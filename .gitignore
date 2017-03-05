@@ -5,7 +5,7 @@
 .git
 npm-debug.log
 client/lib/*
-node_modules
+node_modules/
 node_modules/*
 client/robots.txt
 system.conf
