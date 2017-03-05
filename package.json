@@ -1,0 +1,16 @@
+{
+  "name": "com.epmvirtual.aslitool",
+  "version": "1.0.0",
+  "description": "This README would normally document whatever steps are necessary to get your application up and running.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/alirizadikici/com.epmvirtual.aslitool#readme",
+  "devDependencies": {
+    "typescript": "^2.2.1"
+  }
+}
