@@ -16,15 +16,20 @@
             "id": "58a89d73-d65b-4a9f-8cd8-e732ba3fead0",
             "relativeUrl": "file://./node_modules/test.ts",
             "additionalData": null
+          },
+          {
+            "id": "94de1848-ea6e-4dda-a9cb-cf6c2cb7a1d1",
+            "relativeUrl": "file://.gitignore",
+            "additionalData": null
           }
         ],
         "subItems": [],
         "activeItemIndex": 0
       },
-      "lastUsed": 1488704751313,
+      "lastUsed": 1488704848171,
       "fileTreeExpanded": true,
       "fileTreeWidth": 225,
-      "selectedTabId": "58a89d73-d65b-4a9f-8cd8-e732ba3fead0"
+      "selectedTabId": "94de1848-ea6e-4dda-a9cb-cf6c2cb7a1d1"
     }
   ],
   "relativePathToTsconfig": "./tsconfig.json"
