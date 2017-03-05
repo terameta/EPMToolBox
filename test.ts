@@ -1,3 +1,7 @@
-var foo = 123;
-foo = 'Hello World';
-console.log(foo);
+function greeter(person){
+  return "Hell, " + person;
+}
+
+var user = "Jane User";
+
+console.log(greeter(user));
