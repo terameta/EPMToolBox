@@ -13,23 +13,23 @@
             "additionalData": null
           },
           {
-            "id": "58a89d73-d65b-4a9f-8cd8-e732ba3fead0",
-            "relativeUrl": "file://./node_modules/test.ts",
+            "id": "94de1848-ea6e-4dda-a9cb-cf6c2cb7a1d1",
+            "relativeUrl": "file://.gitignore",
             "additionalData": null
           },
           {
-            "id": "94de1848-ea6e-4dda-a9cb-cf6c2cb7a1d1",
-            "relativeUrl": "file://.gitignore",
+            "id": "e8d66ad0-cd73-48f5-8d85-0addda7f2ae3",
+            "relativeUrl": "file://./test.ts",
             "additionalData": null
           }
         ],
         "subItems": [],
         "activeItemIndex": 0
       },
-      "lastUsed": 1488704848171,
+      "lastUsed": 1488704994642,
       "fileTreeExpanded": true,
       "fileTreeWidth": 225,
-      "selectedTabId": "94de1848-ea6e-4dda-a9cb-cf6c2cb7a1d1"
+      "selectedTabId": "e8d66ad0-cd73-48f5-8d85-0addda7f2ae3"
     }
   ],
   "relativePathToTsconfig": "./tsconfig.json"
