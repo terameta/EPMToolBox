@@ -11,5 +11,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/alirizadikici/com.epmvirtual.aslitool#readme"
+  "homepage": "https://bitbucket.org/alirizadikici/com.epmvirtual.aslitool#readme",
+  "devDependencies": {
+    "typescript": "^2.2.1",
+    "typings": "^2.1.0"
+  }
 }
