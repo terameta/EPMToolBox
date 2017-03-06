@@ -3,12 +3,7 @@
   "version": "0.0.1",
   "description": "EPM Tools for epmvirtual users",
   "main": "index.js",
-  "dependencies": {
-    "consolidate": "^0.14.5",
-    "express": "^4.15.0",
-    "handlebars": "^4.0.6",
-    "vio": "^0.2.1"
-  },
+  "dependencies": {},
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
