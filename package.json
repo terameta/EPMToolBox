@@ -4,7 +4,9 @@
   "description": "EPM Tools for epmvirtual users",
   "main": "index.js",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "typescript": "^2.2.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
