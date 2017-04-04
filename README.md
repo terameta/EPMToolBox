@@ -1,8 +1,14 @@
-# README #
+# AsliTool #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+A toolbox for Oracle Hyperion EPM professionals.
 
-### What is this repository for? ###
+### Road Map  ###
+* Data Integration
+    * Data Integration with MSSQL DB (Done)
+    * Data Integration with Oracle DB
+    * Data Integration with MySQL DB
+* Metadata Management
+* Dashboard
 
 #### Quick Summary ####
 This is quick summary
