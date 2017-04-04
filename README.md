@@ -10,11 +10,20 @@ A toolbox for Oracle Hyperion EPM professionals.
 * Metadata Management
 * Dashboard
 
+### Information ###
+This repository is developed by Visual Studio Code (http://code.visualstudio.com)
+The dev installation steps provide the information for this IDE.
+
 ### Installation ###
 
 * Install node.js
 * Pull from the repository
 * npm install
+
+### Dev Installation ###
+* Install node.js (https://nodejs.org/en/download/)
+* Install Visual Studio Code (https://code.visualstudio.com/Download)
+* 
 
 ### About ###
 * Owner: Ali Dikici
