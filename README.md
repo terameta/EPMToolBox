@@ -17,5 +17,5 @@ A toolbox for Oracle Hyperion EPM professionals.
 * npm install
 
 ### About ###
-* Owner: Ali Riza Dikici
+* Owner: Ali Dikici
 * Community: Oracle EPM
