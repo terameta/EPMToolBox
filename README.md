@@ -18,12 +18,14 @@ The dev installation steps provide the information for this IDE.
 
 * Install node.js
 * Pull from the repository
-* npm install
+* npm install -g typescript
 
 ### Dev Installation ###
 * Install node.js (https://nodejs.org/en/download/)
 * Install Visual Studio Code (https://code.visualstudio.com/Download)
-* 
+* npm install -g typescript
+* npm install -g eslint
+* npm install -g tslint
 
 ### About ###
 * Owner: Ali Dikici
