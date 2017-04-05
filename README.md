@@ -26,6 +26,11 @@ The dev installation steps provide the information for this IDE.
 * npm install -g typescript
 * npm install -g eslint
 * npm install -g tslint
+* Go to Visual Studio Code, Click to File->Preferences->Settings
+    * Make sure you are currently on user settings while you are editing settings.json
+    * Add "typescript.tsdk": "C:/Users/username/AppData/Roaming/npm/node_modules/typescript/lib" to the json.
+    * Verify the path using npm list -g typescript
+    * Restart VSCode, and see that at the right-bottom side of the window the correct version of typescript listed when editing a TS file.
 
 ### About ###
 * Owner: Ali Dikici

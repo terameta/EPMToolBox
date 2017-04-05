@@ -1,5 +1,7 @@
-let message:string = "Hello world";
+const message = "Hello World!";
 
-message = 0;
+const sayHello = (message) => {
+	console.log(message);
+}
 
-console.log(message);
+sayHello(message);
