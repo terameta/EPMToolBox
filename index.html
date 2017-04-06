@@ -4,7 +4,18 @@
 <head>
 	<meta charset="utf-8">
 	<title>EPM ToolBox</title>
-	<script src="./src/server/index.js"></script>
+	<script src="./node_modules/systemjs/dist/system.src.js"></script>
+	<!--script src="./src/server/index.js"></script-->
+	<script>
+		System.config({
+			packages: {
+				'.': {
+					defaultExtension: 'js'
+				}
+			}
+		});
+		System.import('./src/server/index.js');
+	</script>
 </head>
 
 <body>

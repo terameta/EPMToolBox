@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "description": "EPM Tools for epmvirtual users",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "systemjs": "^0.20.11"
+  },
   "devDependencies": {
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
