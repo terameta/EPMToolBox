@@ -13,6 +13,7 @@
         "noLib": false,
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
-        "watch": true
+        "watch": true,
+        "strictNullChecks": true
     }
 }
