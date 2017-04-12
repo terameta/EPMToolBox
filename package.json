@@ -4,9 +4,14 @@
   "description": "EPM Tools for epmvirtual users",
   "main": "index.js",
   "dependencies": {
+    "express": "^4.15.2",
+    "mysql": "^2.13.0",
+    "sequelize": "^3.30.4",
     "systemjs": "^0.20.11"
   },
   "devDependencies": {
+    "@types/express": "^4.0.35",
+    "@types/sequelize": "^3.4.43",
     "browser-sync": "^2.18.8",
     "browserify": "^14.1.0",
     "chai": "^3.5.0",
