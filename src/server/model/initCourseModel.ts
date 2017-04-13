@@ -1,5 +1,5 @@
 import * as ORM from 'Sequelize';
-import {Sequelize} from 'Sequelize';
+import { Sequelize } from 'Sequelize';
 
 export function initCourseModel(sequelize: Sequelize) {
 	return sequelize.define('Course', {
