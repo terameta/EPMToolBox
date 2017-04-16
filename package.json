@@ -4,7 +4,9 @@
   "description": "EPM Tools for epmvirtual users",
   "main": "index.js",
   "dependencies": {
+    "body-parser": "^1.17.1",
     "express": "^4.15.2",
+    "human-readable-ids": "^1.0.1",
     "mysql": "^2.13.0",
     "sequelize": "^3.30.4",
     "systemjs": "^0.20.11"
