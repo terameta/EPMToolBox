@@ -14,6 +14,7 @@
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
         "watch": true,
-        "strictNullChecks": true
+        "strictNullChecks": true,
+        "noEmitOnError": false
     }
 }

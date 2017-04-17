@@ -38,7 +38,10 @@
     "es6": "./node_modules/.bin/http-server -c1 .",
     "types-examples": "node ./src/server/learning-types.js",
     "start": "./node_modules/.bin/ts-node ./src/server/server.ts",
-    "watch": "./node_modules/.bin/nodemon -w . --ext \".ts\" --exec \"npm run start\""
+    "watch": "./node_modules/.bin/nodemon -w . --ext \".ts\" --exec \"npm run start\"",
+    "oo": "node ./src/server/object-oriented.js",
+    "generics": "node ./src/server/generics.js",
+    "decorators": "node ./src/server/decorators.js"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,9 @@
-import { CourseModel } from './../model/model';
+import { CourseSummary, createCourseSummaries } from "./../../shared/model/course-summary";
+import { CourseModel } from "./../model/model";
 
-export function findAllCourses() {
+export function findAllCourses(): Promise<CourseSummary[]> {
 	return CourseModel.findAll({
-		order: ['seqNo']
-	});
+		order: ["seqNo"]
+	}).
+	then( createCourseSummaries );
 }

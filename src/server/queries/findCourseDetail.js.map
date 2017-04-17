@@ -1,0 +1,1 @@
+{"version":3,"file":"findCourseDetail.js","sourceRoot":"","sources":["findCourseDetail.ts"],"names":[],"mappings":";;AACA,0CAA4D;AAC5D,4EAA2E;AAE3E,0BAAiC,QAAgB;IAChD,MAAM,CAAC,mBAAW,CAAC,QAAQ,CAAC,QAAQ,EAAE;QACrC,OAAO,EAAE;YACR;gBACC,KAAK,EAAE,mBAAW;aAClB;SACD;KACD,CAAC;QACF,IAAI,CAAC,uCAAkB,CAAC,CAAC;AAC1B,CAAC;AATD,4CASC"}
