@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
-import * as _ from 'lodash';
-import { onSuccess } from './onSuccess';
-import { onError } from './onError';
-import { deleteLesson } from '../queries/deleteLesson';
+import { Request, Response } from "express";
+import * as _ from "lodash";
+import { onSuccess } from "./onSuccess";
+import { onError } from "./onError";
+import { deleteLesson } from "../queries/deleteLesson";
 
 
 export function apiDeleteLesson(req: Request, res: Response) {
