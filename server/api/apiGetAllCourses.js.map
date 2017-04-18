@@ -1,1 +1,1 @@
-{"version":3,"file":"apiGetAllCourses.js","sourceRoot":"","sources":["apiGetAllCourses.ts"],"names":[],"mappings":";;AACA,4DAA2D;AAC3D,0BAA4B;AAC5B,qCAAoC;AACpC,yCAAwC;AAGxC,0BAAiC,GAAY,EAAE,GAAa;IAC3D,+BAAc,EAAE;QAChB,IAAI,CAAE,CAAC,CAAC,OAAO,CAAC,qBAAS,EAAE,GAAG,CAAC,CAAE;QACjC,KAAK,CAAE,CAAC,CAAC,OAAO,CAAC,iBAAO,EAAE,GAAG,EAAE,yBAAyB,CAAC,CAAE,CAAC;AAC7D,CAAC;AAJD,4CAIC"}
+{"version":3,"file":"apiGetAllCourses.js","sourceRoot":"","sources":["apiGetAllCourses.ts"],"names":[],"mappings":""}

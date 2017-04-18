@@ -1,9 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function createCourseSummary(_a) {
-    var id = _a.id, url = _a.url, description = _a.description, iconUrl = _a.iconUrl, courseListIcon = _a.courseListIcon, seqNo = _a.seqNo;
+function createCourseSummary({ id, url, description, iconUrl, courseListIcon, seqNo }) {
     return {
-        id: id, url: url, description: description, iconUrl: iconUrl, courseListIcon: courseListIcon, seqNo: seqNo
+        id, url, description, iconUrl, courseListIcon, seqNo
     };
 }
 exports.createCourseSummary = createCourseSummary;

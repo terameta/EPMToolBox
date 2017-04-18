@@ -1,4 +1,4 @@
-import { CourseDetail } from "./../../shared/model/course-detail";
+/*import { CourseDetail } from "./../../shared/model/course-detail";
 import { CourseModel, LessonModel } from "./../model/model";
 import { createCourseDetail } from "../../shared/model/createCourseDetail";
 
@@ -12,3 +12,4 @@ export function findCourseDetail(courseId: number): Promise<CourseDetail> {
 	}).
 	then(createCourseDetail);
 }
+*/

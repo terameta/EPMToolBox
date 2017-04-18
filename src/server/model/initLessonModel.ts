@@ -1,4 +1,4 @@
-import * as ORM from 'Sequelize';
+/*import * as ORM from 'Sequelize';
 import { Sequelize } from 'Sequelize';
 
 export function initLessonModel(sequelize: Sequelize) {
@@ -13,3 +13,4 @@ export function initLessonModel(sequelize: Sequelize) {
 		gitHubUrl: ORM.STRING
 	});
 }
+*/

@@ -1,4 +1,4 @@
-import * as ORM from 'Sequelize';
+/*import * as ORM from 'Sequelize';
 import { Sequelize } from 'Sequelize';
 
 export function initCourseModel(sequelize: Sequelize) {
@@ -14,3 +14,4 @@ export function initCourseModel(sequelize: Sequelize) {
 		isOngoing: ORM.BOOLEAN
 	});
 }
+*/

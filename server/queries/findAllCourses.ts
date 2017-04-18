@@ -1,4 +1,4 @@
-import { CourseSummary, createCourseSummaries } from "./../../shared/model/course-summary";
+/*import { CourseSummary, createCourseSummaries } from "./../../shared/model/course-summary";
 import { CourseModel } from "./../model/model";
 
 export function findAllCourses(): Promise<CourseSummary[]> {
@@ -7,3 +7,4 @@ export function findAllCourses(): Promise<CourseSummary[]> {
 	}).
 	then( createCourseSummaries );
 }
+*/

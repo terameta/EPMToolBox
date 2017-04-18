@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function apiEnvironment(app) {
-    app.route("/api/environment").get(function (req, res) {
-        res.send("OK");
+function apiEnvironment(app, refDB) {
+    app.route("/api/environment").get((req, res) => {
+        res.send("OKOKA");
     });
 }
 exports.apiEnvironment = apiEnvironment;

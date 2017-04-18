@@ -1,4 +1,4 @@
-
+/*
 import { LessonModel } from '../model/model';
 
 export function updateLesson(id: string, props: any) {
@@ -9,3 +9,4 @@ export function updateLesson(id: string, props: any) {
 		}
 	);
 }
+*/

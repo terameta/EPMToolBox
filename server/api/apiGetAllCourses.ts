@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+/*import { Request, Response } from "express";
 import { findAllCourses } from "../queries/findAllCourses";
 import * as _ from "lodash";
 import { onError } from "./onError";
@@ -10,3 +10,4 @@ export function apiGetAllCourses(req: Request, res: Response) {
 	then( _.partial(onSuccess, res) ).
 	catch( _.partial(onError, res, "Find All Courses Failed") );
 }
+*/

@@ -1,1 +1,1 @@
-{"version":3,"file":"deleteLesson.js","sourceRoot":"","sources":["deleteLesson.ts"],"names":[],"mappings":";;AAAA,0CAA+C;AAE/C,sBAA6B,EAAU;IACtC,MAAM,CAAC,mBAAW,CAAC,OAAO,CAAC;QAC1B,KAAK,EAAE,EAAC,EAAE,IAAA,EAAC;KACX,CAAC,CAAC;AACJ,CAAC;AAJD,oCAIC"}
+{"version":3,"file":"deleteLesson.js","sourceRoot":"","sources":["deleteLesson.ts"],"names":[],"mappings":""}

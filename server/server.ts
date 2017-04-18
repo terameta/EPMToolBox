@@ -3,6 +3,8 @@ import { cpus } from "os";
 import * as fs from "fs";
 import * as mysql from "mysql";
 import { initiateApplicationWorker } from "./config/config.app";
+import { initiateCronWorker } from "./config/config.croner";
+import { initiateInitiator } from "./config/config.initiator";
 
 const numCPUs = cpus().length;
 
@@ -23,15 +25,18 @@ if (cluster.isMaster) {
 	interface ApplicationEnvironmentProperties { isCroner: boolean; }
 	let croner_env: ApplicationEnvironmentProperties = { isCroner: true };
 	let worker_env: ApplicationEnvironmentProperties = { isCroner: false };
-	console.log(configuration);
 
+	initiateInitiator(db);
 
-	for (let i = 0; i < numCPUs; i++){
+	for (let i = 0; i < numCPUs; i++) {
 		cluster.fork(worker_env);
 	}
 	cluster.fork(croner_env);
 } else /* this is not cluster master */ {
-	console.log( "We are at child. Is croner:", (process.env.isCroner === "true") );
-	initiateApplicationWorker(db);
+	if (process.env.isCroner === "true") {
+		initiateCronWorker(db);
+	} else {
+		initiateApplicationWorker(db);
+	}
 }
 

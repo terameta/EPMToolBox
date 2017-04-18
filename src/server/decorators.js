@@ -11,23 +11,22 @@ function registerOrmModel(model) {
     console.log('registering ORM models', model);
 }
 function Entity(tableName) {
-    return function (target) {
+    return (target) => {
         registerOrmModel(target);
     };
 }
 function Column(columnName) {
-    return function (target, propertyKey) {
+    return (target, propertyKey) => {
         console.log('Column Target:', target);
         console.log('=====');
         console.log('Column Prop Key:', propertyKey);
     };
 }
-var Todo = (function () {
-    function Todo() {
+let Todo = class Todo {
+    constructor() {
         this.done = false;
     }
-    return Todo;
-}());
+};
 __decorate([
     Column('DESCR'),
     __metadata("design:type", String)

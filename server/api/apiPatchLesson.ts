@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+/*import { Request, Response } from "express";
 import * as _ from "lodash";
 import { onSuccess } from "./onSuccess";
 import { onError } from "./onError";
@@ -12,3 +12,4 @@ export function apiPatchLesson(req: Request, res: Response) {
 		catch(_.partial(databaseErrorHandler, res)).
 		catch( _.partial(onError, res, "Couldn't update lesson"));
 }
+*/

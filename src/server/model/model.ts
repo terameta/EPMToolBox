@@ -1,4 +1,4 @@
-import * as ORM from "Sequelize";
+/*import * as ORM from "Sequelize";
 import { Sequelize, LoggingOptions } from "Sequelize";
 import { initCourseModel } from "./initCourseModel";
 import { initLessonModel } from "./initLessonModel";
@@ -13,3 +13,4 @@ export const LessonModel = initLessonModel(sequelize);
 
 CourseModel.hasMany(LessonModel, { foreignKey: "courseId" });
 LessonModel.belongsTo(CourseModel, { foreignKey: "courseId" });
+*/
