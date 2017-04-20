@@ -1,0 +1,22 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "workbench.colorTheme": "Default Light+",
+    "git.confirmSync": false,
+    "window.zoomLevel": 0,
+    "typescript.tsdk": "C:/Users/arizadikici/AppData/Roaming/npm/node_modules/typescript/lib",
+    "editor.tabSize": 3,
+    "editor.insertSpaces": false,
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "editor.fontSize": 12,
+    "autoimport.doubleQuotes": true,
+    "autoimport.spaceBetweenBraces": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.js.map": true,
+        "**/*.js": {"when": "$(basename).ts"}
+    }
+}
