@@ -1,7 +1,7 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/dist
+# /dist
 /tmp
 /out-tsc
 
@@ -42,6 +42,7 @@ testem.log
 Thumbs.db
 
 # Exclude Robots File
+/dist/robots.txt
 
 # Exclude Credentials
 system.conf
