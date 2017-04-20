@@ -13,7 +13,8 @@ import { AppComponent } from "./app.component";
 	imports: [
 		BrowserModule,
 		FormsModule,
-		HttpModule
+		HttpModule,
+		NgbModule.forRoot()
 	],
 	providers: [],
 	bootstrap: [AppComponent]
