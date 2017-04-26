@@ -1,0 +1,17 @@
+{
+  "name": "aslitool.epmvirtual.com server module",
+  "version": "2.0.0",
+  "description": "EPM Tools for epmvirtual users",
+  "main": "index.js",
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://alirizadikici@bitbucket.org/alirizadikici/com.epmvirtual.aslitool.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/alirizadikici/com.epmvirtual.aslitool#readme"
+}
