@@ -30,7 +30,7 @@ The dev installation steps provide the information for this IDE.
 * Update git hook
     * Edit file: <project-folder>/.git/hooks/post-commit
     * Type below content:
-        * #!/bin/sh
+        * \#!/bin/sh
         * git push origin master
 * Go to Visual Studio Code, Click to File->Preferences->Settings
     * Make sure you are currently on user settings while you are editing settings.json
