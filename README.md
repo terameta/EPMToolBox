@@ -42,6 +42,7 @@ The dev installation steps provide the information for this IDE.
     * Install extension
     * Install Below Extensions
         * tslint
+		  * eslint
 
 ### About ###
 * Owner: Ali Dikici
