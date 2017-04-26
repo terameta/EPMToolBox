@@ -1,3 +1,5 @@
+/*
+	Below is the old version
 {
 	// See https://go.microsoft.com/fwlink/?LinkId=733558
 	// for the documentation about the tasks.json format
@@ -8,4 +10,20 @@
 	"showOutput": "always",
 	"isBackground": false,
 	"problemMatcher": "$tsc-watch"
+}
+*/
+
+{
+	"version": "0.1.0",
+	"tasks": [
+		{
+			"taskName": "tsc",
+			"command": "tsc",
+			"args": ["-w", "-p", "./server"],
+			"showOutput": "silent",
+			"isBackground": true,
+			"isBuildCommand": true,
+			"problemMatcher": "$tsc-watch"
+		}
+	]
 }
