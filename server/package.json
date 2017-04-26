@@ -20,7 +20,10 @@
     "@types/helmet": "0.0.34",
     "@types/morgan": "^1.7.32",
     "@types/mysql": "0.0.32",
-    "@types/node": "^7.0.13"
+    "@types/node": "^7.0.14",
+    "ts-node": "^3.0.2",
+    "tslint": "^5.1.0",
+    "typescript": "^2.2.2"
   },
   "repository": {
     "type": "git",

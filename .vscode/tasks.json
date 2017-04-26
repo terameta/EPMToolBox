@@ -19,11 +19,23 @@
 		{
 			"taskName": "tsc",
 			"command": "tsc",
+			"isShellCommand": true,
 			"args": ["-w", "-p", "./server"],
 			"showOutput": "silent",
-			"isBackground": true,
+			"isBackground": false,
 			"isBuildCommand": true,
 			"problemMatcher": "$tsc-watch"
+		},
+		{
+			"taskName": "ngbuild",
+			"options":{
+				"cwd": "${workspaceRoot}/client"
+			},
+			"isShellCommand": true,
+			"isBackground": false,
+			"isBuildCommand": false,
+			"command": "ng",
+			"args": [ "build", "-w" ]
 		}
 	]
 }

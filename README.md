@@ -26,6 +26,7 @@ The dev installation steps provide the information for this IDE.
 * npm install -g typescript
 * npm install -g eslint
 * npm install -g tslint
+* npm install -g ts-node
 * npm install -g @angular/cli
 * Update git hook
     * Edit file: <project-folder>/.git/hooks/post-commit
