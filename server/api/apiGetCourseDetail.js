@@ -1,1 +1,0 @@
-//# sourceMappingURL=apiGetCourseDetail.js.map

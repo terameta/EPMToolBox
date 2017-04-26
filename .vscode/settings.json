@@ -8,8 +8,8 @@
     "editor.insertSpaces": false,
     "editor.fontFamily": "Consolas, 'Courier New', monospace",
     "editor.fontSize": 12,
-    "autoimport.doubleQuotes": true,
-    "autoimport.spaceBetweenBraces": true,
+    // "autoimport.doubleQuotes": true,
+    // "autoimport.spaceBetweenBraces": true,
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
