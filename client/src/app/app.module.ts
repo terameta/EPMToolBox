@@ -9,18 +9,18 @@ import { ProcessesComponent } from './processes/processes.component';
 import { TopmenuComponent } from './topmenu/topmenu.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    ProcessComponent,
-    ProcessesComponent,
-    TopmenuComponent
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+	declarations: [
+		AppComponent,
+		ProcessComponent,
+		ProcessesComponent,
+		TopmenuComponent
+	],
+	imports: [
+		BrowserModule,
+		FormsModule,
+		HttpModule
+	],
+	providers: [],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }

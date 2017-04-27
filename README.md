@@ -29,6 +29,7 @@ The dev installation steps provide the information for this IDE.
 * npm install -g ts-node
 * npm install -g @angular/cli
 * npm install -g nodemon
+* npm install -g npm-check-updates
 * Update git hook
     * Edit file: <project-folder>/.git/hooks/post-commit
     * Type below content:
