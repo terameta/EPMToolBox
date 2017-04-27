@@ -18,6 +18,7 @@ export function initiateApplicationWorker(refDB: IPool) {
 	app.use(bodyParser.json({ limit: "100mb" }));
 	app.use(bodyParser.urlencoded({ extended: false}));
 	app.use(express.static(path.join(__dirname, "../../client/dist")));
+	console.log(__dirname);
 
 	app.use(helmet());
 	app.use(helmet.noCache());
@@ -30,7 +31,7 @@ export function initiateApplicationWorker(refDB: IPool) {
 	app.set("port", 8000);
 
 	app.get("*", (req, res) => {
-		res.sendFile(path.join(__dirname, "../../dist/index.html"));
+		res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
 	});
 
 	const server: http.Server = app.listen(app.get("port"), () => {

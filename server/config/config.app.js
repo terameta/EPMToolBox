@@ -12,13 +12,14 @@ function initiateApplicationWorker(refDB) {
     app.use(bodyParser.json({ limit: "100mb" }));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(express.static(path.join(__dirname, "../../client/dist")));
+    console.log(__dirname);
     app.use(helmet());
     app.use(helmet.noCache());
     app.use(logger("short"));
     api_1.initializeRestApi(app, refDB);
     app.set("port", 8000);
     app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../../dist/index.html"));
+        res.sendFile(path.join(__dirname, "../../client/dist/index.html"));
     });
     const server = app.listen(app.get("port"), () => {
         console.log("Server is now running on port " + server.address().port);
