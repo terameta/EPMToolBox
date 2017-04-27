@@ -23,5 +23,7 @@
 	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
 	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
 	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
-    "tslint.exclude": "**/node_modules/**/*.ts"
+    "tslint.exclude": "**/node_modules/**/*.ts",
+    "workbench.editor.enablePreview": false,
+    "explorer.openEditors.visible": 0
 }
