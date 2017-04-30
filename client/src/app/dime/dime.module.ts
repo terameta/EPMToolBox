@@ -14,7 +14,7 @@ import { DimedashboardComponent } from './dimedashboard/dimedashboard.component'
 const dimeRoutes: Routes = [
 	{ path: 'dime', component: DimeComponent, children: [
 		{ path: '', component: DimedashboardComponent },
-		{ path: 'schedules', component: DimeschedulesComponent },
+		{ path: 'schedules', component: DimeschedulesComponent, loadChildren: 'app/dime/dimeschedule/dimeschedule.module#DimescheduleModule' },
 		{ path: 'processes', component: DimeprocessesComponent }
 	] }
 ];
@@ -27,7 +27,6 @@ const dimeRoutes: Routes = [
 		RouterModule.forChild(dimeRoutes)
 	],
 	exports: [
-		DimeComponent,
 		RouterModule
 	],
 	declarations: [DimeComponent, DimemenuComponent, DimedashboardComponent]
