@@ -1,2 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
-body { padding-top: 50px; }
+/* Global Styles */
+body { padding-top: 70px; }
+.center-text {	text-align: center }
+.default-color { color: #515151 }
+/*
+body { padding-top: 70px; background-color: #ecf0f5 }
+.center-text {	text-align: center }
+.navbar-border{ border-bottom: solid 5px #0080c5 }
+.navbar-bordered .navbar-nav > li > a { border-right:1px solid #ddd; }
+
+.navbar-default { background-color: white; color: #333 }
+
+a {
+  text-decoration: inherit;
+  font-style: inherit;
+  color: inherit;
+}
+a:link, a:visited {
+ border:none;
+ text-decoration:inherit;
+ font-style:normal;
+ color:black;
+}
+
+a:hover {
+ text-decoration: none;
+ color: #a3211f;
+}
+*/

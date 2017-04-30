@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TopmenuComponent } from './topmenu.component';
+import { DimeschedulesComponent } from './dimeschedules.component';
 
-describe('TopmenuComponent', () => {
-  let component: TopmenuComponent;
-  let fixture: ComponentFixture<TopmenuComponent>;
+describe('DimeschedulesComponent', () => {
+  let component: DimeschedulesComponent;
+  let fixture: ComponentFixture<DimeschedulesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TopmenuComponent ]
+      declarations: [ DimeschedulesComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TopmenuComponent);
+    fixture = TestBed.createComponent(DimeschedulesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

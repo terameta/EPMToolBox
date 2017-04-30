@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProcessComponent } from './process.component';
+import { DimeprocessesComponent } from './dimeprocesses.component';
 
-describe('ProcessComponent', () => {
-  let component: ProcessComponent;
-  let fixture: ComponentFixture<ProcessComponent>;
+describe('DimeprocessesComponent', () => {
+  let component: DimeprocessesComponent;
+  let fixture: ComponentFixture<DimeprocessesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ProcessComponent ]
+      declarations: [ DimeprocessesComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ProcessComponent);
+    fixture = TestBed.createComponent(DimeprocessesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
