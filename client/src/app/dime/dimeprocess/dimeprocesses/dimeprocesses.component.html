@@ -1,3 +1,16 @@
-<p>
-  dimeprocesses works!
-</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12">
+			<button class="btn btn-default" (click)="onGet()">Get Processes</button>
+			<hr>
+			<hr>
+			<hr>
+			<ul class="list-group" *ngFor="let process of processes">
+				<li class="list-group-item">
+					{{ process.name }} ({{ process.id }})
+				</li>
+			</ul>
+		</div>
+
+	</div>
+</div>

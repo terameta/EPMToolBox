@@ -233,18 +233,18 @@ function checkTables(configuration: any): Promise<any> {
 		console.log("=== Checking Tables           =================");
 		// console.log(db.config);
 		db.query(
-			'SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = "' + 
-			configuration.mysql.db + '"', function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				console.log(rows);
-				console.log(configuration);
-				/*createTables(rows).
-					then(populateTables).
-					then(resolve).catch(reject);
-					*/
-			}
-		});
+			"SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"" +
+			configuration.mysql.db + "\"", function (err, rows, fields) {
+				if (err) {
+					reject(err);
+				} else {
+					// console.log(rows);
+					// console.log(configuration);
+					/*createTables(rows).
+						then(populateTables).
+						then(resolve).catch(reject);
+						*/
+				}
+			});
 	});
 }

@@ -2,6 +2,7 @@ import { Application } from "express";
 import {IPool} from "mysql";
 
 import { apiEnvironment } from "./api.environment";
+import { apiProcess } from "./api.process";
 // import { apiGetAllCourses } from "./apiGetAllCourses";
 // import { apiGetCourseDetail } from "./apiGetCourseDetail";
 // import { apiCreateLesson } from "./apiCreateLesson";
@@ -10,6 +11,7 @@ import { apiEnvironment } from "./api.environment";
 
 export function initializeRestApi(app: Application, refDB: IPool) {
 	apiEnvironment(app, refDB);
+	apiProcess(app, refDB);
 
 	// app.route("/api/courses").get(apiGetAllCourses);
 	// app.route("/api/courses/:id").get(apiGetCourseDetail);

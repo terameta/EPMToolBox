@@ -220,14 +220,12 @@ function checkTables(configuration) {
     return new Promise((resolve, reject) => {
         console.log("===============================================");
         console.log("=== Checking Tables           =================");
-        db.query('SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = "' +
-            configuration.mysql.db + '"', function (err, rows, fields) {
+        db.query("SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"" +
+            configuration.mysql.db + "\"", function (err, rows, fields) {
             if (err) {
                 reject(err);
             }
             else {
-                console.log(rows);
-                console.log(configuration);
             }
         });
     });
