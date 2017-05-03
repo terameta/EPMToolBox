@@ -15,7 +15,7 @@ const dimeRoutes: Routes = [
 	{ path: 'dime', component: DimeComponent, children: [
 		{ path: '', component: DimedashboardComponent },
 		{ path: 'schedules', component: DimeschedulesComponent, loadChildren: 'app/dime/dimeschedule/dimeschedule.module#DimescheduleModule' },
-		{ path: 'processes', component: DimeprocessesComponent }
+		{ path: 'processes', component: DimeprocessesComponent, loadChildren: 'app/dime/dimeprocess/dimeprocess.module#DimeprocessModule' }
 	] }
 ];
 

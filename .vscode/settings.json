@@ -3,7 +3,7 @@
     "workbench.colorTheme": "Default Light+",
     "git.confirmSync": false,
     "window.zoomLevel": 0,
-    "typescript.tsdk": "C:/Users/arizadikici/AppData/Roaming/npm/node_modules/typescript/lib",
+    "typescript.tsdk": "../../AppData/roaming/npm/node_modules/typescript/lib",
     "editor.tabSize": 3,
     "editor.insertSpaces": false,
     "editor.fontFamily": "Consolas, 'Courier New', monospace",

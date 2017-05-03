@@ -8,23 +8,22 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
-import { DimeModule } from 'app/dime/dime.module';
-// import { DimeComponent } from 'app/dime/dime/dime.component';
-import { WelcomeComponent } from 'app/welcome/welcome.component';
+import { DimeModule } from './dime/dime.module';
+import { WelcomeModule } from './welcome/welcome.module';
 
 const appRoutes: Routes = [
-	{ path: '', component: WelcomeComponent }
+	{ path: '', component: AppComponent }
 ];
 
 @NgModule({
 	declarations: [
-		AppComponent,
-		WelcomeComponent
+		AppComponent
 	],
 	imports: [
 		BrowserModule,
 		FormsModule,
 		HttpModule,
+		WelcomeModule,
 		DimeModule,
 		RouterModule.forRoot(appRoutes),
 		ToastrModule.forRoot(),
