@@ -2,11 +2,11 @@ import * as Cron from "cron";
 import { IPool } from "mysql";
 
 export function initiateCronWorker(refDB: IPool) {
-	let jobPer10Sec = new Cron.CronJob(
-		'*/10 * * * * *',
-		function(){
+	const jobPer10Sec = new Cron.CronJob(
+		"*/10 * * * * *",
+		function () {
 			/*console.log("Every 10 secs", new Date());*/
-		}, function(){ 
+		}, function () {
 			console.log("This is the end!");
 		},
 		true,

@@ -32,7 +32,7 @@ else {
         config_croner_1.initiateCronWorker(db);
     }
     else {
-        config_app_1.initiateApplicationWorker(db);
+        config_app_1.initiateApplicationWorker(db, configuration);
     }
 }
 //# sourceMappingURL=server.js.map

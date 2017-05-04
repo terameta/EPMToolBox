@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function apiProcess(app, refDB) {
+function apiProcess(app, refDB, refTools) {
     app.route("/api/process").get((req, res) => {
         refDB.query("SELECT * FROM processes", function (err, result, fields) {
             if (err) {

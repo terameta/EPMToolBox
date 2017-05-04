@@ -36,7 +36,7 @@ if (cluster.isMaster) {
 	if (process.env.isCroner === "true") {
 		initiateCronWorker(db);
 	} else {
-		initiateApplicationWorker(db);
+		initiateApplicationWorker(db, configuration);
 	}
 }
 

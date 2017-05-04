@@ -9,23 +9,24 @@ import {IPool} from "mysql";
 
 import { Application } from "express";
 import { initializeRestApi } from "../api/api";
+import { MainTools } from "./config.tools";
 
-export function initiateApplicationWorker(refDB: IPool) {
+export function initiateApplicationWorker(refDB: IPool, refConfig: any) {
 	const app: Application = express();
+	const mainTools = new MainTools(refConfig);
 
 	app.enable("trust proxy");
 
 	app.use(bodyParser.json({ limit: "100mb" }));
 	app.use(bodyParser.urlencoded({ extended: false}));
 	app.use(express.static(path.join(__dirname, "../../client/dist")));
-	console.log(__dirname);
 
 	app.use(helmet());
 	app.use(helmet.noCache());
 
 	app.use(logger("short"));
 
-	initializeRestApi(app, refDB);
+	initializeRestApi(app, refDB, mainTools);
 	// app.use(apiErrorHandler);
 
 	app.set("port", 8000);

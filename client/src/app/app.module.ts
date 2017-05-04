@@ -10,9 +10,11 @@ import { ToastrModule } from 'ngx-toastr';
 import { AppComponent } from './app.component';
 import { DimeModule } from './dime/dime.module';
 import { WelcomeModule } from './welcome/welcome.module';
+import { AuthService } from './welcome/auth.service';
 
 const appRoutes: Routes = [
-	{ path: '', component: AppComponent }
+	//{ path: '', component: AppComponent },
+	{ path: '', pathMatch: 'full', redirectTo: 'welcome' }
 ];
 
 @NgModule({
@@ -29,7 +31,7 @@ const appRoutes: Routes = [
 		ToastrModule.forRoot(),
 		BrowserAnimationsModule
 	],
-	providers: [],
+	providers: [AuthService],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }
