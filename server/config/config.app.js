@@ -5,6 +5,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const logger = require("morgan");
+const jwt = require("express-jwt");
 const api_1 = require("../api/api");
 const config_tools_1 = require("./config.tools");
 function initiateApplicationWorker(refDB, refConfig) {
@@ -17,6 +18,7 @@ function initiateApplicationWorker(refDB, refConfig) {
     app.use(helmet());
     app.use(helmet.noCache());
     app.use(logger("short"));
+    app.use(jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin", "/welcome/signin", "/", "/welcome"] }));
     api_1.initializeRestApi(app, refDB, mainTools);
     app.set("port", 8000);
     app.get("*", (req, res) => {

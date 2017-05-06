@@ -24,17 +24,17 @@ export class MainTools {
 		return jwt.sign(toSign, this.config.hash, { expiresIn: 60 * 60 * 24 * 30 });
 	}
 
-	checkToken(req: Request, res: Response, next: Function) {
-		const token = req.body.token || req.query.token || req.headers["x-access-token"];
-		if (token) {
-			jwt.verify(token, this.config.hash, function (err: Error, decoded: Object) {
-				if (err) {
-					return res.status(401).json({ status: "fail", message: "Failed to authenticate token" });
-				} else {
-					req.curUser = decoded;
-					next();
-				}
-			});
-		}
-	}
+	// checkToken(req: Request, res: Response, next: Function) {
+	// 	const token = req.body.token || req.query.token || req.headers["x-access-token"];
+	// 	if (token) {
+	// 		jwt.verify(token, this.config.hash, function (err: Error, decoded: Object) {
+	// 			if (err) {
+	// 				return res.status(401).json({ status: "fail", message: "Failed to authenticate token" });
+	// 			} else {
+	// 				req.curUser = decoded;
+	// 				next();
+	// 			}
+	// 		});
+	// 	}
+	// }
 }

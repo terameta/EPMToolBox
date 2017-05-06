@@ -2,6 +2,7 @@ import { Http, Headers, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 import 'rxjs/Rx';
 import { Observable } from 'rxjs/Observable'
+import { tokenNotExpired } from 'angular2-jwt';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,7 @@ export class AuthService {
 	signinUser(email: string, password: string) {
 		const headers = new Headers({ 'Content-Type': 'application/json' });
 
-		return this.http.post('/api/auth/signin', { email: email, password: password }, {headers: headers}).map(
+		return this.http.post('/api/auth/signin', { email: email, password: password }, { headers: headers }).map(
 			(response: Response) => {
 				const data = response.json();
 				return data;
@@ -22,6 +23,14 @@ export class AuthService {
 				return Observable.throw('Fetching Processes has failed');
 			}
 			);
+	}
+
+	loggedIn() {
+		return tokenNotExpired();
+	}
+
+	getToken() {
+		return
 	}
 
 }

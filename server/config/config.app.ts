@@ -4,8 +4,9 @@ import * as path from "path";
 import * as bodyParser from "body-parser";
 import * as helmet from "helmet";
 import * as logger from "morgan";
+import * as jwt from "express-jwt";
 
-import {IPool} from "mysql";
+import { IPool } from "mysql";
 
 import { Application } from "express";
 import { initializeRestApi } from "../api/api";
@@ -18,13 +19,15 @@ export function initiateApplicationWorker(refDB: IPool, refConfig: any) {
 	app.enable("trust proxy");
 
 	app.use(bodyParser.json({ limit: "100mb" }));
-	app.use(bodyParser.urlencoded({ extended: false}));
+	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(express.static(path.join(__dirname, "../../client/dist")));
 
 	app.use(helmet());
 	app.use(helmet.noCache());
 
 	app.use(logger("short"));
+
+	app.use(jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin", "/welcome/signin", "/", "/welcome"] }));
 
 	initializeRestApi(app, refDB, mainTools);
 	// app.use(apiErrorHandler);
@@ -36,7 +39,7 @@ export function initiateApplicationWorker(refDB: IPool, refConfig: any) {
 	});
 
 	const server: http.Server = app.listen(app.get("port"), () => {
-		console.log("Server is now running on port " + server.address().port );
+		console.log("Server is now running on port " + server.address().port);
 	});
 
 }
