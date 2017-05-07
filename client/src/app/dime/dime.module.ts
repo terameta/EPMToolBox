@@ -1,22 +1,27 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { AuthModule } from "../welcome/auth.module";
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Routes, RouterModule, CanActivate } from "@angular/router";
 
-import { DimeComponent } from './dime/dime.component';
-import { DimemenuComponent } from './dimemenu/dimemenu.component';
-import { DimeprocessesComponent } from 'app/dime/dimeprocess/dimeprocesses/dimeprocesses.component';
-import { DimeschedulesComponent } from 'app/dime/dimeschedule/dimeschedules/dimeschedules.component';
-import { DimescheduleModule } from 'app/dime/dimeschedule/dimeschedule.module';
-import { DimeprocessModule } from 'app/dime/dimeprocess/dimeprocess.module';
-import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
+import { AuthGuard } from "../welcome/auth-guard.service";
+
+import { DimeComponent } from "./dime/dime.component";
+import { DimemenuComponent } from "./dimemenu/dimemenu.component";
+import { DimeprocessesComponent } from "app/dime/dimeprocess/dimeprocesses/dimeprocesses.component";
+import { DimeschedulesComponent } from "app/dime/dimeschedule/dimeschedules/dimeschedules.component";
+import { DimescheduleModule } from "app/dime/dimeschedule/dimeschedule.module";
+import { DimeprocessModule } from "app/dime/dimeprocess/dimeprocess.module";
+import { DimedashboardComponent } from "./dimedashboard/dimedashboard.component";
 
 
 const dimeRoutes: Routes = [
-	{ path: 'dime', component: DimeComponent, children: [
-		{ path: '', component: DimedashboardComponent },
-		{ path: 'schedules', component: DimeschedulesComponent, loadChildren: 'app/dime/dimeschedule/dimeschedule.module#DimescheduleModule' },
-		{ path: 'processes', component: DimeprocessesComponent, loadChildren: 'app/dime/dimeprocess/dimeprocess.module#DimeprocessModule' }
-	] }
+	{
+		path: "dime", component: DimeComponent, children: [
+			{ path: "", component: DimedashboardComponent, canActivate: [AuthGuard] },
+			{ path: "schedules", component: DimeschedulesComponent, loadChildren: "app/dime/dimeschedule/dimeschedule.module#DimescheduleModule" },
+			{ path: "processes", component: DimeprocessesComponent, loadChildren: "app/dime/dimeprocess/dimeprocess.module#DimeprocessModule" }
+		]
+	}
 ];
 
 @NgModule({
@@ -24,7 +29,8 @@ const dimeRoutes: Routes = [
 		CommonModule,
 		DimeprocessModule,
 		DimescheduleModule,
-		RouterModule.forChild(dimeRoutes)
+		RouterModule.forChild(dimeRoutes),
+		AuthModule
 	],
 	exports: [
 		RouterModule

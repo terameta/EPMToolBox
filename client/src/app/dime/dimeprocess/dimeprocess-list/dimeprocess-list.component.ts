@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 
-import { DimeProcessService } from '../dimeprocess.service';
-import { ToastrService } from 'ngx-toastr';
+import { DimeProcessService } from "../dimeprocess.service";
+import { ToastrService } from "ngx-toastr";
 
 @Component({
-	selector: 'app-dimeprocess-list',
-	templateUrl: './dimeprocess-list.component.html',
-	styleUrls: ['./dimeprocess-list.component.css']
+	selector: "app-dimeprocess-list",
+	templateUrl: "./dimeprocess-list.component.html",
+	styleUrls: ["./dimeprocess-list.component.css"]
 })
 export class DimeprocessListComponent implements OnInit {
 
@@ -19,13 +19,14 @@ export class DimeprocessListComponent implements OnInit {
 
 	ngOnInit() {
 		this.getAll();
-		console.log('We are at app-dimeprocess-list');
+		// console.log("We are at app-dimeprocess-list");
 	}
 
 	getAll() {
 		this.dimeProcessService.getAll().subscribe(
 			(processList: any[]) => {
 				this.processList = processList;
+				// console.log(processList);
 			},
 			(error) => {
 				this.toastrService.error(error);

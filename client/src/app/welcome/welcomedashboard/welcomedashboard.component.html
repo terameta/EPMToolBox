@@ -21,7 +21,9 @@
 			</span>
 		</div>
 		<div class="col-xs-3 col-xs-offset-2" style="text-align: center">
-			<button class="btn btn-primary btn-lg" routerLink="signin">Start Here</button>
+			<button class="btn btn-primary btn-lg" routerLink="signin" *ngIf="!authService.authenticated">Start Here</button>
+			<button class="btn btn-primary btn-lg" routerLink="/dime" *ngIf="authService.authenticated">Go to DIME</button>
+
 		</div>
 	</div>
 </div>

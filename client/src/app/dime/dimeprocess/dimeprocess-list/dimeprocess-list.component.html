@@ -1,7 +1,28 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-xs-12">
-			List of the processes should come here.
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover table-striped table-condensed">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Source</th>
+							<th>Target</th>
+							<th>Status</th>
+							<th width="160">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr *ngFor="let process of processList; let i = index;">
+							<td>{{ process.name }}</td>
+							<td>{{ process.source }}</td>
+							<td>{{ process.target }}</td>
+							<td>{{ process.status }}</td>
+							<td>Actions</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>

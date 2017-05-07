@@ -1,21 +1,30 @@
 <nav class="navbar navbar-default navbar-inverse navbar-fixed-top">
 	<div class="container-fluid navbar-border">
 		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="topmenucollapse" data-target="#topmenu" aria-expanded="false" aria-controls="navbar">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#topmenu" aria-expanded="false" aria-controls="navbar">
 				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
+				<i class="fa fa-bars fa-inverse"></i>
 			</button>
 			<a routerLink="/" class="navbar-brand">EPM Toolbox</a>
 			<a routerLink="/dime" class="navbar-brand">Dime</a>
 		</div>
-		<div id="topmenu" class="collapse navbar-collapse">
+		<div id="topmenu" class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
 				<li routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><a routerLink="."><i class="fa fa-home fa-fw"></i> Dime Dashboard</a></li>
+				<li routerLinkActive="active"><a routerLink="environments"><i class="fa fa-building fa-fw"></i> Environments</a></li>
+				<li routerLinkActive="active"><a routerLink="streams"><i class="fa fa-arrows fa-fw"></i> Streams</a></li>
+				<li routerLinkActive="active"><a routerLink="maps"><i class="fa fa-map-signs fa-fw"></i> Maps</a></li>
 				<li routerLinkActive="active"><a routerLink="schedules"><i class="fa fa-calendar fa-fw"></i> Schedules</a></li>
 				<li routerLinkActive="active"><a routerLink="processes"><i class="fa fa-cogs fa-fw"></i> Processes</a></li>
+				<li routerLinkActive="active"><a routerLink="settings"><i class="fa fa-cog fa-fw"></i> Settings</a></li>
+				<li routerLinkActive="active"><a routerLink="users"><i class="fa fa-user fa-fw"></i> Users</a></li>
+				<li routerLinkActive="active"><a routerLink="secrets"><i class="fa fa-key fa-fw"></i> Secrets</a></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a routerLink="logout"><i class="fa fa-sign-out"></i> Sign Out</a></li>
 			</ul>
 		</div>
+		<!--/.nav-collapse -->
 	</div>
+	<!--/.container-fluid -->
 </nav>

@@ -1,12 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { Component, OnInit } from "@angular/core";
+import { NgForm } from "@angular/forms";
 
-import { AuthService } from '../auth.service';
+import { AuthService } from "../auth.service";
 
 @Component({
-	selector: 'app-signin',
-	templateUrl: './signin.component.html',
-	styleUrls: ['./signin.component.css']
+	selector: "app-signin",
+	templateUrl: "./signin.component.html",
+	styleUrls: ["./signin.component.css"]
 })
 export class SigninComponent implements OnInit {
 
@@ -16,10 +16,10 @@ export class SigninComponent implements OnInit {
 	}
 
 	signIn(form: NgForm) {
-		const email = form.value.email;
+		const username = form.value.username;
 		const password = form.value.password;
 		console.log("We are signing in");
-		this.authService.signinUser(email, password).subscribe((result) => {
+		this.authService.signinUser(username, password).subscribe((result) => {
 			console.log("Resulted", result);
 		}, (error) => {
 			console.log("Erred:", error);

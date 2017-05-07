@@ -1,12 +1,12 @@
-import { ToastrService } from 'ngx-toastr';
-import { DimeProcessService } from '../dimeprocess.service';
-import { Component, OnInit } from '@angular/core';
-import { Response } from '@angular/http';
+import { ToastrService } from "ngx-toastr";
+import { DimeProcessService } from "../dimeprocess.service";
+import { Component, OnInit } from "@angular/core";
+import { Response } from "@angular/http";
 
 @Component({
-	selector: 'app-dimeprocesses',
-	templateUrl: './dimeprocesses.component.html',
-	styleUrls: ['./dimeprocesses.component.css']
+	selector: "app-dimeprocesses",
+	templateUrl: "./dimeprocesses.component.html",
+	styleUrls: ["./dimeprocesses.component.css"]
 })
 export class DimeprocessesComponent implements OnInit {
 
@@ -19,8 +19,8 @@ export class DimeprocessesComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		console.log('This is not doSomething');
-		this.doSomething();
+		// console.log("This is not doSomething");
+		// this.doSomething();
 	}
 
 	onGet() {
@@ -34,7 +34,7 @@ export class DimeprocessesComponent implements OnInit {
 		);
 	}
 
-	doSomething(): void {
-		console.log('Do Something');
-	}
+	// doSomething(): void {
+	// 	console.log("Do Something");
+	// }
 }

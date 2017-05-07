@@ -18,7 +18,7 @@ function initiateApplicationWorker(refDB, refConfig) {
     app.use(helmet());
     app.use(helmet.noCache());
     app.use(logger("short"));
-    app.use(jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin", "/welcome/signin", "/", "/welcome"] }));
+    app.use("/api", jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin"] }));
     api_1.initializeRestApi(app, refDB, mainTools);
     app.set("port", 8000);
     app.get("*", (req, res) => {

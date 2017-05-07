@@ -1,21 +1,21 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { Routes, RouterModule } from "@angular/router";
+import { FormsModule } from "@angular/forms";
 
-import { WelcomeComponent } from './welcome.component';
-import { WelcomedashboardComponent } from './welcomedashboard/welcomedashboard.component';
-import { SigninComponent } from './signin/signin.component';
-import { SignupComponent } from './signup/signup.component';
+import { WelcomeComponent } from "./welcome.component";
+import { WelcomedashboardComponent } from "./welcomedashboard/welcomedashboard.component";
+import { SigninComponent } from "./signin/signin.component";
+import { SignupComponent } from "./signup/signup.component";
 
 
 
 const welcomeRoutes: Routes = [
 	{
-		path: 'welcome', component: WelcomeComponent, children: [
-			{ path: '', component: WelcomedashboardComponent },
-			{ path: 'signin', component: SigninComponent },
-			{ path: 'signup', component: SignupComponent }
+		path: "welcome", component: WelcomeComponent, children: [
+			{ path: "", component: WelcomedashboardComponent },
+			{ path: "signin", component: SigninComponent },
+			{ path: "signup", component: SignupComponent }
 		]
 	}
 ];
