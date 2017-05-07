@@ -10,7 +10,7 @@ interface TableDefiner {
 }
 
 let db: IPool;
-let tableList: Array<TableDefiner> = [];
+const tableList: Array<TableDefiner> = [];
 
 tableList.push({
 	name: "users",
@@ -231,20 +231,111 @@ function checkTables(configuration: any): Promise<any> {
 	return new Promise((resolve, reject) => {
 		console.log("===============================================");
 		console.log("=== Checking Tables           =================");
-		// console.log(db.config);
 		db.query(
 			"SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = \"" +
 			configuration.mysql.db + "\"", function (err, rows, fields) {
 				if (err) {
 					reject(err);
 				} else {
-					// console.log(rows);
+					console.log(rows);
 					// console.log(configuration);
-					/*createTables(rows).
+					createTables(rows).
 						then(populateTables).
 						then(resolve).catch(reject);
-						*/
 				}
 			});
+	});
+}
+
+function createTables(existingTables) {
+	return new Promise(function (resolve, reject) {
+		let curTableExists;
+		const promises = [];
+
+		tableList.forEach(function (curTable) {
+			curTableExists = false;
+			console.log("=== Checking Table:", curTable.name);
+			existingTables.forEach(function (curExistingTable) {
+				if (curExistingTable.TABLE_NAME === curTable.name) { curTableExists = true; }
+			});
+			if (!curTableExists) {
+				console.log("=== Table", curTable.name, "doesn't exist.");
+				promises.push(createTableAction(curTable));
+			} else {
+				console.log("=== Table", curTable.name, "exists.");
+			}
+		});
+		Promise.all(promises).then(function () {
+			resolve(existingTables);
+		}).catch(reject);
+	});
+}
+
+function createTableAction(curTable) {
+	return new Promise(function (resolve, reject) {
+		console.log("=== Creating Table:", curTable.name);
+		// console.log(curTable);
+		let createQuery = "CREATE TABLE " + curTable.name + "(" + curTable.fields.join(",");
+		if (curTable.primaryKey) { createQuery += ", PRIMARY KEY (" + curTable.primaryKey + ") "; }
+		createQuery += ")";
+		// console.log(createQuery);
+		db.query(createQuery, function (err, rows, fields) {
+			if (err) {
+				reject(err);
+			} else {
+				console.log("=== Created Table:", curTable.name);
+				resolve();
+			}
+		});
+	});
+}
+
+function populateTables(existingTables) {
+	return new Promise(function (resolve, reject) {
+		let promises = [];
+		tableList.forEach(function (curTable) {
+			if (curTable.values) {
+				console.log("=== Checking default records for", curTable.name);
+				promises.push(populateTablesAction(curTable));
+			}
+		});
+		Promise.all(promises).then(function () {
+			resolve(existingTables);
+		}).catch(reject);
+	});
+}
+
+function populateTablesAction(curTable) {
+	return new Promise(function (resolve, reject) {
+		let query = "";
+		let checker = [];
+		let wherer = [];
+		curTable.values.forEach(function (curTuple) {
+			query = "SELECT COUNT(*) AS RESULT FROM " + curTable.name + " WHERE ";
+			checker = [];
+			wherer = [];
+			curTable.fieldsToCheck.forEach(function (curField) {
+				checker.push(curField);
+				checker.push(curTuple[curField]);
+				wherer.push("?? = ?");
+			});
+			query += wherer.join(" AND ");
+			db.query(query, checker, function (err, rows, fields) {
+				if (err) {
+					reject(err);
+				} else if (rows[0].RESULT === 0) {
+					db.query("INSERT INTO " + curTable.name + " SET ?", curTuple, function (err, rows, fields) {
+						if (err) {
+							reject(err);
+						} else {
+							console.log("=== Inserted records for", curTable.name);
+							resolve();
+						}
+					});
+				} else {
+					resolve();
+				}
+			});
+		});
 	});
 }

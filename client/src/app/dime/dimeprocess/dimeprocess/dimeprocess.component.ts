@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 
 @Component({
-  selector: 'app-dimeprocess',
-  templateUrl: './dimeprocess.component.html',
-  styleUrls: ['./dimeprocess.component.css']
+	selector: "app-dimeprocess",
+	templateUrl: "./dimeprocess.component.html",
+	styleUrls: ["./dimeprocess.component.css"]
 })
 export class DimeprocessComponent implements OnInit {
 
-  constructor() { }
+	constructor() { }
 
-  ngOnInit() {
-  }
+	ngOnInit() {
+	}
 
 }

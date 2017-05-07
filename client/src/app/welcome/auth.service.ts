@@ -29,8 +29,9 @@ export class AuthService {
 			}
 		).catch(
 			(error: Response) => {
-				console.log(error);
-				return Observable.throw("User signin has failed");
+				// console.log(error.json());
+				const errorMessage: string = error.json().message;
+				return Observable.throw(errorMessage);
 			}
 			);
 	}

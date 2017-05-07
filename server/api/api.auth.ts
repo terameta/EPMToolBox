@@ -19,6 +19,7 @@ export function apiAuth(app: Application, refDB: mysql.IPool, refTools: MainTool
 				} else if (results.length !== 1) {
 					res.status(500).json({ status: "fail", message: "Multiple users are defined with same username. Please consult with system admin." });
 				} else {
+					console.log(results);
 					const dbPass = results[0].password;
 					bcrypt.compare(req.body.password, dbPass, function (encerr, hashResult) {
 						if (encerr) {

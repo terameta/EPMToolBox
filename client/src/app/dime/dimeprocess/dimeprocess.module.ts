@@ -12,6 +12,7 @@ import { DimeprocessComponent } from "./dimeprocess/dimeprocess.component";
 
 
 const dimeProcessRoutes: Routes = [
+	{ path: "dime/processes", pathMatch: "prefix", redirectTo: "dime/processes/process-list" },
 	{ path: "process-list", component: DimeprocessListComponent },
 	{ path: "process-detail", component: DimeprocessDetailComponent }
 ];

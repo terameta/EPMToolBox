@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const bcrypt = require("bcrypt");
 let db;
-let tableList = [];
+const tableList = [];
 tableList.push({
     name: "users",
     fields: ["id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT",
@@ -226,7 +226,106 @@ function checkTables(configuration) {
                 reject(err);
             }
             else {
+                console.log(rows);
+                createTables(rows).
+                    then(populateTables).
+                    then(resolve).catch(reject);
             }
+        });
+    });
+}
+function createTables(existingTables) {
+    return new Promise(function (resolve, reject) {
+        let curTableExists;
+        const promises = [];
+        tableList.forEach(function (curTable) {
+            curTableExists = false;
+            console.log("=== Checking Table:", curTable.name);
+            existingTables.forEach(function (curExistingTable) {
+                if (curExistingTable.TABLE_NAME === curTable.name) {
+                    curTableExists = true;
+                }
+            });
+            if (!curTableExists) {
+                console.log("=== Table", curTable.name, "doesn't exist.");
+                promises.push(createTableAction(curTable));
+            }
+            else {
+                console.log("=== Table", curTable.name, "exists.");
+            }
+        });
+        Promise.all(promises).then(function () {
+            resolve(existingTables);
+        }).catch(reject);
+    });
+}
+function createTableAction(curTable) {
+    return new Promise(function (resolve, reject) {
+        console.log("=== Creating Table:", curTable.name);
+        let createQuery = "CREATE TABLE " + curTable.name + "(" + curTable.fields.join(",");
+        if (curTable.primaryKey) {
+            createQuery += ", PRIMARY KEY (" + curTable.primaryKey + ") ";
+        }
+        createQuery += ")";
+        db.query(createQuery, function (err, rows, fields) {
+            if (err) {
+                reject(err);
+            }
+            else {
+                console.log("=== Created Table:", curTable.name);
+                resolve();
+            }
+        });
+    });
+}
+function populateTables(existingTables) {
+    return new Promise(function (resolve, reject) {
+        let promises = [];
+        tableList.forEach(function (curTable) {
+            if (curTable.values) {
+                console.log("=== Checking default records for", curTable.name);
+                promises.push(populateTablesAction(curTable));
+            }
+        });
+        Promise.all(promises).then(function () {
+            resolve(existingTables);
+        }).catch(reject);
+    });
+}
+function populateTablesAction(curTable) {
+    return new Promise(function (resolve, reject) {
+        let query = "";
+        let checker = [];
+        let wherer = [];
+        curTable.values.forEach(function (curTuple) {
+            query = "SELECT COUNT(*) AS RESULT FROM " + curTable.name + " WHERE ";
+            checker = [];
+            wherer = [];
+            curTable.fieldsToCheck.forEach(function (curField) {
+                checker.push(curField);
+                checker.push(curTuple[curField]);
+                wherer.push("?? = ?");
+            });
+            query += wherer.join(" AND ");
+            db.query(query, checker, function (err, rows, fields) {
+                if (err) {
+                    reject(err);
+                }
+                else if (rows[0].RESULT === 0) {
+                    db.query("INSERT INTO " + curTable.name + " SET ?", curTuple, function (err, rows, fields) {
+                        if (err) {
+                            reject(err);
+                        }
+                        else {
+                            console.log("=== Inserted records for", curTable.name);
+                            resolve();
+                        }
+                    });
+                }
+                else {
+                    resolve();
+                }
+            });
         });
     });
 }
