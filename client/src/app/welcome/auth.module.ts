@@ -8,7 +8,7 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
 		headerPrefix: "bearer",
 		tokenName: "token",
 		tokenGetter: (() => localStorage.getItem("token")),
-		globalHeaders: [{ "Content-Type": "applicaton/json" }],
+		// globalHeaders: [{ "Content-Type": "applicaton/json" }],
 		noJwtError: true
 	}), http, options);
 }
