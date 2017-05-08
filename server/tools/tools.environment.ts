@@ -55,4 +55,32 @@ export class EnvironmentTools {
 		});
 	};
 
+	public create = () => {
+		const newEnv = { name: "New Environment (Please change name)", type: 0, server: "", port: "", username: "", password: "" };
+		return new Promise((resolve, reject) => {
+			this.db.query("INSERT INTO environments SET ?", newEnv, function (err, result, fields) {
+				if (err) {
+					reject({ error: err, message: "Failed to create a new environment." });
+				} else {
+					resolve({ id: result.insertId });
+				}
+			});
+		});
+	};
+
+	public update = (theEnvironment) => {
+		return new Promise((resolve, reject) => {
+			console.log("In Environment:", theEnvironment);
+			if (theEnvironment.password === "|||---protected---|||") { delete theEnvironment.password; }
+			const theID: number = theEnvironment.id;
+			this.db.query("UPDATE environments SET ? WHERE id = " + theID, theEnvironment, function (err, result, fields) {
+				if (err) {
+					reject({ error: err, message: "Failed to update the environment" });
+				} else {
+					resolve({ id: theID });
+				}
+			});
+		});
+	}
+
 }

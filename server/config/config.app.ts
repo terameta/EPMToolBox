@@ -16,11 +16,12 @@ export function initiateApplicationWorker(refDB: IPool, refConfig: any) {
 	const app: Application = express();
 	const mainTools = new MainTools(refConfig);
 
-	app.enable("trust proxy");
-
 	app.use(bodyParser.json({ limit: "100mb" }));
-	app.use(bodyParser.urlencoded({ extended: false }));
+	app.use(bodyParser.text({ limit: "100mb" }));
+	app.use(bodyParser.urlencoded({ extended: true, limit: "100mb" }));
 	app.use(express.static(path.join(__dirname, "../../client/dist")));
+
+	app.enable("trust proxy");
 
 	app.use(helmet());
 	app.use(helmet.noCache());
@@ -31,7 +32,6 @@ export function initiateApplicationWorker(refDB: IPool, refConfig: any) {
 	// app.use(jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin", "/welcome/signin", "/", "/welcome"] }));
 
 	initializeRestApi(app, refDB, mainTools);
-	// app.use(apiErrorHandler);
 
 	app.set("port", 8000);
 

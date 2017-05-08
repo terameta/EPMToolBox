@@ -11,10 +11,11 @@ const config_tools_1 = require("./config.tools");
 function initiateApplicationWorker(refDB, refConfig) {
     const app = express();
     const mainTools = new config_tools_1.MainTools(refConfig);
-    app.enable("trust proxy");
     app.use(bodyParser.json({ limit: "100mb" }));
-    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.text({ limit: "100mb" }));
+    app.use(bodyParser.urlencoded({ extended: true, limit: "100mb" }));
     app.use(express.static(path.join(__dirname, "../../client/dist")));
+    app.enable("trust proxy");
     app.use(helmet());
     app.use(helmet.noCache());
     app.use(logger("short"));

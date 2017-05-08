@@ -37,7 +37,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 					}
 				);
 			}
-		)
+		);
 		this.environmentService.listTypes().subscribe(
 			(typeList) => {
 				this.environmentTypeList = typeList;
@@ -54,6 +54,14 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	saveEnvironment(form: NgForm) {
 		console.log("This works");
 		console.log(form.value);
+		console.log(this.curEnvironment);
+		this.environmentService.update(this.curEnvironment).subscribe(
+			(result) => {
+				this.toastr.info("Information updated");
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
 	}
 
 }

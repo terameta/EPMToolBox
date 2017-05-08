@@ -1,7 +1,8 @@
 <nav class="navbar navbar-default navbar-fixed-top navbar-toolbar">
 	<div class="container-fluid navbar-border">
 		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#submenu" aria-expanded="false" aria-controls="navbar">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#submenu" aria-expanded="false"
+			 aria-controls="navbar">
 				<span class="sr-only">Toggle navigation</span>
 				<i class="fa fa-bars fa-inverse"></i>
 			</button>
@@ -10,8 +11,14 @@
 		<div id="submenu" class="collapse navbar-collapse">
 			<ul class="nav navbar-nav">
 				<li routerLinkActive="active"><a routerLink="environment-list">List</a></li>
-				<li routerLinkActive="active"><a routerLink="environment-detail">Detail</a></li>
-				<li><a (click)="create()">New</a></li>
+				<li routerLinkActive="active" class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" *ngIf="!curEnvironmentID">Details <span class="caret"></span></a>
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" *ngIf="curEnvironmentID">Details of<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li *ngFor="let environment of environmentList"><a [routerLink]="['/dime/environments/environment-detail', environment.id]">Go to {{environment.name}}</a></li>
+					</ul>
+				</li>
+				<li><a (click)="create()" style="cursor: pointer">New</a></li>
 			</ul>
 		</div>
 	</div>

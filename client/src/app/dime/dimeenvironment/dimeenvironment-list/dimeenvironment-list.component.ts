@@ -16,7 +16,7 @@ export class DimeenvironmentListComponent implements OnInit {
 
 	constructor(
 		private dimeEnvironmentService: DimeEnvironmentService,
-		private toastrService: ToastrService,
+		private toastr: ToastrService,
 		private router: Router
 	) { }
 
@@ -29,7 +29,7 @@ export class DimeenvironmentListComponent implements OnInit {
 			(environmentList: any[]) => {
 				this.environmentList = environmentList;
 			}, (error) => {
-				this.toastrService.error(error);
+				this.toastr.error(error);
 			}
 		)
 	}

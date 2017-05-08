@@ -21,6 +21,15 @@ export class ApiEnvironment {
 	}
 
 	setRoutes() {
+		// this.app.route("/api/environment/:id").put( (req, res) => {
+		// 	console.log(req.body);
+		// 	console.log(req.params);
+		// 	res.send("OK");
+		// });
+		// this.apiRoutes.put("/:id", (req, res) => {
+		// 	console.log(req.body);
+		// 	res.send("OK");
+		// })
 		this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.environment.listTypes, null, req, res)})
 		// this.apiRoutes.post("/listProcedures", (req, res) => { this.rester.respond(this.environment.listProcedures, req.body, req, res) });
 	}

@@ -46,14 +46,27 @@ export class DimeEnvironmentService {
 				console.log(error);
 				return Observable.throw("Fetching the environment has failed");
 			}
-		);
+			);
+	}
+
+	update(theEnvironment) {
+		const toSend = JSON.stringify(theEnvironment);
+		console.log("Service Updater", toSend);
+		return this.authHttp.put("/api/environment/" + theEnvironment.id, toSend).map((response: Response) => {
+			console.log("Resulted", theEnvironment);
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			console.log("Erred", theEnvironment);
+			return Observable.throw("Updating the environment has failed:" + theEnvironment.name);
+		});
 	}
 
 	listTypes() {
-		return this.authHttp.get("/api/environment/listTypes").map( (response: Response) => {
+		return this.authHttp.get("/api/environment/listTypes").map((response: Response) => {
 			const data = response.json();
 			return data;
-		}).catch( (error: Response) => {
+		}).catch((error: Response) => {
 			console.log(error);
 			return Observable.throw("Fetching environment type list has failed");
 		});

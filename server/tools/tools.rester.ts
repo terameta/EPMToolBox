@@ -28,6 +28,8 @@ export class Rester {
 		});
 
 		router.put("/:id", (req: Request, res: Response) => {
+			console.log("In rester (body  ):", req.body);
+			console.log("In rester (params):", req.params);
 			this.respond(tool.update, req.body, req, res);
 		});
 
