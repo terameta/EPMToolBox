@@ -3,7 +3,7 @@ import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
 
-import { apiEnvironment } from "./api.environment";
+import { ApiEnvironment } from "./api.environment";
 import { apiProcess } from "./api.process";
 import { apiAuth } from "./api.auth";
 // import { apiGetAllCourses } from "./apiGetAllCourses";
@@ -13,7 +13,7 @@ import { apiAuth } from "./api.auth";
 // import { apiDeleteLesson } from "./apiDeleteLesson";
 
 export function initializeRestApi(app: Application, refDB: IPool, refTools: MainTools) {
-	apiEnvironment(app, refDB, refTools);
+	const apiEnvironment = new ApiEnvironment(app, refDB, refTools);
 	apiProcess(app, refDB, refTools);
 	apiAuth(app, refDB, refTools);
 

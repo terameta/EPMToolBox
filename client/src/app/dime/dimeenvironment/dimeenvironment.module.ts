@@ -1,3 +1,4 @@
+import { FormsModule } from "@angular/forms";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { Routes, RouterModule } from "@angular/router";
@@ -12,12 +13,13 @@ import { DimeenvironmentToolbarComponent } from "./dimeenvironment-toolbar/dimee
 const dimeEnvironmentRoutes: Routes = [
 	{ path: "dime/environments", pathMatch: "prefix", redirectTo: "dime/environments/environment-list" },
 	{ path: "environment-list", component: DimeenvironmentListComponent },
-	{ path: "environment-detail", component: DimeenvironmentDetailComponent }
+	{ path: "environment-detail/:id", component: DimeenvironmentDetailComponent }
 ]
 
 @NgModule({
 	imports: [
 		CommonModule,
+		FormsModule,
 		RouterModule.forChild(dimeEnvironmentRoutes),
 		AuthModule
 	],

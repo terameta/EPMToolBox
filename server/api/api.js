@@ -4,7 +4,7 @@ const api_environment_1 = require("./api.environment");
 const api_process_1 = require("./api.process");
 const api_auth_1 = require("./api.auth");
 function initializeRestApi(app, refDB, refTools) {
-    api_environment_1.apiEnvironment(app, refDB, refTools);
+    const apiEnvironment = new api_environment_1.ApiEnvironment(app, refDB, refTools);
     api_process_1.apiProcess(app, refDB, refTools);
     api_auth_1.apiAuth(app, refDB, refTools);
 }

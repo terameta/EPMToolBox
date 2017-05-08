@@ -1,3 +1,4 @@
+import { FormsModule } from "@angular/forms";
 import { AuthModule } from "../welcome/auth.module";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
@@ -37,6 +38,7 @@ const dimeRoutes: Routes = [
 @NgModule({
 	imports: [
 		CommonModule,
+		FormsModule,
 		DimeprocessModule,
 		DimescheduleModule,
 		DimeenvironmentModule,

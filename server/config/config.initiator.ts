@@ -222,7 +222,6 @@ export function initiateInitiator(refDB: IPool, configuration: any) {
 	console.log("=== Initiator is now starting =================");
 	tableList.forEach(curTable => {
 		console.log("=== " + curTable.name);
-
 	});
 	checkTables(configuration);
 }

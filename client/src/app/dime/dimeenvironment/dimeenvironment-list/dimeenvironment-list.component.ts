@@ -1,3 +1,4 @@
+import { Router } from "@angular/router";
 import { Component, OnInit } from "@angular/core";
 
 import { ToastrService } from "ngx-toastr";
@@ -15,7 +16,8 @@ export class DimeenvironmentListComponent implements OnInit {
 
 	constructor(
 		private dimeEnvironmentService: DimeEnvironmentService,
-		private toastrService: ToastrService
+		private toastrService: ToastrService,
+		private router: Router
 	) { }
 
 	ngOnInit() {
@@ -31,5 +33,4 @@ export class DimeenvironmentListComponent implements OnInit {
 			}
 		)
 	}
-
 }

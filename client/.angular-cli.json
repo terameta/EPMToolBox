@@ -20,7 +20,7 @@
 			"prefix": "app",
 			"styles": [
 				"../node_modules/ngx-toastr/toastr.css",
-				"../node_modules/bootstrap/dist/css/cosmo.bootstrap.min.css",
+				"../node_modules/bootstrap/dist/css/yeti.bootstrap.min.css",
 				"../node_modules/font-awesome/css/font-awesome.min.css",
 				"styles.css"
 			],

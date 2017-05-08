@@ -1,3 +1,69 @@
-<p>
-  dimeenvironment-detail works!
-</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-12">
+			<form (ngSubmit)="saveEnvironment(f)" #f="ngForm" class="form-horizontal">
+				<fieldset>
+					<legend>Edit Environment: {{ curEnvironment.name }}</legend>
+					<div class="form-group">
+						<label for="environmentID" class="col-lg-1 control-label">ID:</label>
+						<div class="col-lg-11">
+							<input type="text" class="form-control" id="environmentID" name="environmentID" [(ngModel)]="curEnvironment.id" disabled>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentName" class="col-lg-1 control-label">Name:</label>
+						<div class="col-lg-11">
+							<input type="text" class="form-control" id="environmentName" name="environmentName" [(ngModel)]="curEnvironment.name" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentType" class="col-lg-1 control-label">Type:</label>
+						<div class="col-lg-11">
+							<select name="environmentType" id="environmentType" class="form-control" [(ngModel)]="curEnvironment.type" required>
+								<option *ngFor="let envType of environmentTypeList" [value]="envType.id">{{envType.name}}</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentServer" class="col-lg-1 control-label">Server:</label>
+						<div class="col-lg-11">
+							<input type="text" class="form-control" id="environmentServer" name="environmentServer" [(ngModel)]="curEnvironment.server" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentPort" class="col-lg-1 control-label">Port:</label>
+						<div class="col-lg-11">
+							<input type="text" class="form-control" id="environmentPort" name="environmentPort" [(ngModel)]="curEnvironment.port" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentUsername" class="col-lg-1 control-label">Username:</label>
+						<div class="col-lg-11">
+							<input type="text" class="form-control" id="environmentUsername" name="environmentUsername" [(ngModel)]="curEnvironment.username" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentPassword" class="col-lg-1 control-label">Password:</label>
+						<div class="col-lg-11">
+							<input type="password" class="form-control" id="environmentPassword" name="environmentPassword" [(ngModel)]="curEnvironment.password" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="environmentVerified" class="col-lg-1 control-label">Verified?</label>
+						<div class="col-lg-11">
+							<i class="fa fa-fw fa-check-square-o" *ngIf="curEnvironment.verified"></i>
+							<i class="fa fa-fw fa-square-o" *ngIf="!curEnvironment.verified"></i>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-lg-11 col-lg-offset-1">
+							<button class="btn btn-primary" type="submit">Save Changes</button>
+							<button class="btn btn-danger" type="button">Cancel</button>
+							<button class="btn btn-success pull-right" type="button">Verify Environment</button>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
