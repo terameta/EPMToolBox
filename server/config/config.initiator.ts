@@ -31,8 +31,11 @@ tableList.push({
 	name: "environmenttypes",
 	fields: ["id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT", "name varchar(255) NOT NULL", "value varchar(255) NOT NULL"],
 	primaryKey: "id",
-	values: [{ name: "Hyperion Planning", value: "HP" },
-	{ name: "Microsoft SQL Server", value: "MSSQL" }],
+	values: [
+		{ name: "Hyperion Planning On-premises", value: "HP" },
+		{ name: "Microsoft SQL Server", value: "MSSQL" },
+		{ name: "Hyperion Planning PBCS", value: "PBCS" }
+	],
 	fieldsToCheck: ["name", "value"]
 });
 tableList.push({
@@ -223,7 +226,8 @@ export function initiateInitiator(refDB: IPool, configuration: any) {
 	tableList.forEach(curTable => {
 		console.log("=== " + curTable.name);
 	});
-	checkTables(configuration);
+	checkTables(configuration).
+		then(modifyTables);
 }
 
 function checkTables(configuration: any): Promise<any> {
@@ -236,7 +240,7 @@ function checkTables(configuration: any): Promise<any> {
 				if (err) {
 					reject(err);
 				} else {
-					console.log(rows);
+					// console.log(rows);
 					// console.log(configuration);
 					createTables(rows).
 						then(populateTables).
@@ -245,7 +249,6 @@ function checkTables(configuration: any): Promise<any> {
 			});
 	});
 }
-
 function createTables(existingTables) {
 	return new Promise(function (resolve, reject) {
 		let curTableExists;
@@ -269,7 +272,6 @@ function createTables(existingTables) {
 		}).catch(reject);
 	});
 }
-
 function createTableAction(curTable) {
 	return new Promise(function (resolve, reject) {
 		console.log("=== Creating Table:", curTable.name);
@@ -288,10 +290,9 @@ function createTableAction(curTable) {
 		});
 	});
 }
-
 function populateTables(existingTables) {
 	return new Promise(function (resolve, reject) {
-		let promises = [];
+		const promises = [];
 		tableList.forEach(function (curTable) {
 			if (curTable.values) {
 				console.log("=== Checking default records for", curTable.name);
@@ -303,7 +304,6 @@ function populateTables(existingTables) {
 		}).catch(reject);
 	});
 }
-
 function populateTablesAction(curTable) {
 	return new Promise(function (resolve, reject) {
 		let query = "";
@@ -335,6 +335,35 @@ function populateTablesAction(curTable) {
 					resolve();
 				}
 			});
+		});
+	});
+}
+
+interface ModificationDefiner {
+	type: string;
+	tableName: string;
+	columnName?: string;
+	newColWidth?: number;
+}
+
+const modificationList: Array<ModificationDefiner> = [];
+
+modificationList.push({ type: "alterVarCharColWidth", tableName: "environments", columnName: "password", newColWidth: 4096 })
+
+function modifyTables() {
+	return new Promise((resolve, reject) => {
+		console.log("===============================================");
+		console.log("=== Running Modifications     =================");
+		modificationList.forEach((curMod) => {
+			if (curMod.type === "alterVarCharColWidth") {
+				console.log("=== Altering Column Width for", curMod.tableName, curMod.columnName, curMod.newColWidth);
+				db.query(
+					"ALTER TABLE " + curMod.tableName + " MODIFY " + curMod.columnName + " VARCHAR(" + curMod.newColWidth + ");",
+					(err, results, fields) => {
+						if (err) { console.log("!!! Error:", err); }
+					}
+				);
+			}
 		});
 	});
 }

@@ -12,7 +12,7 @@ export class ApiEnvironment {
 	rester: Rester;
 
 	constructor(public app: Application, public db: IPool, public tools: MainTools) {
-		this.environment = new EnvironmentTools(this.db);
+		this.environment = new EnvironmentTools(this.db, this.tools);
 		this.apiRoutes = express.Router();
 		this.rester = new Rester(tools);
 		this.setRoutes();
@@ -30,7 +30,8 @@ export class ApiEnvironment {
 		// 	console.log(req.body);
 		// 	res.send("OK");
 		// })
-		this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.environment.listTypes, null, req, res)})
+		this.apiRoutes.get("/listTypes", 	(req, res) => { this.rester.respond(this.environment.listTypes, 	null, 				req, res); 			});
+		this.apiRoutes.get("/verify/:id", 	(req, res) => { this.rester.respond(this.environment.verify, 		req.params.id, 	req, res);			});
 		// this.apiRoutes.post("/listProcedures", (req, res) => { this.rester.respond(this.environment.listProcedures, req.body, req, res) });
 	}
 

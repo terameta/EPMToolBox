@@ -23,8 +23,6 @@ class Rester {
             this.respond(tool.create, req.body, req, res);
         });
         router.put("/:id", (req, res) => {
-            console.log("In rester (body  ):", req.body);
-            console.log("In rester (params):", req.params);
             this.respond(tool.update, req.body, req, res);
         });
         router.delete("/:id", (req, res) => {

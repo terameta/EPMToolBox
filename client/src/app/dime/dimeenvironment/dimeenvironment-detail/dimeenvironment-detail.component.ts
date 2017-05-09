@@ -29,13 +29,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		this.paramsSubscription = this.route.params.subscribe(
 			(params: Params) => {
 				this.curEnvironmentID = params["id"];
-				this.environmentService.getOne(params["id"]).subscribe(
-					(dbEnvironment) => {
-						this.curEnvironment = dbEnvironment;
-					}, (error) => {
-						this.toastr.error(error);
-					}
-				);
+				this.getCurEnvironment();
 			}
 		);
 		this.environmentService.listTypes().subscribe(
@@ -52,12 +46,30 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	}
 
 	saveEnvironment(form: NgForm) {
-		console.log("This works");
-		console.log(form.value);
-		console.log(this.curEnvironment);
 		this.environmentService.update(this.curEnvironment).subscribe(
 			(result) => {
 				this.toastr.info("Information updated");
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
+	}
+
+	getCurEnvironment() {
+		this.environmentService.getOne(this.curEnvironmentID).subscribe(
+			(dbEnvironment) => {
+				this.curEnvironment = dbEnvironment;
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
+	}
+
+	verifyEnvironment() {
+		this.environmentService.verify(this.curEnvironmentID).subscribe(
+			(result) => {
+				this.toastr.info("Environment is now verified. We are now refreshing the view.");
+				this.getCurEnvironment();
 			}, (error) => {
 				this.toastr.error(error);
 			}

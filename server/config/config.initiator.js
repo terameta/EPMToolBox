@@ -22,8 +22,11 @@ tableList.push({
     name: "environmenttypes",
     fields: ["id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT", "name varchar(255) NOT NULL", "value varchar(255) NOT NULL"],
     primaryKey: "id",
-    values: [{ name: "Hyperion Planning", value: "HP" },
-        { name: "Microsoft SQL Server", value: "MSSQL" }],
+    values: [
+        { name: "Hyperion Planning On-premises", value: "HP" },
+        { name: "Microsoft SQL Server", value: "MSSQL" },
+        { name: "Hyperion Planning PBCS", value: "PBCS" }
+    ],
     fieldsToCheck: ["name", "value"]
 });
 tableList.push({
@@ -213,7 +216,8 @@ function initiateInitiator(refDB, configuration) {
     tableList.forEach(curTable => {
         console.log("=== " + curTable.name);
     });
-    checkTables(configuration);
+    checkTables(configuration).
+        then(modifyTables);
 }
 exports.initiateInitiator = initiateInitiator;
 function checkTables(configuration) {
@@ -226,7 +230,6 @@ function checkTables(configuration) {
                 reject(err);
             }
             else {
-                console.log(rows);
                 createTables(rows).
                     then(populateTables).
                     then(resolve).catch(reject);
@@ -280,7 +283,7 @@ function createTableAction(curTable) {
 }
 function populateTables(existingTables) {
     return new Promise(function (resolve, reject) {
-        let promises = [];
+        const promises = [];
         tableList.forEach(function (curTable) {
             if (curTable.values) {
                 console.log("=== Checking default records for", curTable.name);
@@ -326,6 +329,24 @@ function populateTablesAction(curTable) {
                     resolve();
                 }
             });
+        });
+    });
+}
+const modificationList = [];
+modificationList.push({ type: "alterVarCharColWidth", tableName: "environments", columnName: "password", newColWidth: 4096 });
+function modifyTables() {
+    return new Promise((resolve, reject) => {
+        console.log("===============================================");
+        console.log("=== Running Modifications     =================");
+        modificationList.forEach((curMod) => {
+            if (curMod.type === "alterVarCharColWidth") {
+                console.log("=== Altering Column Width for", curMod.tableName, curMod.columnName, curMod.newColWidth);
+                db.query("ALTER TABLE " + curMod.tableName + " MODIFY " + curMod.columnName + " VARCHAR(" + curMod.newColWidth + ");", (err, results, fields) => {
+                    if (err) {
+                        console.log("!!! Error:", err);
+                    }
+                });
+            }
         });
     });
 }

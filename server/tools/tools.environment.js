@@ -1,8 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tools_mssql_1 = require("./tools.mssql");
+const tools_hp_1 = require("./tools.hp");
 class EnvironmentTools {
-    constructor(db) {
+    constructor(db, tools) {
         this.db = db;
+        this.tools = tools;
         this.getAll = () => {
             return new Promise((resolve, reject) => {
                 this.db.query("SELECT * FROM environments", function (err, rows, fields) {
@@ -21,9 +24,9 @@ class EnvironmentTools {
         this.getOne = (id) => {
             return this.getEnvironmentDetails({ id: id });
         };
-        this.getEnvironmentDetails = (refObj) => {
+        this.getEnvironmentDetails = (refObj, shouldShowPassword) => {
             return new Promise((resolve, reject) => {
-                this.db.query("SELECT * FROM environments WHERE id = ?", refObj.id, function (err, rows, fields) {
+                this.db.query("SELECT * FROM environments WHERE id = ?", refObj.id, (err, rows, fields) => {
                     if (err) {
                         reject({ error: err, message: "Retrieving environment with id " + refObj.id + " has failed" });
                     }
@@ -31,7 +34,12 @@ class EnvironmentTools {
                         reject({ error: "Wrong number of records", message: "Wrong number of records for environment received from the server, 1 expected" });
                     }
                     else {
-                        rows[0].password = "|||---protected---|||";
+                        if (shouldShowPassword) {
+                            rows[0].password = this.tools.decryptText(rows[0].password);
+                        }
+                        else {
+                            rows[0].password = "|||---protected---|||";
+                        }
                         resolve(rows[0]);
                     }
                 });
@@ -51,6 +59,18 @@ class EnvironmentTools {
         };
         this.getTypeDetails = (refObj) => {
             return new Promise((resolve, reject) => {
+                this.db.query("SELECT * FROM environmenttypes WHERE id = ?", refObj.type, (err, results, fields) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else if (results.length > 0) {
+                        refObj.typedetails = results[0];
+                        resolve(refObj);
+                    }
+                    else {
+                        resolve(refObj);
+                    }
+                });
             });
         };
         this.create = () => {
@@ -68,9 +88,11 @@ class EnvironmentTools {
         };
         this.update = (theEnvironment) => {
             return new Promise((resolve, reject) => {
-                console.log("In Environment:", theEnvironment);
                 if (theEnvironment.password === "|||---protected---|||") {
                     delete theEnvironment.password;
+                }
+                else if (theEnvironment.password) {
+                    theEnvironment.password = this.tools.encryptText(theEnvironment.password);
                 }
                 const theID = theEnvironment.id;
                 this.db.query("UPDATE environments SET ? WHERE id = " + theID, theEnvironment, function (err, result, fields) {
@@ -83,6 +105,55 @@ class EnvironmentTools {
                 });
             });
         };
+        this.verify = (envID) => {
+            let environmentObject;
+            return new Promise((resolve, reject) => {
+                environmentObject = { id: envID };
+                this.getEnvironmentDetails(environmentObject, true).
+                    then(this.getTypeDetails).
+                    then((curObj) => {
+                    if (!curObj.typedetails) {
+                        return Promise.reject("No type definition on the environment object");
+                    }
+                    else if (!curObj.typedetails.value) {
+                        return Promise.reject("No type value definition on the environment object");
+                    }
+                    else if (curObj.typedetails.value === "MSSQL") {
+                        return this.mssqlTool.verify(curObj);
+                    }
+                    else if (curObj.typedetails.value === "HP") {
+                        return this.hpTool.verify(curObj);
+                    }
+                    else if (curObj.typedetails.value === "PBCS") {
+                        return Promise.reject("PBCS");
+                    }
+                    else {
+                        return Promise.reject("Undefined Environment Type");
+                    }
+                }).
+                    then(this.setVerified).
+                    then((result) => {
+                    resolve({ result: "OK" });
+                }).catch((issue) => {
+                    reject({ error: issue, message: "Failed to verify the environment" });
+                });
+            });
+        };
+        this.setVerified = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.db.query("UPDATE environments SET ? WHERE id = " + refObj.id, { verified: 1 }, (err, results, fields) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        refObj.verified = 1;
+                        resolve(refObj);
+                    }
+                });
+            });
+        };
+        this.mssqlTool = new tools_mssql_1.MSSQLTools();
+        this.hpTool = new tools_hp_1.HPTools();
     }
 }
 exports.EnvironmentTools = EnvironmentTools;

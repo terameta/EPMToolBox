@@ -11,21 +11,24 @@
 							<th>Port</th>
 							<th>isVerified?</th>
 							<th>Username</th>
-							<th>Password</th>
+							<!--<th>Password</th>-->
 							<th width="160">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr *ngFor="let environment of environmentList; let i = index;" (click)="goToDetail(environment.id)">
+						<tr *ngFor="let environment of environmentList; let i = index;">
 							<td>{{ environment.name }}</td>
 							<td>{{ environment.type }}</td>
 							<td>{{ environment.server }}</td>
 							<td>{{ environment.port }}</td>
-							<td>{{ environment.verified }}</td>
-							<td>{{ environment.username }}</td>
-							<td>{{ environment.password }}</td>
 							<td>
-								<button class="btn btn-xs btn-primary" [routerLink]="['../environment-detail', environment.id]"><i class="fa fa-fw fa-asterisk"></i></button>
+								<i class="fa fa-fw fa-check-square-o" *ngIf="environment.verified" title="Environment is verified"></i>
+								<i class="fa fa-fw fa-square-o" *ngIf="!environment.verified"title="Environment is not verified"></i>
+							</td>
+							<td>{{ environment.username }}</td>
+							<!--<td>{{ environment.password }}</td>-->
+							<td>
+								<button class="btn btn-xs btn-primary" [routerLink]="['../environment-detail', environment.id]" title="Details"><i class="fa fa-fw fa-asterisk"></i></button>
 							</td>
 						</tr>
 					</tbody>

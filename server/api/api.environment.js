@@ -8,7 +8,7 @@ class ApiEnvironment {
         this.app = app;
         this.db = db;
         this.tools = tools;
-        this.environment = new tools_environment_1.EnvironmentTools(this.db);
+        this.environment = new tools_environment_1.EnvironmentTools(this.db, this.tools);
         this.apiRoutes = express.Router();
         this.rester = new tools_rester_1.Rester(tools);
         this.setRoutes();
@@ -17,6 +17,7 @@ class ApiEnvironment {
     }
     setRoutes() {
         this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.environment.listTypes, null, req, res); });
+        this.apiRoutes.get("/verify/:id", (req, res) => { this.rester.respond(this.environment.verify, req.params.id, req, res); });
     }
 }
 exports.ApiEnvironment = ApiEnvironment;

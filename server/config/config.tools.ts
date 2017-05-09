@@ -1,6 +1,7 @@
 import { IPool } from "mysql";
 import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
+import * as crypto from "crypto";
 
 export class MainTools {
 	config: any;
@@ -18,6 +19,30 @@ export class MainTools {
 			retVal += charset.charAt(Math.floor(Math.random() * n));
 		}
 		return retVal;
+	}
+
+	public encryptText = (plaintext: string) => {
+		// console.log("-------- Encrypt Start ----------------");
+		// console.log("Hash:", this.config.hash);
+		// console.log("PlTx:", plaintext);
+		const cipher = crypto.createCipher("aes-256-ctr", this.config.hash);
+		let crypted = cipher.update(plaintext, "utf8","hex");
+		crypted += cipher.final("hex");
+		// console.log("CrTx:", crypted);
+		// console.log("-------- Encrypt End   ----------------");
+		return crypted;
+	};
+
+	public decryptText = (crypted: string) => {
+		// console.log("-------- Decrypt Start ----------------");
+		// console.log("Hash:", this.config.hash);
+		// console.log("CrTx:", crypted);
+		const decipher = crypto.createDecipher("aes-256-ctr", this.config.hash);
+		let plaintext = decipher.update(crypted, "hex", "utf8");
+		plaintext += decipher.final("utf8");
+		// console.log("PlTx:", plaintext);
+		// console.log("-------- Decrypt End ----------------");
+		return plaintext;
 	}
 
 	signToken(toSign: string): string {

@@ -51,10 +51,8 @@ export class DimeEnvironmentService {
 
 	update(theEnvironment) {
 		const toSend = JSON.stringify(theEnvironment);
-		console.log("Service Updater", toSend);
 		const headers = new Headers({ "Content-Type": "application/json" });
 		return this.authHttp.put("/api/environment/" + theEnvironment.id, toSend, { headers: headers }).map((response: Response) => {
-			console.log("Resulted", theEnvironment);
 			return response.json();
 		}).catch((error: Response) => {
 			console.log(error);
@@ -70,6 +68,15 @@ export class DimeEnvironmentService {
 		}).catch((error: Response) => {
 			console.log(error);
 			return Observable.throw("Fetching environment type list has failed");
+		});
+	}
+
+	verify(environmentID: number) {
+		return this.authHttp.get("/api/environment/verify/" + environmentID).map( (response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			return Observable.throw("Environment verification has failed");
 		});
 	}
 }
