@@ -45,6 +45,18 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		this.paramsSubscription.unsubscribe();
 	}
 
+	isPBCS() {
+		let toReturn = false;
+		if (this.curEnvironment.type) {
+			this.environmentTypeList.forEach((curType) => {
+				if (parseInt(this.curEnvironment.type, 10) === parseInt(curType.id, 10) && curType.value === "PBCS") {
+					toReturn = true;
+				}
+			});
+		}
+		return toReturn;
+	}
+
 	saveEnvironment(form: NgForm) {
 		this.environmentService.update(this.curEnvironment).subscribe(
 			(result) => {

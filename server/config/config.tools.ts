@@ -4,10 +4,10 @@ import { Request, Response } from "express";
 import * as crypto from "crypto";
 
 export class MainTools {
-	config: any;
+	// config: any;
 
-	constructor(refConfig: any) {
-		this.config = refConfig;
+	constructor(public config: any) {
+		// this.config = refConfig;
 	}
 
 	generateLongString(sentLength?: number): string {
@@ -21,12 +21,23 @@ export class MainTools {
 		return retVal;
 	}
 
+	public parseJsonString(toParse: string) {
+		return new Promise((resolve, reject) => {
+			try {
+				const toReturn = JSON.parse(toParse);
+				resolve(toReturn);
+			} catch (e) {
+				reject("Not a valid json");
+			}
+		});
+	}
+
 	public encryptText = (plaintext: string) => {
 		// console.log("-------- Encrypt Start ----------------");
 		// console.log("Hash:", this.config.hash);
 		// console.log("PlTx:", plaintext);
 		const cipher = crypto.createCipher("aes-256-ctr", this.config.hash);
-		let crypted = cipher.update(plaintext, "utf8","hex");
+		let crypted = cipher.update(plaintext, "utf8", "hex");
 		crypted += cipher.final("hex");
 		// console.log("CrTx:", crypted);
 		// console.log("-------- Encrypt End   ----------------");

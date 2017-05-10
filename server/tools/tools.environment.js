@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tools_mssql_1 = require("./tools.mssql");
 const tools_hp_1 = require("./tools.hp");
+const tools_pbcs_1 = require("./tools.pbcs");
 class EnvironmentTools {
     constructor(db, tools) {
         this.db = db;
@@ -125,7 +126,7 @@ class EnvironmentTools {
                         return this.hpTool.verify(curObj);
                     }
                     else if (curObj.typedetails.value === "PBCS") {
-                        return Promise.reject("PBCS");
+                        return this.pbcsTool.verify(curObj);
                     }
                     else {
                         return Promise.reject("Undefined Environment Type");
@@ -152,8 +153,9 @@ class EnvironmentTools {
                 });
             });
         };
-        this.mssqlTool = new tools_mssql_1.MSSQLTools();
-        this.hpTool = new tools_hp_1.HPTools();
+        this.mssqlTool = new tools_mssql_1.MSSQLTools(tools);
+        this.hpTool = new tools_hp_1.HPTools(tools);
+        this.pbcsTool = new tools_pbcs_1.PBCSTools(tools);
     }
 }
 exports.EnvironmentTools = EnvironmentTools;

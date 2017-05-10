@@ -2,11 +2,12 @@ import * as request from "request";
 import * as xml2js from "xml2js";
 
 import { EnvironmentHP } from "../../shared/model/environmentHP";
+import { MainTools } from "../config/config.tools";
 
 export class HPTools {
 	xmlParser: any;
 
-	constructor() {
+	constructor(public tools: MainTools) {
 		this.xmlParser = xml2js.parseString;
 	}
 
@@ -135,7 +136,7 @@ export class HPTools {
 					// tslint:disable-next-line:max-line-length
 					body: "<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc=\"0\">en_US</lngs><sso>" + refObj.sso + "</sso></req_ConnectToProvider>",
 					headers: { "Content-Type": "application/xml" }
-				}, (err, response, body){
+				}, (err, response, body) => {
 					if (err) {
 						reject(err);
 					} else {

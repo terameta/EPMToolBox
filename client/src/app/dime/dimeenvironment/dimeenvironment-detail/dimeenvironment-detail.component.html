@@ -27,7 +27,8 @@
 					<div class="form-group">
 						<label for="environmentServer" class="col-lg-1 control-label">Server:</label>
 						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentServer" name="environmentServer" [(ngModel)]="curEnvironment.server" required>
+							<input type="text" class="form-control" id="environmentServer" name="environmentServer" [(ngModel)]="curEnvironment.server"
+							 required>
 						</div>
 					</div>
 					<div class="form-group">
@@ -39,13 +40,24 @@
 					<div class="form-group">
 						<label for="environmentUsername" class="col-lg-1 control-label">Username:</label>
 						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentUsername" name="environmentUsername" [(ngModel)]="curEnvironment.username" required>
+							<input type="text" class="form-control" id="environmentUsername" name="environmentUsername" [(ngModel)]="curEnvironment.username"
+							 required>
+							<span class="help-inline" *ngIf="isPBCS()">
+								<div class="well well-warning well-sm">
+										With PBCS you should remember to add "identity domain" name to the username <br>
+										E.g.:<br>
+										Normal Username: mr.brown@awesomecompany.com<br>
+										Identity Domain Name: a123456<br>
+										Username to write above: a123456.mr.brown@awesomecompany.com
+								</div>
+							</span>
 						</div>
 					</div>
 					<div class="form-group">
 						<label for="environmentPassword" class="col-lg-1 control-label">Password:</label>
 						<div class="col-lg-11">
-							<input type="password" class="form-control" id="environmentPassword" name="environmentPassword" [(ngModel)]="curEnvironment.password" required>
+							<input type="password" class="form-control" id="environmentPassword" name="environmentPassword" [(ngModel)]="curEnvironment.password"
+							 required>
 						</div>
 					</div>
 					<div class="form-group">

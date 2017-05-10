@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mssql = require("mssql");
 class MSSQLTools {
-    constructor() {
+    constructor(tools) {
+        this.tools = tools;
         this.verify = (refObj) => {
             return this.connect(refObj);
         };

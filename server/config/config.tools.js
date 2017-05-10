@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 class MainTools {
-    constructor(refConfig) {
+    constructor(config) {
+        this.config = config;
         this.encryptText = (plaintext) => {
             const cipher = crypto.createCipher("aes-256-ctr", this.config.hash);
             let crypted = cipher.update(plaintext, "utf8", "hex");
@@ -16,7 +17,6 @@ class MainTools {
             plaintext += decipher.final("utf8");
             return plaintext;
         };
-        this.config = refConfig;
     }
     generateLongString(sentLength) {
         const length = sentLength || 128;
@@ -27,6 +27,17 @@ class MainTools {
             retVal += charset.charAt(Math.floor(Math.random() * n));
         }
         return retVal;
+    }
+    parseJsonString(toParse) {
+        return new Promise((resolve, reject) => {
+            try {
+                const toReturn = JSON.parse(toParse);
+                resolve(toReturn);
+            }
+            catch (e) {
+                reject("Not a valid json");
+            }
+        });
     }
     signToken(toSign) {
         return jwt.sign(toSign, this.config.hash, { expiresIn: 60 * 60 * 24 * 30 });

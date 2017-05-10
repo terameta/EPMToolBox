@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const request = require("request");
 const xml2js = require("xml2js");
 class HPTools {
-    constructor() {
+    constructor(tools) {
+        this.tools = tools;
         this.verify = (refObj) => {
             return this.staticVerify(refObj).
                 then(this.hpEstablishConnection).

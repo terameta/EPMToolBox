@@ -1,10 +1,11 @@
-import { Environment } from "../../shared/model/environment";
 import * as mssql from "mssql";
 
+import { MainTools } from "../config/config.tools";
+import { Environment } from "../../shared/model/environment";
 
 export class MSSQLTools {
 
-	constructor() { }
+	constructor(public tools: MainTools) { }
 
 	public verify = (refObj: Environment) => {
 		return this.connect(refObj);

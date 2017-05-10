@@ -4,14 +4,17 @@ import { MainTools } from "../config/config.tools";
 import { Environment } from "../../shared/model/environment";
 import { MSSQLTools } from "./tools.mssql";
 import { HPTools } from "./tools.hp";
+import { PBCSTools } from "./tools.pbcs";
 
 export class EnvironmentTools {
 	mssqlTool: MSSQLTools;
 	hpTool: HPTools;
+	pbcsTool: PBCSTools;
 
 	constructor(public db: IPool, public tools: MainTools) {
-		this.mssqlTool = new MSSQLTools();
-		this.hpTool = new HPTools();
+		this.mssqlTool = new MSSQLTools(tools);
+		this.hpTool = new HPTools(tools);
+		this.pbcsTool = new PBCSTools(tools);
 	}
 
 	public getAll = () => {
@@ -126,7 +129,7 @@ export class EnvironmentTools {
 					} else if (curObj.typedetails.value === "HP") {
 						return this.hpTool.verify(curObj);
 					} else if (curObj.typedetails.value === "PBCS") {
-						return Promise.reject("PBCS");
+						return this.pbcsTool.verify(curObj);
 					} else {
 						return Promise.reject("Undefined Environment Type");
 					}
