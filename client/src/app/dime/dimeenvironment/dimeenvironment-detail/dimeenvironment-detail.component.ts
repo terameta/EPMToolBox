@@ -1,4 +1,4 @@
-import { ActivatedRoute, Params } from "@angular/router";
+import { ActivatedRoute, Router, Params } from "@angular/router";
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { NgForm } from "@angular/forms";
 
@@ -21,6 +21,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
+		private router: Router,
 		private environmentService: DimeEnvironmentService,
 		private toastr: ToastrService
 	) { }
@@ -29,7 +30,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		this.paramsSubscription = this.route.params.subscribe(
 			(params: Params) => {
 				this.curEnvironmentID = params["id"];
-				this.getCurEnvironment();
+				this.environmentGetCurrent();
 			}
 		);
 		this.environmentService.listTypes().subscribe(
@@ -57,7 +58,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		return toReturn;
 	}
 
-	saveEnvironment(form: NgForm) {
+	environmentSave(form: NgForm) {
 		this.environmentService.update(this.curEnvironment).subscribe(
 			(result) => {
 				this.toastr.info("Information updated");
@@ -67,7 +68,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		);
 	}
 
-	getCurEnvironment() {
+	environmentGetCurrent() {
 		this.environmentService.getOne(this.curEnvironmentID).subscribe(
 			(dbEnvironment) => {
 				this.curEnvironment = dbEnvironment;
@@ -77,11 +78,22 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		);
 	}
 
-	verifyEnvironment() {
+	environmentVerify() {
 		this.environmentService.verify(this.curEnvironmentID).subscribe(
 			(result) => {
 				this.toastr.info("Environment is now verified. We are now refreshing the view.");
-				this.getCurEnvironment();
+				this.environmentGetCurrent();
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
+	}
+
+	environmentDelete(envID) {
+		this.environmentService.delete(envID).subscribe(
+			(result) => {
+				this.toastr.info("Environment is now deleted. We are now going back to the environment list.");
+				this.router.navigate(["/dime/environments/environment-list"]);
 			}, (error) => {
 				this.toastr.error(error);
 			}

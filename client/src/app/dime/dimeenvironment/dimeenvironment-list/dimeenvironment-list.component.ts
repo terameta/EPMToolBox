@@ -33,4 +33,15 @@ export class DimeenvironmentListComponent implements OnInit {
 			}
 		)
 	}
+
+	environmentDelete(envID) {
+		this.dimeEnvironmentService.delete(envID).subscribe(
+			(result) => {
+				this.toastr.info("Environment is now deleted. We are now going back to the environment list.");
+				this.getAll();
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
+	}
 }

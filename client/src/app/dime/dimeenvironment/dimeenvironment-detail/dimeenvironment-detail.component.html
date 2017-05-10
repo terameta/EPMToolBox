@@ -1,48 +1,47 @@
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-xs-12">
-			<form (ngSubmit)="saveEnvironment(f)" #f="ngForm" class="form-horizontal">
-				<fieldset>
-					<legend>Edit Environment: {{ curEnvironment.name }}</legend>
-					<div class="form-group">
-						<label for="environmentID" class="col-lg-1 control-label">ID:</label>
-						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentID" name="environmentID" [(ngModel)]="curEnvironment.id" disabled>
-						</div>
+<div class="box box-primary">
+	<div class="box-body">
+		<form (ngSubmit)="environmentSave(f)" #f="ngForm" class="form-horizontal">
+			<fieldset>
+				<legend>Edit Environment: {{ curEnvironment.name }}</legend>
+				<div class="form-group">
+					<label for="environmentID" class="col-lg-1 control-label">ID:</label>
+					<div class="col-lg-11">
+						<input type="text" class="form-control" id="environmentID" name="environmentID" [(ngModel)]="curEnvironment.id" disabled>
 					</div>
-					<div class="form-group">
-						<label for="environmentName" class="col-lg-1 control-label">Name:</label>
-						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentName" name="environmentName" [(ngModel)]="curEnvironment.name" required>
-						</div>
+				</div>
+				<div class="form-group">
+					<label for="environmentName" class="col-lg-1 control-label">Name:</label>
+					<div class="col-lg-11">
+						<input type="text" class="form-control" id="environmentName" name="environmentName" [(ngModel)]="curEnvironment.name" required>
 					</div>
-					<div class="form-group">
-						<label for="environmentType" class="col-lg-1 control-label">Type:</label>
-						<div class="col-lg-11">
-							<select name="environmentType" id="environmentType" class="form-control" [(ngModel)]="curEnvironment.type" required>
+				</div>
+				<div class="form-group">
+					<label for="environmentType" class="col-lg-1 control-label">Type:</label>
+					<div class="col-lg-11">
+						<select name="environmentType" id="environmentType" class="form-control" [(ngModel)]="curEnvironment.type" required>
 								<option *ngFor="let envType of environmentTypeList" [value]="envType.id">{{envType.name}}</option>
 							</select>
-						</div>
 					</div>
-					<div class="form-group">
-						<label for="environmentServer" class="col-lg-1 control-label">Server:</label>
-						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentServer" name="environmentServer" [(ngModel)]="curEnvironment.server"
-							 required>
-						</div>
+				</div>
+				<div class="form-group">
+					<label for="environmentServer" class="col-lg-1 control-label">Server:</label>
+					<div class="col-lg-11">
+						<input type="text" class="form-control" id="environmentServer" name="environmentServer" [(ngModel)]="curEnvironment.server"
+						 required>
 					</div>
-					<div class="form-group">
-						<label for="environmentPort" class="col-lg-1 control-label">Port:</label>
-						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentPort" name="environmentPort" [(ngModel)]="curEnvironment.port" required>
-						</div>
+				</div>
+				<div class="form-group">
+					<label for="environmentPort" class="col-lg-1 control-label">Port:</label>
+					<div class="col-lg-11">
+						<input type="text" class="form-control" id="environmentPort" name="environmentPort" [(ngModel)]="curEnvironment.port" required>
 					</div>
-					<div class="form-group">
-						<label for="environmentUsername" class="col-lg-1 control-label">Username:</label>
-						<div class="col-lg-11">
-							<input type="text" class="form-control" id="environmentUsername" name="environmentUsername" [(ngModel)]="curEnvironment.username"
-							 required>
-							<span class="help-inline" *ngIf="isPBCS()">
+				</div>
+				<div class="form-group">
+					<label for="environmentUsername" class="col-lg-1 control-label">Username:</label>
+					<div class="col-lg-11">
+						<input type="text" class="form-control" id="environmentUsername" name="environmentUsername" [(ngModel)]="curEnvironment.username"
+						 required>
+						<span class="help-inline" *ngIf="isPBCS()">
 								<div class="well well-warning well-sm">
 										With PBCS you should remember to add "identity domain" name to the username <br>
 										E.g.:<br>
@@ -51,31 +50,31 @@
 										Username to write above: a123456.mr.brown@awesomecompany.com
 								</div>
 							</span>
-						</div>
 					</div>
-					<div class="form-group">
-						<label for="environmentPassword" class="col-lg-1 control-label">Password:</label>
-						<div class="col-lg-11">
-							<input type="password" class="form-control" id="environmentPassword" name="environmentPassword" [(ngModel)]="curEnvironment.password"
-							 required>
-						</div>
+				</div>
+				<div class="form-group">
+					<label for="environmentPassword" class="col-lg-1 control-label">Password:</label>
+					<div class="col-lg-11">
+						<input type="password" class="form-control" id="environmentPassword" name="environmentPassword" [(ngModel)]="curEnvironment.password"
+						 required>
 					</div>
-					<div class="form-group">
-						<label for="environmentVerified" class="col-lg-1 control-label">Verified?</label>
-						<div class="col-lg-11">
-							<i class="fa fa-fw fa-check-square-o" *ngIf="curEnvironment.verified"></i>
-							<i class="fa fa-fw fa-square-o" *ngIf="!curEnvironment.verified"></i>
-						</div>
+				</div>
+				<div class="form-group">
+					<label for="environmentVerified" class="col-lg-1 control-label">Verified?</label>
+					<div class="col-lg-11">
+						<i class="fa fa-fw fa-check-square-o" *ngIf="curEnvironment.verified"></i>
+						<i class="fa fa-fw fa-square-o" *ngIf="!curEnvironment.verified"></i>
 					</div>
-					<div class="form-group">
-						<div class="col-lg-11 col-lg-offset-1">
-							<button class="btn btn-primary" type="submit">Save Changes</button>
-							<button class="btn btn-danger" type="button">Cancel</button>
-							<button class="btn btn-success pull-right" type="button" (click)="verifyEnvironment()">Verify Environment</button>
-						</div>
+				</div>
+				<div class="form-group">
+					<div class="col-lg-11 col-lg-offset-1">
+						<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+						<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/environments/environment-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
+						<button class="btn btn-success btn-xs" type="button" (click)="environmentVerify()"><i class="fa fa-check fa-fw"></i> Verify Environment</button>
+						<button class="btn btn-danger btn-xs pull-right" type="button" (click)="environmentDelete(curEnvironment.id)"><i class="fa fa-trash fa-fw"></i> Delete Environment</button>
 					</div>
-				</fieldset>
-			</form>
-		</div>
+				</div>
+			</fieldset>
+		</form>
 	</div>
 </div>

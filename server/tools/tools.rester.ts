@@ -32,7 +32,7 @@ export class Rester {
 		});
 
 		router.delete("/:id", (req: Request, res: Response) => {
-			this.respond(tool.remove, req.params.id, req, res);
+			this.respond(tool.delete, req.params.id, req, res);
 		});
 	}
 }

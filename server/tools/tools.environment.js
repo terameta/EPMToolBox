@@ -106,6 +106,18 @@ class EnvironmentTools {
                 });
             });
         };
+        this.delete = (id) => {
+            return new Promise((resolve, reject) => {
+                this.db.query("DELETE FROM environments WHERE id = ?", id, (err, result, fields) => {
+                    if (err) {
+                        reject({ error: err, message: "Failed to delete the environment" });
+                    }
+                    else {
+                        resolve({ id: id });
+                    }
+                });
+            });
+        };
         this.verify = (envID) => {
             let environmentObject;
             return new Promise((resolve, reject) => {

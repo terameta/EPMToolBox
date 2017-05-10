@@ -1,26 +1,21 @@
-<nav class="navbar navbar-default navbar-fixed-top navbar-toolbar">
-	<div class="container-fluid navbar-border">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#submenu" aria-expanded="false"
-			 aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<i class="fa fa-bars fa-inverse"></i>
-			</button>
-			<a routerLink="/dime/environments" class="navbar-brand"><i class="fa fa-building fa-fw"></i> Environments</a>
-		</div>
-		<div id="submenu" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li routerLinkActive="active"><a routerLink="environment-list">List</a></li>
-				<li routerLinkActive="active" class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" *ngIf="!curEnvironmentID">Details <span class="caret"></span></a>
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" *ngIf="curEnvironmentID">Details of<span class="caret"></span></a>
-					<ul class="dropdown-menu">
-						<li *ngFor="let environment of environmentList"><a [routerLink]="['/dime/environments/environment-detail', environment.id]">Go to {{environment.name}}</a></li>
-					</ul>
-				</li>
-				<li><a (click)="create()" style="cursor: pointer">New</a></li>
+<div class="btn-toolbar" role="toolbar" aria-label="Environments Menu">
+	<div class="btn-group btn-group-xs" role="group">
+		<button type="button" class="btn btn-default btn-xs" title="Environment List" routerLink="environment-list"><i class="fa fa-building fa-fw"></i> Environments</button>
+	</div>
+	<div class="btn-group btn-group-xs" role="group">
+		<button type="button" class="btn btn-default btn-xs" title="Environment List" routerLink="environment-list"><i class="fa fa-list fa-fw"></i> List</button>
+		<div class="btn-group btn-group-xs" role="group">
+			<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<i class="fa fa-exchange fa-fw"></i> Go To
+				<span class="caret"></span>
+    		</button>
+			<ul class="dropdown-menu">
+				<li *ngFor="let environment of environmentList"><a [routerLink]="['/dime/environments/environment-detail', environment.id]">Go to {{environment.name}}</a></li>
 			</ul>
 		</div>
+		<button type="button" class="btn btn-default btn-xs" title="New Environment" (click)="create()"><i class="fa fa-plus fa-fw"></i> New</button>
 	</div>
-</nav>
-<div style="height: 50px;">&nbsp;</div>
+	<div class="btn-group btn-group-xs pull-right" role="group">
+		<button type="button" class="btn btn-default" title="Help"><i class="fa fa-question fa-fw"></i> Help</button>
+	</div>
+</div>

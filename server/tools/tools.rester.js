@@ -26,7 +26,7 @@ class Rester {
             this.respond(tool.update, req.body, req, res);
         });
         router.delete("/:id", (req, res) => {
-            this.respond(tool.remove, req.params.id, req, res);
+            this.respond(tool.delete, req.params.id, req, res);
         });
     }
 }

@@ -35,7 +35,7 @@ export class DimeEnvironmentService {
 			)
 	}
 
-	getOne(id: Number) {
+	getOne(id: number) {
 		return this.authHttp.get("/api/environment/" + id).map(
 			(response: Response) => {
 				const data = response.json();
@@ -46,7 +46,7 @@ export class DimeEnvironmentService {
 				console.log(error);
 				return Observable.throw("Fetching the environment has failed");
 			}
-			);
+		);
 	}
 
 	update(theEnvironment) {
@@ -59,6 +59,20 @@ export class DimeEnvironmentService {
 			console.log("Erred", theEnvironment);
 			return Observable.throw("Updating the environment has failed:" + theEnvironment.name);
 		});
+	}
+
+	delete(id: number) {
+		return this.authHttp.delete("/api/environment/" + id).map(
+			(response: Response) => {
+				const data = response.json();
+				return data;
+			}
+		).catch(
+			(error: Response) => {
+				console.log(error);
+				return Observable.throw("Fetching the environment has failed");
+			}
+		);
 	}
 
 	listTypes() {
