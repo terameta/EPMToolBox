@@ -1,15 +1,15 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed, inject } from "@angular/core/testing";
 
-import { DimeenvironmentService } from './dimeenvironment.service';
+import { DimeEnvironmentService } from "./dimeenvironment.service";
 
-describe('DimeenvironmentService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [DimeenvironmentService]
-    });
-  });
+describe("DimeEnvironmentService", () => {
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			providers: [DimeEnvironmentService]
+		});
+	});
 
-  it('should ...', inject([DimeenvironmentService], (service: DimeenvironmentService) => {
-    expect(service).toBeTruthy();
-  }));
+	it("should ...", inject([DimeEnvironmentService], (service: DimeEnvironmentService) => {
+		expect(service).toBeTruthy();
+	}));
 });

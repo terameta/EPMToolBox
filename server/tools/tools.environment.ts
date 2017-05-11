@@ -169,4 +169,59 @@ export class EnvironmentTools {
 		});
 	};
 
+	public listDatabases = (refObj: Environment) => {
+		console.log("Environment list databases");
+		return new Promise((resolve, reject) => {
+			this.getEnvironmentDetails(refObj, true).
+				then(this.getTypeDetails).
+				then((curObj: Environment) => {
+					if (!curObj.typedetails) {
+						return Promise.reject("No type definition on the environment object");
+					} else if (!curObj.typedetails.value) {
+						return Promise.reject("No type value definition on the environment object");
+					} else if (curObj.typedetails.value === "MSSQL") {
+						return this.mssqlTool.listDatabases(curObj);
+					} else if (curObj.typedetails.value === "HP") {
+						return this.hpTool.listApplications(curObj);
+					} else if (curObj.typedetails.value === "PBCS") {
+						return this.pbcsTool.listApplications(curObj);
+					} else {
+						return Promise.reject("Undefined Environment Type");
+					}
+				}).
+				then(resolve).
+				catch((issue) => {
+					reject({ error: issue, message: "Failed to list the databases" });
+				});
+		});
+	}
+	public listTables = (refObj: Environment) => {
+		// console.log("Environment list tables", refObj);
+		return new Promise((resolve, reject) => {
+			this.getEnvironmentDetails(refObj, true).
+				then(this.getTypeDetails).
+				then((curObj: Environment) => {
+					curObj.database = refObj.database;
+					if (!curObj.typedetails) {
+						return Promise.reject("No type definition on the environment object");
+					} else if (!curObj.typedetails.value) {
+						return Promise.reject("No type value definition on the environment object");
+					} else if (curObj.typedetails.value === "MSSQL") {
+						// console.log(curObj);
+						return this.mssqlTool.listTables(curObj);
+					} else if (curObj.typedetails.value === "HP") {
+						return this.hpTool.listCubes(curObj);
+					} else if (curObj.typedetails.value === "PBCS") {
+						return this.pbcsTool.listCubes(curObj);
+					} else {
+						return Promise.reject("Undefined Environment Type");
+					}
+				}).
+				then(resolve).
+				catch((issue) => {
+					reject({ error: issue, message: "Failed to list the tables" });
+				});
+		});
+	}
+
 }

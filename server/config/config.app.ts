@@ -8,11 +8,13 @@ import * as jwt from "express-jwt";
 
 import { IPool } from "mysql";
 
+import { SystemConfig } from "../../shared/model/systemconfig";
+
 import { Application } from "express";
 import { initializeRestApi } from "../api/api";
 import { MainTools } from "./config.tools";
 
-export function initiateApplicationWorker(refDB: IPool, refConfig: any) {
+export function initiateApplicationWorker(refDB: IPool, refConfig: SystemConfig) {
 	const app: Application = express();
 	const mainTools = new MainTools(refConfig);
 

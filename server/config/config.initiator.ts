@@ -249,10 +249,10 @@ function checkTables(configuration: any): Promise<any> {
 			});
 	});
 }
-function createTables(existingTables) {
+function createTables(existingTables: any[]) {
 	return new Promise(function (resolve, reject) {
 		let curTableExists;
-		const promises = [];
+		const promises: any[] = [];
 
 		tableList.forEach(function (curTable) {
 			curTableExists = false;
@@ -272,7 +272,7 @@ function createTables(existingTables) {
 		}).catch(reject);
 	});
 }
-function createTableAction(curTable) {
+function createTableAction(curTable: any) {
 	return new Promise(function (resolve, reject) {
 		console.log("=== Creating Table:", curTable.name);
 		// console.log(curTable);
@@ -290,9 +290,9 @@ function createTableAction(curTable) {
 		});
 	});
 }
-function populateTables(existingTables) {
+function populateTables(existingTables: any) {
 	return new Promise(function (resolve, reject) {
-		const promises = [];
+		const promises: any[] = [];
 		tableList.forEach(function (curTable) {
 			if (curTable.values) {
 				console.log("=== Checking default records for", curTable.name);
@@ -304,16 +304,16 @@ function populateTables(existingTables) {
 		}).catch(reject);
 	});
 }
-function populateTablesAction(curTable) {
+function populateTablesAction(curTable: any) {
 	return new Promise(function (resolve, reject) {
 		let query = "";
-		let checker = [];
-		let wherer = [];
-		curTable.values.forEach(function (curTuple) {
+		let checker: any[] = [];
+		let wherer: any[] = [];
+		curTable.values.forEach(function (curTuple: any) {
 			query = "SELECT COUNT(*) AS RESULT FROM " + curTable.name + " WHERE ";
 			checker = [];
 			wherer = [];
-			curTable.fieldsToCheck.forEach(function (curField) {
+			curTable.fieldsToCheck.forEach(function (curField: any) {
 				checker.push(curField);
 				checker.push(curTuple[curField]);
 				wherer.push("?? = ?");
@@ -323,9 +323,9 @@ function populateTablesAction(curTable) {
 				if (err) {
 					reject(err);
 				} else if (rows[0].RESULT === 0) {
-					db.query("INSERT INTO " + curTable.name + " SET ?", curTuple, function (err, rows, fields) {
-						if (err) {
-							reject(err);
+					db.query("INSERT INTO " + curTable.name + " SET ?", curTuple, function (ierr, irows, ifields) {
+						if (ierr) {
+							reject(ierr);
 						} else {
 							console.log("=== Inserted records for", curTable.name);
 							resolve();

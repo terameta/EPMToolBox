@@ -46,7 +46,7 @@ export class DimeEnvironmentService {
 				console.log(error);
 				return Observable.throw("Fetching the environment has failed");
 			}
-		);
+			);
 	}
 
 	update(theEnvironment) {
@@ -72,7 +72,7 @@ export class DimeEnvironmentService {
 				console.log(error);
 				return Observable.throw("Fetching the environment has failed");
 			}
-		);
+			);
 	}
 
 	listTypes() {
@@ -86,11 +86,28 @@ export class DimeEnvironmentService {
 	}
 
 	verify(environmentID: number) {
-		return this.authHttp.get("/api/environment/verify/" + environmentID).map( (response: Response) => {
+		return this.authHttp.get("/api/environment/verify/" + environmentID).map((response: Response) => {
 			return response.json();
 		}).catch((error: Response) => {
 			console.log(error);
 			return Observable.throw("Environment verification has failed");
+		});
+	}
+
+	listDatabases(environmentID: number) {
+		return this.authHttp.get("/api/environment/listDatabases/" + environmentID).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			return Observable.throw("Listing environment databases has failed");
+		});
+	}
+	listTables(environmentID: number, dbName: string) {
+		return this.authHttp.get("/api/environment/listTables/" + environmentID + "/" + dbName).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			return Observable.throw("Listing environment tables has failed");
 		});
 	}
 }

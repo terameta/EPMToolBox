@@ -165,6 +165,68 @@ class EnvironmentTools {
                 });
             });
         };
+        this.listDatabases = (refObj) => {
+            console.log("Environment list databases");
+            return new Promise((resolve, reject) => {
+                this.getEnvironmentDetails(refObj, true).
+                    then(this.getTypeDetails).
+                    then((curObj) => {
+                    if (!curObj.typedetails) {
+                        return Promise.reject("No type definition on the environment object");
+                    }
+                    else if (!curObj.typedetails.value) {
+                        return Promise.reject("No type value definition on the environment object");
+                    }
+                    else if (curObj.typedetails.value === "MSSQL") {
+                        return this.mssqlTool.listDatabases(curObj);
+                    }
+                    else if (curObj.typedetails.value === "HP") {
+                        return this.hpTool.listApplications(curObj);
+                    }
+                    else if (curObj.typedetails.value === "PBCS") {
+                        return this.pbcsTool.listApplications(curObj);
+                    }
+                    else {
+                        return Promise.reject("Undefined Environment Type");
+                    }
+                }).
+                    then(resolve).
+                    catch((issue) => {
+                    reject({ error: issue, message: "Failed to list the databases" });
+                });
+            });
+        };
+        this.listTables = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.getEnvironmentDetails(refObj, true).
+                    then(this.getTypeDetails).
+                    then((curObj) => {
+                    curObj.database = refObj.database;
+                    if (!curObj.typedetails) {
+                        return Promise.reject("No type definition on the environment object");
+                    }
+                    else if (!curObj.typedetails.value) {
+                        return Promise.reject("No type value definition on the environment object");
+                    }
+                    else if (curObj.typedetails.value === "MSSQL") {
+                        return this.mssqlTool.listTables(curObj);
+                    }
+                    else if (curObj.typedetails.value === "HP") {
+                        return this.hpTool.listCubes(curObj);
+                    }
+                    else if (curObj.typedetails.value === "PBCS") {
+                        return this.pbcsTool.listCubes(curObj);
+                    }
+                    else {
+                        return Promise.reject("Undefined Environment Type");
+                    }
+                }).
+                    then(resolve).
+                    catch((issue) => {
+                    reject({ error: issue, message: "Failed to list the tables" });
+                });
+            });
+        };
         this.mssqlTool = new tools_mssql_1.MSSQLTools(tools);
         this.hpTool = new tools_hp_1.HPTools(tools);
         this.pbcsTool = new tools_pbcs_1.PBCSTools(tools);

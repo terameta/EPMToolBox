@@ -18,6 +18,8 @@ class ApiEnvironment {
     setRoutes() {
         this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.environment.listTypes, null, req, res); });
         this.apiRoutes.get("/verify/:id", (req, res) => { this.rester.respond(this.environment.verify, req.params.id, req, res); });
+        this.apiRoutes.get("/listDatabases/:id", (req, res) => { this.rester.respond(this.environment.listDatabases, { id: req.params.id }, req, res); });
+        this.apiRoutes.get("/listTables/:id/:db", (req, res) => { this.rester.respond(this.environment.listTables, { id: req.params.id, database: req.params.db }, req, res); });
     }
 }
 exports.ApiEnvironment = ApiEnvironment;

@@ -31,6 +31,47 @@ class MSSQLTools {
                 });
             });
         };
+        this.listDatabases = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.connect(refObj).
+                    then((curObj) => {
+                    curObj.connection.request().query("SELECT name FROM sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb')", (err, result) => {
+                        if (err) {
+                            console.log("error", err);
+                            reject(err);
+                        }
+                        else {
+                            resolve(result.recordset);
+                        }
+                    });
+                }).
+                    catch(reject);
+            });
+        };
+        this.listTables = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.connect(refObj).
+                    then((curObj) => {
+                    curObj.connection.request().query("SELECT TABLE_NAME, TABLE_TYPE FROM " + refObj.database + ".INFORMATION_SCHEMA.Tables ORDER BY 2, 1", (err, result) => {
+                        if (err) {
+                            console.log("error", err);
+                            reject(err);
+                        }
+                        else {
+                            result.recordset.forEach((curRecord) => {
+                                curRecord.name = curRecord.TABLE_NAME;
+                                curRecord.type = (curRecord.TABLE_TYPE === "VIEW" ? "view" : "table");
+                                delete curRecord.TABLE_NAME;
+                                delete curRecord.TABLE_TYPE;
+                            });
+                            result.recordset.push({ name: "Custom Query", type: "Custom Query" });
+                            resolve(result.recordset);
+                        }
+                    });
+                }).
+                    catch(reject);
+            });
+        };
     }
 }
 exports.MSSQLTools = MSSQLTools;

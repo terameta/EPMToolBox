@@ -315,9 +315,9 @@ function populateTablesAction(curTable) {
                     reject(err);
                 }
                 else if (rows[0].RESULT === 0) {
-                    db.query("INSERT INTO " + curTable.name + " SET ?", curTuple, function (err, rows, fields) {
-                        if (err) {
-                            reject(err);
+                    db.query("INSERT INTO " + curTable.name + " SET ?", curTuple, function (ierr, irows, ifields) {
+                        if (ierr) {
+                            reject(ierr);
                         }
                         else {
                             console.log("=== Inserted records for", curTable.name);

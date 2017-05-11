@@ -1,0 +1,103 @@
+<div class="box box-primary">
+	<div class="box-body">
+		<form (ngSubmit)="streamSave(f)" #f="ngForm" class="form-horizontal">
+			<fieldset>
+				<legend>Edit Stream: {{ curStream.name }}</legend>
+				<div class="form-group">
+					<label for="streamID" class="col-xs-2 control-label">ID:</label>
+					<div class="col-xs-10">
+						<input type="text" class="form-control" id="streamID" name="streamID" [(ngModel)]="curStream.id" disabled>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="streamName" class="col-xs-2 control-label">Name:</label>
+					<div class="col-xs-10">
+						<input type="text" class="form-control" id="streamName" name="streamName" [(ngModel)]="curStream.name">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="streamType" class="col-xs-2 control-label">Type:</label>
+					<div class="col-xs-10">
+						<select name="streamType" id="streamType" class="form-control" [(ngModel)]="curStream.type">
+							<option *ngFor="let streamType of streamTypeList" [value]="streamType.id">{{streamType.name}}</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="streamEnvironment" class="col-xs-2 control-label">Environment:</label>
+					<div class="col-xs-10">
+						<!--<input type="text" class="form-control" id="streamEnvironment" name="streamEnvironment" [(ngModel)]="curStream.environment" required>-->
+						<select name="streamEnvironment" id="streamEnvironment" class="form-control" [(ngModel)]="curStream.environment" (change)="curStreamClean=false;">
+							<option *ngFor="let environment of environmentList" [value]="environment.id">{{environment.name}}</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="streamDB" class="col-xs-2 control-label">Database Name:</label>
+					<div class="col-xs-10">
+						<div class="input-group">
+							<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="curStream.dbName" (change)="curStreamClean=false;">
+								<option *ngFor="let selectableDB of databaseList" [value]="selectableDB.name">{{selectableDB.name}}</option>
+							</select>
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" [disabled]="curStream.environment < 1 || !curStreamClean" (click)="streamRefreshDatabases()">Refresh</button>
+							</span>
+						</div>
+						<span class="help-block" *ngIf="curStream.environment < 1">
+							<div class="well well-warning well-sm">
+									Please assign an environment to be able to change the database.
+							</div>
+						</span>
+						<span class="help-block" *ngIf="!curStreamClean">
+							<div class="well well-warning well-sm">
+									Changes must be saved before assignment.
+							</div>
+						</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="streamTable" class="col-xs-2 control-label">Table Name:</label>
+					<div class="col-xs-10">
+						<div class="input-group">
+							<select name="streamTable" id="streamTable" class="form-control" [(ngModel)]="curStream.tableName" (change)="curStreamClean=false;">
+								<option *ngFor="let selectableTable of tableList" [value]="selectableTable.name">{{selectableTable.name}} ({{selectableTable.type}})</option>
+							</select>
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" [disabled]="!curStream.dbName" (click)="streamRefreshTables()">Refresh</button>
+							</span>
+						</div>
+						<span class="help-block" *ngIf="!curStream.dbName">
+							<div class="well well-warning well-sm">
+									Please assign a database to be able to change the tablename.
+							</div>
+						</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="streamQuery" class="col-xs-2 control-label">Custom Query:</label>
+					<div class="col-xs-10">
+						<div class="input-group">
+							<input type="text" class="form-control" id="streamQuery" name="streamQuery" [(ngModel)]="curStream.customQuery" disabled>
+							<span class="input-group-btn">
+								<button class="btn btn-default" type="button" [disabled]="!curStream.dbName">Make Custom</button>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-xs-10 col-xs-offset-2">
+						<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+						<!--<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/streams/stream-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>-->
+						<!--<button class="btn btn-success btn-xs" type="button" (click)="streamVerify()"><i class="fa fa-check fa-fw"></i> Verify Stream</button>-->
+						<button class="btn btn-danger btn-xs pull-right" type="button" (click)="streamDelete(curStream.id)"><i class="fa fa-trash fa-fw"></i> Delete Stream</button>
+					</div>
+				</div>
+				<div class="form-group">
+					<pre>{{curStream | json}}</pre>
+					<pre>CurStreamClean: {{curStreamClean}}</pre>
+					<pre>{{databaseList}}</pre>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>

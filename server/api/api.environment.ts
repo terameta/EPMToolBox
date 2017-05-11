@@ -21,18 +21,10 @@ export class ApiEnvironment {
 	}
 
 	setRoutes() {
-		// this.app.route("/api/environment/:id").put( (req, res) => {
-		// 	console.log(req.body);
-		// 	console.log(req.params);
-		// 	res.send("OK");
-		// });
-		// this.apiRoutes.put("/:id", (req, res) => {
-		// 	console.log(req.body);
-		// 	res.send("OK");
-		// })
-		this.apiRoutes.get("/listTypes", 	(req, res) => { this.rester.respond(this.environment.listTypes, 	null, 				req, res); 			});
-		this.apiRoutes.get("/verify/:id", 	(req, res) => { this.rester.respond(this.environment.verify, 		req.params.id, 	req, res);			});
-		// this.apiRoutes.post("/listProcedures", (req, res) => { this.rester.respond(this.environment.listProcedures, req.body, req, res) });
+		this.apiRoutes.get("/listTypes", 				(req, res) => { this.rester.respond(this.environment.listTypes, 		null, 														req, res); 	});
+		this.apiRoutes.get("/verify/:id", 				(req, res) => { this.rester.respond(this.environment.verify, 			req.params.id, 											req, res);	});
+		this.apiRoutes.get("/listDatabases/:id", 		(req, res) => { this.rester.respond(this.environment.listDatabases, 	{id: req.params.id}, 									req, res);	});
+		this.apiRoutes.get("/listTables/:id/:db", 	(req, res) => { this.rester.respond(this.environment.listTables, 		{id: req.params.id, database: req.params.db}, 	req, res);	});
 	}
 
 

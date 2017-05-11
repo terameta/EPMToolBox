@@ -1,4 +1,3 @@
-import { resolveForwardRef } from '@angular/core/core';
 import * as request from "request";
 import * as xml2js from "xml2js";
 

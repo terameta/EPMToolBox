@@ -41,7 +41,7 @@
 					<div class="col-lg-11">
 						<input type="text" class="form-control" id="environmentUsername" name="environmentUsername" [(ngModel)]="curEnvironment.username"
 						 required>
-						<span class="help-inline" *ngIf="isPBCS()">
+						<span class="help-block" *ngIf="isPBCS()">
 								<div class="well well-warning well-sm">
 										With PBCS you should remember to add "identity domain" name to the username <br>
 										E.g.:<br>
