@@ -61,7 +61,7 @@ export class MSSQLTools {
 						} else {
 							result.recordset.forEach((curRecord: any) => {
 								curRecord.name = curRecord.TABLE_NAME;
-								curRecord.type = (curRecord.TABLE_TYPE === "VIEW" ? "view" : "table");
+								curRecord.type = (curRecord.TABLE_TYPE === "VIEW" ? "View" : "Table");
 								delete curRecord.TABLE_NAME;
 								delete curRecord.TABLE_TYPE;
 							});
