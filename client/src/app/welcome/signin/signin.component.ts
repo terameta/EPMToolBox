@@ -22,6 +22,9 @@ export class SigninComponent implements OnInit {
 	ngOnInit() {
 		if (this.authService.authenticated) {
 			console.log("We are actially logged in, so we should route");
+			console.log(this.authService.jwtHelper.decodeToken(localStorage.getItem("token")));
+			console.log(this.authService.jwtHelper.getTokenExpirationDate(localStorage.getItem("token")));
+			console.log(this.authService.jwtHelper.isTokenExpired(localStorage.getItem("token")));
 			this.router.navigate(["/"]);
 		}
 	}

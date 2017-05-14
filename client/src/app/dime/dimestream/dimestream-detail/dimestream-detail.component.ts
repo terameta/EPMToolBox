@@ -78,8 +78,11 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 				if (this.curStream.dbName && this.databaseList.length === 0) {
 					this.databaseList.push({ name: this.curStream.dbName });
 				}
-				if (this.curStream.tableName && this.tableList.length === 0) {
-					this.tableList.push({ name: this.curStream.tableName, type: "-" });
+				if (this.tableList.length === 0) {
+					if (this.curStream.tableName && this.curStream.tableName !== "Custom Query") {
+						this.tableList.push({ name: this.curStream.tableName, type: "-" });
+					}
+					this.tableList.push({ name: "Custom Query", type: "Custom Query" });
 				}
 			}, (error) => {
 				this.toastr.error(error);
@@ -128,33 +131,26 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 			}
 		);
 	}
-	/*
 
-
-
-
-
-
-		streamVerify() {
-			this.streamService.verify(this.curStreamID).subscribe(
-				(result) => {
-					this.toastr.info("Stream is now verified. We are now refreshing the view.");
-					this.streamGetCurrent();
-				}, (error) => {
-					this.toastr.error(error);
-				}
-			);
-		}
-
-		streamDelete(envID) {
-			this.streamService.delete(envID).subscribe(
-				(result) => {
-					this.toastr.info("Stream is now deleted. We are now going back to the stream list.");
-					this.router.navigate(["/dime/streams/stream-list"]);
-				}, (error) => {
-					this.toastr.error(error);
-				}
-			);
-		}
-	*/
+	streamDelete(streamID) {
+		this.streamService.delete(streamID).subscribe(
+			(result) => {
+				this.toastr.info("Stream is now deleted. We are now going back to the stream list.");
+				this.router.navigate(["/dime/streams/stream-list"]);
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
+	}
+	streamGetFields = (streamID: number) => {
+		this.streamService.listFields(streamID).subscribe(
+			(result) => {
+				this.toastr.info("Stream fields are refreshed from the server");
+				this.curStream.sourcedFields = result;
+			}, (error) => {
+				this.toastr.error(error);
+				console.error(error);
+			}
+		)
+	};
 }

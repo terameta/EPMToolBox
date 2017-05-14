@@ -69,4 +69,15 @@ export class StreamTools {
 			});
 		});
 	}
+	public delete = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query("DELETE FROM streams WHERE id = ?", id, (err, result, fields) => {
+				if (err) {
+					reject({ error: err, message: "Failed to delete the stream" });
+				} else {
+					resolve({ id: id });
+				}
+			});
+		});
+	}
 }

@@ -71,38 +71,26 @@ export class DimeStreamService {
 			return Observable.throw("Updating the environment has failed:" + theStream.name);
 		});
 	}
-	/*
-
-
-
-
-
-
-
-
-		delete(id: number) {
-			return this.authHttp.delete("/api/environment/" + id).map(
-				(response: Response) => {
-					const data = response.json();
-					return data;
-				}
-			).catch(
-				(error: Response) => {
-					console.log(error);
-					return Observable.throw("Fetching the environment has failed");
-				}
-			);
-		}
-
-
-
-		verify(environmentID: number) {
-			return this.authHttp.get("/api/environment/verify/" + environmentID).map( (response: Response) => {
-				return response.json();
-			}).catch((error: Response) => {
+	delete(id: number) {
+		return this.authHttp.delete("/api/stream/" + id).map(
+			(response: Response) => {
+				const data = response.json();
+				return data;
+			}
+		).catch(
+			(error: Response) => {
 				console.log(error);
-				return Observable.throw("Environment verification has failed");
-			});
-		}
-	*/
+				return Observable.throw("Deleting the stream has failed");
+			}
+			);
+	}
+	listFields = (streamID) => {
+		return this.authHttp.get("/api/stream/listFields/" + streamID).map((response: Response) => {
+			const data = response.json();
+			return data;
+		}).catch((error: Response) => {
+			console.log(error);
+			return Observable.throw("Listing the stream fields has failed");
+		});
+	};
 }

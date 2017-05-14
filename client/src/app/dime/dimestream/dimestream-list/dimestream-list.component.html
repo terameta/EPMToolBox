@@ -5,26 +5,27 @@
 				<tr>
 					<th>Name</th>
 					<th>Type</th>
-					<th>Server</th>
-					<th>Port</th>
-					<th>isVerified?</th>
-					<th>Username</th>
-					<!--<th>Password</th>-->
+					<th>Environment</th>
+					<th>Database</th>
+					<th>Table</th>
 					<th width="80">Actions</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr *ngFor="let stream of streamList; let i = index;">
 					<td>{{ stream.name }}</td>
-					<td>{{ stream.type }}</td>
-					<td>{{ stream.server }}</td>
-					<td>{{ stream.port }}</td>
 					<td>
-						<i class="fa fa-fw fa-check-square-o" *ngIf="stream.verified" title="Stream is verified"></i>
-						<i class="fa fa-fw fa-square-o" *ngIf="!stream.verified" title="Stream is not verified"></i>
+						<span *ngFor="let sType of streamTypeList">
+							<span *ngIf="sType.id == stream.type">{{sType.name}}</span>
+						</span>
 					</td>
-					<td>{{ stream.username }}</td>
-					<!--<td>{{ stream.password }}</td>-->
+					<td>
+						<span *ngFor="let environment of environmentList">
+							<span *ngIf="environment.id == stream.environment">{{environment.name}}</span>
+						</span>
+					</td>
+					<td>{{ stream.dbName }}</td>
+					<td>{{ stream.tableName }}</td>
 					<td>
 						<div class="btn-toolbar" role="toolbar" aria-label="Stream Actions">
 							<div class="btn-group btn-group-xs" role="group">

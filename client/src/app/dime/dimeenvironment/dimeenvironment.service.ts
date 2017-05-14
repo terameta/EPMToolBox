@@ -70,7 +70,7 @@ export class DimeEnvironmentService {
 		).catch(
 			(error: Response) => {
 				console.log(error);
-				return Observable.throw("Fetching the environment has failed");
+				return Observable.throw("Deleting the environment has failed");
 			}
 			);
 	}
