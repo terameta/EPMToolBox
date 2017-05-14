@@ -21,6 +21,7 @@ export class ApiStream {
 	}
 
 	private setRoutes = () => {
-		this.apiRoutes.get("/listTypes", 	(req, res) => { this.rester.respond(this.stream.listTypes, 	null, 				req, res); 			});
+		this.apiRoutes.get("/listTypes", 		(req, res) => { this.rester.respond(this.stream.listTypes, 	null, 			req, res); });
+		this.apiRoutes.get("/listFields/:id", 	(req, res) => { this.rester.respond(this.stream.listFields, req.params.id, req, res); });
 	}
 }

@@ -25,5 +25,6 @@
 	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
     "tslint.exclude": "**/node_modules/**/*.ts",
     "workbench.editor.enablePreview": false,
-    "explorer.openEditors.visible": 0
+	"explorer.openEditors.visible": 0,
+	"editor.tabCompletion": true
 }

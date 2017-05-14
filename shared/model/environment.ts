@@ -11,5 +11,7 @@ export interface Environment {
 	username?: string,
 	password?: string,
 	database?: string,
-	connection?: any
+	table?: string,
+	connection?: any,
+	query?: string
 }

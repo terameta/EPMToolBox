@@ -227,6 +227,34 @@ class EnvironmentTools {
                 });
             });
         };
+        this.listFields = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.getEnvironmentDetails(refObj, true).
+                    then(this.getTypeDetails).
+                    then((innerObj) => {
+                    innerObj.database = refObj.database;
+                    innerObj.query = refObj.query;
+                    innerObj.table = refObj.table;
+                    if (!innerObj.typedetails) {
+                        return Promise.reject("No tpe definition on the environment object");
+                    }
+                    else if (!innerObj.typedetails.value) {
+                        return Promise.reject("No type value definition on the environment object");
+                    }
+                    else if (innerObj.typedetails.value === "MSSQL") {
+                        return this.mssqlTool.listFields(innerObj);
+                    }
+                    else if (innerObj.typedetails.value === "HP") {
+                        return this.hpTool.listFields(innerObj);
+                    }
+                    else {
+                        return Promise.reject("Undefined Environment Type");
+                    }
+                }).
+                    then(resolve).
+                    catch(reject);
+            });
+        };
         this.mssqlTool = new tools_mssql_1.MSSQLTools(tools);
         this.hpTool = new tools_hp_1.HPTools(tools);
         this.pbcsTool = new tools_pbcs_1.PBCSTools(tools);

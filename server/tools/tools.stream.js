@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const tools_environment_1 = require("./tools.environment");
 class StreamTools {
     constructor(db, tools) {
         this.db = db;
@@ -81,6 +82,45 @@ class StreamTools {
                 });
             });
         };
+        this.listFields = (id) => {
+            return new Promise((resolve, reject) => {
+                this.getOne(id).
+                    then(this.buildQuery).
+                    then((innerObj) => {
+                    return this.environmentTool.listFields({ id: innerObj.environment, query: innerObj.finalQuery, database: innerObj.dbName, table: innerObj.tableName });
+                }).
+                    then((result) => {
+                    result.forEach((curField, curKey) => {
+                        if (!curField.order) {
+                            curField.order = curKey + 1;
+                        }
+                    });
+                    resolve(result);
+                }).
+                    catch(reject);
+            });
+        };
+        this.buildQuery = (refObj) => {
+            return new Promise((resolve, reject) => {
+                if (refObj.tableName === "Custom Query") {
+                    refObj.finalQuery = refObj.customQuery;
+                    if (!refObj.finalQuery) {
+                        reject("No query is defined or malformed query");
+                    }
+                    else {
+                        if (refObj.finalQuery.substr(refObj.finalQuery.length - 1) === ";") {
+                            refObj.finalQuery = refObj.finalQuery.slice(0, -1);
+                        }
+                        resolve(refObj);
+                    }
+                }
+                else {
+                    refObj.finalQuery = "SELECT * FROM " + refObj.tableName;
+                    resolve(refObj);
+                }
+            });
+        };
+        this.environmentTool = new tools_environment_1.EnvironmentTools(this.db, this.tools);
     }
 }
 exports.StreamTools = StreamTools;

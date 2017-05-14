@@ -44,7 +44,10 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="streamDB" class="col-xs-2 control-label">Database Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="!curStreamEnvironmentType">Database Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='MSSQL'">Database Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='HP'">Application Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='PBCS'">Application Name:</label>
 							<div class="col-xs-10">
 								<div class="input-group">
 									<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="curStream.dbName" (change)="curStreamClean=false;">
@@ -67,24 +70,35 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="streamTable" class="col-xs-2 control-label">Table Name:</label>
-							<div class="col-xs-10">
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="!curStreamEnvironmentType">Table Name:</label>
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='MSSQL'">Table Name:</label>
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='HP'">Cube Name:</label>
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='PBCS'">Cube Name:</label>
+							<div class="col-xs-10" *ngIf="curStreamEnvironmentType == 'PBCS'">
+								<input type="text" class="form-control" id="streamTable" name="streamTable" [(ngModel)]="curStream.tableName">
+								<span class="help-block" *ngIf="!curStream.dbName">
+									<div class="well well-warning well-sm">
+											Please assign a database/application to be able to change the tablename.
+									</div>
+								</span>
+							</div>
+							<div class="col-xs-10" *ngIf="curStreamEnvironmentType != 'PBCS'">
 								<div class="input-group">
 									<select name="streamTable" id="streamTable" class="form-control" [(ngModel)]="curStream.tableName" (change)="curStreamClean=false;">
-								<option *ngFor="let selectableTable of tableList" [value]="selectableTable.name">{{selectableTable.name}} ({{selectableTable.type}})</option>
-							</select>
+										<option *ngFor="let selectableTable of tableList" [value]="selectableTable.name">{{selectableTable.name}} ({{selectableTable.type}})</option>
+									</select>
 									<span class="input-group-btn">
-								<button class="btn btn-default" type="button" [disabled]="!curStream.dbName" (click)="streamRefreshTables()">Refresh</button>
-							</span>
+										<button class="btn btn-default" type="button" [disabled]="!curStream.dbName" (click)="streamRefreshTables()">Refresh</button>
+									</span>
 								</div>
 								<span class="help-block" *ngIf="!curStream.dbName">
-							<div class="well well-warning well-sm">
-									Please assign a database to be able to change the tablename.
-							</div>
-						</span>
+									<div class="well well-warning well-sm">
+											Please assign a database to be able to change the tablename.
+									</div>
+								</span>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group" *ngIf="curStreamEnvironmentType == 'MSSQL'">
 							<label for="streamQuery" class="col-xs-2 control-label">Custom Query:</label>
 							<div class="col-xs-10">
 								<textarea name="streamQuery" id="streamQuery" rows="10" class="form-control" [(ngModel)]="curStream.customQuery" *ngIf="curStream.tableName == 'Custom Query'"></textarea>
@@ -100,6 +114,18 @@
 								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="streamDelete(curStream.id)"><i class="fa fa-trash fa-fw"></i> Delete Stream</button>
 							</div>
 						</div>
+						<!--<div class="form-group">
+							<pre>{{curStreamEnvironmentType|json}}</pre>
+						</div>
+						<div class="form-group">
+							<pre>{{curStream|json}}</pre>
+						</div>
+						<div class="form-group">
+							<pre>{{environmentList|json}}</pre>
+						</div>
+						<div class="form-group">
+							<pre>{{environmentTypeList|json}}</pre>
+						</div>-->
 					</fieldset>
 				</form>
 			</div>

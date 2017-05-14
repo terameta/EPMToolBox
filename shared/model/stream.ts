@@ -5,5 +5,6 @@ export interface Stream {
 	environment: number,
 	dbName?: string,
 	tableName?: string,
-	customQuery?: string
+	customQuery?: string,
+	finalQuery?: string
 }

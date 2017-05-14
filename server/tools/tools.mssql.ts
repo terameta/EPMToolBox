@@ -65,9 +65,66 @@ export class MSSQLTools {
 								delete curRecord.TABLE_NAME;
 								delete curRecord.TABLE_TYPE;
 							});
-							result.recordset.push({name: "Custom Query", type: "Custom Query"});
+							result.recordset.push({ name: "Custom Query", type: "Custom Query" });
 							// console.log(result.recordset);
 							resolve(result.recordset);
+						}
+					});
+				}).
+				catch(reject);
+		});
+	}
+	public listFields = (refObj: Environment) => {
+		return new Promise((resolve, reject) => {
+			this.connect(refObj).
+				then((innerObj: any) => {
+					const theQuery = "SELECT TOP 100 * FROM (" + refObj.query + ") T";
+					innerObj.connection.request().query(theQuery, (err: any, result: any) => {
+						if (err) {
+							reject(err);
+						} else if (result.recordset.length === 0) {
+							reject("No records received, can't process the fields");
+						} else {
+							let fieldArray: any[];
+							fieldArray = Object.keys(result.recordset[0]);
+
+							fieldArray.forEach((curField, curKey) => {
+								fieldArray[curKey] = { name: curField, isString: 0, isNumber: 0, isDate: 0 };
+							});
+							result.recordset.forEach((curTuple: any) => {
+								fieldArray.forEach((curField, curKey) => {
+									if (typeof curTuple[curField.name] === "string") {
+										fieldArray[curKey].isString++;
+									} else if (typeof curTuple[curField.name] === "number") {
+										fieldArray[curKey].isNumber++;
+									} else {
+										const curChecker = new Date(curTuple[curField.name]);
+										if (curChecker instanceof Date && !isNaN(curChecker.valueOf())) { fieldArray[curKey].isDate++; }
+									}
+								})
+							});
+
+							fieldArray.forEach(function (curField, curKey) {
+								fieldArray[curKey].type = "undefined";
+								let typemax = 0;
+								if (parseInt(fieldArray[curKey].isString, 10) > typemax) {
+									fieldArray[curKey].type = "string";
+									typemax = parseInt(fieldArray[curKey].isString, 10);
+								}
+								if (parseInt(fieldArray[curKey].isNumber, 10) > typemax) {
+									fieldArray[curKey].type = "number";
+									typemax = parseInt(fieldArray[curKey].isNumber, 10);
+								}
+								if (parseInt(fieldArray[curKey].isDate, 10) > typemax) {
+									fieldArray[curKey].type = "date";
+									typemax = parseInt(fieldArray[curKey].isDate, 10);
+								}
+								delete fieldArray[curKey].isString;
+								delete fieldArray[curKey].isNumber;
+								delete fieldArray[curKey].isDate;
+								fieldArray[curKey].order = curKey + 1;
+							});
+							resolve(fieldArray);
 						}
 					});
 				}).

@@ -23,6 +23,8 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	curStreamClean = true;
 	databaseList = [];
 	tableList = [];
+	environmentTypeList = [];
+	curStreamEnvironmentType;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -42,14 +44,6 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 		this.streamService.listTypes().subscribe(
 			(typeList) => {
 				this.streamTypeList = typeList;
-			}, (error) => {
-				this.toastr.error(error);
-			}
-		);
-		this.environmentService.getAll().subscribe(
-			(curEnvList) => {
-				this.environmentList = curEnvList;
-				this.environmentList.sort(this.sortByName);
 			}, (error) => {
 				this.toastr.error(error);
 			}
@@ -84,6 +78,31 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 					}
 					this.tableList.push({ name: "Custom Query", type: "Custom Query" });
 				}
+
+				this.environmentService.getAll().subscribe(
+					(curEnvList) => {
+						this.environmentList = curEnvList;
+						this.environmentList.sort(this.sortByName);
+						this.environmentService.listTypes().subscribe(
+							(curTypeList) => {
+								this.environmentTypeList = curTypeList;
+								this.environmentList.forEach((curEnv) => {
+									if (parseInt(curEnv.id, 10) === parseInt(this.curStream.environment, 10)) {
+										this.environmentTypeList.forEach((curType) => {
+											if (parseInt(curEnv.type, 10) === parseInt(curType.id, 10)) {
+												this.curStreamEnvironmentType = curType.value;
+											}
+										});
+									}
+								});
+							}, (error) => {
+								this.toastr.error(error);
+							}
+						);
+					}, (error) => {
+						this.toastr.error(error);
+					}
+				);
 			}, (error) => {
 				this.toastr.error(error);
 			}

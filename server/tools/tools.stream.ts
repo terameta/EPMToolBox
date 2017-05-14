@@ -2,9 +2,14 @@ import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
 import { Stream } from "../../shared/model/stream";
+import { EnvironmentTools } from "./tools.environment";
 
 export class StreamTools {
-	constructor(public db: IPool, public tools: MainTools) { }
+	environmentTool: EnvironmentTools;
+
+	constructor(public db: IPool, public tools: MainTools) {
+		this.environmentTool = new EnvironmentTools(this.db, this.tools);
+	}
 
 	public getAll = () => {
 		return new Promise((resolve, reject) => {
@@ -17,7 +22,6 @@ export class StreamTools {
 			});
 		});
 	}
-
 	public create = () => {
 		const newStream = { name: "New Stream (Please change name)", type: 0, environment: 0 };
 		return new Promise((resolve, reject) => {
@@ -30,21 +34,19 @@ export class StreamTools {
 			});
 		});
 	};
-
 	public getOne = (id: number) => {
 		return new Promise((resolve, reject) => {
 			this.db.query("SELECT * FROM streams WHERE id = ?", id, (err, rows, fields) => {
 				if (err) {
 					reject({ error: err, message: "Retrieving stream with id " + id + " has failed" });
 				} else if (rows.length !== 1) {
-					reject({ error: "Wrong number of records", message: "Wrong number of records for stream received from the server, 1 expected"});
+					reject({ error: "Wrong number of records", message: "Wrong number of records for stream received from the server, 1 expected" });
 				} else {
 					resolve(rows[0]);
 				}
 			});
 		});
 	}
-
 	public listTypes = () => {
 		return new Promise((resolve, reject) => {
 			this.db.query("SELECT * FROM streamtypes", function (err, rows, fields) {
@@ -56,7 +58,6 @@ export class StreamTools {
 			});
 		});
 	};
-
 	public update = (theStream: Stream) => {
 		return new Promise((resolve, reject) => {
 			const theID: number = theStream.id;
@@ -78,6 +79,38 @@ export class StreamTools {
 					resolve({ id: id });
 				}
 			});
+		});
+	}
+	public listFields = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.getOne(id).
+				then(this.buildQuery).
+				then((innerObj: Stream) => {
+					return this.environmentTool.listFields({ id: innerObj.environment, query: innerObj.finalQuery, database: innerObj.dbName, table: innerObj.tableName });
+				}).
+				then((result: any) => {
+					result.forEach((curField: any, curKey: any) => {
+						if (!curField.order) { curField.order = curKey + 1; }
+					});
+					resolve(result);
+				}).
+				catch(reject);
+		});
+	}
+	private buildQuery = (refObj: Stream) => {
+		return new Promise((resolve, reject) => {
+			if (refObj.tableName === "Custom Query") {
+				refObj.finalQuery = refObj.customQuery;
+				if (!refObj.finalQuery) {
+					reject("No query is defined or malformed query");
+				} else {
+					if (refObj.finalQuery.substr(refObj.finalQuery.length - 1) === ";") { refObj.finalQuery = refObj.finalQuery.slice(0, -1); }
+					resolve(refObj);
+				}
+			} else {
+				refObj.finalQuery = "SELECT * FROM " + refObj.tableName;
+				resolve(refObj);
+			}
 		});
 	}
 }

@@ -224,4 +224,29 @@ export class EnvironmentTools {
 		});
 	}
 
+	public listFields = (refObj: Environment) => {
+		return new Promise((resolve, reject) => {
+			this.getEnvironmentDetails(refObj, true).
+				then(this.getTypeDetails).
+				then((innerObj: Environment) => {
+					innerObj.database = refObj.database;
+					innerObj.query = refObj.query;
+					innerObj.table = refObj.table;
+					if (!innerObj.typedetails) {
+						return Promise.reject("No tpe definition on the environment object");
+					} else if (!innerObj.typedetails.value) {
+						return Promise.reject("No type value definition on the environment object");
+					} else if (innerObj.typedetails.value === "MSSQL") {
+						return this.mssqlTool.listFields(innerObj);
+					} else if (innerObj.typedetails.value === "HP") {
+						return this.hpTool.listFields(innerObj);
+					} else {
+						return Promise.reject("Undefined Environment Type");
+					}
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	}
+
 }

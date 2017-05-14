@@ -10,6 +10,7 @@ class ApiStream {
         this.tools = tools;
         this.setRoutes = () => {
             this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.stream.listTypes, null, req, res); });
+            this.apiRoutes.get("/listFields/:id", (req, res) => { this.rester.respond(this.stream.listFields, req.params.id, req, res); });
         };
         this.stream = new tools_stream_1.StreamTools(this.db, this.tools);
         this.apiRoutes = express_1.Router();
