@@ -79,6 +79,97 @@ class PBCSTools {
                 });
             });
         };
+        this.listApplications = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.pbcsGetApplications(refObj).
+                    then((innerObj) => {
+                    resolve(innerObj.apps);
+                }).
+                    catch(reject);
+            });
+        };
+        this.pbcsGetApplications = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.initiateRest(refObj).
+                    then((innerObj) => {
+                    request.get({
+                        url: innerObj.resturl + "/applications",
+                        auth: {
+                            user: innerObj.username,
+                            pass: innerObj.password,
+                            sendImmediately: true
+                        },
+                        headers: { "Content-Type": "application/json" }
+                    }, (err, response, body) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        else {
+                            this.tools.parseJsonString(body).
+                                then((result) => {
+                                if (!result) {
+                                    reject("No response received at pbcsGetApplications");
+                                }
+                                else if (!result.items) {
+                                    reject("No items received at pbcsGetApplications");
+                                }
+                                else {
+                                    innerObj.apps = [];
+                                    result.items.forEach((curItem) => {
+                                        if (innerObj.apps) {
+                                            innerObj.apps.push({ name: curItem.name });
+                                        }
+                                    });
+                                    console.log(result);
+                                    resolve(innerObj);
+                                }
+                            }).
+                                catch(reject);
+                        }
+                    });
+                }).
+                    catch(reject);
+            });
+        };
+        this.listCubes = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.pbcsGetCubes(refObj).
+                    then((innerObj) => {
+                    reject("Not yet");
+                }).
+                    catch(reject);
+            });
+        };
+        this.pbcsGetCubes = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.initiateRest(refObj).
+                    then((innerObj) => {
+                    request.get({
+                        url: innerObj.resturl + "/applications/" + innerObj.database + "/",
+                        auth: {
+                            user: innerObj.username,
+                            pass: innerObj.password,
+                            sendImmediately: true
+                        },
+                        headers: { "Content-Type": "application/json" }
+                    }, (err, response, body) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        else {
+                            console.log(response);
+                            this.tools.parseJsonString(body).
+                                then((result) => {
+                                console.log(result);
+                                reject("Hdere");
+                            }).
+                                catch(reject);
+                        }
+                    });
+                }).
+                    catch(reject);
+            });
+        };
         this.xmlParser = xml2js.parseString;
     }
 }

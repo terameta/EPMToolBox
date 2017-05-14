@@ -80,4 +80,89 @@ export class PBCSTools {
 			});
 		});
 	}
+	public listApplications = (refObj: EnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			this.pbcsGetApplications(refObj).
+				then((innerObj: EnvironmentPBCS) => {
+					resolve(innerObj.apps);
+				}).
+				catch(reject);
+		});
+	}
+	private pbcsGetApplications = (refObj: EnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			this.initiateRest(refObj).
+				then((innerObj: EnvironmentPBCS) => {
+					request.get({
+						url: innerObj.resturl + "/applications",
+						auth: {
+							user: innerObj.username,
+							pass: innerObj.password,
+							sendImmediately: true
+						},
+						headers: { "Content-Type": "application/json" }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							this.tools.parseJsonString(body).
+								then((result: any) => {
+									if (!result) {
+										reject("No response received at pbcsGetApplications");
+									} else if (!result.items) {
+										reject("No items received at pbcsGetApplications");
+									} else {
+										innerObj.apps = [];
+										result.items.forEach((curItem: any) => {
+											if (innerObj.apps) { innerObj.apps.push({ name: curItem.name }); }
+										});
+										console.log(result);
+										resolve(innerObj);
+									}
+								}).
+								catch(reject);
+						}
+					});
+				}).
+				catch(reject);
+		});
+	}
+	public listCubes = (refObj: EnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			this.pbcsGetCubes(refObj).
+				then((innerObj: EnvironmentPBCS) => {
+					reject("Not yet");
+				}).
+				catch(reject);
+		});
+	}
+	private pbcsGetCubes = (refObj: EnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			this.initiateRest(refObj).
+				then((innerObj: EnvironmentPBCS) => {
+					request.get({
+						url: innerObj.resturl + "/applications/" + innerObj.database + "/",
+						auth: {
+							user: innerObj.username,
+							pass: innerObj.password,
+							sendImmediately: true
+						},
+						headers: { "Content-Type": "application/json" }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							console.log(response);
+							this.tools.parseJsonString(body).
+								then((result: any) => {
+									console.log(result);
+									reject("Hdere");
+								}).
+								catch(reject);
+						}
+					});
+				}).
+				catch(reject);
+		});
+	}
 }

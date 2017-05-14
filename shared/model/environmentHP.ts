@@ -6,5 +6,8 @@ export interface EnvironmentHP extends Environment{
 	planningurl?: string,
 	sID?: string,
 	sso?: string,
-	products?: any[]
+	products?: any[],
+	server?: string,
+	apps?: any[],
+	cubes?: any[]
 }
