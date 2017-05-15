@@ -27,6 +27,15 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	curStreamEnvironmentType;
 	sourcedFields: any[] = undefined;
 	assignedFields: any[] = undefined;
+	pbcsFieldTypes = [
+		"Accounts",
+		"Entity",
+		"Generic",
+		"Scenario",
+		"Time",
+		"Year",
+		"Version"
+	];
 
 	constructor(
 		private route: ActivatedRoute,
@@ -250,5 +259,24 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 				console.error(error);
 			}
 		);
+	}
+	streamInitiateFieldsPBCS = () => {
+		this.sourcedFields = [
+			{ "name": "Account", "type": "Accounts", "order": 1 },
+			{ "name": "Period", "type": "Time", "order": 2 },
+			{ "name": "Year", "type": "Year", "order": 3 },
+			{ "name": "Scenario", "type": "Scenario", "order": 4 },
+			{ "name": "Version", "type": "Version", "order": 5 },
+			{ "name": "Entity", "type": "Entity", "order": 6 }
+		];
+	}
+	streamSourcedFieldRemove = (curIndex) => {
+		this.sourcedFields.splice(curIndex, 1);
+		this.sourcedFields.forEach((curField, curKey) => {
+			curField.order = curKey + 1;
+		});
+	}
+	streamSourcedFieldAdd = () => {
+		this.sourcedFields.push({ name: "", type: "", order: this.sourcedFields.length + 1 });
 	}
 }
