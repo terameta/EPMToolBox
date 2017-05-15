@@ -93,4 +93,42 @@ export class DimeStreamService {
 			return Observable.throw("Listing the stream fields has failed");
 		});
 	};
+	assignFields = (theStream) => {
+		const headers = new Headers({ "Content-Type": "application/json" });
+		return this.authHttp.post("/api/stream/assignFields/" + theStream.id, theStream.fields, { headers: headers }).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			console.log("Erred", theStream);
+			return Observable.throw("Assigning fields has failed: " + error.json().message);
+		});
+	}
+	retrieveFields = (id: number) => {
+		return this.authHttp.get("/api/stream/retrieveFields/" + id).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			console.log("Erred", id);
+			return Observable.throw("Retrieving fields has failed: " + id);
+		});
+	}
+	clearFields = (id: number) => {
+		return this.authHttp.get("/api/stream/clearFields/" + id).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			console.log("Erred", id);
+			return Observable.throw("Clearing fields has failed: " + id);
+		});
+	}
+	saveFields = (refObj: any) => {
+		const headers = new Headers({ "Content-Type": "application/json" });
+		return this.authHttp.post("/api/stream/saveFields", refObj, {headers: headers}).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			console.log("Erred", refObj);
+			return Observable.throw("Assigning fields has failed: " + error.json().message);
+		});
+	}
 }

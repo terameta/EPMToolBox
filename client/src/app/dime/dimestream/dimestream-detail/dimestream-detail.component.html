@@ -6,7 +6,7 @@
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#streamtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
 			<li><a href="#streamtabfields" data-toggle="tab">Fields</a></li>
-			<li><a href="#streamtabfielddescriptiontables" data-toggle="tab">Field Description Tables</a></li>
+			<li><a href="#streamtabfielddescriptiontables" data-toggle="tab" *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Field Description Tables</a></li>
 		</ul>
 	</div>
 	<div class="box-body">
@@ -130,13 +130,172 @@
 				</form>
 			</div>
 			<div class="tab-pane fade" id="streamtabfields">
-				<button *ngIf="!curStream.assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamGetFields(curStream.id)">Refresh Fields from Server</button>
-				<button *ngIf="curStream.sourcedFields" type="button" class="btn btn-default btn-xs" ng-click="streamAssignFields(stream)">Assign Fields</button>
-				<button *ngIf="curStream.assignedFields" type="button" class="btn btn-default btn-xs" ng-click="streamFieldsStartOver(stream)">Start Over</button>
-				<button *ngIf="curStream.assignedFields" type="button" class="btn btn-default btn-xs" ng-click="streamFieldsSaveChanges(stream)"><i class="fa fa-save fa-fw"></i> Save Changes</button>
-				<hr *ngIf="curStream.sourcedFields  || curStream.assignedFields">
-				<div *ngIf="curStream.sourcedFields && !curStream.assignedFields"> ng-include="'/etools/stream/streamsExpandedFieldsSourced.html'"</div>
-				<div *ngIf="curStream.assignedFields">streamsExpandedFieldsAssigned.html</div>
+				<button *ngIf="!assignedFields && curStreamEnvironmentType != 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamGetFields(curStream.id)">Refresh Fields from Server</button>
+				<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamGetFields(curStream.id)">Start</button>
+				<button *ngIf="sourcedFields" type="button" class="btn btn-default btn-xs" (click)="streamAssignFields()">Assign Fields</button>
+				<button *ngIf="assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamFieldsStartOver(curStream)">Start Over</button>
+				<button *ngIf="assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamFieldsSaveChanges()"><i class="fa fa-save fa-fw"></i> Save Changes</button>
+				<hr *ngIf="sourcedFields  || assignedFields">
+				<div *ngIf="sourcedFields && !assignedFields && curStreamEnvironmentType != 'PBCS'">
+					<!--<pre>{{curStream.sourcedFields| json}}</pre>-->
+					<table class="table table-striped table-bordered table-hover table-condensed">
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Should Ignore?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Assign Properties</th>
+							<th>Actions</th>
+						</tr>
+						<!--<tr ng-repeat="curField in curStream.sourcedFields">-->
+						<tr *ngFor="let curField of sourcedFields;let i = index;let last=last;let first=first">
+							<td>{{curField.name}}</td>
+							<td>{{curField.type}}</td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b># of Digits:</b></span>
+									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.precision" min="1" max="65">
+									<span class="input-group-addon">(Min: 1, Max: 65)</span>
+									<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.decimals" min="0" max="{{curField.precision -1 || 0}}">
+									<span class="input-group-addon">(Min: 0, Max: {{curField.precision -1 || 0}})</span>
+								</div>
+								<div class="input-group" *ngIf="curField.type=='string' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b># of Chars:</b></span>
+									<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.characters">
+									<span class="input-group-addon">(Max: 1024)</span>
+								</div>
+								<div class="input-group" *ngIf="curField.type=='date' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b>Format:</b></span>
+									<input type="text" class="form-control" [(ngModel)]="curField.dateFormat" placeholder="YYYY-MM-DD HH:mm">
+									<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
+								</div>
+							</td>
+							<td>
+								<div class="btn-group btn-group-xs" role="group">
+									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="streamFieldMove(sourcedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="streamFieldMove(sourcedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
+								</div>
+							</td>
+
+						</tr>
+					</table>
+				</div>
+				<div *ngIf="sourcedFields && !assignedFields && curStreamEnvironmentType == 'PBCS'">
+					<!--<pre>{{curStream.sourcedFields| json}}</pre>-->
+					<table class="table table-striped table-bordered table-hover table-condensed">
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Should Ignore?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Assign Properties</th>
+							<th>Actions</th>
+						</tr>
+						<!--<tr ng-repeat="curField in curStream.sourcedFields">-->
+						<tr *ngFor="let curField of sourcedFields;let i = index;let last=last;let first=first">
+							<td>{{curField.name}}</td>
+							<td>{{curField.type}}</td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b># of Digits:</b></span>
+									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.precision" min="1" max="65">
+									<span class="input-group-addon">(Min: 1, Max: 65)</span>
+									<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.decimals" min="0" max="{{curField.precision -1 || 0}}">
+									<span class="input-group-addon">(Min: 0, Max: {{curField.precision -1 || 0}})</span>
+								</div>
+								<div class="input-group" *ngIf="curField.type=='string' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b># of Chars:</b></span>
+									<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.characters">
+									<span class="input-group-addon">(Max: 1024)</span>
+								</div>
+								<div class="input-group" *ngIf="curField.type=='date' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b>Format:</b></span>
+									<input type="text" class="form-control" [(ngModel)]="curField.dateFormat" placeholder="YYYY-MM-DD HH:mm">
+									<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
+								</div>
+							</td>
+							<td>
+								<div class="btn-group btn-group-xs" role="group">
+									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="streamFieldMove(sourcedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="streamFieldMove(sourcedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
+								</div>
+							</td>
+
+						</tr>
+					</table>
+				</div>
+				<div *ngIf="assignedFields">
+					<!--<pre>{{assignedFields|json}}</pre>-->
+					<table class="table table-striped table-bordered table-hover table-condensed">
+						<tr>
+							<th>Name</th>
+							<th>Type</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Should Ignore?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Described?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Filter?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Cross Tab?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Month?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Data?</th>
+							<th *ngIf="curStreamEnvironmentType == 'PBCS' || curStreamEnvironmentType == 'HP'">Should Ignore for Crosstab?</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Aggregate Function</th>
+							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Assign Properties</th>
+							<th>Actions</th>
+						</tr>
+						<tr *ngFor="let curField of assignedFields;let i = index;let last=last;let first=first">
+							<td>
+								{{curField.name}}<br>
+								<!--<pre>{{curField|json}}</pre>-->
+							</td>
+							<td>{{curField.type}}</td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isDescribed" ngTrueValue="1" ng-false-value="0"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isFilter" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isMonth" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isData" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="curStreamEnvironmentType == 'PBCS' || curStreamEnvironmentType == 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+								<select *ngIf="curField.isData == 1" [(ngModel)]="curField.aggregateFunction">
+									<option value="">NONE</option>
+									<option value="SUM">SUM</option>
+									<option value="AVG">AVG</option>
+									<option value="COUNT">COUNT</option>
+									<option value="MAX">MAX</option>
+									<option value="MIN">MIN</option>
+								</select>
+							</td>
+							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b># of Digits:</b></span>
+									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.fPrecision" min="1" max="65">
+									<span class="input-group-addon">(Min: 1, Max: 65)</span>
+									<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.fDecimals" min="0" max="{{curField.fPrecision -1 || 0}}">
+									<span class="input-group-addon">(Min: 0, Max: {{curField.fPrecision -1 || 0}})</span>
+								</div>
+								<div class="input-group" *ngIf="curField.type=='string' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b># of Chars:</b></span>
+									<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.fCharacters">
+									<span class="input-group-addon">(Max: 1024)</span>
+								</div>
+								<div class="input-group" *ngIf="curField.type=='date' && !curField.shouldIgnore">
+									<span class="input-group-addon"><b>Format:</b></span>
+									<input type="text" class="form-control" [(ngModel)]="curField.fDateFormat" placeholder="YYYY-MM-DD HH:mm">
+									<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
+								</div>
+							</td>
+							<td>
+								<div class="btn-group btn-group-xs" role="group">
+									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="streamFieldMove(assignedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="streamFieldMove(assignedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
+								</div>
+							</td>
+
+						</tr>
+					</table>
+				</div>
 			</div>
 			<div class="tab-pane fade" id="streamtabfielddescriptiontables">Default 3</div>
 		</div>

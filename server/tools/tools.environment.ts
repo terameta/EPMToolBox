@@ -239,7 +239,7 @@ export class EnvironmentTools {
 					} else if (innerObj.typedetails.value === "MSSQL") {
 						return this.mssqlTool.listFields(innerObj);
 					} else if (innerObj.typedetails.value === "HP") {
-						return this.hpTool.listFields(innerObj);
+						return this.hpTool.listDimensions(innerObj);
 					} else {
 						return Promise.reject("Undefined Environment Type");
 					}

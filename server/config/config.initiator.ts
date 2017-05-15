@@ -10,6 +10,7 @@ interface TableDefiner {
 }
 
 let db: IPool;
+let configuration: any;
 const tableList: Array<TableDefiner> = [];
 
 tableList.push({
@@ -218,8 +219,9 @@ tableList.push({
 	primaryKey: "id"
 });
 
-export function initiateInitiator(refDB: IPool, configuration: any) {
+export function initiateInitiator(refDB: IPool, refConf: any) {
 	db = refDB;
+	configuration = refConf;
 	console.log("===============================================");
 	console.log("===============================================");
 	console.log("=== Initiator is now starting =================");
@@ -343,12 +345,26 @@ interface ModificationDefiner {
 	type: string;
 	tableName: string;
 	columnName?: string;
+	columnType?: string;
 	newColWidth?: number;
+	afterCol?: string;
+	isFirst?: boolean;
+	isNullable?: boolean;
+	defaultValue?: any;
 }
 
 const modificationList: Array<ModificationDefiner> = [];
 
-modificationList.push({ type: "alterVarCharColWidth", tableName: "environments", columnName: "password", newColWidth: 4096 })
+modificationList.push({ type: "alterVarCharColWidth", tableName: "environments", columnName: "password", newColWidth: 4096 });
+modificationList.push({
+	type: "addNewColumn",
+	tableName: "streamfields",
+	columnName: "shouldIgnore",
+	columnType: "TINYINT",
+	afterCol: "fOrder",
+	isNullable: true,
+	defaultValue: 0
+});
 
 function modifyTables() {
 	return new Promise((resolve, reject) => {
@@ -363,6 +379,35 @@ function modifyTables() {
 						if (err) { console.log("!!! Error:", err); }
 					}
 				);
+			} else if (curMod.type === "addNewColumn") {
+				console.log("=== Adding Column " + curMod.columnName + " to Table " + curMod.tableName);
+				let curQuery: string;
+				curQuery = "ALTER TABLE `" + curMod.tableName + "` ";
+				curQuery += "ADD COLUMN `" + curMod.columnName + "` ";
+				curQuery += curMod.columnType + " ";
+				if (curMod.isNullable) { curQuery += "NULL "; }
+				if (!curMod.isNullable) { curQuery += "NOT NULL "; }
+				if (curMod.defaultValue !== undefined) { curQuery += "DEFAULT '" + curMod.defaultValue + "' "; }
+				if (curMod.isFirst) { curQuery += "FIRST "; }
+				if (curMod.afterCol) { curQuery += "AFTER `" + curMod.afterCol + "` "; }
+
+				db.query("DESCRIBE " + curMod.tableName, (err, results, fields) => {
+					if (err) {
+						console.log("!!! Error:", err);
+					} else {
+						let doesExist = false;
+						results.forEach((curField: any) => {
+							if (curField.Field === curMod.columnName) { doesExist = true; }
+						});
+						if (!doesExist) {
+							db.query(curQuery, (cerr, cresults, cfields) => {
+								if (cerr) {
+									console.log("!!! Error:", cerr);
+								}
+							});
+						}
+					}
+				});
 			}
 		});
 	});

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const bcrypt = require("bcrypt");
 let db;
+let configuration;
 const tableList = [];
 tableList.push({
     name: "users",
@@ -208,8 +209,9 @@ tableList.push({
         "allowedips VARCHAR(4096)"],
     primaryKey: "id"
 });
-function initiateInitiator(refDB, configuration) {
+function initiateInitiator(refDB, refConf) {
     db = refDB;
+    configuration = refConf;
     console.log("===============================================");
     console.log("===============================================");
     console.log("=== Initiator is now starting =================");
@@ -334,6 +336,15 @@ function populateTablesAction(curTable) {
 }
 const modificationList = [];
 modificationList.push({ type: "alterVarCharColWidth", tableName: "environments", columnName: "password", newColWidth: 4096 });
+modificationList.push({
+    type: "addNewColumn",
+    tableName: "streamfields",
+    columnName: "shouldIgnore",
+    columnType: "TINYINT",
+    afterCol: "fOrder",
+    isNullable: true,
+    defaultValue: 0
+});
 function modifyTables() {
     return new Promise((resolve, reject) => {
         console.log("===============================================");
@@ -344,6 +355,48 @@ function modifyTables() {
                 db.query("ALTER TABLE " + curMod.tableName + " MODIFY " + curMod.columnName + " VARCHAR(" + curMod.newColWidth + ");", (err, results, fields) => {
                     if (err) {
                         console.log("!!! Error:", err);
+                    }
+                });
+            }
+            else if (curMod.type === "addNewColumn") {
+                console.log("=== Adding Column " + curMod.columnName + " to Table " + curMod.tableName);
+                let curQuery;
+                curQuery = "ALTER TABLE `" + curMod.tableName + "` ";
+                curQuery += "ADD COLUMN `" + curMod.columnName + "` ";
+                curQuery += curMod.columnType + " ";
+                if (curMod.isNullable) {
+                    curQuery += "NULL ";
+                }
+                if (!curMod.isNullable) {
+                    curQuery += "NOT NULL ";
+                }
+                if (curMod.defaultValue !== undefined) {
+                    curQuery += "DEFAULT '" + curMod.defaultValue + "' ";
+                }
+                if (curMod.isFirst) {
+                    curQuery += "FIRST ";
+                }
+                if (curMod.afterCol) {
+                    curQuery += "AFTER `" + curMod.afterCol + "` ";
+                }
+                db.query("DESCRIBE " + curMod.tableName, (err, results, fields) => {
+                    if (err) {
+                        console.log("!!! Error:", err);
+                    }
+                    else {
+                        let doesExist = false;
+                        results.forEach((curField) => {
+                            if (curField.Field === curMod.columnName) {
+                                doesExist = true;
+                            }
+                        });
+                        if (!doesExist) {
+                            db.query(curQuery, (cerr, cresults, cfields) => {
+                                if (cerr) {
+                                    console.log("!!! Error:", cerr);
+                                }
+                            });
+                        }
                     }
                 });
             }

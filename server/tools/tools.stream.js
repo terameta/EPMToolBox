@@ -120,6 +120,153 @@ class StreamTools {
                 }
             });
         };
+        this.assignFields = (refObj) => {
+            return new Promise((resolve, reject) => {
+                if (!refObj) {
+                    reject("No data is provided");
+                }
+                else if (!refObj.id) {
+                    reject("No stream id is provided");
+                }
+                else if (!refObj.fields) {
+                    reject("No field list is provided");
+                }
+                else if (!Array.isArray(refObj.fields)) {
+                    reject("Field list is not valid");
+                }
+                else {
+                    this.clearFields(refObj).
+                        then((innerObj) => {
+                        let toInsert;
+                        let promises;
+                        promises = [];
+                        innerObj.fields.forEach((curField) => {
+                            toInsert = {};
+                            toInsert.stream = innerObj.id;
+                            toInsert.name = curField.name;
+                            toInsert.type = curField.type;
+                            toInsert.fOrder = curField.order;
+                            toInsert.shouldIgnore = curField.shouldIgnore;
+                            if (toInsert.shouldIgnore === undefined) {
+                                toInsert.shouldIgnore = 0;
+                            }
+                            if (curField.precision !== undefined) {
+                                toInsert.fPrecision = parseInt(curField.precision, 10);
+                            }
+                            if (curField.decimals !== undefined) {
+                                toInsert.fDecimals = parseInt(curField.decimals, 10);
+                            }
+                            if (curField.characters !== undefined) {
+                                toInsert.fCharacters = parseInt(curField.characters, 10);
+                            }
+                            if (curField.dateFormat !== undefined) {
+                                toInsert.fDateFormat = curField.dateFormat;
+                            }
+                            if (toInsert.type === "string" && toInsert.fCharacters === undefined) {
+                                toInsert.fCharacters = 1024;
+                            }
+                            if (toInsert.type === "number" && toInsert.fPrecision === undefined) {
+                                toInsert.fPrecision = 28;
+                            }
+                            if (toInsert.type === "number" && toInsert.fDecimals === undefined) {
+                                toInsert.fDecimals = 8;
+                            }
+                            if (toInsert.type === "number" && toInsert.fPrecision <= toInsert.fDecimals) {
+                                toInsert.fDecimals = toInsert.fPrecision - 1;
+                            }
+                            if (toInsert.type === "number" && toInsert.fDecimals < 0) {
+                                toInsert.fDecimals = 0;
+                            }
+                            if (toInsert.type === "date" && toInsert.fDateFormat === undefined) {
+                                toInsert.fDateFormat = "YYYY-MM-DD";
+                            }
+                            promises.push(this.assignField(toInsert));
+                        });
+                        return Promise.all(promises);
+                    }).
+                        then((result) => {
+                        resolve({ result: "OK" });
+                    }).
+                        catch(reject);
+                }
+            });
+        };
+        this.assignField = (fieldDefinition) => {
+            return new Promise((resolve, reject) => {
+                this.db.query("INSERT INTO streamfields SET ?", fieldDefinition, (err, rows, fields) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            });
+        };
+        this.clearFields = (refObj) => {
+            return new Promise((resolve, reject) => {
+                this.db.query("DELETE FROM streamfields WHERE stream = ?", refObj.id, (err, rows, fields) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(refObj);
+                    }
+                });
+            });
+        };
+        this.retrieveFields = (id) => {
+            return new Promise((resolve, reject) => {
+                this.db.query("SELECT * FROM streamfields WHERE stream = ? ORDER BY fOrder", id, (err, rows, fields) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(rows);
+                    }
+                });
+            });
+        };
+        this.saveFields = (refObj) => {
+            return new Promise((resolve, reject) => {
+                if (!refObj) {
+                    reject("No data is provided");
+                }
+                else if (!refObj.id) {
+                    reject("No stream id is provided");
+                }
+                else if (!refObj.fields) {
+                    reject("No field list is provided");
+                }
+                else if (!Array.isArray(refObj.fields)) {
+                    reject("Field list is not valid");
+                }
+                else {
+                    let promises;
+                    promises = [];
+                    refObj.fields.forEach((curField) => {
+                        promises.push(this.saveField(curField));
+                    });
+                    Promise.all(promises).
+                        then((result) => {
+                        resolve({ result: "OK" });
+                    }).
+                        catch(reject);
+                }
+            });
+        };
+        this.saveField = (fieldDefinition) => {
+            return new Promise((resolve, reject) => {
+                this.db.query("UPDATE streamfields SET ? WHERE id = " + fieldDefinition.id, fieldDefinition, (err, rows, fields) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            });
+        };
         this.environmentTool = new tools_environment_1.EnvironmentTools(this.db, this.tools);
     }
 }

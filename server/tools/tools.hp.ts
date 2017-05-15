@@ -401,4 +401,71 @@ export class HPTools {
 				catch();
 		});
 	};
+	public listDimensions = (refObj: EnvironmentHP) => {
+		return new Promise((resolve, reject) => {
+			this.hpListDimensions(refObj).
+				then(resolve).
+				catch(reject);
+		});
+	}
+	// Old Step1000
+	private hpOpenCube = (refObj: EnvironmentHP) => {
+		return new Promise((resolve, reject) => {
+			this.hpListCubes(refObj).
+				then((innerObj: EnvironmentHP) => {
+					request.post({
+						url: innerObj.planningurl || "",
+						// tslint:disable-next-line:max-line-length
+						body: "<req_OpenCube><sID>" + innerObj.sID + "</sID><srv>" + innerObj.server + "</srv><app>" + innerObj.database + "</app><cube>" + innerObj.table + "</cube><type></type><url></url><form></form></req_OpenCube>",
+						headers: { "Content-Type": "application/xml" }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							this.xmlParser(body, (pErr: any, pResult: any) => {
+								if (pErr) {
+									reject(pErr);
+								} else if (!pResult) {
+									reject("No result at step hpOpenCube");
+								} else {
+									resolve(innerObj);
+								}
+							})
+						}
+					})
+				}).
+				catch(reject);
+		});
+	}
+	private hpListDimensions = (refObj: EnvironmentHP) => {
+		return new Promise((resolve, reject) => {
+			this.hpOpenCube(refObj).
+				then((innerObj: EnvironmentHP) => {
+					request.post({
+						url: innerObj.planningurl || "",
+						body: "<req_EnumDims><sID>" + innerObj.sID + "</sID><cube>" + innerObj.table + "</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>",
+						headers: { "Content-Type": "application/xml" }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							this.xmlParser(body, (pErr: any, pResult: any) => {
+								if (pErr) {
+									reject(pErr);
+								} else if (!pResult) {
+									reject("No result at step hpListDimensions");
+								} else {
+									let toResolve: any[]; toResolve = [];
+									pResult.res_EnumDims.dimList[0].dim.forEach((curDim: any) => {
+										toResolve.push(curDim.$);
+									});
+									resolve(toResolve);
+								}
+							});
+						}
+					})
+				}).
+				catch(reject);
+		});
+	}
 }

@@ -25,6 +25,8 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	tableList = [];
 	environmentTypeList = [];
 	curStreamEnvironmentType;
+	sourcedFields: any[] = undefined;
+	assignedFields: any[] = undefined;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -103,6 +105,7 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 						this.toastr.error(error);
 					}
 				);
+				this.streamRetrieveFields();
 			}, (error) => {
 				this.toastr.error(error);
 			}
@@ -143,7 +146,6 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 		this.environmentService.listTables(this.curStream.environment, this.curStream.dbName).subscribe(
 			(result) => {
 				this.toastr.info("Table list is updated");
-				console.log(result);
 				this.tableList = result;
 			}, (error) => {
 				this.toastr.error(error);
@@ -165,11 +167,88 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 		this.streamService.listFields(streamID).subscribe(
 			(result) => {
 				this.toastr.info("Stream fields are refreshed from the server");
-				this.curStream.sourcedFields = result;
+				this.sourcedFields = result;
+				this.sourcedFields.sort(this.streamFieldSortNumeric);
 			}, (error) => {
 				this.toastr.error(error);
 				console.error(error);
 			}
-		)
+		);
 	};
+	streamFieldMove = (theFieldList: any[], theField, direction) => {
+		const curOrder = theField.order || theField.fOrder || theField.pOrder;
+		const nextOrder = parseInt(curOrder, 10) + (direction === "down" ? 1 : -1);
+		theFieldList.forEach((curField) => {
+			if (parseInt(curField.order, 10) === nextOrder) { curField.order = curOrder; }
+			if (parseInt(curField.fOrder, 10) === nextOrder) { curField.fOrder = curOrder; }
+			if (parseInt(curField.pOrder, 10) === nextOrder) { curField.pOrder = curOrder; }
+		});
+		if (theField.order) { theField.order = nextOrder; }
+		if (theField.fOrder) { theField.fOrder = nextOrder; }
+		if (theField.pOrder) { theField.pOrder = nextOrder; }
+		theFieldList.sort(this.streamFieldSortNumeric);
+	}
+	streamFieldSortNumeric = (f1, f2): number => {
+		let fItem: string;
+		if (f1.order) { fItem = "order" };
+		if (f1.fOrder) { fItem = "fOrder" };
+		if (f1.pOrder) { fItem = "pOrder" };
+		if (parseInt(f1[fItem], 10) > parseInt(f2[fItem], 10)) {
+			return 1;
+		} else if (parseInt(f1[fItem], 10) < parseInt(f2[fItem], 10)) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+	streamAssignFields = () => {
+		this.streamService.assignFields({ id: this.curStream.id, fields: this.sourcedFields }).subscribe(
+			(result) => {
+				this.toastr.info("Stream fields are assigned.");
+				this.toastr.info("Refreshing the saved fields");
+				this.streamRetrieveFields();
+				this.sourcedFields = undefined;
+			}, (error) => {
+				this.toastr.error(error);
+				console.error(error);
+			}
+		);
+	}
+	streamRetrieveFields = () => {
+		this.streamService.retrieveFields(this.curStream.id).subscribe(
+			(result) => {
+				this.toastr.info("Stream fields are retrieved.");
+				if (result.length > 0) { this.assignedFields = result; }
+			}, (error) => {
+				this.toastr.error(error);
+				console.error(error);
+			}
+		);
+	}
+	streamFieldsStartOver = () => {
+		if (confirm("Are you sure to delete all the assigned fields?")) {
+			this.streamService.clearFields(this.curStream.id).subscribe(
+				(result) => {
+					this.toastr.info("Stream fields are cleared.");
+					this.assignedFields = undefined;
+					this.sourcedFields = undefined;
+				}, (error) => {
+					this.toastr.error(error);
+					console.error(error);
+				}
+			);
+		}
+	}
+	streamFieldsSaveChanges = () => {
+		this.streamService.saveFields({ id: this.curStream.id, fields: this.assignedFields }).subscribe(
+			(result) => {
+				this.toastr.info("Stream fields are saved.");
+				this.toastr.info("Refreshing field list");
+				this.streamRetrieveFields();
+			}, (error) => {
+				this.toastr.error(error);
+				console.error(error);
+			}
+		);
+	}
 }
