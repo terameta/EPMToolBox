@@ -37,7 +37,7 @@
     "@angular/cli": "1.0.3",
     "@angular/compiler-cli": "^4.1.2",
     "@types/jasmine": "2.5.47",
-    "@types/jquery": "^2.0.43",
+    "@types/jquery": "^2.0.44",
     "@types/node": "~7.0.18",
     "@types/tether": "^1.4.1",
     "codelyzer": "~3.0.1",
@@ -49,7 +49,7 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "protractor": "~5.1.1",
+    "protractor": "~5.1.2",
     "ts-node": "~3.0.4",
     "tslint": "~5.2.0",
     "typescript": "~2.3.2"

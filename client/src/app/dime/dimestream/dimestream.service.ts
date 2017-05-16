@@ -131,4 +131,15 @@ export class DimeStreamService {
 			return Observable.throw("Assigning fields has failed: " + error.json().message);
 		});
 	}
+	listFieldsforField(environmentID: number, field: any) {
+		const bodyToSend = { environmentID: environmentID, field: field };
+		const headers = new Headers({ "Content-Type": "application/json" });
+		return this.authHttp.post("/api/stream/listFieldsforField", bodyToSend, { headers: headers }).map((response: Response) => {
+			return response.json();
+		}).catch((error: Response) => {
+			console.log(error);
+			console.log("Erred", environmentID);
+			return Observable.throw("Listing description fields has failed: " + field.name);
+		});
+	}
 }

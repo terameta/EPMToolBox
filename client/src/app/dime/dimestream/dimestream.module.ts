@@ -10,6 +10,8 @@ import { DimeStreamService } from "./dimestream.service";
 import { DimestreamsComponent } from "./dimestreams/dimestreams.component";
 import { DimestreamToolbarComponent } from "./dimestream-toolbar/dimestream-toolbar.component";
 
+import { DescribedFieldFilter } from "./dimestream.describedfield.pipe";
+
 const dimeStreamRoutes: Routes = [
 	{ path: "dime/streams", pathMatch: "prefix", redirectTo: "dime/streams/stream-list" },
 	{ path: "stream-list", component: DimestreamListComponent },
@@ -34,7 +36,8 @@ const dimeStreamRoutes: Routes = [
 		DimestreamDetailComponent,
 		DimestreamComponent,
 		DimestreamsComponent,
-		DimestreamToolbarComponent
+		DimestreamToolbarComponent,
+		DescribedFieldFilter
 	]
 })
 export class DimestreamModule { }

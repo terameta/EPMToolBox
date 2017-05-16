@@ -74,6 +74,15 @@ export class MSSQLTools {
 				catch(reject);
 		});
 	}
+	private sortByName = (e1: any, e2: any) => {
+		if (e1.name > e2.name) {
+			return 1;
+		} else if (e1.name < e2.name) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
 	public listFields = (refObj: Environment) => {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
@@ -104,6 +113,7 @@ export class MSSQLTools {
 								})
 							});
 
+							fieldArray.sort(this.sortByName);
 							fieldArray.forEach(function (curField, curKey) {
 								fieldArray[curKey].type = "undefined";
 								let typemax = 0;

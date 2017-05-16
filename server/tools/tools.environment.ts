@@ -248,5 +248,4 @@ export class EnvironmentTools {
 				catch(reject);
 		});
 	}
-
 }

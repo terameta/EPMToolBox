@@ -100,6 +100,27 @@ class StreamTools {
                     catch(reject);
             });
         };
+        this.listFieldsforField = (refObj) => {
+            return new Promise((resolve, reject) => {
+                const toBuild = {
+                    tableName: refObj.field.descriptiveTable,
+                    customQuery: refObj.field.descriptiveQuery
+                };
+                this.buildQuery(toBuild).
+                    then((innerObj) => {
+                    return this.environmentTool.listFields({ id: refObj.environmentID, query: innerObj.finalQuery, database: refObj.field.descriptiveDB, table: refObj.field.descriptiveTable });
+                }).
+                    then((result) => {
+                    result.forEach((curField, curKey) => {
+                        if (!curField.order) {
+                            curField.order = curKey + 1;
+                        }
+                    });
+                    resolve(result);
+                }).
+                    catch(reject);
+            });
+        };
         this.buildQuery = (refObj) => {
             return new Promise((resolve, reject) => {
                 if (refObj.tableName === "Custom Query") {

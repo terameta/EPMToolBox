@@ -97,7 +97,26 @@ export class StreamTools {
 				catch(reject);
 		});
 	}
-	private buildQuery = (refObj: Stream) => {
+	public listFieldsforField = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			const toBuild: any = {
+				tableName: refObj.field.descriptiveTable,
+				customQuery: refObj.field.descriptiveQuery
+			};
+			this.buildQuery(toBuild).
+				then((innerObj: any) => {
+					return this.environmentTool.listFields({ id: refObj.environmentID, query: innerObj.finalQuery, database: refObj.field.descriptiveDB, table: refObj.field.descriptiveTable});
+				}).
+				then((result: any) => {
+					result.forEach((curField: any, curKey: any) => {
+						if (!curField.order) { curField.order = curKey + 1; }
+					});
+					resolve(result);
+				}).
+				catch(reject);
+		});
+	}
+	private buildQuery = (refObj: any) => {
 		return new Promise((resolve, reject) => {
 			if (refObj.tableName === "Custom Query") {
 				refObj.finalQuery = refObj.customQuery;
@@ -191,38 +210,6 @@ export class StreamTools {
 				if (err) {
 					reject(err);
 				} else {
-					// rows.forEach((curField: any) => {
-					// 	if (curField.isDescribed) {
-					// 		curField.descriptiveReferenceField = {
-					// 			name: curField.drfName,
-					// 			type: curField.drfType,
-					// 			fCharacters: curField.drfCharacters,
-					// 			fPrecision: curField.drfPrecision,
-					// 			fDecimials: curField.drfDecimals,
-					// 			fDateFormat: curField.drfDateFormat
-					// 		};
-					// 		delete curField.drfName;
-					// 		delete curField.drfType;
-					// 		delete curField.drfCharacters;
-					// 		delete curField.drfPrecision;
-					// 		delete curField.drfDecimals;
-					// 		delete curField.drfDateFormat;
-					// 		curField.descriptiveDescriptionField = {
-					// 			name: curField.ddfName,
-					// 			type: curField.ddfType,
-					// 			fCharacters: curField.ddfCharacters,
-					// 			fPrecision: curField.ddfPrecision,
-					// 			fDecimials: curField.ddfDecimals,
-					// 			fDateFormat: curField.ddfDateFormat
-					// 		};
-					// 		delete curField.ddfName;
-					// 		delete curField.ddfType;
-					// 		delete curField.ddfCharacters;
-					// 		delete curField.ddfPrecision;
-					// 		delete curField.ddfDecimals;
-					// 		delete curField.ddfDateFormat;
-					// 	}
-					// });
 					resolve(rows);
 				}
 			});

@@ -27,6 +27,8 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	curStreamEnvironmentType;
 	sourcedFields: any[] = undefined;
 	assignedFields: any[] = undefined;
+	descriptiveTables: any = {};
+	descriptiveFields: any = {};
 	pbcsFieldTypes = [
 		"Accounts",
 		"Entity",
@@ -227,7 +229,25 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 		this.streamService.retrieveFields(this.curStream.id).subscribe(
 			(result) => {
 				this.toastr.info("Stream fields are retrieved.");
-				if (result.length > 0) { this.assignedFields = result; }
+				if (result.length > 0) {
+					this.assignedFields = result;
+					this.assignedFields.forEach((curField) => {
+						if (curField.isDescribed && curField.descriptiveDB && curField.descriptiveTable) {
+							if (!this.descriptiveTables[curField.descriptiveDB]) {
+								this.descriptiveTables[curField.descriptiveDB] = [];
+							}
+							this.descriptiveTables[curField.descriptiveDB].push({ name: curField.descriptiveTable, type: "-" }, { name: "Custom Query", type: "-" });
+							if (!this.descriptiveFields[curField.descriptiveDB]) {
+								this.descriptiveFields[curField.descriptiveDB] = {};
+							}
+							if (!this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable]) {
+								this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable] = [];
+								if (curField.drfName) { this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable].push({ name: curField.drfName, type: curField.drfType }) };
+								if (curField.ddfName) { this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable].push({ name: curField.ddfName, type: curField.ddfType }) };
+							}
+						}
+					})
+				}
 			}, (error) => {
 				this.toastr.error(error);
 				console.error(error);
@@ -278,5 +298,41 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	}
 	streamSourcedFieldAdd = () => {
 		this.sourcedFields.push({ name: "", type: "", order: this.sourcedFields.length + 1 });
+	}
+	streamFieldRefreshTables = (field: any) => {
+		if (!field.descriptiveDB) {
+			this.toastr.error("Please assign a database to the field description before refreshing the table list");
+			return false;
+		}
+		this.environmentService.listTables(this.curStream.environment, field.descriptiveDB).subscribe(
+			(result) => {
+				this.toastr.info("Table list is updated");
+				this.descriptiveTables[field.descriptiveDB] = result;
+			}, (error) => {
+				this.toastr.error(error);
+			}
+		);
+	}
+	streamFieldGetFields = (field: any) => {
+		this.streamService.listFieldsforField(this.curStream.environment, field).subscribe(
+			(result) => {
+				this.toastr.info("Descriptive fields are refreshed from the server for " + field.name);
+				if (!this.descriptiveFields[field.descriptiveDB]) {
+					this.descriptiveFields[field.descriptiveDB] = {};
+				}
+				this.descriptiveFields[field.descriptiveDB][field.descriptiveTable] = result;
+				// this.sourcedFields = result;
+				// this.sourcedFields.sort(this.streamFieldSortNumeric);
+			}, (error) => {
+				this.toastr.error(error);
+				console.error(error);
+			}
+		);
+	};
+	setdrfType(field, event) {
+		field.drfType = this.descriptiveFields[field.descriptiveDB][field.descriptiveTable][event.target.selectedIndex].type;
+	}
+	setddfType(field, event) {
+		field.ddfType = this.descriptiveFields[field.descriptiveDB][field.descriptiveTable][event.target.selectedIndex].type;
 	}
 }
