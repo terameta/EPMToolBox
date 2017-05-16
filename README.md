@@ -52,12 +52,12 @@ The dev installation steps provide the information for this IDE.
 * Community: Oracle EPM
 
 ### Self Notes ###
-cd client && ng generate module dime/dimemap                                        (This will generate a module -> /src/app/dime/dimemap/dimemap.module.ts)
-cd client && ng generate service dime/dimemap/dimemap                               (This will generate a service -> /src/app/dime/dimemap/dimemap.service.ts)
-edit dimemap.service.ts and rename service from DimemapService to DimeMapService
-edit dimemap.module.ts add providers array and add "DimeMapService" to this array
-cd client && ng generate component dime/dimemap/dimemaps                            (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemaps.component.*)
-cd client && ng generate component dime/dimemap/dimemap-toolbar                     (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-toolbar.component.*)
-cd client && ng generate component dime/dimemap/dimemap-list                        (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-list.component.*)
-cd client && ng generate component dime/dimemap/dimemap-detail                      (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-detail.component.*)
-cd client && ng generate component dime/dimemap/dimemap                             (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap.component.*)
+* cd client && ng generate module dime/dimemap                                        (This will generate a module -> /src/app/dime/dimemap/dimemap.module.ts)
+* cd client && ng generate service dime/dimemap/dimemap                               (This will generate a service -> /src/app/dime/dimemap/dimemap.service.ts)
+* edit dimemap.service.ts and rename service from DimemapService to DimeMapService
+* edit dimemap.module.ts add providers array and add "DimeMapService" to this array
+* cd client && ng generate component dime/dimemap/dimemaps                            (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemaps.component.*)
+* cd client && ng generate component dime/dimemap/dimemap-toolbar                     (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-toolbar.component.*)
+* cd client && ng generate component dime/dimemap/dimemap-list                        (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-list.component.*)
+* cd client && ng generate component dime/dimemap/dimemap-detail                      (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-detail.component.*)
+* cd client && ng generate component dime/dimemap/dimemap                             (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap.component.*)
