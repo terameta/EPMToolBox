@@ -1,3 +1,4 @@
-<p>
-  dimemap-list works!
-</p>
+<ul>
+	<li *ngFor="let map of maps|async"><a [routerLink]="['/dime/maps/map-detail', map.id]">Go to {{map.name}}</a></li>
+	<li *ngIf="!maps"><a style="cursor: pointer;" (click)="create()">No maps are defined. Click here to create the first one.</a></li>
+</ul>

@@ -3,7 +3,7 @@ import { Application, Router } from "express";
 
 import { MainTools } from "../config/config.tools";
 import { Rester } from "../tools/tools.rester";
-import { StreamTools } from "../tools/tools.stream";
+import { StreamTools } from "../tools/tools.dime.stream";
 
 export class ApiStream {
 	apiRoutes: Router;
@@ -13,7 +13,7 @@ export class ApiStream {
 	constructor(public app: Application, public db: IPool, public tools: MainTools) {
 		this.stream = new StreamTools(this.db, this.tools);
 		this.apiRoutes = Router();
-		this.rester = new Rester(tools);
+		this.rester = new Rester(this.tools);
 
 		this.setRoutes();
 		this.rester.restify(this.apiRoutes, this.stream);

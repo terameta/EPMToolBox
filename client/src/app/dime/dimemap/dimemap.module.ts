@@ -29,7 +29,7 @@ const dimeMapRoutes: Routes = [
 		RouterModule
 	],
 	providers: [
-		DimeMapService
+		// DimeMapService
 	],
 	declarations: [
 		DimemapsComponent,

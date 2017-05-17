@@ -261,4 +261,4 @@ class EnvironmentTools {
     }
 }
 exports.EnvironmentTools = EnvironmentTools;
-//# sourceMappingURL=tools.environment.js.map
+//# sourceMappingURL=tools.dime.environment.js.map

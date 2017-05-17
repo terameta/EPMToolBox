@@ -10,8 +10,8 @@
 				<span class="caret"></span>
     		</button>
 			<ul class="dropdown-menu">
-				<li *ngFor="let map of mapList"><a [routerLink]="['/dime/maps/map-detail', map.id]">Go to {{map.name}}</a></li>
-				<li *ngIf="!mapList"><a style="cursor: pointer;" (click)="create()">No maps are defined. Click here to create the first one.</a></li>
+				<li *ngFor="let map of maps|async"><a [routerLink]="['/dime/maps/map-detail', map.id]">Go to {{map.name}}</a></li>
+				<li *ngIf="!maps"><a style="cursor: pointer;" (click)="create()">No maps are defined. Click here to create the first one.</a></li>
 			</ul>
 		</div>
 		<button type="button" class="btn btn-default btn-xs" title="New Map" (click)="create()"><i class="fa fa-plus fa-fw"></i> New</button>

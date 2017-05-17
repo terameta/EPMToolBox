@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const tools_rester_1 = require("../tools/tools.rester");
-const tools_stream_1 = require("../tools/tools.stream");
+const tools_dime_stream_1 = require("../tools/tools.dime.stream");
 class ApiStream {
     constructor(app, db, tools) {
         this.app = app;
@@ -17,13 +17,13 @@ class ApiStream {
             this.apiRoutes.post("/listFieldsforField/", (req, res) => { this.rester.respond(this.stream.listFieldsforField, req.body, req, res); });
             this.apiRoutes.post("/saveFields", (req, res) => { this.rester.respond(this.stream.saveFields, req.body, req, res); });
         };
-        this.stream = new tools_stream_1.StreamTools(this.db, this.tools);
+        this.stream = new tools_dime_stream_1.StreamTools(this.db, this.tools);
         this.apiRoutes = express_1.Router();
-        this.rester = new tools_rester_1.Rester(tools);
+        this.rester = new tools_rester_1.Rester(this.tools);
         this.setRoutes();
         this.rester.restify(this.apiRoutes, this.stream);
         this.app.use("/api/stream", this.apiRoutes);
     }
 }
 exports.ApiStream = ApiStream;
-//# sourceMappingURL=api.stream.js.map
+//# sourceMappingURL=api.dime.stream.js.map

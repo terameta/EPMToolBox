@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const tools_environment_1 = require("../tools/tools.environment");
+const tools_dime_environment_1 = require("../tools/tools.dime.environment");
 const tools_rester_1 = require("../tools/tools.rester");
 class ApiEnvironment {
     constructor(app, db, tools) {
         this.app = app;
         this.db = db;
         this.tools = tools;
-        this.environment = new tools_environment_1.EnvironmentTools(this.db, this.tools);
+        this.environment = new tools_dime_environment_1.EnvironmentTools(this.db, this.tools);
         this.apiRoutes = express.Router();
         this.rester = new tools_rester_1.Rester(tools);
         this.setRoutes();
@@ -23,4 +23,4 @@ class ApiEnvironment {
     }
 }
 exports.ApiEnvironment = ApiEnvironment;
-//# sourceMappingURL=api.environment.js.map
+//# sourceMappingURL=api.dime.environment.js.map

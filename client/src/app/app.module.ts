@@ -15,6 +15,9 @@ import { AuthService } from "./welcome/auth.service";
 import { AuthGuard } from "./welcome/auth-guard.service";
 import { AuthModule } from "./welcome/auth.module";
 
+// Services
+import { DimeMapService } from "./dime/dimemap/dimemap.service";
+
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
 	{ path: "", pathMatch: "full", redirectTo: "welcome" }
@@ -37,7 +40,8 @@ const appRoutes: Routes = [
 	],
 	providers: [
 		AuthGuard,
-		AuthService
+		AuthService,
+		DimeMapService
 	],
 	bootstrap: [AppComponent]
 })

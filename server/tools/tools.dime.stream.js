@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tools_environment_1 = require("./tools.environment");
+const tools_dime_environment_1 = require("./tools.dime.environment");
 class StreamTools {
     constructor(db, tools) {
         this.db = db;
@@ -288,8 +288,8 @@ class StreamTools {
                 });
             });
         };
-        this.environmentTool = new tools_environment_1.EnvironmentTools(this.db, this.tools);
+        this.environmentTool = new tools_dime_environment_1.EnvironmentTools(this.db, this.tools);
     }
 }
 exports.StreamTools = StreamTools;
-//# sourceMappingURL=tools.stream.js.map
+//# sourceMappingURL=tools.dime.stream.js.map

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function apiProcess(app, refDB, refTools) {
+function ApiProcess(app, refDB, refTools) {
     app.route("/api/process").get((req, res) => {
         refDB.query("SELECT * FROM processes", function (err, result, fields) {
             if (err) {
@@ -15,5 +15,5 @@ function apiProcess(app, refDB, refTools) {
         });
     });
 }
-exports.apiProcess = apiProcess;
-//# sourceMappingURL=api.process.js.map
+exports.ApiProcess = ApiProcess;
+//# sourceMappingURL=api.dime.process.js.map

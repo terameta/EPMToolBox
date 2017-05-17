@@ -3,7 +3,7 @@ import * as express from "express";
 import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
-import { EnvironmentTools } from "../tools/tools.environment";
+import { EnvironmentTools } from "../tools/tools.dime.environment";
 import { Rester } from "../tools/tools.rester";
 
 export class ApiEnvironment {

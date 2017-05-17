@@ -2,7 +2,7 @@ import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
 import { Stream } from "../../shared/model/stream";
-import { EnvironmentTools } from "./tools.environment";
+import { EnvironmentTools } from "./tools.dime.environment";
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
