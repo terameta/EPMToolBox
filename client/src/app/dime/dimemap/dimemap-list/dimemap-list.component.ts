@@ -9,13 +9,12 @@ import { Component, OnInit } from "@angular/core";
 	styleUrls: ["./dimemap-list.component.css"]
 })
 export class DimemapListComponent implements OnInit {
-	maps: Observable<DimeMap[]>;
+	// maps: Observable<DimeMap[]>;
 
 	constructor(private mapService: DimeMapService) {
-		this.maps = this.mapService.maps;
+		// this.maps = this.mapService.maps;
 	}
 
 	ngOnInit() {
 	}
-
 }

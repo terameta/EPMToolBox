@@ -13,7 +13,7 @@ class ApiEnvironment {
         this.rester = new tools_rester_1.Rester(tools);
         this.setRoutes();
         this.rester.restify(this.apiRoutes, this.environment);
-        this.app.use("/api/environment", this.apiRoutes);
+        this.app.use("/api/dime/environment", this.apiRoutes);
     }
     setRoutes() {
         this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.environment.listTypes, null, req, res); });

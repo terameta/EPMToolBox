@@ -27,7 +27,7 @@ export class Rester {
 			this.respond(tool.create, req.body, req, res);
 		});
 
-		router.put("/:id", (req: Request, res: Response) => {
+		router.put("/", (req: Request, res: Response) => {
 			this.respond(tool.update, req.body, req, res);
 		});
 

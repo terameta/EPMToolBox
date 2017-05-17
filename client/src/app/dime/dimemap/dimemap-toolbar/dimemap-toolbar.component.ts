@@ -11,18 +11,10 @@ import { DimeMap } from "../../../../../../shared/model/map";
 	styleUrls: ["./dimemap-toolbar.component.css"]
 })
 export class DimemapToolbarComponent implements OnInit {
-	maps: Observable<DimeMap[]>;
-	currentMap: Observable<DimeMap>;
 
 	constructor(private mapService: DimeMapService) { }
 
 	ngOnInit() {
-		this.maps = this.mapService.maps;
 		this.mapService.getAll();
 	}
-
-	private create = () => {
-		this.mapService.create({ id: 0, name: "New Map" });
-	}
-
 }

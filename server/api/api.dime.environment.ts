@@ -17,7 +17,7 @@ export class ApiEnvironment {
 		this.rester = new Rester(tools);
 		this.setRoutes();
 		this.rester.restify(this.apiRoutes, this.environment);
-		this.app.use("/api/environment", this.apiRoutes);
+		this.app.use("/api/dime/environment", this.apiRoutes);
 	}
 
 	setRoutes() {

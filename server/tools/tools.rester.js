@@ -22,7 +22,7 @@ class Rester {
         router.post("/", (req, res) => {
             this.respond(tool.create, req.body, req, res);
         });
-        router.put("/:id", (req, res) => {
+        router.put("/", (req, res) => {
             this.respond(tool.update, req.body, req, res);
         });
         router.delete("/:id", (req, res) => {

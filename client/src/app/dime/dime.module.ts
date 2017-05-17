@@ -35,8 +35,8 @@ const dimeRoutes: Routes = [
 			{ path: "processes", component: DimeprocessesComponent, loadChildren: "app/dime/dimeprocess/dimeprocess.module#DimeprocessModule" },
 			// tslint:disable-next-line:max-line-length
 			{ path: "environments", component: DimeenvironmentsComponent, loadChildren: "app/dime/dimeenvironment/dimeenvironment.module#DimeenvironmentModule" },
-			{ path: "streams", component: DimestreamsComponent, loadChildren: "app/dime/dimestream/dimestream.module#DimestreamModule" },
-			{ path: "maps", component: DimemapsComponent, loadChildren: "app/dime/dimemap/dimemap.module#DimemapModule" }
+			// { path: "streams", component: DimestreamsComponent, loadChildren: "app/dime/dimestream/dimestream.module#DimestreamModule" },
+			// { path: "maps", component: DimemapsComponent, loadChildren: "app/dime/dimemap/dimemap.module#DimemapModule" }
 		]
 	}
 ];
@@ -48,8 +48,8 @@ const dimeRoutes: Routes = [
 		DimeprocessModule,
 		DimescheduleModule,
 		DimeenvironmentModule,
-		DimestreamModule,
-		DimemapModule,
+		// DimestreamModule,
+		// DimemapModule,
 		RouterModule.forChild(dimeRoutes),
 		AuthModule
 	],

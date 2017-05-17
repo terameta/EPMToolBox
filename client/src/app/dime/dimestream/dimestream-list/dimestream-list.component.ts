@@ -25,7 +25,7 @@ export class DimestreamListComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.getAll();
+		/*this.getAll();
 		this.environmentService.getAll().subscribe(
 			(curEnvList) => {
 				this.environmentList = curEnvList;
@@ -40,7 +40,7 @@ export class DimestreamListComponent implements OnInit {
 			}, (error) => {
 				this.toastr.error(error);
 			}
-		);
+		);*/
 	}
 
 	private sortByName = (e1, e2) => {

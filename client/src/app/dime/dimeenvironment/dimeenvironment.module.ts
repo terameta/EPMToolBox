@@ -6,7 +6,7 @@ import { DimeenvironmentListComponent } from "./dimeenvironment-list/dimeenviron
 import { DimeenvironmentDetailComponent } from "./dimeenvironment-detail/dimeenvironment-detail.component";
 import { DimeenvironmentComponent } from "./dimeenvironment/dimeenvironment.component";
 import { AuthModule } from "app/welcome/auth.module";
-import { DimeEnvironmentService } from "./dimeenvironment.service";
+// import { DimeEnvironmentService } from "./dimeenvironment.service";
 import { DimeenvironmentsComponent } from "./dimeenvironments/dimeenvironments.component";
 import { DimeenvironmentToolbarComponent } from "./dimeenvironment-toolbar/dimeenvironment-toolbar.component";
 
@@ -27,7 +27,7 @@ const dimeEnvironmentRoutes: Routes = [
 		RouterModule
 	],
 	providers: [
-		DimeEnvironmentService
+		// DimeEnvironmentService
 	],
 	declarations: [
 		DimeenvironmentListComponent,

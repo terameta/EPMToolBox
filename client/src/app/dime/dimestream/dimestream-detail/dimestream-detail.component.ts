@@ -51,7 +51,7 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 		this.paramsSubscription = this.route.params.subscribe(
 			(params: Params) => {
 				this.curStreamID = params["id"];
-				this.streamGetCurrent();
+				/*this.streamGetCurrent();*/
 			}
 		);
 		this.streamService.listTypes().subscribe(
@@ -76,7 +76,7 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 			return 0;
 		}
 	}
-
+/*
 	streamGetCurrent() {
 		this.streamService.getOne(this.curStreamID).subscribe(
 			(dbStream) => {
@@ -335,4 +335,5 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	setddfType(field, event) {
 		field.ddfType = this.descriptiveFields[field.descriptiveDB][field.descriptiveTable][event.target.selectedIndex].type;
 	}
+	*/
 }

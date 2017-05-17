@@ -27,7 +27,7 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.paramsSubscription = this.route.params.subscribe(
+		/*this.paramsSubscription = this.route.params.subscribe(
 			(params: Params) => {
 				this.curEnvironmentID = params["id"];
 				this.environmentGetCurrent();
@@ -39,13 +39,13 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 			}, (error) => {
 				this.toastr.error(error);
 			}
-		);
+		);*/
 	}
 
 	ngOnDestroy() {
 		this.paramsSubscription.unsubscribe();
 	}
-
+/*
 	isPBCS() {
 		let toReturn = false;
 		if (this.curEnvironment.type) {
@@ -99,5 +99,5 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 			}
 		);
 	}
-
+*/
 }
