@@ -65,7 +65,7 @@ class StreamTools {
                         reject({ error: err, message: "Failed to update the stream" });
                     }
                     else {
-                        resolve({ id: theID });
+                        resolve(theStream);
                     }
                 });
             });

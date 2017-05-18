@@ -6,7 +6,7 @@ import { DimestreamListComponent } from "./dimestream-list/dimestream-list.compo
 import { DimestreamDetailComponent } from "./dimestream-detail/dimestream-detail.component";
 import { DimestreamComponent } from "./dimestream/dimestream.component";
 import { AuthModule } from "app/welcome/auth.module";
-import { DimeStreamService } from "./dimestream.service";
+// import { DimeStreamService } from "./dimestream.service";
 import { DimestreamsComponent } from "./dimestreams/dimestreams.component";
 import { DimestreamToolbarComponent } from "./dimestream-toolbar/dimestream-toolbar.component";
 
@@ -29,14 +29,14 @@ const dimeStreamRoutes: Routes = [
 		RouterModule
 	],
 	providers: [
-		DimeStreamService
+		// DimeStreamService
 	],
 	declarations: [
+		DimestreamToolbarComponent,
 		DimestreamListComponent,
 		DimestreamDetailComponent,
 		DimestreamComponent,
 		DimestreamsComponent,
-		DimestreamToolbarComponent,
 		DescribedFieldFilter
 	]
 })

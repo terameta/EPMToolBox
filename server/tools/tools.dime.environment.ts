@@ -107,7 +107,8 @@ export class EnvironmentTools {
 				if (err) {
 					reject({ error: err, message: "Failed to update the environment" });
 				} else {
-					resolve({ id: theID });
+					theEnvironment.password = "|||---protected---|||";
+					resolve({ theEnvironment });
 				}
 			});
 		});

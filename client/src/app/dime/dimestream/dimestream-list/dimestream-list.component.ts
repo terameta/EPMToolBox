@@ -13,18 +13,19 @@ import { DimeEnvironmentService } from "../../dimeenvironment/dimeenvironment.se
 })
 export class DimestreamListComponent implements OnInit {
 
-	streamList: any[];
-	streamTypeList: any[];
-	environmentList: any[];
+	// streamList: any[];
+	// streamTypeList: any[];
+	// environmentList: any[];
 
 	constructor(
-		private streamService: DimeStreamService,
+		private mainService: DimeStreamService,
 		private environmentService: DimeEnvironmentService,
 		private toastr: ToastrService,
-		private router: Router
+		// private router: Router
 	) { }
 
 	ngOnInit() {
+		// this.environmentService.getAll();
 		/*this.getAll();
 		this.environmentService.getAll().subscribe(
 			(curEnvList) => {
@@ -42,7 +43,7 @@ export class DimestreamListComponent implements OnInit {
 			}
 		);*/
 	}
-
+/*
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
 			return 1;
@@ -73,5 +74,5 @@ export class DimestreamListComponent implements OnInit {
 				this.toastr.error(error);
 			}
 		);
-	}
+	}*/
 }

@@ -16,8 +16,9 @@ import { AuthGuard } from "./welcome/auth-guard.service";
 import { AuthModule } from "./welcome/auth.module";
 
 // Services
-import { DimeMapService } from "./dime/dimemap/dimemap.service";
 import { DimeEnvironmentService } from "./dime/dimeenvironment/dimeenvironment.service";
+import { DimeStreamService } from "./dime/dimestream/dimestream.service";
+import { DimeMapService } from "./dime/dimemap/dimemap.service";
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -43,7 +44,8 @@ const appRoutes: Routes = [
 		AuthGuard,
 		AuthService,
 		DimeMapService,
-		DimeEnvironmentService
+		DimeEnvironmentService,
+		DimeStreamService
 	],
 	bootstrap: [AppComponent]
 })

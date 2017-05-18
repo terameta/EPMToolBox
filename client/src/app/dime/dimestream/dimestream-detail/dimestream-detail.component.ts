@@ -14,57 +14,48 @@ import { DimeEnvironmentService } from "../../dimeenvironment/dimeenvironment.se
 	styleUrls: ["./dimestream-detail.component.css"]
 })
 export class DimestreamDetailComponent implements OnInit, OnDestroy {
-
-	curStreamID: number;
-	curStream: any = {};
 	paramsSubscription: Subscription;
-	streamTypeList = [];
-	environmentList = [];
-	curStreamClean = true;
-	databaseList = [];
-	tableList = [];
-	environmentTypeList = [];
-	curStreamEnvironmentType;
-	sourcedFields: any[] = undefined;
-	assignedFields: any[] = undefined;
-	descriptiveTables: any = {};
-	descriptiveFields: any = {};
-	pbcsFieldTypes = [
-		"Accounts",
-		"Entity",
-		"Generic",
-		"Scenario",
-		"Time",
-		"Year",
-		"Version"
-	];
+	// curStreamClean = true;
+	// databaseList = [];
+	// tableList = [];
+	// curStreamID: number;
+	// curStream: any = {};
+	// streamTypeList = [];
+	// environmentList = [];
+
+	// environmentTypeList = [];
+	// curStreamEnvironmentType;
+	// sourcedFields: any[] = undefined;
+	// assignedFields: any[] = undefined;
+	// descriptiveTables: any = {};
+	// descriptiveFields: any = {};
+	// pbcsFieldTypes = [
+	// 	"Accounts",
+	// 	"Entity",
+	// 	"Generic",
+	// 	"Scenario",
+	// 	"Time",
+	// 	"Year",
+	// 	"Version"
+	// ];
 
 	constructor(
 		private route: ActivatedRoute,
 		private router: Router,
-		private streamService: DimeStreamService,
+		private mainService: DimeStreamService,
 		private environmentService: DimeEnvironmentService,
-		private toastr: ToastrService
 	) { }
 
 	ngOnInit() {
 		this.paramsSubscription = this.route.params.subscribe(
 			(params: Params) => {
-				this.curStreamID = params["id"];
-				/*this.streamGetCurrent();*/
-			}
-		);
-		this.streamService.listTypes().subscribe(
-			(typeList) => {
-				this.streamTypeList = typeList;
-			}, (error) => {
-				this.toastr.error(error);
+				this.mainService.getOne(params["id"]);
 			}
 		);
 	}
 
 	ngOnDestroy() {
-		this.paramsSubscription.unsubscribe();
+		// this.paramsSubscription.unsubscribe();
 	}
 
 	private sortByName = (e1, e2) => {
@@ -77,51 +68,6 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 		}
 	}
 /*
-	streamGetCurrent() {
-		this.streamService.getOne(this.curStreamID).subscribe(
-			(dbStream) => {
-				this.curStream = dbStream;
-				this.curStreamClean = true;
-				if (this.curStream.dbName && this.databaseList.length === 0) {
-					this.databaseList.push({ name: this.curStream.dbName });
-				}
-				if (this.tableList.length === 0) {
-					if (this.curStream.tableName && this.curStream.tableName !== "Custom Query") {
-						this.tableList.push({ name: this.curStream.tableName, type: "-" });
-					}
-					this.tableList.push({ name: "Custom Query", type: "Custom Query" });
-				}
-
-				this.environmentService.getAll().subscribe(
-					(curEnvList) => {
-						this.environmentList = curEnvList;
-						this.environmentList.sort(this.sortByName);
-						this.environmentService.listTypes().subscribe(
-							(curTypeList) => {
-								this.environmentTypeList = curTypeList;
-								this.environmentList.forEach((curEnv) => {
-									if (parseInt(curEnv.id, 10) === parseInt(this.curStream.environment, 10)) {
-										this.environmentTypeList.forEach((curType) => {
-											if (parseInt(curEnv.type, 10) === parseInt(curType.id, 10)) {
-												this.curStreamEnvironmentType = curType.value;
-											}
-										});
-									}
-								});
-							}, (error) => {
-								this.toastr.error(error);
-							}
-						);
-					}, (error) => {
-						this.toastr.error(error);
-					}
-				);
-				this.streamRetrieveFields();
-			}, (error) => {
-				this.toastr.error(error);
-			}
-		);
-	}
 
 	streamSave(form: NgForm) {
 		this.streamService.update(this.curStream).subscribe(

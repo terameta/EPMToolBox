@@ -13,9 +13,9 @@ import { DimeEnvironmentService } from "../dimeenvironment.service";
 })
 export class DimeenvironmentToolbarComponent implements OnInit {
 
-	constructor(private environmentService: DimeEnvironmentService) { }
+	constructor(private mainService: DimeEnvironmentService) { }
 
 	ngOnInit() {
-		this.environmentService.getAll();
+		// this.mainService.getAll();
 	}
 }

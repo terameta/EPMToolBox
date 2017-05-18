@@ -22,7 +22,7 @@ class ApiStream {
         this.rester = new tools_rester_1.Rester(this.tools);
         this.setRoutes();
         this.rester.restify(this.apiRoutes, this.stream);
-        this.app.use("/api/stream", this.apiRoutes);
+        this.app.use("/api/dime/stream", this.apiRoutes);
     }
 }
 exports.ApiStream = ApiStream;

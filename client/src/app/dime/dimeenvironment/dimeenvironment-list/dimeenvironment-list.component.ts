@@ -13,23 +13,9 @@ import { DimeEnvironmentService } from "../dimeenvironment.service";
 	styleUrls: ["./dimeenvironment-list.component.css"]
 })
 export class DimeenvironmentListComponent implements OnInit {
-	// environments: Observable<Environment[]>;
 
-	// environmentList: any[];
-
-	constructor(private environmentService: DimeEnvironmentService) { }
+	constructor(private mainService: DimeEnvironmentService) { }
 
 	ngOnInit() {
 	}
-
-	// environmentDelete(envID) {
-	// 	this.dimeEnvironmentService.delete(envID).subscribe(
-	// 		(result) => {
-	// 			this.toastr.info("Environment is now deleted. We are now going back to the environment list.");
-	// 			this.getAll();
-	// 		}, (error) => {
-	// 			this.toastr.error(error);
-	// 		}
-	// 	);
-	// }
 }

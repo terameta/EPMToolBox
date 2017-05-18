@@ -17,7 +17,7 @@ export class ApiStream {
 
 		this.setRoutes();
 		this.rester.restify(this.apiRoutes, this.stream);
-		this.app.use("/api/stream", this.apiRoutes);
+		this.app.use("/api/dime/stream", this.apiRoutes);
 	}
 
 	private setRoutes = () => {

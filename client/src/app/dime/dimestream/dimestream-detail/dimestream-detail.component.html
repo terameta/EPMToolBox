@@ -1,75 +1,68 @@
 <div class="box box-primary">
 	<div class="box-header with-border">
-		<h3 class="box-title">Edit Stream: {{curStream.name}}</h3>
+		<h3 class="box-title">Edit Stream</h3>
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#streamtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
 			<li><a href="#streamtabfields" data-toggle="tab">Fields</a></li>
-			<li><a href="#streamtabfielddescriptiontables" data-toggle="tab" *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP' && assignedFields">Field Description Tables</a></li>
+			<li><a href="#streamtabfielddescriptiontables" data-toggle="tab" *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP' && mainService.curItemAssignedFields.length > 0">Field Description Tables</a></li>
 		</ul>
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
 			<div class="tab-pane fade in active" id="streamtabmaindefinitions">
-				<form (ngSubmit)="streamSave(f)" #f="ngForm" class="form-horizontal">
+				<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
 					<fieldset>
-						<div class="form-group">
-							<label for="streamID" class="col-xs-2 control-label">ID:</label>
-							<div class="col-xs-10">
-								<input type="text" class="form-control" id="streamID" name="streamID" [(ngModel)]="curStream.id" disabled>
-							</div>
-						</div>
 						<div class="form-group">
 							<label for="streamName" class="col-xs-2 control-label">Name:</label>
 							<div class="col-xs-10">
-								<input type="text" class="form-control" id="streamName" name="streamName" [(ngModel)]="curStream.name">
+								<input type="text" class="form-control" id="streamName" name="streamName" [(ngModel)]="mainService.curItem.name">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="streamType" class="col-xs-2 control-label">Type:</label>
 							<div class="col-xs-10">
-								<select name="streamType" id="streamType" class="form-control" [(ngModel)]="curStream.type">
-							<option *ngFor="let streamType of streamTypeList" [value]="streamType.id">{{streamType.name}}</option>
-						</select>
+								<select name="streamType" id="streamType" class="form-control" [(ngModel)]="mainService.curItem.type">
+									<option *ngFor="let streamType of mainService.typeList" [value]="streamType.id">{{streamType.name}}</option>
+								</select>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="streamEnvironment" class="col-xs-2 control-label">Environment:</label>
 							<div class="col-xs-10">
-								<!--<input type="text" class="form-control" id="streamEnvironment" name="streamEnvironment" [(ngModel)]="curStream.environment" required>-->
-								<select name="streamEnvironment" id="streamEnvironment" class="form-control" [(ngModel)]="curStream.environment" (change)="curStreamClean=false;">
-							<option *ngFor="let environment of environmentList" [value]="environment.id">{{environment.name}}</option>
-						</select>
+								<select name="streamEnvironment" id="streamEnvironment" class="form-control" [(ngModel)]="mainService.curItem.environment" (change)="mainService.curItemClean=false;">
+									<option *ngFor="let environment of environmentService.items | async" [value]="environment.id">{{environment.name}}</option>
+								</select>
 							</div>
 						</div>
 						<div class="form-group">
-							<label for="streamDB" class="col-xs-2 control-label" *ngIf="!curStreamEnvironmentType">Database Name:</label>
-							<label for="streamDB" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='MSSQL'">Database Name:</label>
-							<label for="streamDB" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='HP'">Application Name:</label>
-							<label for="streamDB" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='PBCS'">Application Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="!mainService.curItemEnvironmentType">Database Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='MSSQL'">Database Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='HP'">Application Name:</label>
+							<label for="streamDB" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='PBCS'">Application Name:</label>
 							<div class="col-xs-10">
 								<div class="input-group">
-									<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="curStream.dbName" (change)="curStreamClean=false;">
-										<option *ngFor="let selectableDB of databaseList" [value]="selectableDB.name">{{selectableDB.name}}</option>
+									<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="mainService.curItem.dbName" (change)="curStreamClean=false;">
+										<option *ngFor="let selectableDB of mainService.curItemDatabaseList" [value]="selectableDB.name">{{selectableDB.name}}</option>
 									</select>
 									<span class="input-group-btn">
-										<button class="btn btn-default" type="button" [disabled]="curStream.environment < 1 || !curStreamClean" (click)="streamRefreshDatabases()">Refresh</button>
+										<button class="btn btn-default" type="button" [disabled]="mainService.curItem.environment < 1 || !mainService.curItemClean" (click)="mainService.refreshDatabases()">Refresh</button>
 									</span>
 								</div>
-								<span class="help-block" *ngIf="curStream.environment < 1">
-							<div class="well well-warning well-sm">
-									Please assign an environment to be able to change the database.
-							</div>
-						</span>
-								<span class="help-block" *ngIf="!curStreamClean">
-							<div class="well well-warning well-sm">
-									Changes must be saved before assignment.
-							</div>
-						</span>
+								<span class="help-block" *ngIf="mainService.curItem.environment < 1">
+									<div class="well well-warning well-sm">
+											Please assign an environment to be able to change the database.
+									</div>
+								</span>
+								<span class="help-block" *ngIf="!mainService.curItemClean">
+									<div class="well well-warning well-sm">
+											Changes must be saved before assignment.
+									</div>
+								</span>
 							</div>
 						</div>
-						<div class="form-group">
+						<!--<div class="form-group">
 							<label for="streamTable" class="col-xs-2 control-label" *ngIf="!curStreamEnvironmentType">Table Name:</label>
 							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='MSSQL'">Table Name:</label>
 							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='HP'">Cube Name:</label>
@@ -109,15 +102,14 @@
 						<div class="form-group">
 							<div class="col-xs-10 col-xs-offset-2">
 								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-								<!--<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/streams/stream-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>-->
-								<!--<button class="btn btn-success btn-xs" type="button" (click)="streamVerify()"><i class="fa fa-check fa-fw"></i> Verify Stream</button>-->
+								<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/streams/stream-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
 								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="streamDelete(curStream.id)"><i class="fa fa-trash fa-fw"></i> Delete Stream</button>
 							</div>
-						</div>
+						</div>-->
 					</fieldset>
 				</form>
 			</div>
-			<div class="tab-pane fade" id="streamtabfields">
+			<!--<div class="tab-pane fade" id="streamtabfields">
 				<button *ngIf="!assignedFields && curStreamEnvironmentType != 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamGetFields(curStream.id)">Refresh Fields from Server</button>
 				<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamInitiateFieldsPBCS()">Start</button>
 				<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS' && sourcedFields" type="button" class="btn btn-default btn-xs"
@@ -170,7 +162,6 @@
 					</table>
 				</div>
 				<div *ngIf="sourcedFields && !assignedFields && curStreamEnvironmentType == 'PBCS'">
-					<!--<pre>{{curStream.sourcedFields| json}}</pre>-->
 					<table class="table table-striped table-bordered table-hover table-condensed">
 						<tr>
 							<th>Name</th>
@@ -203,7 +194,6 @@
 					</table>
 				</div>
 				<div *ngIf="assignedFields">
-					<!--<pre>{{assignedFields|json}}</pre>-->
 					<table class="table table-striped table-bordered table-hover table-condensed">
 						<tr>
 							<th>Name</th>
@@ -222,7 +212,6 @@
 						<tr *ngFor="let curField of assignedFields;let i = index;let last=last;let first=first">
 							<td>
 								{{curField.name}}<br>
-								<!--<pre>{{curField|json}}</pre>-->
 							</td>
 							<td>{{curField.type}}</td>
 							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
@@ -272,8 +261,8 @@
 						</tr>
 					</table>
 				</div>
-			</div>
-			<div class="tab-pane fade" id="streamtabfielddescriptiontables">
+			</div>-->
+			<!--<div class="tab-pane fade" id="streamtabfielddescriptiontables">
 				<div class="box box-primary">
 					<div class="box-header">
 						<ul class="nav nav-tabs">
@@ -356,17 +345,14 @@
 													<select name="fieldDescriptiveReferenceField" id="fieldDescriptiveReferenceField" class="form-control" [(ngModel)]="field.drfName" (change)="setdrfType(field, $event)">
 														<option *ngFor="let selectableField of descriptiveFields[field.descriptiveDB][field.descriptiveTable]" [value]="selectableField.name">{{selectableField.name}} ({{selectableField.type}})</option>
 													</select>
-													<!-- If the reference field is string -->
 													<span *ngIf="field.drfType=='string'" class="input-group-addon"><b># of Chars:</b></span>
 													<input *ngIf="field.drfType=='string'" name="fielddrfCharacters" type="number" class="form-control" min="1" max="1024" [(ngModel)]="field.drfCharacters">
 													<span *ngIf="field.drfType=='string'" class="input-group-addon">(Max: 1024)</span>
-													<!-- If the reference field is number -->
 													<span *ngIf="field.drfType=='number'" class="input-group-addon"><b># of Digits:</b></span>
 													<input *ngIf="field.drfType=='number'" name="fielddrfPrecision" type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.drfPrecision" min="1" max="65">
 													<span *ngIf="field.drfType=='number'" class="input-group-addon">(Min: 1, Max: 65)</span>
 													<input *ngIf="field.drfType=='number'" name="fielddrfDecimals" type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="field.drfDecimals" min="0" max="{{field.drfPrecision -1 || 0}}">
 													<span *ngIf="field.drfType=='number'" class="input-group-addon">(Min: 0, Max: {{field.drfPrecision -1 || 0}})</span>
-													<!-- If the reference field is date -->
 													<span *ngIf="field.drfType=='date'" class="input-group-addon"><b>Format:</b></span>
 													<input *ngIf="field.drfType=='date'" name="fielddrfDateFormat" type="text" class="form-control" [(ngModel)]="field.drfDateFormat" placeholder="YYYY-MM-DD HH:mm">
 													<span *ngIf="field.drfType=='date'" class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
@@ -380,17 +366,14 @@
 													<select name="fieldDescriptiveDescriptionField" id="fieldDescriptiveDescriptionField" class="form-control" [(ngModel)]="field.ddfName" (change)="setddfType(field, $event)">
 														<option *ngFor="let selectableField of descriptiveFields[field.descriptiveDB][field.descriptiveTable]" [value]="selectableField.name">{{selectableField.name}} ({{selectableField.type}})</option>
 													</select>
-													<!-- If the reference field is string -->
 													<span *ngIf="field.ddfType=='string'" class="input-group-addon"><b># of Chars:</b></span>
 													<input *ngIf="field.ddfType=='string'" name="fieldddfCharacters" type="number" class="form-control" min="1" max="1024" [(ngModel)]="field.ddfCharacters">
 													<span *ngIf="field.ddfType=='string'" class="input-group-addon">(Max: 1024)</span>
-													<!-- If the reference field is number -->
 													<span *ngIf="field.ddfType=='number'" class="input-group-addon"><b># of Digits:</b></span>
 													<input *ngIf="field.ddfType=='number'" name="fieldddfPrecision" type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.ddfPrecision" min="1" max="65">
 													<span *ngIf="field.ddfType=='number'" class="input-group-addon">(Min: 1, Max: 65)</span>
 													<input *ngIf="field.ddfType=='number'" name="fieldddfDecimals" type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="field.ddfDecimals" min="0" max="{{field.ddfPrecision -1 || 0}}">
 													<span *ngIf="field.ddfType=='number'" class="input-group-addon">(Min: 0, Max: {{field.ddfPrecision -1 || 0}})</span>
-													<!-- If the reference field is date -->
 													<span *ngIf="field.ddfType=='date'" class="input-group-addon"><b>Format:</b></span>
 													<input *ngIf="field.ddfType=='date'" name="fieldddfDateFormat" type="text" class="form-control" [(ngModel)]="field.ddfDateFormat" placeholder="YYYY-MM-DD HH:mm">
 													<span *ngIf="field.ddfType=='date'" class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
@@ -408,7 +391,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div>-->
 		</div>
 	</div>
 </div>
