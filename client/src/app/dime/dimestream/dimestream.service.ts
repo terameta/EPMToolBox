@@ -26,10 +26,15 @@ export class DimeStreamService {
 	// CurItem Related Information all together
 	curItem: Stream;
 	curItemEnvironmentType: string;
+	curItemSourcedFields: any[];
 	curItemAssignedFields: any[];
 	curItemClean = true;
 	curItemDatabaseList = [];
 	curItemTableList = [];
+
+	// Field detail related information all together
+	descriptiveTables: any = {};
+	descriptiveFields: any = {};
 
 	constructor(
 		private http: Http,
@@ -48,7 +53,8 @@ export class DimeStreamService {
 		this.typeList = [];
 		this.getAll(true);
 		this.curItemEnvironmentType = "";
-		this.curItemAssignedFields = [];
+		this.curItemAssignedFields = undefined;
+		this.curItemSourcedFields = undefined;
 	}
 
 	getAll = (isSilent?: boolean) => {
@@ -136,7 +142,8 @@ export class DimeStreamService {
 			});
 	}
 	update = (curItem?: Stream) => {
-		if (!curItem) { curItem = this.curItem };
+		let shouldUpdate = false;
+		if (!curItem) { curItem = this.curItem; shouldUpdate = true; };
 		this.authHttp.put(this.baseUrl, curItem, { headers: this.headers }).
 			map(response => response.json()).
 			subscribe(data => {
@@ -146,6 +153,9 @@ export class DimeStreamService {
 
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.toastr.info("Item is successfully saved.", this.serviceName);
+				// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
+				// This shouldn't change the state of the current item.
+				if (shouldUpdate) { this.curItemClean = true; }
 			}, error => {
 				this.toastr.error("Failed to save the item.", this.serviceName);
 				console.log(error);
@@ -180,90 +190,165 @@ export class DimeStreamService {
 				this.toastr.error("Listing types has failed", this.serviceName);
 			});
 	}
+	public refreshDatabases() {
+		if (!this.curItemClean) {
+			this.toastr.error("Please save your changes before refreshing database list");
+			return false;
+		}
+		this.environmentService.listDatabases(this.curItem.environment).subscribe(
+			(result) => {
+				this.toastr.info("Database list is updated", this.serviceName);
+				this.curItemDatabaseList = result;
+			}, (error) => {
+				this.toastr.error("Failed to refresh databases.", this.serviceName);
+				console.log(error);
+			}
+		);
+	}
+	public refreshTables() {
+		if (!this.curItemClean) {
+			this.toastr.error("Please save your changes before refreshing the table list");
+			return false;
+		}
+		this.environmentService.listTables(this.curItem.environment, this.curItem.dbName).subscribe(
+			(result) => {
+				this.toastr.info("Table list is updated.", this.serviceName);
+				this.curItemTableList = result;
+			}, (error) => {
+				this.toastr.error("Failed to refresh databases.", this.serviceName);
+				console.log(error);
+			}
+		);
+	}
+	public listFieldsFromSourceEnvironment = (id: number) => {
+		this.authHttp.get(this.baseUrl + "/listFields/" + id).
+			map(response => response.json()).
+			subscribe((data) => {
+				this.toastr.info("Successfully listed fields from the source environment.", this.serviceName);
+				this.curItemSourcedFields = data;
+				this.curItemSourcedFields.sort(this.fieldSortNumeric);
+			}, (error) => {
+				this.toastr.error("Failed to list fields from the source environment.", this.serviceName);
+				console.log(error);
+			});
+	};
+	private fieldSortNumeric = (f1, f2): number => {
+		let fItem: string;
+		if (f1.order) { fItem = "order" };
+		if (f1.fOrder) { fItem = "fOrder" };
+		if (f1.pOrder) { fItem = "pOrder" };
+		if (parseInt(f1[fItem], 10) > parseInt(f2[fItem], 10)) {
+			return 1;
+		} else if (parseInt(f1[fItem], 10) < parseInt(f2[fItem], 10)) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+	public fieldMove = (theFieldList: any[], theField, direction) => {
+		const curOrder = theField.order || theField.fOrder || theField.pOrder;
+		const nextOrder = parseInt(curOrder, 10) + (direction === "down" ? 1 : -1);
+		theFieldList.forEach((curField) => {
+			if (parseInt(curField.order, 10) === nextOrder) { curField.order = curOrder; }
+			if (parseInt(curField.fOrder, 10) === nextOrder) { curField.fOrder = curOrder; }
+			if (parseInt(curField.pOrder, 10) === nextOrder) { curField.pOrder = curOrder; }
+		});
+		if (theField.order) { theField.order = nextOrder; }
+		if (theField.fOrder) { theField.fOrder = nextOrder; }
+		if (theField.pOrder) { theField.pOrder = nextOrder; }
+		theFieldList.sort(this.fieldSortNumeric);
+	}
+	public assignFields = (refObj: { id: number, fieldList: any[] }) => {
+		this.authHttp.post(this.baseUrl + "/assignFields/" + refObj.id, refObj.fieldList, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((data) => {
+				this.toastr.info("Stream fields are assigned.", this.serviceName);
+				this.toastr.info("Refreshing the assigned fields.", this.serviceName);
+				this.retrieveFields();
+			}, (error) => {
+				this.toastr.error("Failed to assign fields to the item.", this.serviceName);
+				console.log(error);
+			});
+		/*
+		streamAssignFields = () => {
+			this.streamService.assignFields({ id: this.curStream.id, fields: this.sourcedFields }).subscribe(
+				(result) => {
+					this.toastr.info("Stream fields are assigned.");
+					this.toastr.info("Refreshing the saved fields");
+					this.streamRetrieveFields();
+					this.sourcedFields = undefined;
+				}, (error) => {
+					this.toastr.error(error);
+					console.error(error);
+				}
+			);
+		}
+		*/
+	};
+	public retrieveFields = () => {
+		this.authHttp.get(this.baseUrl + "/retrieveFields/" + this.curItem.id).
+			map(response => response.json()).
+			subscribe((data) => {
+				this.toastr.info("Stream assigned fields are retrieved.", this.serviceName);
+				if (data.length > 0) {
+					this.curItemAssignedFields = data;
+					this.curItemAssignedFields.forEach((curField) => {
+						if (curField.isDescribed && curField.descriptiveDB && curField.descriptiveTable) {
+							if (!this.descriptiveTables[curField.descriptiveDB]) {
+								this.descriptiveTables[curField.descriptiveDB] = [];
+							}
+							this.descriptiveTables[curField.descriptiveDB].push({ name: curField.descriptiveTable, type: "-" }, { name: "Custom Query", type: "-" });
+							if (!this.descriptiveFields[curField.descriptiveDB]) {
+								this.descriptiveFields[curField.descriptiveDB] = {};
+							}
+							if (!this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable]) {
+								this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable] = [];
+								if (curField.drfName) { this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable].push({ name: curField.drfName, type: curField.drfType }) };
+								if (curField.ddfName) { this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable].push({ name: curField.ddfName, type: curField.ddfType }) };
+							}
+						}
+					})
+				}
+			}, (error) => {
+				this.toastr.error("Failed to retrieve assigned field list for the stream.", this.serviceName);
+				console.log(error);
+			});
+		/*
+
+		streamRetrieveFields = () => {
+			this.streamService.retrieveFields(this.curStream.id).subscribe(
+				(result) => {
+					this.toastr.info("Stream fields are retrieved.");
+					if (result.length > 0) {
+						this.assignedFields = result;
+						this.assignedFields.forEach((curField) => {
+							if (curField.isDescribed && curField.descriptiveDB && curField.descriptiveTable) {
+								if (!this.descriptiveTables[curField.descriptiveDB]) {
+									this.descriptiveTables[curField.descriptiveDB] = [];
+								}
+								this.descriptiveTables[curField.descriptiveDB].push({ name: curField.descriptiveTable, type: "-" }, { name: "Custom Query", type: "-" });
+								if (!this.descriptiveFields[curField.descriptiveDB]) {
+									this.descriptiveFields[curField.descriptiveDB] = {};
+								}
+								if (!this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable]) {
+									this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable] = [];
+									if (curField.drfName) { this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable].push({ name: curField.drfName, type: curField.drfType }) };
+									if (curField.ddfName) { this.descriptiveFields[curField.descriptiveDB][curField.descriptiveTable].push({ name: curField.ddfName, type: curField.ddfType }) };
+								}
+							}
+						})
+					}
+				}, (error) => {
+					this.toastr.error(error);
+					console.error(error);
+				}
+			);
+		}
+		*/
+	}
 }
 
 /*
-	create() {
-		return this.authHttp.post("/api/stream", {}).map(
-			(response: Response) => {
-				const data = response.json();
-				return data;
-			}
-		).catch(
-			(error: Response) => {
-				return Observable.throw("Creating a new stream has failed");
-			}
-			)
-	}
-
-	getOne(id: number) {
-		return this.authHttp.get("/api/stream/" + id).map(
-			(response: Response) => {
-				const data = response.json();
-				return data;
-			}
-		).catch(
-			(error: Response) => {
-				console.log(error);
-				return Observable.throw("Fetching the environment has failed");
-			}
-			);
-	}
-
-
-
-	update(theStream) {
-		const toSend = JSON.stringify(theStream);
-		const headers = new Headers({ "Content-Type": "application/json" });
-		return this.authHttp.put("/api/stream/" + theStream.id, toSend, { headers: headers }).map((response: Response) => {
-			return response.json();
-		}).catch((error: Response) => {
-			console.log(error);
-			console.log("Erred", theStream);
-			return Observable.throw("Updating the environment has failed:" + theStream.name);
-		});
-	}
-	delete(id: number) {
-		return this.authHttp.delete("/api/stream/" + id).map(
-			(response: Response) => {
-				const data = response.json();
-				return data;
-			}
-		).catch(
-			(error: Response) => {
-				console.log(error);
-				return Observable.throw("Deleting the stream has failed");
-			}
-			);
-	}
-	listFields = (streamID) => {
-		return this.authHttp.get("/api/stream/listFields/" + streamID).map((response: Response) => {
-			const data = response.json();
-			return data;
-		}).catch((error: Response) => {
-			console.log(error);
-			return Observable.throw("Listing the stream fields has failed");
-		});
-	};
-	assignFields = (theStream) => {
-		const headers = new Headers({ "Content-Type": "application/json" });
-		return this.authHttp.post("/api/stream/assignFields/" + theStream.id, theStream.fields, { headers: headers }).map((response: Response) => {
-			return response.json();
-		}).catch((error: Response) => {
-			console.log(error);
-			console.log("Erred", theStream);
-			return Observable.throw("Assigning fields has failed: " + error.json().message);
-		});
-	}
-	retrieveFields = (id: number) => {
-		return this.authHttp.get("/api/stream/retrieveFields/" + id).map((response: Response) => {
-			return response.json();
-		}).catch((error: Response) => {
-			console.log(error);
-			console.log("Erred", id);
-			return Observable.throw("Retrieving fields has failed: " + id);
-		});
-	}
 	clearFields = (id: number) => {
 		return this.authHttp.get("/api/stream/clearFields/" + id).map((response: Response) => {
 			return response.json();

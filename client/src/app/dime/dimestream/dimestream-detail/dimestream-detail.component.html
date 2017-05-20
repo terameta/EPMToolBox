@@ -6,7 +6,7 @@
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#streamtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
 			<li><a href="#streamtabfields" data-toggle="tab">Fields</a></li>
-			<li><a href="#streamtabfielddescriptiontables" data-toggle="tab" *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP' && mainService.curItemAssignedFields.length > 0">Field Description Tables</a></li>
+			<li><a href="#streamtabfielddescriptiontables" data-toggle="tab" *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP' && mainService.curItemAssignedFields">Field Description Tables</a></li>
 		</ul>
 	</div>
 	<div class="box-body">
@@ -43,7 +43,7 @@
 							<label for="streamDB" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='PBCS'">Application Name:</label>
 							<div class="col-xs-10">
 								<div class="input-group">
-									<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="mainService.curItem.dbName" (change)="curStreamClean=false;">
+									<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="mainService.curItem.dbName" (change)="mainService.curItemClean=false;">
 										<option *ngFor="let selectableDB of mainService.curItemDatabaseList" [value]="selectableDB.name">{{selectableDB.name}}</option>
 									</select>
 									<span class="input-group-btn">
@@ -62,76 +62,78 @@
 								</span>
 							</div>
 						</div>
-						<!--<div class="form-group">
-							<label for="streamTable" class="col-xs-2 control-label" *ngIf="!curStreamEnvironmentType">Table Name:</label>
-							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='MSSQL'">Table Name:</label>
-							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='HP'">Cube Name:</label>
-							<label for="streamTable" class="col-xs-2 control-label" *ngIf="curStreamEnvironmentType=='PBCS'">Cube Name:</label>
-							<div class="col-xs-10" *ngIf="curStreamEnvironmentType == 'PBCS'">
-								<input type="text" class="form-control" id="streamTable" name="streamTable" [(ngModel)]="curStream.tableName">
-								<span class="help-block" *ngIf="!curStream.dbName">
+						<div class="form-group">
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="!mainService.curItemEnvironmentType">Table Name:</label>
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='MSSQL'">Table Name:</label>
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='HP'">Cube Name:</label>
+							<label for="streamTable" class="col-xs-2 control-label" *ngIf="mainService.curItemEnvironmentType=='PBCS'">Cube Name:</label>
+							<div class="col-xs-10" *ngIf="mainService.curItemEnvironmentType == 'PBCS'">
+								<input type="text" class="form-control" id="streamTable" name="streamTable" [(ngModel)]="mainService.curItem.tableName">
+								<span class="help-block" *ngIf="!mainService.curItem.dbName">
 									<div class="well well-warning well-sm">
 											Please assign a database/application to be able to change the tablename.
 									</div>
 								</span>
 							</div>
-							<div class="col-xs-10" *ngIf="curStreamEnvironmentType != 'PBCS'">
+							<div class="col-xs-10" *ngIf="mainService.curItemEnvironmentType != 'PBCS'">
 								<div class="input-group">
-									<select name="streamTable" id="streamTable" class="form-control" [(ngModel)]="curStream.tableName" (change)="curStreamClean=false;">
-										<option *ngFor="let selectableTable of tableList" [value]="selectableTable.name">{{selectableTable.name}} ({{selectableTable.type}})</option>
+									<select name="streamTable" id="streamTable" class="form-control" [(ngModel)]="mainService.curItem.tableName" (change)="mainService.curStreamClean=false;">
+										<option *ngFor="let selectableTable of mainService.curItemTableList" [value]="selectableTable.name">{{selectableTable.name}} ({{selectableTable.type}})</option>
 									</select>
 									<span class="input-group-btn">
-										<button class="btn btn-default" type="button" [disabled]="!curStream.dbName" (click)="streamRefreshTables()">Refresh</button>
+										<button class="btn btn-default" type="button" [disabled]="!mainService.curItem.dbName" (click)="mainService.refreshTables()">Refresh</button>
 									</span>
 								</div>
-								<span class="help-block" *ngIf="!curStream.dbName">
+								<span class="help-block" *ngIf="!mainService.curItem.dbName">
 									<div class="well well-warning well-sm">
 											Please assign a database to be able to change the tablename.
 									</div>
 								</span>
 							</div>
 						</div>
-						<div class="form-group" *ngIf="curStreamEnvironmentType == 'MSSQL'">
+						<div class="form-group" *ngIf="mainService.curItemEnvironmentType == 'MSSQL'">
 							<label for="streamQuery" class="col-xs-2 control-label">Custom Query:</label>
 							<div class="col-xs-10">
-								<textarea name="streamQuery" id="streamQuery" rows="10" class="form-control" [(ngModel)]="curStream.customQuery" *ngIf="curStream.tableName == 'Custom Query'"></textarea>
-								<input type="text" class="form-control" id="streamQuery" name="streamQuery" [(ngModel)]="curStream.customQuery" disabled
-								 *ngIf="curStream.tableName != 'Custom Query'">
+								<textarea name="streamQuery" id="streamQuery" rows="10" class="form-control" [(ngModel)]="mainService.curItem.customQuery" *ngIf="mainService.curItem.tableName == 'Custom Query'"></textarea>
+								<input type="text" class="form-control" id="streamQuery" name="streamQuery" [(ngModel)]="mainService.curItem.customQuery" disabled *ngIf="mainService.curItem.tableName != 'Custom Query'">
 							</div>
 						</div>
 						<div class="form-group">
 							<div class="col-xs-10 col-xs-offset-2">
 								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
 								<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/streams/stream-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
-								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="streamDelete(curStream.id)"><i class="fa fa-trash fa-fw"></i> Delete Stream</button>
+								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)"><i class="fa fa-trash fa-fw"></i> Delete Stream</button>
 							</div>
-						</div>-->
+						</div>
 					</fieldset>
 				</form>
 			</div>
-			<!--<div class="tab-pane fade" id="streamtabfields">
-				<button *ngIf="!assignedFields && curStreamEnvironmentType != 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamGetFields(curStream.id)">Refresh Fields from Server</button>
-				<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamInitiateFieldsPBCS()">Start</button>
-				<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS' && sourcedFields" type="button" class="btn btn-default btn-xs"
-				 (click)="streamSourcedFieldAdd()">Add New Field</button>
-				<button *ngIf="sourcedFields" type="button" class="btn btn-default btn-xs" (click)="streamAssignFields()">Assign Fields</button>
-				<button *ngIf="assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamFieldsStartOver(curStream)">Start Over</button>
-				<button *ngIf="assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamFieldsSaveChanges()"><i class="fa fa-save fa-fw"></i> Save Changes</button>
-				<hr *ngIf="sourcedFields  || assignedFields">
-				<div *ngIf="sourcedFields && !assignedFields && curStreamEnvironmentType != 'PBCS'">
+			<div class="tab-pane fade" id="streamtabfields">
+				<button 
+					*ngIf="!mainService.curItemAssignedFields && mainService.curItemEnvironmentType != 'PBCS'" 
+					type="button" class="btn btn-default btn-xs" (click)="mainService.listFieldsFromSourceEnvironment(mainService.curItem.id)">
+					Refresh Fields from Server
+				</button>
+				<!--<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="streamInitiateFieldsPBCS()">Start</button>-->
+				<!--<button *ngIf="!assignedFields && curStreamEnvironmentType == 'PBCS' && mainService.curItemSourcedFields" type="button" class="btn btn-default btn-xs" (click)="streamSourcedFieldAdd()">Add New Field</button>-->
+				<button *ngIf="mainService.curItemSourcedFields" type="button" class="btn btn-default btn-xs" (click)="streamAssignFields()">Assign Fields</button>
+				<!--<button *ngIf="assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamFieldsStartOver(curStream)">Start Over</button>-->
+				<!--<button *ngIf="assignedFields" type="button" class="btn btn-default btn-xs" (click)="streamFieldsSaveChanges()"><i class="fa fa-save fa-fw"></i> Save Changes</button>-->
+				<hr *ngIf="mainService.curItemSourcedFields  || mainService.curItemAssignedFields">
+				<div *ngIf="mainService.curItemSourcedFields && !mainService.curItemAssignedFields && mainService.curItemEnvironmentType != 'PBCS'">
 					<table class="table table-striped table-bordered table-hover table-condensed">
 						<tr>
 							<th>Name</th>
 							<th>Type</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Should Ignore?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Assign Properties</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Should Ignore?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Assign Properties</th>
 							<th>Actions</th>
 						</tr>
-						<tr *ngFor="let curField of sourcedFields;let i = index;let last=last;let first=first">
+						<tr *ngFor="let curField of mainService.curItemSourcedFields;let i = index;let last=last;let first=first">
 							<td>{{curField.name}}</td>
 							<td>{{curField.type}}</td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">
 								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
 									<span class="input-group-addon"><b># of Digits:</b></span>
 									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.precision" min="1" max="65">
@@ -152,25 +154,25 @@
 							</td>
 							<td>
 								<div class="btn-group btn-group-xs" role="group">
-									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="streamFieldMove(sourcedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.fieldMove(mainService.curItemSourcedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
 									<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
-									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="streamFieldMove(sourcedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.fieldMove(mainService.curItemSourcedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
 								</div>
 							</td>
 
 						</tr>
 					</table>
 				</div>
-				<div *ngIf="sourcedFields && !assignedFields && curStreamEnvironmentType == 'PBCS'">
+				<!--<div *ngIf="mainService.curItemSourcedFields && !assignedFields && curStreamEnvironmentType == 'PBCS'">
 					<table class="table table-striped table-bordered table-hover table-condensed">
 						<tr>
 							<th>Name</th>
 							<th>Type</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Should Ignore?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Assign Properties</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Should Ignore?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Assign Properties</th>
 							<th>Actions</th>
 						</tr>
-						<tr *ngFor="let curField of sourcedFields;let i = index;let last=last;let first=first">
+						<tr *ngFor="let curField of mainService.curItemSourcedFields;let i = index;let last=last;let first=first">
 							<td>
 								<input type="text" class="form-control" placeholder="Dimension Name" [(ngModel)]="curField.name">
 							</td>
@@ -181,9 +183,9 @@
 							</td>
 							<td>
 								<div class="btn-group btn-group-xs" role="group">
-									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="streamFieldMove(sourcedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="streamFieldMove(mainService.curItemSourcedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
 									<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
-									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="streamFieldMove(sourcedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
+									<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="streamFieldMove(mainService.curItemSourcedFields, curField, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
 								</div>
 								<div class="btn-group btn-group-xs pull-right" role="group">
 									<button class="btn btn-danger" type="button" (click)="streamSourcedFieldRemove(i)"><i class="fa fa-trash fa-fw"></i></button>
@@ -198,15 +200,15 @@
 						<tr>
 							<th>Name</th>
 							<th>Type</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Should Ignore?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Described?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Filter?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Cross Tab?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Month?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Is Data?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Should Ignore?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Described?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Filter?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Cross Tab?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Month?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Data?</th>
 							<th *ngIf="curStreamEnvironmentType == 'PBCS' || curStreamEnvironmentType == 'HP'">Should Ignore for Crosstab?</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Aggregate Function</th>
-							<th *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">Assign Properties</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Aggregate Function</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Assign Properties</th>
 							<th>Actions</th>
 						</tr>
 						<tr *ngFor="let curField of assignedFields;let i = index;let last=last;let first=first">
@@ -214,14 +216,14 @@
 								{{curField.name}}<br>
 							</td>
 							<td>{{curField.type}}</td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isDescribed" ngTrueValue="1" ng-false-value="0"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isFilter" ng-true-value="1" ng-false-value="0"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isMonth" ng-true-value="1" ng-false-value="0"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isData" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isDescribed" ngTrueValue="1" ng-false-value="0"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isFilter" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isMonth" ng-true-value="1" ng-false-value="0"></td>
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isData" ng-true-value="1" ng-false-value="0"></td>
 							<td *ngIf="curStreamEnvironmentType == 'PBCS' || curStreamEnvironmentType == 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">
 								<select *ngIf="curField.isData == 1" [(ngModel)]="curField.aggregateFunction">
 									<option value="">NONE</option>
 									<option value="SUM">SUM</option>
@@ -231,7 +233,7 @@
 									<option value="MIN">MIN</option>
 								</select>
 							</td>
-							<td *ngIf="curStreamEnvironmentType != 'PBCS' && curStreamEnvironmentType != 'HP'">
+							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">
 								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
 									<span class="input-group-addon"><b># of Digits:</b></span>
 									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.fPrecision" min="1" max="65">
@@ -260,8 +262,8 @@
 
 						</tr>
 					</table>
-				</div>
-			</div>-->
+				</div>-->
+			</div>
 			<!--<div class="tab-pane fade" id="streamtabfielddescriptiontables">
 				<div class="box box-primary">
 					<div class="box-header">
