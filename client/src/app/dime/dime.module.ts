@@ -36,7 +36,7 @@ const dimeRoutes: Routes = [
 			// tslint:disable-next-line:max-line-length
 			{ path: "environments", component: DimeenvironmentsComponent, loadChildren: "app/dime/dimeenvironment/dimeenvironment.module#DimeenvironmentModule" },
 			{ path: "streams", component: DimestreamsComponent, loadChildren: "app/dime/dimestream/dimestream.module#DimestreamModule" },
-			// { path: "maps", component: DimemapsComponent, loadChildren: "app/dime/dimemap/dimemap.module#DimemapModule" }
+			{ path: "maps", component: DimemapsComponent, loadChildren: "app/dime/dimemap/dimemap.module#DimemapModule" }
 		]
 	}
 ];
@@ -49,7 +49,7 @@ const dimeRoutes: Routes = [
 		DimescheduleModule,
 		DimeenvironmentModule,
 		DimestreamModule,
-		// DimemapModule,
+		DimemapModule,
 		RouterModule.forChild(dimeRoutes),
 		AuthModule
 	],

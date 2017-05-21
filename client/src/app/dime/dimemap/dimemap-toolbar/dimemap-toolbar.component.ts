@@ -12,9 +12,9 @@ import { DimeMap } from "../../../../../../shared/model/map";
 })
 export class DimemapToolbarComponent implements OnInit {
 
-	constructor(private mapService: DimeMapService) { }
+	constructor(private mainService: DimeMapService) { }
 
 	ngOnInit() {
-		this.mapService.getAll();
+		this.mainService.getAll();
 	}
 }

@@ -31,19 +31,17 @@ class MapTools {
                 });
             });
         };
-        this.create = (dimeMap) => {
+        this.create = () => {
             return new Promise((resolve, reject) => {
-                if (dimeMap.id) {
-                    delete dimeMap.id;
-                }
-                ;
-                this.db.query("INSERT INTO maps SET ?", dimeMap, (err, rows, fields) => {
+                let newMap = {};
+                newMap = { name: "New Map" };
+                this.db.query("INSERT INTO maps SET ?", { name: "New Map" }, (err, rows, fields) => {
                     if (err) {
                         reject({ error: err, message: "Failed to create a new map." });
                     }
                     else {
-                        dimeMap.id = rows.insertId;
-                        resolve(dimeMap);
+                        newMap.id = rows.insertId;
+                        resolve(newMap);
                     }
                 });
             });

@@ -5,9 +5,3 @@ export interface DimeMap {
 	source?: number,
 	target?: number
 }
-
-export interface DimeMapType {
-	id: number,
-	name: string,
-	value: string
-}

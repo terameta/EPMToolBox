@@ -43,9 +43,9 @@ const appRoutes: Routes = [
 	providers: [
 		AuthGuard,
 		AuthService,
-		DimeMapService,
 		DimeEnvironmentService,
-		DimeStreamService
+		DimeStreamService,
+		DimeMapService
 	],
 	bootstrap: [AppComponent]
 })
