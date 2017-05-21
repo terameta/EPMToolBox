@@ -1,17 +1,17 @@
 import * as mssql from "mssql";
 
 import { MainTools } from "../config/config.tools";
-import { Environment } from "../../shared/model/environment";
+import { DimeEnvironment } from "../../shared/model/dime/environment";
 
 export class MSSQLTools {
 
 	constructor(public tools: MainTools) { }
 
-	public verify = (refObj: Environment) => {
+	public verify = (refObj: DimeEnvironment) => {
 		return this.connect(refObj);
 	}
 
-	private connect = (refObj: Environment) => {
+	private connect = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			const dbConfig: any = {
 				user: refObj.username || "",
@@ -33,7 +33,7 @@ export class MSSQLTools {
 		})
 	}
 
-	public listDatabases = (refObj: Environment) => {
+	public listDatabases = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
 				then((curObj: any) => {
@@ -50,7 +50,7 @@ export class MSSQLTools {
 		});
 	}
 
-	public listTables = (refObj: Environment) => {
+	public listTables = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
 				then((curObj: any) => {
@@ -83,7 +83,7 @@ export class MSSQLTools {
 			return 0;
 		}
 	}
-	public listFields = (refObj: Environment) => {
+	public listFields = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
 				then((innerObj: any) => {

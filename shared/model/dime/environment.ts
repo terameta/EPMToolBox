@@ -1,10 +1,10 @@
-import { EnvironmentType } from './environmenttype';
+import { DimeEnvironmentType } from './environmenttype';
 
-export interface Environment {
+export interface DimeEnvironment {
 	id: number,
 	name?: string,
 	type?: number,
-	typedetails?: EnvironmentType,
+	typedetails?: DimeEnvironmentType,
 	server?: string,
 	port?: string,
 	verified?: number,

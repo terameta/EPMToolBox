@@ -5,7 +5,6 @@ import { Subscription } from "rxjs/Subscription";
 import { Observable } from "rxjs/Rx";
 
 import { DimeMapService } from "../dimemap.service";
-import { DimeStreamService } from "../../dimestream/dimestream.service";
 
 @Component({
 	selector: "app-dimemap-detail",
@@ -17,8 +16,7 @@ export class DimemapDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
-		private mainService: DimeMapService,
-		private streamService: DimeStreamService
+		private mainService: DimeMapService
 	) { }
 
 	ngOnInit() {

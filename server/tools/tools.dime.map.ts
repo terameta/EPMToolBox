@@ -2,7 +2,7 @@ import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
 
-import { DimeMap } from "../../shared/model/map";
+import { DimeMap } from "../../shared/model/dime/map";
 
 export class MapTools {
 	constructor(public db: IPool, public tools: MainTools) {
@@ -35,7 +35,7 @@ export class MapTools {
 	}
 	public create = () => {
 		return new Promise((resolve, reject) => {
-			let newMap = {};
+			let newMap: any = {};
 			newMap = { name: "New Map" };
 			this.db.query("INSERT INTO maps SET ?", { name: "New Map" }, (err, rows, fields) => {
 				if (err) {

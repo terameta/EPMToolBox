@@ -7,7 +7,7 @@ import { Observable } from "rxjs/Rx";
 
 import { DimeEnvironmentService } from "../dimeenvironment.service";
 
-import { Environment } from "../../../../../../shared/model/environment";
+// import { DimeEnvironment } from "../../../../../../shared/model/dime/environment";
 
 @Component({
 	selector: "app-dimeenvironment-detail",

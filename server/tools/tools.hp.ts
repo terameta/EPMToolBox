@@ -1,7 +1,7 @@
 import * as request from "request";
 import * as xml2js from "xml2js";
 
-import { EnvironmentHP } from "../../shared/model/environmentHP";
+import { DimeEnvironmentHP } from "../../shared/model/dime/environmentHP";
 import { MainTools } from "../config/config.tools";
 
 export class HPTools {
@@ -11,7 +11,7 @@ export class HPTools {
 		this.xmlParser = xml2js.parseString;
 	}
 
-	public verify = (refObj: EnvironmentHP) => {
+	public verify = (refObj: DimeEnvironmentHP) => {
 		return this.staticVerify(refObj).
 			then(this.hpEstablishConnection).
 			then(this.hpGetDataSources).
@@ -28,7 +28,7 @@ export class HPTools {
 		// 		}).catch(reject);
 		// });
 	}
-	private staticVerify = (refObj: EnvironmentHP) => {
+	private staticVerify = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
 				reject("No data provided");
@@ -50,7 +50,7 @@ export class HPTools {
 		});
 	}
 	// Old Step0100
-	private hpEstablishConnection = (refObj: EnvironmentHP) => {
+	private hpEstablishConnection = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			request.post({
 				url: refObj.smartviewurl || "",
@@ -68,7 +68,7 @@ export class HPTools {
 		});
 	}
 	// Old Step0200
-	private hpGetDataSources = (refObj: EnvironmentHP) => {
+	private hpGetDataSources = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			request.post({
 				url: refObj.smartviewurl || "",
@@ -126,12 +126,12 @@ export class HPTools {
 		});
 	}
 	// Old Step0300
-	private hpConnectToProvider = (refObj: EnvironmentHP) => {
+	private hpConnectToProvider = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.staticVerify(refObj).
 				then(this.hpEstablishConnection).
 				then(this.hpGetDataSources).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					if (!innerObj.planningurl) {
 						reject("No Planning url is found");
 					} else {
@@ -165,20 +165,20 @@ export class HPTools {
 				}).catch(reject);
 		})
 	}
-	public listApplications = (refObj: EnvironmentHP) => {
+	public listApplications = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpListApplications(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					resolve(innerObj.apps);
 				}).
 				catch(reject);
 		})
 	};
 	// Old Step0400
-	private hpListServers = (refObj: EnvironmentHP) => {
+	private hpListServers = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpConnectToProvider(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						body: "<req_ListServers><sID>" + innerObj.sID + "</sID></req_ListServers>",
@@ -207,10 +207,10 @@ export class HPTools {
 		});
 	};
 	// Old Step0500
-	private hpListApplications = (refObj: EnvironmentHP) => {
+	private hpListApplications = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpListServers(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						body: "<req_ListApplications><sID>" + innerObj.sID + "</sID><srv>" + innerObj.server + "</srv><type></type><url></url></req_ListApplications>",
@@ -247,10 +247,10 @@ export class HPTools {
 				}).catch(reject);
 		});
 	};
-	public listCubes = (refObj: EnvironmentHP) => {
+	public listCubes = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpListCubes(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					if (!innerObj.cubes) {
 						reject("No cubes are found");
 					} else {
@@ -266,11 +266,11 @@ export class HPTools {
 		});
 	};
 	// Old Step0600
-	private hpOpenApplication = (refObj: EnvironmentHP) => {
+	private hpOpenApplication = (refObj: DimeEnvironmentHP) => {
 		let curBody = "";
 		return new Promise((resolve, reject) => {
 			this.hpListApplications(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					curBody = "<req_OpenApplication>";
 					curBody += "<sID>" + innerObj.sID + "</sID>";
 					curBody += "<srv>" + innerObj.server + "</srv>";
@@ -307,10 +307,10 @@ export class HPTools {
 		});
 	};
 	// Old Step0700
-	private hpGetAvailableServices = (refObj: EnvironmentHP) => {
+	private hpGetAvailableServices = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpOpenApplication(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						body: "<req_GetAvailableServices><sID>" + refObj.sID + "</sID><CubeView/></req_GetAvailableServices>",
@@ -337,10 +337,10 @@ export class HPTools {
 		});
 	};
 	// Old Step0800
-	private hpListDocuments = (refObj: EnvironmentHP) => {
+	private hpListDocuments = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpGetAvailableServices(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						body: "<req_ListDocuments><sID>" + refObj.sID + "</sID><type>all</type><folder>/</folder><ODL_ECID>0000</ODL_ECID></req_ListDocuments>",
@@ -367,10 +367,10 @@ export class HPTools {
 		})
 	};
 	// Old Step0900
-	private hpListCubes = (refObj: EnvironmentHP) => {
+	private hpListCubes = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpListDocuments(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						body: "<req_ListCubes><sID>" + refObj.sID + "</sID><srv>" + refObj.server + "</srv><app>" + refObj.database + "</app><type></type><url></url></req_ListCubes>",
@@ -401,7 +401,7 @@ export class HPTools {
 				catch();
 		});
 	};
-	public listDimensions = (refObj: EnvironmentHP) => {
+	public listDimensions = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpListDimensions(refObj).
 				then(resolve).
@@ -409,10 +409,10 @@ export class HPTools {
 		});
 	}
 	// Old Step1000
-	private hpOpenCube = (refObj: EnvironmentHP) => {
+	private hpOpenCube = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpListCubes(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						// tslint:disable-next-line:max-line-length
@@ -437,10 +437,10 @@ export class HPTools {
 				catch(reject);
 		});
 	}
-	private hpListDimensions = (refObj: EnvironmentHP) => {
+	private hpListDimensions = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			this.hpOpenCube(refObj).
-				then((innerObj: EnvironmentHP) => {
+				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
 						url: innerObj.planningurl || "",
 						body: "<req_EnumDims><sID>" + innerObj.sID + "</sID><cube>" + innerObj.table + "</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>",

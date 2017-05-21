@@ -1,4 +1,4 @@
-export interface StreamType {
+export interface DimeStreamType {
 	id: number,
 	name: string,
 	value: string

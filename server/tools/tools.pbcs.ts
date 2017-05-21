@@ -1,7 +1,7 @@
 import * as request from "request";
 import * as xml2js from "xml2js";
 
-import { EnvironmentPBCS } from "../../shared/model/environmentPBCS";
+import { DimeEnvironmentPBCS } from "../../shared/model/dime/environmentPBCS";
 import { MainTools } from "../config/config.tools";
 
 export class PBCSTools {
@@ -11,15 +11,15 @@ export class PBCSTools {
 		this.xmlParser = xml2js.parseString;
 	}
 
-	public verify = (refObj: EnvironmentPBCS) => {
+	public verify = (refObj: DimeEnvironmentPBCS) => {
 		return this.initiateRest(refObj);
 
 	};
-	private initiateRest = (refObj: EnvironmentPBCS) => {
+	private initiateRest = (refObj: DimeEnvironmentPBCS) => {
 		return this.staticVerify(refObj).
 			then(this.pbcsGetVersion);
 	}
-	private staticVerify = (refObj: EnvironmentPBCS) => {
+	private staticVerify = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
 				reject("No data provided");
@@ -41,7 +41,7 @@ export class PBCSTools {
 			}
 		});
 	}
-	private pbcsGetVersion = (refObj: EnvironmentPBCS) => {
+	private pbcsGetVersion = (refObj: DimeEnvironmentPBCS) => {
 		// console.log(refObj.resturl);
 		return new Promise((resolve, reject) => {
 			request.get({
@@ -80,19 +80,19 @@ export class PBCSTools {
 			});
 		});
 	}
-	public listApplications = (refObj: EnvironmentPBCS) => {
+	public listApplications = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			this.pbcsGetApplications(refObj).
-				then((innerObj: EnvironmentPBCS) => {
+				then((innerObj: DimeEnvironmentPBCS) => {
 					resolve(innerObj.apps);
 				}).
 				catch(reject);
 		});
 	}
-	private pbcsGetApplications = (refObj: EnvironmentPBCS) => {
+	private pbcsGetApplications = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			this.initiateRest(refObj).
-				then((innerObj: EnvironmentPBCS) => {
+				then((innerObj: DimeEnvironmentPBCS) => {
 					request.get({
 						url: innerObj.resturl + "/applications",
 						auth: {
@@ -127,19 +127,19 @@ export class PBCSTools {
 				catch(reject);
 		});
 	}
-	public listCubes = (refObj: EnvironmentPBCS) => {
+	public listCubes = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			this.pbcsGetCubes(refObj).
-				then((innerObj: EnvironmentPBCS) => {
+				then((innerObj: DimeEnvironmentPBCS) => {
 					reject("Not yet");
 				}).
 				catch(reject);
 		});
 	}
-	private pbcsGetCubes = (refObj: EnvironmentPBCS) => {
+	private pbcsGetCubes = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			this.initiateRest(refObj).
-				then((innerObj: EnvironmentPBCS) => {
+				then((innerObj: DimeEnvironmentPBCS) => {
 					request.get({
 						url: innerObj.resturl + "/applications/" + innerObj.database + "/",
 						auth: {

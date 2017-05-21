@@ -6,7 +6,10 @@ import { BehaviorSubject, Observable } from "rxjs/Rx";
 import { AuthHttp } from "angular2-jwt";
 import { ToastrService } from "ngx-toastr";
 
-import { DimeMap } from "../../../../../shared/model/map";
+import { DimeStreamService } from "../dimestream/dimestream.service";
+
+import { DimeMap } from "../../../../../shared/model/dime/map";
+import { DimeStream } from "../../../../../shared/model/dime/stream";
 
 @Injectable()
 export class DimeMapService {
@@ -14,6 +17,10 @@ export class DimeMapService {
 	itemCount: Observable<number>;
 	curItem: DimeMap;
 	curItemClean: boolean;
+	curItemSourceStream: DimeStream;
+	curItemSourceStreamFields: any[];
+	curItemTargetStream: DimeStream;
+	curItemTargetStreamFields: any[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeMap[]>;
 	private baseUrl: string;
@@ -27,7 +34,8 @@ export class DimeMapService {
 		private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private router: Router,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private streamService: DimeStreamService
 	) {
 		this.baseUrl = "/api/dime/map";
 		this.dataStore = { items: [] };
@@ -44,6 +52,7 @@ export class DimeMapService {
 				return response.json();
 			}).
 			subscribe((data) => {
+				data.sort(this.sortByName);
 				this.dataStore.items = data;
 				this._items.next(Object.assign({}, this.dataStore).items);
 			}, (error) => {
@@ -67,19 +76,40 @@ export class DimeMapService {
 					this.dataStore.items.push(result);
 				}
 
+				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.curItem = result;
 				this.curItemClean = true;
+				if (this.curItem.source) { this.getStreamDefinition(this.curItem.source, "source"); }
+				if (this.curItem.target) { this.getStreamDefinition(this.curItem.target, "target"); }
 			}, (error) => {
 				this.toastr.error("Failed to get the item.", this.serviceName);
 				console.log(error);
 			});
+	}
+	private getStreamDefinition = (id: number, srctar: string) => {
+		this.streamService.fetchOne(id).subscribe((result) => {
+			if (srctar === "source") { this.curItemSourceStream = result; }
+			if (srctar === "target") { this.curItemTargetStream = result; }
+		}, (error) => {
+			this.toastr.error("Failed to fetch stream definition.", this.serviceName);
+			console.log(error);
+		});
+		this.streamService.retrieveFieldsFetch(id).subscribe((result) => {
+			console.log("Returned", result, srctar);
+			if (srctar === "source") { this.curItemSourceStreamFields = result; }
+			if (srctar === "target") { this.curItemTargetStreamFields = result; }
+		}, (error) => {
+			this.toastr.error("Failed to fetch stream fields list.", this.serviceName);
+			console.log(error);
+		})
 	}
 	create = () => {
 		this.authHttp.post(this.baseUrl, {}, { headers: this.headers }).
 			map(response => response.json()).
 			subscribe((result) => {
 				this.dataStore.items.push(result);
+				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.resetCurItem();
 				this.router.navigate(["/dime/maps/map-detail", result.id]);
@@ -90,15 +120,35 @@ export class DimeMapService {
 			}
 			);
 	}
-	update = (dimeMap: DimeMap) => {
-		this.authHttp.put(this.baseUrl + "/" + dimeMap.id, dimeMap, { headers: this.headers })
-			.map(response => response.json()).subscribe(data => {
-				this.dataStore.items.forEach((item, index) => {
-					if (item.id === data.id) { this.dataStore.items[index] = data; }
-				});
+	// update = (curItem?: DimeMap) => {
+	// 	this.authHttp.put(this.baseUrl + "/" + dimeMap.id, dimeMap, { headers: this.headers })
+	// 		.map(response => response.json()).subscribe(data => {
+	// 			this.dataStore.items.forEach((item, index) => {
+	// 				if (item.id === data.id) { this.dataStore.items[index] = data; }
+	// 			});
 
+	// 			this._items.next(Object.assign({}, this.dataStore).items);
+	// 		}, error => console.log("Could not update map."));
+	// }
+	update = (curItem?: DimeMap) => {
+		let shouldUpdate = false;
+		if (!curItem) { curItem = this.curItem; shouldUpdate = true; };
+		this.authHttp.put(this.baseUrl, curItem, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.dataStore.items.forEach((item, index) => {
+					if (item.id === result.id) { this.dataStore.items[index] = result; }
+				});
+				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
-			}, error => console.log("Could not update map."));
+				this.toastr.info("Item is successfully saved.", this.serviceName);
+				// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
+				// This shouldn't change the state of the current item.
+				if (shouldUpdate) { this.curItemClean = true; }
+			}, error => {
+				this.toastr.error("Failed to save the item.", this.serviceName);
+				console.log(error);
+			});
 	}
 	delete(id: number) {
 		const verificationQuestion = this.serviceName + ": Are you sure you want to delete " + (name !== undefined ? name : "the item") + "?";
@@ -107,7 +157,7 @@ export class DimeMapService {
 				this.dataStore.items.forEach((item, index) => {
 					if (item.id === id) { this.dataStore.items.splice(index, 1); }
 				});
-
+				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.toastr.info("Item is deleted.", this.serviceName);
 				this.router.navigate(["/dime/maps/map-list"]);
@@ -123,5 +173,14 @@ export class DimeMapService {
 	private resetCurItem = () => {
 		this.curItem = { id: 0, name: "-" };
 		this.curItemClean = true;
+	}
+	private sortByName = (e1, e2) => {
+		if (e1.name > e2.name) {
+			return 1;
+		} else if (e1.name < e2.name) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 }

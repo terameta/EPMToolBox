@@ -1,6 +1,6 @@
-import { Environment } from './environment';
+import { DimeEnvironment } from './environment';
 
-export interface EnvironmentHP extends Environment{
+export interface DimeEnvironmentHP extends DimeEnvironment{
 	address?: string,
 	smartviewurl?: string,
 	planningurl?: string,

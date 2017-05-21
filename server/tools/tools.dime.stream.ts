@@ -1,7 +1,7 @@
 import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
-import { Stream } from "../../shared/model/stream";
+import { DimeStream } from "../../shared/model/dime/stream";
 import { EnvironmentTools } from "./tools.dime.environment";
 
 export class StreamTools {
@@ -58,7 +58,7 @@ export class StreamTools {
 			});
 		});
 	};
-	public update = (theStream: Stream) => {
+	public update = (theStream: DimeStream) => {
 		return new Promise((resolve, reject) => {
 			const theID: number = theStream.id;
 			this.db.query("UPDATE streams SET ? WHERE id = " + theID, theStream, function (err, result, fields) {
@@ -85,7 +85,7 @@ export class StreamTools {
 		return new Promise((resolve, reject) => {
 			this.getOne(id).
 				then(this.buildQuery).
-				then((innerObj: Stream) => {
+				then((innerObj: DimeStream) => {
 					return this.environmentTool.listFields({ id: innerObj.environment, query: innerObj.finalQuery, database: innerObj.dbName, table: innerObj.tableName });
 				}).
 				then((result: any) => {

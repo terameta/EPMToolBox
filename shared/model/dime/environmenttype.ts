@@ -1,4 +1,4 @@
-export interface EnvironmentType{
+export interface DimeEnvironmentType{
 	id: number,
 	name: string,
 	value: string

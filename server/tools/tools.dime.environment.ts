@@ -1,7 +1,7 @@
 import { IPool } from "mysql";
 
 import { MainTools } from "../config/config.tools";
-import { Environment } from "../../shared/model/environment";
+import { DimeEnvironment } from "../../shared/model/dime/environment";
 import { MSSQLTools } from "./tools.mssql";
 import { HPTools } from "./tools.hp";
 import { PBCSTools } from "./tools.pbcs";
@@ -23,7 +23,7 @@ export class EnvironmentTools {
 				if (err) {
 					reject({ error: err, message: "Retrieving environment list has failed" });
 				} else {
-					rows.forEach((curRow: Environment) => {
+					rows.forEach((curRow: DimeEnvironment) => {
 						curRow.password = "|||---protected---|||";
 					});
 					resolve(rows);
@@ -36,7 +36,7 @@ export class EnvironmentTools {
 		return this.getEnvironmentDetails({ id: id });
 	}
 
-	public getEnvironmentDetails = (refObj: Environment, shouldShowPassword?: boolean) => {
+	public getEnvironmentDetails = (refObj: DimeEnvironment, shouldShowPassword?: boolean) => {
 		return new Promise((resolve, reject) => {
 			this.db.query("SELECT * FROM environments WHERE id = ?", refObj.id, (err, rows, fields) => {
 				if (err) {
@@ -67,7 +67,7 @@ export class EnvironmentTools {
 		});
 	};
 
-	private getTypeDetails = (refObj: Environment): Promise<Environment> => {
+	private getTypeDetails = (refObj: DimeEnvironment): Promise<DimeEnvironment> => {
 		return new Promise((resolve, reject) => {
 			this.db.query("SELECT * FROM environmenttypes WHERE id = ?", refObj.type, (err, results, fields) => {
 				if (err) {
@@ -95,7 +95,7 @@ export class EnvironmentTools {
 		});
 	};
 
-	public update = (theEnvironment: Environment) => {
+	public update = (theEnvironment: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			if (theEnvironment.password === "|||---protected---|||") {
 				delete theEnvironment.password;
@@ -127,12 +127,12 @@ export class EnvironmentTools {
 	}
 
 	public verify = (envID: number) => {
-		let environmentObject: Environment;
+		let environmentObject: DimeEnvironment;
 		return new Promise((resolve, reject) => {
 			environmentObject = { id: envID };
 			this.getEnvironmentDetails(environmentObject, true).
 				then(this.getTypeDetails).
-				then((curObj: Environment) => {
+				then((curObj: DimeEnvironment) => {
 					if (!curObj.typedetails) {
 						return Promise.reject("No type definition on the environment object");
 					} else if (!curObj.typedetails.value) {
@@ -157,7 +157,7 @@ export class EnvironmentTools {
 		});
 	}
 
-	private setVerified = (refObj: Environment) => {
+	private setVerified = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			this.db.query("UPDATE environments SET ? WHERE id = " + refObj.id, { verified: 1 }, (err, results, fields) => {
 				if (err) {
@@ -170,12 +170,12 @@ export class EnvironmentTools {
 		});
 	};
 
-	public listDatabases = (refObj: Environment) => {
+	public listDatabases = (refObj: DimeEnvironment) => {
 		console.log("Environment list databases");
 		return new Promise((resolve, reject) => {
 			this.getEnvironmentDetails(refObj, true).
 				then(this.getTypeDetails).
-				then((curObj: Environment) => {
+				then((curObj: DimeEnvironment) => {
 					if (!curObj.typedetails) {
 						return Promise.reject("No type definition on the environment object");
 					} else if (!curObj.typedetails.value) {
@@ -196,12 +196,12 @@ export class EnvironmentTools {
 				});
 		});
 	}
-	public listTables = (refObj: Environment) => {
+	public listTables = (refObj: DimeEnvironment) => {
 		// console.log("Environment list tables", refObj);
 		return new Promise((resolve, reject) => {
 			this.getEnvironmentDetails(refObj, true).
 				then(this.getTypeDetails).
-				then((curObj: Environment) => {
+				then((curObj: DimeEnvironment) => {
 					curObj.database = refObj.database;
 					if (!curObj.typedetails) {
 						return Promise.reject("No type definition on the environment object");
@@ -225,11 +225,11 @@ export class EnvironmentTools {
 		});
 	}
 
-	public listFields = (refObj: Environment) => {
+	public listFields = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			this.getEnvironmentDetails(refObj, true).
 				then(this.getTypeDetails).
-				then((innerObj: Environment) => {
+				then((innerObj: DimeEnvironment) => {
 					innerObj.database = refObj.database;
 					innerObj.query = refObj.query;
 					innerObj.table = refObj.table;

@@ -1,4 +1,4 @@
-export interface Stream {
+export interface DimeStream {
 	id: number,
 	name: string,
 	type: number,

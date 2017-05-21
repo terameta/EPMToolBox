@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 
 @Component({
-  selector: 'app-dimeenvironment',
-  templateUrl: './dimeenvironment.component.html',
-  styleUrls: ['./dimeenvironment.component.css']
+	selector: "app-dimeenvironment",
+	templateUrl: "./dimeenvironment.component.html",
+	styleUrls: ["./dimeenvironment.component.css"]
 })
 export class DimeenvironmentComponent implements OnInit {
 
-  constructor() { }
+	constructor() { }
 
-  ngOnInit() {
-  }
+	ngOnInit() {
+	}
 
 }

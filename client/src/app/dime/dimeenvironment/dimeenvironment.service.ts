@@ -7,18 +7,18 @@ import { BehaviorSubject, Observable } from "rxjs/Rx";
 import { AuthHttp } from "angular2-jwt";
 import { ToastrService } from "ngx-toastr";
 
-import { Environment } from "../../../../../shared/model/environment";
-import { EnvironmentType } from "../../../../../shared/model/environmenttype";
+import { DimeEnvironment } from "../../../../../shared/model/dime/environment";
+import { DimeEnvironmentType } from "../../../../../shared/model/dime/environmenttype";
 
 @Injectable()
 export class DimeEnvironmentService {
-	items: Observable<Environment[]>;
-	curItem: Environment;
-	typeList: EnvironmentType[];
-	private _items: BehaviorSubject<Environment[]>;
+	items: Observable<DimeEnvironment[]>;
+	curItem: DimeEnvironment;
+	typeList: DimeEnvironmentType[];
+	private _items: BehaviorSubject<DimeEnvironment[]>;
 	private baseUrl: string;
 	private dataStore: {
-		items: Environment[]
+		items: DimeEnvironment[]
 	};
 	private headers = new Headers({ "Content-Type": "application/json" });
 	private serviceName: string;
@@ -27,7 +27,7 @@ export class DimeEnvironmentService {
 		this.baseUrl = "/api/dime/environment";
 		this.serviceName = "Environments";
 		this.dataStore = { items: [] };
-		this._items = <BehaviorSubject<Environment[]>>new BehaviorSubject([]);
+		this._items = <BehaviorSubject<DimeEnvironment[]>>new BehaviorSubject([]);
 		this.items = this._items.asObservable();
 		this.curItem = { id: 0 };
 		this.typeList = [];
@@ -86,7 +86,7 @@ export class DimeEnvironmentService {
 				console.log(error);
 			});
 	}
-	update = (curItem?: Environment) => {
+	update = (curItem?: DimeEnvironment) => {
 		if (!curItem) { curItem = this.curItem };
 		this.authHttp.put(this.baseUrl, curItem, { headers: this.headers }).
 			map(response => response.json()).

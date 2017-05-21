@@ -44,15 +44,6 @@ export class DimestreamListComponent implements OnInit {
 		);*/
 	}
 /*
-	private sortByName = (e1, e2) => {
-		if (e1.name > e2.name) {
-			return 1;
-		} else if (e1.name < e2.name) {
-			return -1;
-		} else {
-			return 0;
-		}
-	}
 
 	getAll() {
 		this.streamService.getAll().subscribe(

@@ -3,3 +3,15 @@
 .center-text {	text-align: center; }
 .default-color { color: #515151; }
 .navbar-toolbar { margin-top: 51px; }
+
+.well-warning{
+    background: rgb(243, 156, 18);
+	 color: rgb(255,255,255);
+	 border-color: rgb(224, 142, 11);
+}
+
+.well-success {
+	background: rgb(0, 166, 90);
+	color: rgb(255,255,255);
+	border-color: rgb(0, 141, 76);
+}

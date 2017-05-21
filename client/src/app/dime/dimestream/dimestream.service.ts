@@ -8,23 +8,23 @@ import { AuthHttp } from "angular2-jwt";
 import { ToastrService } from "ngx-toastr/toastr/toastr-service";
 
 import { DimeEnvironmentService } from "../dimeenvironment/dimeenvironment.service";
-import { Stream } from "../../../../../shared/model/stream";
-import { StreamType } from "../../../../../shared/model/streamtype";
+import { DimeStream } from "../../../../../shared/model/dime/stream";
+import { DimeStreamType } from "../../../../../shared/model/dime/streamtype";
 
 @Injectable()
 export class DimeStreamService {
-	items: Observable<Stream[]>;
-	typeList: StreamType[];
-	private _items: BehaviorSubject<Stream[]>;
+	items: Observable<DimeStream[]>;
+	typeList: DimeStreamType[];
+	private _items: BehaviorSubject<DimeStream[]>;
 	private baseUrl: string;
 	private dataStore: {
-		items: Stream[]
+		items: DimeStream[]
 	};
 	private headers = new Headers({ "Content-Type": "application/json" });
 	private serviceName: string;
 
 	// CurItem Related Information all together
-	curItem: Stream;
+	curItem: DimeStream;
 	curItemEnvironmentType: string;
 	curItemSourcedFields: any[];
 	curItemAssignedFields: any[];
@@ -57,7 +57,7 @@ export class DimeStreamService {
 		this.baseUrl = "/api/dime/stream";
 		this.serviceName = "Streams";
 		this.dataStore = { items: [] };
-		this._items = <BehaviorSubject<Stream[]>>new BehaviorSubject([]);
+		this._items = <BehaviorSubject<DimeStream[]>>new BehaviorSubject([]);
 		this.items = this._items.asObservable();
 		this.curItem = { id: 0, name: "-", type: 0, environment: 0 };
 		this.typeList = [];
@@ -82,10 +82,19 @@ export class DimeStreamService {
 				console.log(error);
 			});
 	}
+	fetchOne = (id: number) => {
+		return this.authHttp.get(this.baseUrl + "/" + id).
+			map(response => response.json()).
+			catch(error => Observable.throw(error));
+	}
+	/**Reason to have fetchOne/getOne Couple
+	 * Whenever there is a use of the service from another service, and the other service is requesting items, decoupling the fetching mechanism is beneficial.
+	 * Please check dimemap.service.ts for the usage of fetchOne function */
 	getOne = (id: number) => {
 		if (this.typeList.length === 0) { this.listTypes(); }
-		this.authHttp.get(this.baseUrl + "/" + id).
-			map(response => response.json()).
+		// this.authHttp.get(this.baseUrl + "/" + id).
+		// 	map(response => response.json()).
+		this.fetchOne(id).
 			subscribe((data) => {
 				let notFound = true;
 
@@ -148,7 +157,7 @@ export class DimeStreamService {
 				console.log(error);
 			});
 	}
-	update = (curItem?: Stream) => {
+	update = (curItem?: DimeStream) => {
 		let shouldUpdate = false;
 		if (!curItem) { curItem = this.curItem; shouldUpdate = true; };
 		this.authHttp.put(this.baseUrl, curItem, { headers: this.headers }).
@@ -290,9 +299,13 @@ export class DimeStreamService {
 				console.log(error);
 			});
 	};
+	public retrieveFieldsFetch = (id: number) => {
+		return this.authHttp.get(this.baseUrl + "/retrieveFields/" + id).
+			map(response => { console.log(response.json()); return response.json(); }).
+			catch(error => Observable.throw(error));
+	}
 	public retrieveFields = () => {
-		this.authHttp.get(this.baseUrl + "/retrieveFields/" + this.curItem.id).
-			map(response => response.json()).
+		this.retrieveFieldsFetch(this.curItem.id).
 			subscribe((data) => {
 				this.toastr.info("Stream assigned fields are retrieved.", this.serviceName);
 				if (data.length > 0) {

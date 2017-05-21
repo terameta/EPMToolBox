@@ -1,0 +1,48 @@
+<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
+	<fieldset>
+		<div class="form-group">
+			<label for="mapName" class="col-xs-1 control-label">Name:</label>
+			<div class="col-xs-11">
+				<input type="text" class="form-control" id="mapName" name="mapName" [(ngModel)]="mainService.curItem.name">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="mapSource" class="col-xs-1 control-label">Source Stream:</label>
+			<div class="col-xs-11">
+				<select name="mapSourceStream" id="mapSourceStream" class="form-control" [(ngModel)]="mainService.curItem.source">
+					<option *ngFor="let srcStream of streamService.items | async" [value]="srcStream.id"> {{ srcStream.name }} </option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="mapTarget" class="col-xs-1 control-label">Target Stream:</label>
+			<div class="col-xs-11">
+				<select name="mapTargetStream" id="mapTargetStream" class="form-control" [(ngModel)]="mainService.curItem.target">
+					<option *ngFor="let tarStream of streamService.items | async" [value]="tarStream.id"> {{ tarStream.name }} </option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-xs-11 col-xs-offset-1">
+				<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+				<button class="btn btn-success btn-xs" type="button" (click)="mainService.prepareTables()" *ngIf="mainService.curItemIsReady"><i class="fa fa-check-circle"></i> Re-Prepare Map</button>
+				<button class="btn btn-warning btn-xs" type="button" (click)="mainService.prepareTables()" *ngIf="!mainService.curItemIsReady"><i class="fa fa-check-circle"></i> Prepare Map</button>
+				<span class="help-block" *ngIf="mainService.curItemIsReady">
+					<div class="well well-success well-sm">
+							This map definition is ready for mapping.
+					</div>
+				</span>
+				<span class="help-block" *ngIf="!mainService.curItemIsReady">
+					<div class="well well-warning well-sm">
+							This map definition is not ready for mapping.
+					</div>
+				</span>
+			</div>
+		</div>
+	</fieldset>
+</form>
+<pre> {{ mainService.curItem | json }} </pre>
+<pre> {{ mainService.curItemSourceStream | json }} </pre>
+<pre> {{ mainService.curItemSourceStreamFields | json }} </pre>
+<pre> {{ mainService.curItemTargetStream | json }} </pre>
+<pre> {{ mainService.curItemTargetStreamFields | json }} </pre>

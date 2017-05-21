@@ -1,67 +1,33 @@
 <div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">Edit Map</h3>
+	</div>
+	<div class="box-header">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#maptabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
+			<li><a href="#maptabmaptable" data-toggle="tab">Map Table</a></li>
+			<li><a href="#maptabsourcedefinitions" data-toggle="tab">Source Definitions</a></li>
+			<li><a href="#maptabtargetdefinitions" data-toggle="tab">Target Definitions</a></li>
+			<li><a href="#maptabimportexport" data-toggle="tab">Import/Export</a></li>
+		</ul>
+	</div>
 	<div class="box-body">
-		<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
-			<fieldset>
-				<legend>Edit Map</legend>
-				<pre>{{mainService.curItem|json}}</pre>
-				<div class="form-group">
-					<label for="mapName" class="col-lg-1 control-label">Name:</label>
-					<div class="col-lg-11">
-						<input type="text" class="form-control" id="mapName" name="mapName" [(ngModel)]="mainService.curItem.name" required>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="mapSourceStream" class="col-lg-1 control-label">Source Stream:</label>
-					<div class="col-lg-11">
-						<input type="text" class="form-control" id="mapSourceStream" name="mapSourceStream" [(ngModel)]="mainService.curItem.source"
-						 required>
-					</div>
-				</div>
-				<!--<div class="form-group">
-					<label for="mapPort" class="col-lg-1 control-label">Port:</label>
-					<div class="col-lg-11">
-						<input type="text" class="form-control" id="mapPort" name="mapPort" [(ngModel)]="mainService.curItem.port" required>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="mapUsername" class="col-lg-1 control-label">Username:</label>
-					<div class="col-lg-11">
-						<input type="text" class="form-control" id="mapUsername" name="mapUsername" [(ngModel)]="mainService.curItem.username"
-						 required>
-						<span class="help-block" *ngIf="mainService.isPBCS()">
-								<div class="well well-warning well-sm">
-										With PBCS you should remember to add "identity domain" name to the username <br>
-										E.g.:<br>
-										Normal Username: mr.brown@awesomecompany.com<br>
-										Identity Domain Name: a123456<br>
-										Username to write above: a123456.mr.brown@awesomecompany.com
-								</div>
-							</span>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="mapPassword" class="col-lg-1 control-label">Password:</label>
-					<div class="col-lg-11">
-						<input type="password" class="form-control" id="mapPassword" name="mapPassword" [(ngModel)]="mainService.curItem.password"
-						 required>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="mapVerified" class="col-lg-1 control-label">Verified?</label>
-					<div class="col-lg-11">
-						<i class="fa fa-fw fa-check-square-o" *ngIf="mainService.curItem.verified"></i>
-						<i class="fa fa-fw fa-square-o" *ngIf="!mainService.curItem.verified"></i>
-					</div>
-				</div>
-				<div class="form-group">
-					<div class="col-lg-11 col-lg-offset-1">
-						<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-						<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/maps/map-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
-						<button class="btn btn-success btn-xs" type="button" (click)="mainService.verify()"><i class="fa fa-check fa-fw"></i> Verify Map</button>
-						<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)"><i class="fa fa-trash fa-fw"></i> Delete Map</button>
-					</div>
-				</div>-->
-			</fieldset>
-		</form>
+		<div class="tab-content">
+			<div class="tab-pane fade in active" id="maptabmaindefinitions">
+				<app-dimemap-detail-tab-maindefinitions></app-dimemap-detail-tab-maindefinitions>
+			</div>
+			<div class="tab-pane fade in" id="maptabmaptable">
+				<app-dimemap-detail-tab-maptable></app-dimemap-detail-tab-maptable>
+			</div>
+			<div class="tab-pane fade in" id="maptabsourcedefinitions">
+				<app-dimemap-detail-tab-sourcedefinitions></app-dimemap-detail-tab-sourcedefinitions>
+			</div>
+			<div class="tab-pane fade in" id="maptabtargetdefinitions">
+				<app-dimemap-detail-tab-targetdefinitions></app-dimemap-detail-tab-targetdefinitions>
+			</div>
+			<div class="tab-pane fade in" id="maptabimportexport">
+				<app-dimemap-detail-tab-importexport></app-dimemap-detail-tab-importexport>
+			</div>
+		</div>
 	</div>
 </div>
