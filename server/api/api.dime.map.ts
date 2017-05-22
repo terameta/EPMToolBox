@@ -26,5 +26,6 @@ export class ApiMap {
 		this.apiRoutes.post("/fields", (req, res) => { this.rester.respond(this.mapTools.setFields, req.body, req, res); });
 		this.apiRoutes.get("/fields/:id", (req, res) => { this.rester.respond(this.mapTools.getFields, req.params.id, req, res); });
 		this.apiRoutes.get("/prepare/:id", (req, res) => { this.rester.respond(this.mapTools.prepare, req.params.id, req, res); });
+		this.apiRoutes.get("/isReady/:id", (req, res) => { this.rester.respond(this.mapTools.isReady, req.params.id, req, res); });
 	}
 }

@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 
 import { DimeProcessService } from "../dimeprocess.service";
-import { ToastrService } from "ngx-toastr";
 
 @Component({
 	selector: "app-dimeprocess-list",
@@ -10,28 +9,8 @@ import { ToastrService } from "ngx-toastr";
 })
 export class DimeprocessListComponent implements OnInit {
 
-	processList: any[] = [];
-
-	constructor(
-		private dimeProcessService: DimeProcessService,
-		private toastrService: ToastrService
-	) { }
+	constructor(private mainService: DimeProcessService) { }
 
 	ngOnInit() {
-		this.getAll();
-		// console.log("We are at app-dimeprocess-list");
 	}
-
-	getAll() {
-		this.dimeProcessService.getAll().subscribe(
-			(processList: any[]) => {
-				this.processList = processList;
-				// console.log(processList);
-			},
-			(error) => {
-				this.toastrService.error(error);
-			}
-		);
-	}
-
 }

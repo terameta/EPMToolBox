@@ -3,8 +3,6 @@ import { Component, OnInit } from "@angular/core";
 
 import { DimeMapService } from "../dimemap.service";
 
-// import { DimeMap } from "../../../../../../shared/model/dime/map";
-
 @Component({
 	selector: "app-dimemap-toolbar",
 	templateUrl: "./dimemap-toolbar.component.html",

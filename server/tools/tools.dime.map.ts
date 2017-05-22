@@ -7,7 +7,7 @@ import { DimeMap } from "../../shared/model/dime/map";
 import { DimeStream } from "../../shared/model/dime/stream";
 
 export class MapTools {
-	streamTool: StreamTools;
+	private streamTool: StreamTools;
 	constructor(
 		public db: IPool,
 		public tools: MainTools) {
@@ -128,11 +128,8 @@ export class MapTools {
 	}
 	public prepare = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.prepareFieldsForPrepare(id).
+			this.prepareFields(id).
 				then((refObj: any) => {
-					console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-					console.log(refObj.mapFields);
-					console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 					let createQueries: any;
 					createQueries = {};
 					createQueries.maptbl = "CREATE TABLE MAP" + refObj.id + "_MAPTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
@@ -157,13 +154,11 @@ export class MapTools {
 							curFieldDef += " VARCHAR(80)";
 						}
 						if (curField.mappable) { createQueries.maptbl += curFieldDef + ", INDEX (" + curPrefix + curField.name + ")"; }
-						console.log("+++", curField.name, curField.mappable, curField.isDescribed, curFieldDef);
 						if (curField.isDescribed === 1 && curField.mappable) {
 							createQueries.drops.push("DROP TABLE IF EXISTS MAP" + refObj.id + "_DESCTBL" + curField.id + ";");
 							let curQuery: string;
 							curQuery = "CREATE TABLE MAP" + refObj.id + "_DESCTBL" + curField.id + " (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
 							curQuery += ", " + curPrefix + curField.name;
-							console.log("aaa", curField);
 							if (curField.drfType === "string") {
 								curQuery += " VARCHAR(" + curField.drfCharacters + ")";
 							}
@@ -184,7 +179,6 @@ export class MapTools {
 							}
 							curQuery += ", PRIMARY KEY(id) );";
 							createQueries["DESCTBL" + curField.id] = curQuery;
-							// console.log(curField);
 						}
 						if (curField.environmentType === "HPDB" && curField.mappable) {
 							createQueries.drops.push("DROP TABLE IF EXISTS MAP" + refObj.id + "_DESCTBL" + curField.id + ";");
@@ -204,10 +198,8 @@ export class MapTools {
 					return new Promise((tResolve, tReject) => {
 						let promises: any[];
 						promises = [];
-						console.log(refObj.queries);
 						refObj.queries.drops.forEach((curQuery: any) => {
 							promises.push(new Promise((iresolve, ireject) => {
-								// console.log("Drop Query:", curQuery);
 								this.db.query(curQuery, function (err, rows, fields) {
 									if (err) {
 										ireject(err);
@@ -229,17 +221,8 @@ export class MapTools {
 						promises = [];
 						Object.keys(refObj.queries).forEach((curQuery) => {
 							promises.push(new Promise((iresolve, ireject) => {
-								console.log(refObj.queries[curQuery]);
 								this.db.query(refObj.queries[curQuery], function (err, rows, fields) {
 									if (err) {
-										console.log("===================================================");
-										console.log("===================================================");
-										console.log("===================================================");
-										console.log(refObj.queries[curQuery]);
-										console.log(err);
-										console.log("===================================================");
-										console.log("===================================================");
-										console.log("===================================================");
 										ireject(err);
 									} else {
 										iresolve(rows);
@@ -252,11 +235,13 @@ export class MapTools {
 						}).catch(tReject);
 					});
 				}).
-				then(resolve).
+				then(() => {
+					resolve({ result: "OK" });
+				}).
 				catch(reject);
 		});
 	}
-	private prepareFieldsForPrepare = (id: number) => {
+	private prepareFields = (id: number) => {
 		let refObj: any;
 		refObj = {};
 		return new Promise((resolve, reject) => {
@@ -315,15 +300,11 @@ export class MapTools {
 					refObj.fields.forEach((curField: any) => {
 						curField.mappable = false;
 						refObj.mapFields.forEach((curMapField: any) => {
-							console.log(">>>", curMapField.srctar, curField.srctar, curMapField.name, curField.name, curMapField.srctar === curField.srctar, curMapField.name === curField.name);
 							if (curMapField.srctar === curField.srctar && curMapField.name === curField.name) {
 								curField.mappable = true;
 							}
 						})
 					});
-					console.log("======================================");
-					console.log(refObj.mapFields);
-					console.log("======================================");
 					return refObj;
 				}).
 				then(resolve).
@@ -338,5 +319,45 @@ export class MapTools {
 		} else {
 			return 0;
 		}
+	}
+	public isReady = (id: number) => {
+		return new Promise((resolve, reject) => {
+			let maptblExists: boolean; maptblExists = false;
+			let descriptivetblExists: any; descriptivetblExists = {};
+			const systemDBName = this.tools.config.mysql.db;
+			this.prepareFields(id).
+				then((refObj: any) => {
+					this.db.query("SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?", [systemDBName, "MAP" + refObj.id + "_%"], (err, rows, fields) => {
+						if (err) {
+							reject(err);
+						} else if (rows.length === 0) {
+							resolve({ result: "NO" });
+						} else {
+							rows.forEach((curTable: any) => {
+								if (curTable.TABLE_NAME === "MAP" + refObj.id + "_MAPTBL") { maptblExists = true; }
+							});
+							refObj.fields.forEach((curField: any) => {
+								if ((curField.isDescribed || curField.environmentType === "HPDB") && curField.mappable) {
+									descriptivetblExists[curField.name + curField.id] = false;
+									rows.forEach((curTable: any) => {
+										if (curTable.TABLE_NAME === "MAP" + refObj.id + "_DESCTBL" + curField.id) { descriptivetblExists[curField.name + curField.id] = true; }
+									});
+								}
+							});
+							let allExists = true;
+							if (!maptblExists) { allExists = false; }
+							Object.keys(descriptivetblExists).forEach(function (curTbl) {
+								if (!descriptivetblExists[curTbl]) { allExists = false; }
+							});
+							if (allExists) {
+								resolve({ result: "YES" });
+							} else {
+								resolve({ result: "NO" });
+							}
+						}
+					});
+
+				});
+		});
 	}
 }

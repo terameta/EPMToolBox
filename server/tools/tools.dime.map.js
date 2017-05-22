@@ -134,11 +134,8 @@ class MapTools {
         };
         this.prepare = (id) => {
             return new Promise((resolve, reject) => {
-                this.prepareFieldsForPrepare(id).
+                this.prepareFields(id).
                     then((refObj) => {
-                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    console.log(refObj.mapFields);
-                    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     let createQueries;
                     createQueries = {};
                     createQueries.maptbl = "CREATE TABLE MAP" + refObj.id + "_MAPTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
@@ -169,13 +166,11 @@ class MapTools {
                         if (curField.mappable) {
                             createQueries.maptbl += curFieldDef + ", INDEX (" + curPrefix + curField.name + ")";
                         }
-                        console.log("+++", curField.name, curField.mappable, curField.isDescribed, curFieldDef);
                         if (curField.isDescribed === 1 && curField.mappable) {
                             createQueries.drops.push("DROP TABLE IF EXISTS MAP" + refObj.id + "_DESCTBL" + curField.id + ";");
                             let curQuery;
                             curQuery = "CREATE TABLE MAP" + refObj.id + "_DESCTBL" + curField.id + " (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
                             curQuery += ", " + curPrefix + curField.name;
-                            console.log("aaa", curField);
                             if (curField.drfType === "string") {
                                 curQuery += " VARCHAR(" + curField.drfCharacters + ")";
                             }
@@ -215,7 +210,6 @@ class MapTools {
                     return new Promise((tResolve, tReject) => {
                         let promises;
                         promises = [];
-                        console.log(refObj.queries);
                         refObj.queries.drops.forEach((curQuery) => {
                             promises.push(new Promise((iresolve, ireject) => {
                                 this.db.query(curQuery, function (err, rows, fields) {
@@ -240,17 +234,8 @@ class MapTools {
                         promises = [];
                         Object.keys(refObj.queries).forEach((curQuery) => {
                             promises.push(new Promise((iresolve, ireject) => {
-                                console.log(refObj.queries[curQuery]);
                                 this.db.query(refObj.queries[curQuery], function (err, rows, fields) {
                                     if (err) {
-                                        console.log("===================================================");
-                                        console.log("===================================================");
-                                        console.log("===================================================");
-                                        console.log(refObj.queries[curQuery]);
-                                        console.log(err);
-                                        console.log("===================================================");
-                                        console.log("===================================================");
-                                        console.log("===================================================");
                                         ireject(err);
                                     }
                                     else {
@@ -264,11 +249,13 @@ class MapTools {
                         }).catch(tReject);
                     });
                 }).
-                    then(resolve).
+                    then(() => {
+                    resolve({ result: "OK" });
+                }).
                     catch(reject);
             });
         };
-        this.prepareFieldsForPrepare = (id) => {
+        this.prepareFields = (id) => {
             let refObj;
             refObj = {};
             return new Promise((resolve, reject) => {
@@ -327,19 +314,67 @@ class MapTools {
                     refObj.fields.forEach((curField) => {
                         curField.mappable = false;
                         refObj.mapFields.forEach((curMapField) => {
-                            console.log(">>>", curMapField.srctar, curField.srctar, curMapField.name, curField.name, curMapField.srctar === curField.srctar, curMapField.name === curField.name);
                             if (curMapField.srctar === curField.srctar && curMapField.name === curField.name) {
                                 curField.mappable = true;
                             }
                         });
                     });
-                    console.log("======================================");
-                    console.log(refObj.mapFields);
-                    console.log("======================================");
                     return refObj;
                 }).
                     then(resolve).
                     catch(reject);
+            });
+        };
+        this.isReady = (id) => {
+            return new Promise((resolve, reject) => {
+                let maptblExists;
+                maptblExists = false;
+                let descriptivetblExists;
+                descriptivetblExists = {};
+                const systemDBName = this.tools.config.mysql.db;
+                this.prepareFields(id).
+                    then((refObj) => {
+                    this.db.query("SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?", [systemDBName, "MAP" + refObj.id + "_%"], (err, rows, fields) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        else if (rows.length === 0) {
+                            resolve({ result: "NO" });
+                        }
+                        else {
+                            rows.forEach((curTable) => {
+                                if (curTable.TABLE_NAME === "MAP" + refObj.id + "_MAPTBL") {
+                                    maptblExists = true;
+                                }
+                            });
+                            refObj.fields.forEach((curField) => {
+                                if ((curField.isDescribed || curField.environmentType === "HPDB") && curField.mappable) {
+                                    descriptivetblExists[curField.name + curField.id] = false;
+                                    rows.forEach((curTable) => {
+                                        if (curTable.TABLE_NAME === "MAP" + refObj.id + "_DESCTBL" + curField.id) {
+                                            descriptivetblExists[curField.name + curField.id] = true;
+                                        }
+                                    });
+                                }
+                            });
+                            let allExists = true;
+                            if (!maptblExists) {
+                                allExists = false;
+                            }
+                            Object.keys(descriptivetblExists).forEach(function (curTbl) {
+                                if (!descriptivetblExists[curTbl]) {
+                                    allExists = false;
+                                }
+                            });
+                            if (allExists) {
+                                resolve({ result: "YES" });
+                            }
+                            else {
+                                resolve({ result: "NO" });
+                            }
+                        }
+                    });
+                });
             });
         };
         this.streamTool = new tools_dime_stream_1.StreamTools(this.db, this.tools);

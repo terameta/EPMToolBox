@@ -1,6 +1,6 @@
-import { Observable } from "rxjs/Rx";
-import { DimeMapService } from "../dimemap.service";
 import { Component, OnInit } from "@angular/core";
+
+import { DimeMapService } from "../dimemap.service";
 
 @Component({
 	selector: "app-dimemap-list",

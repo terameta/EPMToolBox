@@ -1,18 +1,23 @@
-<nav class="navbar navbar-default navbar-fixed-top navbar-toolbar">
-	<div class="container-fluid navbar-border">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#submenu" aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<i class="fa fa-bars fa-inverse"></i>
-			</button>
-			<a routerLink="/dime/processes" class="navbar-brand"><i class="fa fa-cogs fa-fw"></i> </a>
-		</div>
-		<div id="submenu" class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li routerLinkActive="active"><a routerLink="process-list">List</a></li>
-				<li routerLinkActive="active"><a routerLink="process-detail">Detail</a></li>
+<div class="btn-toolbar" role="toolbar" aria-label="Processes Menu">
+	<div class="btn-group btn-group-xs" role="group">
+		<button type="button" class="btn btn-default btn-xs" title="Process List" routerLink="process-list"><i class="fa fa-cogs fa-fw"></i> Processes</button>
+		<button type="button" class="btn btn-default btn-xs" title="Current Item: {{mainService.curItem.name}}" *ngIf="mainService.curItem.id > 0"><i class="fa fa-angle-double-right fa-fw"></i> {{mainService.curItem.name}}</button>
+	</div>
+	<div class="btn-group btn-group-xs" role="group">
+		<button type="button" class="btn btn-default btn-xs" title="Process List" routerLink="process-list"><i class="fa fa-list fa-fw"></i> List</button>
+		<div class="btn-group btn-group-xs" role="group">
+			<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<i class="fa fa-exchange fa-fw"></i> Go To
+				<span class="caret"></span>
+    		</button>
+			<ul class="dropdown-menu">
+				<li *ngFor="let process of mainService.items | async"><a [routerLink]="['/dime/processes/process-detail', process.id]">Go to {{process.name}}</a></li>
+				<li *ngIf="(mainService.items | async)?.length == 0"><a style="cursor: pointer;" (click)="mainService.create()">No processes are defined. Click here to create the first one.</a></li>
 			</ul>
 		</div>
+		<button type="button" class="btn btn-default btn-xs" title="New Process" (click)="mainService.create()"><i class="fa fa-plus fa-fw"></i> New</button>
 	</div>
-</nav>
-<div style="height: 50px;">&nbsp;</div>
+	<div class="btn-group btn-group-xs pull-right" role="group">
+		<button type="button" class="btn btn-default" title="Help"><i class="fa fa-question fa-fw"></i> Help</button>
+	</div>
+</div>

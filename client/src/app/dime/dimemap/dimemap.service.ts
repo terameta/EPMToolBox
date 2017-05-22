@@ -16,6 +16,7 @@ export class DimeMapService {
 	items: Observable<DimeMap[]>;
 	itemCount: Observable<number>;
 	curItem: DimeMap;
+	curItemIsReady: boolean;
 	curItemFields: any[];
 	curItemClean: boolean;
 	curItemSourceStream: DimeStream;
@@ -83,6 +84,7 @@ export class DimeMapService {
 				this.curItemClean = true;
 				if (this.curItem.source) { this.getStreamDefinition(this.curItem.source, "source"); }
 				if (this.curItem.target) { this.getStreamDefinition(this.curItem.target, "target"); }
+				this.isReady(this.curItem.id);
 			}, (error) => {
 				this.toastr.error("Failed to get the item.", this.serviceName);
 				console.log(error);
@@ -165,6 +167,7 @@ export class DimeMapService {
 		this.curItem = { id: 0, name: "-" };
 		this.curItemFields = undefined;
 		this.curItemClean = true;
+		this.curItemIsReady = false;
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -248,13 +251,26 @@ export class DimeMapService {
 	};
 	public prepareTables = (id?: number) => {
 		if (!id) { id = this.curItem.id; }
-		this.authHttp.get(this.baseUrl + "/prepare/" + id, { headers: this.headers}).
-		map(response => response.json()).
-		subscribe((result) => {
-			this.toastr.info("Map tables are successfully created.", this.serviceName);
-		}, (error) => {
-			this.toastr.error("Failed to prepare the map tables.", this.serviceName);
-			console.log(error);
-		})
+		this.authHttp.get(this.baseUrl + "/prepare/" + id, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.toastr.info("Map tables are successfully created.", this.serviceName);
+				console.log("PrepareTables:", result);
+				this.isReady();
+			}, (error) => {
+				this.toastr.error("Failed to prepare the map tables.", this.serviceName);
+				console.log(error);
+			})
+	}
+	public isReady = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.get(this.baseUrl + "/isReady/" + id, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				if (result.result === "YES") { this.curItemIsReady = true; }
+			}, (error) => {
+				this.toastr.error("Failed to check the readiness of the map tables.", this.serviceName);
+				console.log(error);
+			})
 	}
 }
