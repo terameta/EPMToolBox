@@ -9,9 +9,7 @@ import { Component, OnInit } from "@angular/core";
 })
 export class DimemapListComponent implements OnInit {
 
-	constructor(private mapService: DimeMapService) {
-		// this.maps = this.mapService.maps;
-	}
+	constructor(private mainService: DimeMapService) { }
 
 	ngOnInit() {
 	}

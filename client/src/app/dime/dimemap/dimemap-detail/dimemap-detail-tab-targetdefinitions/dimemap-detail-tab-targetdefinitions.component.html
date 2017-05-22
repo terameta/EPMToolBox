@@ -1,3 +1,42 @@
-<p>
-  dimemap-detail-tab-targetdefinitions works!
-</p>
+<table class="table table-hover table-condensed">
+	<thead>
+		<tr>
+			<th width="100px">Field</th>
+			<th>Details</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>Name:</th>
+			<td>
+				{{ mainService.curItemTargetStream?.name }}
+			</td>
+		</tr>
+		<tr>
+			<th>Fields:</th>
+			<td>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th width="100px">Name</th>
+							<th>Mapped?</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr *ngFor="let field of mainService.curItemTargetStreamFields; let i = index;">
+							<td> {{ field.name }} </td>
+							<td>
+								<input type="checkbox" [(ngModel)]="field.mappable" [disabled]="field.isData"> <span *ngIf="field.isData">Data fields can't be mapped.</span>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<button class="btn btn-default btn-xs" type="button" (click)="mainService.assignTargetFields()"><i class="fa fa-check-circle"></i> Apply</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>

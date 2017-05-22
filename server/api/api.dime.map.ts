@@ -23,6 +23,8 @@ export class ApiMap {
 	}
 
 	private setRoutes = () => {
-		// this.apiRoutes.get("/listTypes", (req, res) => { this.rester.respond(this.stream.listTypes, null, req, res); });
+		this.apiRoutes.post("/fields", (req, res) => { this.rester.respond(this.mapTools.setFields, req.body, req, res); });
+		this.apiRoutes.get("/fields/:id", (req, res) => { this.rester.respond(this.mapTools.getFields, req.params.id, req, res); });
+		this.apiRoutes.get("/prepare/:id", (req, res) => { this.rester.respond(this.mapTools.prepare, req.params.id, req, res); });
 	}
 }

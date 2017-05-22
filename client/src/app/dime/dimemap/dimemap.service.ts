@@ -16,6 +16,7 @@ export class DimeMapService {
 	items: Observable<DimeMap[]>;
 	itemCount: Observable<number>;
 	curItem: DimeMap;
+	curItemFields: any[];
 	curItemClean: boolean;
 	curItemSourceStream: DimeStream;
 	curItemSourceStreamFields: any[];
@@ -96,9 +97,9 @@ export class DimeMapService {
 			console.log(error);
 		});
 		this.streamService.retrieveFieldsFetch(id).subscribe((result) => {
-			console.log("Returned", result, srctar);
 			if (srctar === "source") { this.curItemSourceStreamFields = result; }
 			if (srctar === "target") { this.curItemTargetStreamFields = result; }
+			if (!this.curItemFields) { this.getFields(); }
 		}, (error) => {
 			this.toastr.error("Failed to fetch stream fields list.", this.serviceName);
 			console.log(error);
@@ -119,17 +120,7 @@ export class DimeMapService {
 				console.log(error);
 			}
 			);
-	}
-	// update = (curItem?: DimeMap) => {
-	// 	this.authHttp.put(this.baseUrl + "/" + dimeMap.id, dimeMap, { headers: this.headers })
-	// 		.map(response => response.json()).subscribe(data => {
-	// 			this.dataStore.items.forEach((item, index) => {
-	// 				if (item.id === data.id) { this.dataStore.items[index] = data; }
-	// 			});
-
-	// 			this._items.next(Object.assign({}, this.dataStore).items);
-	// 		}, error => console.log("Could not update map."));
-	// }
+	};
 	update = (curItem?: DimeMap) => {
 		let shouldUpdate = false;
 		if (!curItem) { curItem = this.curItem; shouldUpdate = true; };
@@ -149,7 +140,7 @@ export class DimeMapService {
 				this.toastr.error("Failed to save the item.", this.serviceName);
 				console.log(error);
 			});
-	}
+	};
 	delete(id: number) {
 		const verificationQuestion = this.serviceName + ": Are you sure you want to delete " + (name !== undefined ? name : "the item") + "?";
 		if (confirm(verificationQuestion)) {
@@ -169,11 +160,12 @@ export class DimeMapService {
 		} else {
 			this.toastr.info("Item deletion is cancelled.", this.serviceName);
 		}
-	}
+	};
 	private resetCurItem = () => {
 		this.curItem = { id: 0, name: "-" };
+		this.curItemFields = undefined;
 		this.curItemClean = true;
-	}
+	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
 			return 1;
@@ -182,5 +174,87 @@ export class DimeMapService {
 		} else {
 			return 0;
 		}
+	};
+	public assignSourceFields = () => {
+		let fieldsToAssign: string[];
+		fieldsToAssign = [];
+		this.curItemSourceStreamFields.forEach((curField) => {
+			if (curField.mappable) { fieldsToAssign.push(curField.name); }
+		});
+		this.setFields(fieldsToAssign, "source");
+	};
+	public assignTargetFields = () => {
+		let fieldsToAssign: string[];
+		fieldsToAssign = [];
+		this.curItemTargetStreamFields.forEach((curField) => {
+			if (curField.mappable) { fieldsToAssign.push(curField.name); }
+		});
+		this.setFields(fieldsToAssign, "target");
+	};
+	private setFields = (fields: string[], srctar: string) => {
+		if (!fields) {
+			this.toastr.error("No fields are selected.", this.serviceName);
+		} else if (fields.length === 0) {
+			this.toastr.error("No fields are selected.", this.serviceName);
+		} else {
+			const toSend = {
+				map: this.curItem.id,
+				type: srctar,
+				list: fields
+			};
+			this.authHttp.post(this.baseUrl + "/fields/", toSend, { headers: this.headers }).
+				map(response => response.json()).
+				subscribe((result) => {
+					this.toastr.info("Map field assignments completed.", this.serviceName);
+				}, (error) => {
+					this.toastr.error("Failed to assign fields.", this.serviceName);
+					console.log(error);
+				});
+		}
+	};
+	private getFields = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.get(this.baseUrl + "/fields/" + id, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.curItemFields = result;
+				this.matchFields();
+			}, (error) => {
+				this.toastr.error("Failed to get map fields.", this.serviceName);
+				console.log(error);
+			})
+	};
+	private matchFields = () => {
+		if (this.curItemSourceStreamFields) {
+			this.curItemSourceStreamFields.forEach((curField: { name: string, mappable: boolean }) => {
+				curField.mappable = false;
+				this.curItemFields.forEach((curMapField) => {
+					if (curMapField.name === curField.name && curMapField.srctar === "source") {
+						curField.mappable = true;
+					}
+				});
+			});
+		}
+		if (this.curItemTargetStreamFields) {
+			this.curItemTargetStreamFields.forEach((curField: { name: string, mappable: boolean }) => {
+				curField.mappable = false;
+				this.curItemFields.forEach((curMapField) => {
+					if (curMapField.name === curField.name && curMapField.srctar === "target") {
+						curField.mappable = true;
+					}
+				});
+			});
+		}
+	};
+	public prepareTables = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.get(this.baseUrl + "/prepare/" + id, { headers: this.headers}).
+		map(response => response.json()).
+		subscribe((result) => {
+			this.toastr.info("Map tables are successfully created.", this.serviceName);
+		}, (error) => {
+			this.toastr.error("Failed to prepare the map tables.", this.serviceName);
+			console.log(error);
+		})
 	}
 }

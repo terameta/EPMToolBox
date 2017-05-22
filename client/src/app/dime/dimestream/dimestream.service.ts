@@ -301,7 +301,7 @@ export class DimeStreamService {
 	};
 	public retrieveFieldsFetch = (id: number) => {
 		return this.authHttp.get(this.baseUrl + "/retrieveFields/" + id).
-			map(response => { console.log(response.json()); return response.json(); }).
+			map(response => response.json()).
 			catch(error => Observable.throw(error));
 	}
 	public retrieveFields = () => {
