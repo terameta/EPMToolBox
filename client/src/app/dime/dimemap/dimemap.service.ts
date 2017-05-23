@@ -139,32 +139,32 @@ export class DimeMapService {
 				// This shouldn't change the state of the current item.
 				if (shouldUpdate) { this.curItemClean = true; }
 			}, error => {
-				this.toastr.error("Failed to save the item.", this.serviceName);
+				this.toastr.error('Failed to save the item.', this.serviceName);
 				console.log(error);
 			});
 	};
 	delete(id: number) {
-		const verificationQuestion = this.serviceName + ": Are you sure you want to delete " + (name !== undefined ? name : "the item") + "?";
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + (name !== undefined ? name : 'the item') + '?';
 		if (confirm(verificationQuestion)) {
-			this.authHttp.delete(this.baseUrl + "/" + id).subscribe(response => {
+			this.authHttp.delete(this.baseUrl + '/' + id).subscribe(response => {
 				this.dataStore.items.forEach((item, index) => {
 					if (item.id === id) { this.dataStore.items.splice(index, 1); }
 				});
 				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
-				this.toastr.info("Item is deleted.", this.serviceName);
-				this.router.navigate(["/dime/maps/map-list"]);
+				this.toastr.info('Item is deleted.', this.serviceName);
+				this.router.navigate(['/dime/maps/map-list']);
 				this.resetCurItem();
 			}, (error) => {
-				this.toastr.error("Failed to delete item.", this.serviceName);
+				this.toastr.error('Failed to delete item.', this.serviceName);
 				console.log(error);
 			});
 		} else {
-			this.toastr.info("Item deletion is cancelled.", this.serviceName);
+			this.toastr.info('Item deletion is cancelled.', this.serviceName);
 		}
 	};
 	private resetCurItem = () => {
-		this.curItem = { id: 0, name: "-" };
+		this.curItem = { id: 0, name: '-' };
 		this.curItemFields = undefined;
 		this.curItemClean = true;
 		this.curItemIsReady = false;
@@ -184,7 +184,7 @@ export class DimeMapService {
 		this.curItemSourceStreamFields.forEach((curField) => {
 			if (curField.mappable) { fieldsToAssign.push(curField.name); }
 		});
-		this.setFields(fieldsToAssign, "source");
+		this.setFields(fieldsToAssign, 'source');
 	};
 	public assignTargetFields = () => {
 		let fieldsToAssign: string[];
@@ -192,38 +192,38 @@ export class DimeMapService {
 		this.curItemTargetStreamFields.forEach((curField) => {
 			if (curField.mappable) { fieldsToAssign.push(curField.name); }
 		});
-		this.setFields(fieldsToAssign, "target");
+		this.setFields(fieldsToAssign, 'target');
 	};
 	private setFields = (fields: string[], srctar: string) => {
 		if (!fields) {
-			this.toastr.error("No fields are selected.", this.serviceName);
+			this.toastr.error('No fields are selected.', this.serviceName);
 		} else if (fields.length === 0) {
-			this.toastr.error("No fields are selected.", this.serviceName);
+			this.toastr.error('No fields are selected.', this.serviceName);
 		} else {
 			const toSend = {
 				map: this.curItem.id,
 				type: srctar,
 				list: fields
 			};
-			this.authHttp.post(this.baseUrl + "/fields/", toSend, { headers: this.headers }).
+			this.authHttp.post(this.baseUrl + '/fields/', toSend, { headers: this.headers }).
 				map(response => response.json()).
 				subscribe((result) => {
-					this.toastr.info("Map field assignments completed.", this.serviceName);
+					this.toastr.info('Map field assignments completed.', this.serviceName);
 				}, (error) => {
-					this.toastr.error("Failed to assign fields.", this.serviceName);
+					this.toastr.error('Failed to assign fields.', this.serviceName);
 					console.log(error);
 				});
 		}
 	};
 	private getFields = (id?: number) => {
 		if (!id) { id = this.curItem.id; }
-		this.authHttp.get(this.baseUrl + "/fields/" + id, { headers: this.headers }).
+		this.authHttp.get(this.baseUrl + '/fields/' + id, { headers: this.headers }).
 			map(response => response.json()).
 			subscribe((result) => {
 				this.curItemFields = result;
 				this.matchFields();
 			}, (error) => {
-				this.toastr.error("Failed to get map fields.", this.serviceName);
+				this.toastr.error('Failed to get map fields.', this.serviceName);
 				console.log(error);
 			})
 	};
@@ -232,7 +232,7 @@ export class DimeMapService {
 			this.curItemSourceStreamFields.forEach((curField: { name: string, mappable: boolean }) => {
 				curField.mappable = false;
 				this.curItemFields.forEach((curMapField) => {
-					if (curMapField.name === curField.name && curMapField.srctar === "source") {
+					if (curMapField.name === curField.name && curMapField.srctar === 'source') {
 						curField.mappable = true;
 					}
 				});
@@ -242,7 +242,7 @@ export class DimeMapService {
 			this.curItemTargetStreamFields.forEach((curField: { name: string, mappable: boolean }) => {
 				curField.mappable = false;
 				this.curItemFields.forEach((curMapField) => {
-					if (curMapField.name === curField.name && curMapField.srctar === "target") {
+					if (curMapField.name === curField.name && curMapField.srctar === 'target') {
 						curField.mappable = true;
 					}
 				});
@@ -251,25 +251,25 @@ export class DimeMapService {
 	};
 	public prepareTables = (id?: number) => {
 		if (!id) { id = this.curItem.id; }
-		this.authHttp.get(this.baseUrl + "/prepare/" + id, { headers: this.headers }).
+		this.authHttp.get(this.baseUrl + '/prepare/' + id, { headers: this.headers }).
 			map(response => response.json()).
 			subscribe((result) => {
-				this.toastr.info("Map tables are successfully created.", this.serviceName);
-				console.log("PrepareTables:", result);
+				this.toastr.info('Map tables are successfully created.', this.serviceName);
+				console.log('PrepareTables:', result);
 				this.isReady();
 			}, (error) => {
-				this.toastr.error("Failed to prepare the map tables.", this.serviceName);
+				this.toastr.error('Failed to prepare the map tables.', this.serviceName);
 				console.log(error);
 			})
 	}
 	public isReady = (id?: number) => {
 		if (!id) { id = this.curItem.id; }
-		this.authHttp.get(this.baseUrl + "/isReady/" + id, { headers: this.headers }).
+		this.authHttp.get(this.baseUrl + '/isReady/' + id, { headers: this.headers }).
 			map(response => response.json()).
 			subscribe((result) => {
-				if (result.result === "YES") { this.curItemIsReady = true; }
+				if (result.result === 'YES') { this.curItemIsReady = true; }
 			}, (error) => {
-				this.toastr.error("Failed to check the readiness of the map tables.", this.serviceName);
+				this.toastr.error('Failed to check the readiness of the map tables.', this.serviceName);
 				console.log(error);
 			})
 	}

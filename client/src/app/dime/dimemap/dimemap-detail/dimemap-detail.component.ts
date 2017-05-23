@@ -1,15 +1,14 @@
-import { ActivatedRoute, Params } from "@angular/router";
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { Subscription } from "rxjs/Subscription";
-import { Observable } from "rxjs/Rx";
+import { Subscription } from 'rxjs/Subscription';
 
-import { DimeMapService } from "../dimemap.service";
+import { DimeMapService } from '../dimemap.service';
 
 @Component({
-	selector: "app-dimemap-detail",
-	templateUrl: "./dimemap-detail.component.html",
-	styleUrls: ["./dimemap-detail.component.css"]
+	selector: 'app-dimemap-detail',
+	templateUrl: './dimemap-detail.component.html',
+	styleUrls: ['./dimemap-detail.component.css']
 })
 export class DimemapDetailComponent implements OnInit, OnDestroy {
 	paramSubscription: Subscription;
@@ -21,8 +20,8 @@ export class DimemapDetailComponent implements OnInit, OnDestroy {
 
 	ngOnInit() {
 		this.paramSubscription = this.route.params.subscribe((params: Params) => {
-			this.mainService.getOne(params["id"]);
-		})
+			this.mainService.getOne(params['id']);
+		});
 	}
 
 	ngOnDestroy() {

@@ -17,14 +17,21 @@
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/*.js.map": true,
-        "**/*.js": {"when": "$(basename).ts"}
-	},
-	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
-	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
-	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
-	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
+        "**/*.js": {
+            "when": "$(basename).ts"
+        }
+    },
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
+    "typescript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces": true,
+    "javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
     "tslint.exclude": "**/node_modules/**/*.ts",
     "workbench.editor.enablePreview": false,
-	"explorer.openEditors.visible": 0,
-	"editor.tabCompletion": true
+    "explorer.openEditors.visible": 0,
+    "editor.tabCompletion": true,
+    "editor.formatOnType": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+    "terminal.integrated.fontSize": 12
 }

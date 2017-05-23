@@ -1,12 +1,12 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 
-import { DimeMapService } from "../../dimemap.service";
-import { DimeStreamService } from "../../../dimestream/dimestream.service";
+import { DimeMapService } from '../../dimemap.service';
+import { DimeStreamService } from '../../../dimestream/dimestream.service';
 
 @Component({
-	selector: "app-dimemap-detail-tab-maindefinitions",
-	templateUrl: "./dimemap-detail-tab-maindefinitions.component.html",
-	styleUrls: ["./dimemap-detail-tab-maindefinitions.component.css"]
+	selector: 'app-dimemap-detail-tab-maindefinitions',
+	templateUrl: './dimemap-detail-tab-maindefinitions.component.html',
+	styleUrls: ['./dimemap-detail-tab-maindefinitions.component.css']
 })
 export class DimemapDetailTabMaindefinitionsComponent implements OnInit {
 

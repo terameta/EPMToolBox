@@ -4,29 +4,32 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="#processtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
-			<li><a href="#processtabrun" data-toggle="tab">Run Process</a></li>
-			<li><a href="#processtabsteps" data-toggle="tab">Steps</a></li>
-			<li><a href="#processtabdefaulttargets" data-toggle="tab">Default Targets</a></li>
-			<li><a href="#processtabfilters" data-toggle="tab">Filters</a></li>
+			<li class="active"><a href="#processtabmaindefinitions" data-toggle="tab"><i class="fa fa-sliders fa-fw"></i> Main Definitions</a></li>
+			<li><a href="#processtabrun" data-toggle="tab"><i class="fa fa-space-shuttle fa-fw"></i> Run Process</a></li>
+			<li><a href="#processtabsteps" data-toggle="tab"><i class="fa fa-steam fa-fw"></i> Steps</a></li>
+			<li><a href="#processtabdefaulttargets" data-toggle="tab"><i class="fa fa-bullseye fa-fw"></i> Default Targets</a></li>
+			<li><a href="#processtabfilters" data-toggle="tab"><i class="fa fa-filter fa-fw"></i> Filters</a></li>
 		</ul>
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
 			<div class="tab-pane fade in active" id="processtabmaindefinitions">
-				Main definitions works
+				<app-dimeprocess-detail-tab-maindefinitions></app-dimeprocess-detail-tab-maindefinitions>
 			</div>
 			<div class="tab-pane fade in" id="processtabrun">
-				Run works
+				<app-dimeprocess-detail-tab-run *ngIf="mainService.curItemIsReady"></app-dimeprocess-detail-tab-run>
+				<div class="well well-warning well-sm" *ngIf="!mainService.curItemIsReady">
+					This process definition is not ready for processing.
+				</div>
 			</div>
 			<div class="tab-pane fade in" id="processtabsteps">
-				Steps works
+				<app-dimeprocess-detail-tab-steps></app-dimeprocess-detail-tab-steps>
 			</div>
 			<div class="tab-pane fade in" id="processtabdefaulttargets">
-				Default targets works
+				<app-dimeprocess-detail-tab-defaulttargets></app-dimeprocess-detail-tab-defaulttargets>
 			</div>
 			<div class="tab-pane fade in" id="processtabfilters">
-				Filters works
+				<app-dimeprocess-detail-tab-filters></app-dimeprocess-detail-tab-filters>
 			</div>
 		</div>
 	</div>
