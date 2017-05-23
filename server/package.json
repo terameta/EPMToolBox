@@ -30,12 +30,12 @@
     "@types/morgan": "^1.7.32",
     "@types/mssql": "^4.0.1",
     "@types/mysql": "0.0.33",
-    "@types/node": "^7.0.21",
+    "@types/node": "^7.0.22",
     "@types/request": "0.0.43",
     "@types/xml2js": "0.0.33",
     "ts-node": "^3.0.4",
-    "tslint": "^5.2.0",
-    "typescript": "^2.3.2"
+    "tslint": "^5.3.2",
+    "typescript": "^2.3.3"
   },
   "repository": {
     "type": "git",

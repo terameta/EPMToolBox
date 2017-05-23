@@ -30,8 +30,8 @@ export function initiateApplicationWorker(refDB: IPool, refConfig: SystemConfig)
 
 	app.use(logger("short"));
 
-	app.use("/api", jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin"] }));
-	// app.use(jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin", "/welcome/signin", "/", "/welcome"] }));
+	// app.use("/api", jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin"] }));
+	app.use("/api/dime", jwt({ secret: refConfig.hash }));
 
 	initializeRestApi(app, refDB, mainTools);
 
