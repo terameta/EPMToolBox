@@ -12,8 +12,16 @@
 			<tbody>
 				<tr *ngFor="let map of mainService.items | async; let i = index;">
 					<td>{{map.name}}</td>
-					<td>{{map.source}}</td>
-					<td>{{map.target}}</td>
+					<td>
+						<span *ngFor="let stream of streamService.items | async">
+							<span *ngIf="stream.id == map.source">{{stream.name}}</span>
+						</span>
+					</td>
+					<td>
+						<span *ngFor="let stream of streamService.items | async">
+							<span *ngIf="stream.id == map.target">{{stream.name}}</span>
+						</span>
+					</td>
 					<td>
 						<div class="btn-toolbar" role="toolbar" aria-label="Map Actions">
 							<div class="btn-group btn-group-xs" role="group">

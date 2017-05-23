@@ -79,8 +79,19 @@ export class DimeProcessService {
 				this.curItem = result;
 				this.curItemClean = true;
 				this.isReady(this.curItem.id);
+				this.getSteps(this.curItem.id);
 			}, (error) => {
 				this.toastr.error('Failed to get the item.', this.serviceName);
+				console.log(error);
+			});
+	}
+	public getSteps = (id: number) => {
+		this.authHttp.get(this.baseUrl + '/steps/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.curItemSteps = result;
+			}, (error) => {
+				this.toastr.error('Failed to get the steps.', this.serviceName);
 				console.log(error);
 			});
 	}

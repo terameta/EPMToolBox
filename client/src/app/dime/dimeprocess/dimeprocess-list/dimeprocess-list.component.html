@@ -12,8 +12,16 @@
 			<tbody>
 				<tr *ngFor="let process of mainService.items | async; let i = index;">
 					<td>{{process.name}}</td>
-					<td>{{process.source}}</td>
-					<td>{{process.target}}</td>
+					<td>
+						<span *ngFor="let environment of environmentService.items | async">
+							<span *ngIf="environment.id == process.source">{{environment.name}}</span>
+						</span>
+					</td>
+					<td>
+						<span *ngFor="let environment of environmentService.items | async">
+							<span *ngIf="environment.id == process.target">{{environment.name}}</span>
+						</span>
+					</td>
 					<td>
 						<div class="btn-toolbar" role="toolbar" aria-label="Process Actions">
 							<div class="btn-group btn-group-xs" role="group">
