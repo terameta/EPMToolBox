@@ -1,7 +1,13 @@
 <div class="btn-toolbar" role="toolbar" aria-label="Processes Menu">
 	<div class="btn-group btn-group-xs" role="group">
 		<button type="button" class="btn btn-default btn-xs" title="Process List" routerLink="process-list"><i class="fa fa-cogs fa-fw"></i> Processes</button>
-		<button type="button" class="btn btn-default btn-xs" title="Current Item: {{mainService.curItem.name}}" *ngIf="mainService.curItem.id > 0"><i class="fa fa-angle-double-right fa-fw"></i> {{mainService.curItem.name}}</button>
+		<button type="button"
+					class="btn btn-default btn-xs"
+					title="Current Item: {{mainService.curItem.name}}"
+					routerLink="/dime/processes/process-detail/{{mainService.curItem.id}}"
+					*ngIf="mainService.curItem.id > 0">
+			<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.curItem.name}}
+		</button>
 	</div>
 	<div class="btn-group btn-group-xs" role="group">
 		<button type="button" class="btn btn-default btn-xs" title="Process List" routerLink="process-list"><i class="fa fa-list fa-fw"></i> List</button>

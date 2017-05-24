@@ -9,7 +9,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 	styleUrls: ['./dimeprocess-detail.component.css']
 })
 export class DimeprocessDetailComponent implements OnInit, OnDestroy {
-	paramSubscription: Subscription
+	paramSubscription: Subscription;
 
 	constructor(
 		private route: ActivatedRoute,

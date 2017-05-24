@@ -10,6 +10,8 @@ import { AuthHttp } from 'angular2-jwt';
 
 import { DimeProcess } from '../../../../../shared/model/dime/process';
 import { DimeProcessStep } from '../../../../../shared/model/dime/processstep';
+import { DimeProcessStepType } from '../../../../../shared/model/dime/processsteptype';
+
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
 
 @Injectable()
@@ -19,6 +21,8 @@ export class DimeProcessService {
 	curItemIsReady: boolean;
 	curItemSteps: DimeProcessStep[];
 	curItemClean: boolean;
+	curStep: DimeProcessStep;
+	stepTypes: DimeProcessStepType[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeProcess[]>;
 	private baseUrl: string;
@@ -41,6 +45,7 @@ export class DimeProcessService {
 		this.items = this._items.asObservable();
 		this.serviceName = 'Processes';
 		this.resetCurItem();
+		this.stepFetchTypes();
 	}
 
 	getAll = () => {
@@ -79,19 +84,9 @@ export class DimeProcessService {
 				this.curItem = result;
 				this.curItemClean = true;
 				this.isReady(this.curItem.id);
-				this.getSteps(this.curItem.id);
+				this.stepGetAll(this.curItem.id);
 			}, (error) => {
 				this.toastr.error('Failed to get the item.', this.serviceName);
-				console.log(error);
-			});
-	}
-	public getSteps = (id: number) => {
-		this.authHttp.get(this.baseUrl + '/steps/' + id).
-			map(response => response.json()).
-			subscribe((result) => {
-				this.curItemSteps = result;
-			}, (error) => {
-				this.toastr.error('Failed to get the steps.', this.serviceName);
 				console.log(error);
 			});
 	}
@@ -126,6 +121,7 @@ export class DimeProcessService {
 				// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
 				// This shouldn't change the state of the current item.
 				if (shouldUpdate) { this.curItemClean = true; }
+				this.stepGetAll(this.curItem.id);
 			}, error => {
 				this.toastr.error('Failed to save the item.', this.serviceName);
 				console.log(error);
@@ -171,4 +167,74 @@ export class DimeProcessService {
 		this.toastr.warning('is Ready function should be implemented', this.serviceName);
 		this.curItemIsReady = false;
 	}
+	private stepFetchTypes = () => {
+		this.authHttp.get(this.baseUrl + '/steptypes').
+			map(response => response.json()).
+			subscribe((result) => {
+				this.stepTypes = result;
+			}, (error) => {
+				this.toastr.error('Failed to receive process step types.', this.serviceName);
+				console.error(error);
+			})
+	}
+	public stepCreate = () => {
+		this.authHttp.post(this.baseUrl + '/step', { process: this.curItem.id }, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.stepGetAll(this.curItem.id);
+			}, (error) => {
+				this.toastr.error('Failed to add step.', this.serviceName);
+				console.error(error);
+			});
+	}
+	public stepGetAll = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.get(this.baseUrl + '/steps/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.curItemSteps = result;
+				this.curItemSteps.forEach((curStep) => {
+					if (curStep.type === 'srcprocedure' && this.curItem.source) { curStep.referedid = this.curItem.source; }
+					if (curStep.type === 'tarprocedure' && this.curItem.target) { curStep.referedid = this.curItem.target; }
+				})
+			}, (error) => {
+				this.toastr.error('Failed to get the steps.', this.serviceName);
+				console.log(error);
+			});
+	};
+	public stepGetOne = (id: number) => {
+		this.authHttp.get(this.baseUrl + '/step/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.curStep = result;
+				if (this.curItem.id < 1) { this.getOne(this.curStep.process); }
+			}, (error) => {
+				this.toastr.error('Failed to get the current step.', this.serviceName);
+				console.error(error);
+			});
+	};
+	public stepDelete = (id: number) => {
+		this.authHttp.delete(this.baseUrl + '/step/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.stepGetAll(this.curItem.id);
+			}, (error) => {
+				this.toastr.error('Failed to delete step.', this.serviceName);
+				console.error(error);
+			});
+	};
+	public stepUpdate = (curStep?: DimeProcessStep) => {
+		let shouldUpdate = false;
+		if (!curStep) { curStep = this.curStep; shouldUpdate = true; }
+		if (shouldUpdate && curStep.type === 'srcprocedure') { curStep.referedid = this.curItem.source; }
+		this.authHttp.put(this.baseUrl + '/step', curStep, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.toastr.info('Step is successfully saved.', this.serviceName);
+				if (shouldUpdate) { this.curStep = result; }
+			}, (error) => {
+				this.toastr.error('Step save has failed.', this.serviceName);
+				console.error(error);
+			});
+	};
 }

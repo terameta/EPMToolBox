@@ -1,14 +1,14 @@
-import * as cluster from "cluster";
-import { cpus } from "os";
-import * as fs from "fs";
-import * as mysql from "mysql";
-import { initiateApplicationWorker } from "./config/config.app";
-import { initiateCronWorker } from "./config/config.croner";
-import { initiateInitiator } from "./config/config.initiator";
+import * as cluster from 'cluster';
+import { cpus } from 'os';
+import * as fs from 'fs';
+import * as mysql from 'mysql';
+import { initiateApplicationWorker } from './config/config.app';
+import { initiateCronWorker } from './config/config.croner';
+import { initiateInitiator } from './config/config.initiator';
 
 const numCPUs = cpus().length;
 
-const configuration = JSON.parse(fs.readFileSync("./system.conf", "utf8"));
+const configuration = JSON.parse(fs.readFileSync('./system.conf', 'utf8'));
 
 const db: mysql.IPool = mysql.createPool({
 	connectionLimit: 100,
@@ -33,7 +33,7 @@ if (cluster.isMaster) {
 	}
 	cluster.fork(croner_env);
 } else /* this is not cluster master */ {
-	if (process.env.isCroner === "true") {
+	if (process.env.isCroner === 'true') {
 		initiateCronWorker(db);
 	} else {
 		initiateApplicationWorker(db, configuration);

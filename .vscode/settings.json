@@ -3,7 +3,7 @@
 	"workbench.colorTheme": "Default Light+",
 	"git.confirmSync": false,
 	"window.zoomLevel": 0,
-	"typescript.tsdk": "../../AppData/roaming/npm/node_modules/typescript/lib",
+	"typescript.tsdk": "../../AppData/Roaming/npm/node_modules/typescript/lib",
 	"editor.tabSize": 3,
 	"editor.insertSpaces": false,
 	"editor.fontFamily": "Consolas, 'Courier New', monospace",
@@ -34,5 +34,10 @@
 	"editor.formatOnSave": true,
 	"terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
 	"terminal.integrated.fontSize": 12,
-	"workbench.iconTheme": "vs-seti"
+	"workbench.iconTheme": "vs-seti",
+	"html.format.wrapLineLength": 0,
+	"html.format.indentInnerHtml": true,
+	"html.format.endWithNewline": true,
+	"html.suggest.angular1": false,
+	"html.format.enable": false
 }

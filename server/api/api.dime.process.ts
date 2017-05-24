@@ -24,5 +24,10 @@ export class ApiProcess {
 
 	private setRoutes = () => {
 		this.apiRoutes.get('/steps/:id', (req, res) => { this.rester.respond(this.processTools.stepGetAll, req.params.id, req, res); });
+		this.apiRoutes.get('/steptypes', (req, res) => { this.rester.respond(this.processTools.stepGetTypes, null, req, res); });
+		this.apiRoutes.get('/step/:id', (req, res) => { this.rester.respond(this.processTools.stepGetOne, req.params.id, req, res); });
+		this.apiRoutes.post('/step', (req, res) => { this.rester.respond(this.processTools.stepCreate, req.body, req, res); });
+		this.apiRoutes.put('/step', (req, res) => { this.rester.respond(this.processTools.stepUpdate, req.body, req, res); });
+		this.apiRoutes.delete('/step/:id', (req, res) => { this.rester.respond(this.processTools.stepDelete, req.params.id, req, res); });
 	}
 }

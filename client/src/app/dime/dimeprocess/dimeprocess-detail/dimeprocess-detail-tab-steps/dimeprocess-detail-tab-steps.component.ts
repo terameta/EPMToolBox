@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
 import { DimeProcessService } from '../../dimeprocess.service';
+import { DimeEnvironmentService } from '../../../dimeenvironment/dimeenvironment.service';
+import { DimeStreamService } from '../../../dimestream/dimestream.service';
+import { DimeMapService } from '../../../dimemap/dimemap.service';
 
 @Component({
 	selector: 'app-dimeprocess-detail-tab-steps',
@@ -9,7 +12,12 @@ import { DimeProcessService } from '../../dimeprocess.service';
 })
 export class DimeprocessDetailTabStepsComponent implements OnInit {
 
-	constructor(private mainService: DimeProcessService) { }
+	constructor(
+		private mainService: DimeProcessService,
+		private environmentService: DimeEnvironmentService,
+		private streamService: DimeStreamService,
+		private mapService: DimeMapService
+	) { }
 
 	ngOnInit() {
 	}

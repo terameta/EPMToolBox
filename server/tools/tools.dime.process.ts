@@ -73,7 +73,7 @@ export class ProcessTools {
 					newProcess.id = rows.insertId;
 					this.stepCreate({ id: 0, type: 'srcprocedure', process: rows.insertId }).
 						then(() => this.stepCreate({ id: 0, type: 'pulldata', process: rows.insertId })).
-						then(() => this.stepCreate({ id: 0, type: 'map', process: rows.insertId })).
+						then(() => this.stepCreate({ id: 0, type: 'mapdata', process: rows.insertId })).
 						then(() => this.stepCreate({ id: 0, type: 'pushdata', process: rows.insertId })).
 						then(() => this.stepCreate({ id: 0, type: 'tarprocedure', process: rows.insertId })).
 						then(() => {
@@ -98,6 +98,23 @@ export class ProcessTools {
 						}
 					})
 				}).catch(reject);
+		});
+	}
+	public stepGetOne = (id: number): Promise<DimeProcessStep> => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM processsteps WHERE id = ?', id, function (err, rows: DimeProcessStep[], fields) {
+				if (err) {
+					reject(err);
+				} else if (rows.length !== 1) {
+					reject('Step is not found');
+				} else {
+					rows.map((curStep) => {
+						if (curStep.details) { curStep.details = curStep.details.toString(); }
+						return curStep;
+					});
+					resolve(rows[0]);
+				}
+			});
 		});
 	}
 	public stepGetAll = (id: number): Promise<DimeProcessStep[]> => {
@@ -146,12 +163,69 @@ export class ProcessTools {
 			})
 		});
 	}
-}
+	public stepGetTypes = () => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM processsteptypes ORDER BY tOrder', (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(rows);
+				}
+			})
+		});
+	}
+	public stepDelete = (id: number) => {
+		return new Promise((resolve, reject) => {
+			let curStep: DimeProcessStep;
+			this.stepGetOne(id).then((sStep) => { curStep = sStep; return this.stepRemoveAction(id); }).
+				then(() => { return this.stepGetAll(curStep.process); }).
+				then((allSteps) => {
+					let promises: Promise<any>[]; promises = [];
+					allSteps.forEach((sStep: DimeProcessStep, curKey: number) => {
+						sStep.sOrder = curKey + 1;
+						promises.push(this.stepUpdate(sStep));
+					});
+					return Promise.all(promises);
+				}).
+				then(resolve).
+				catch(reject);
 
+		});
+	}
+	private stepRemoveAction = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('DELETE FROM processsteps WHERE id = ?', id, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve('OK');
+				}
+			});
+		});
+	}
+	public stepUpdate = (theStep: DimeProcessStep): Promise<DimeProcessStep> => {
+		return new Promise((resolve, reject) => {
+			if (!theStep) {
+				reject('Empty body is not accepted');
+			} else {
+				const curId = theStep.id;
+				delete theStep.id;
+				this.db.query('UPDATE processsteps SET ? WHERE id = ?', [theStep, curId], (err, rows, fields) => {
+					if (err) {
+						reject(err);
+					} else {
+						theStep.id = curId;
+						resolve(theStep);
+					}
+				});
+			}
+		});
+	}
+}
 
 /*
 function run(id){
-	return new Promise(function(resolve, reject){
+	return new Promise((resolve, reject) =>{
 		var tracker = 0;
 		var refObj = {id: id};
 		logTool.openLog("Starting Process Run", 0).then(function(logId){
@@ -174,7 +248,7 @@ function run(id){
 	});
 }
 function runAction(refObj){
-	return new Promise(function(resolve, reject){
+	return new Promise((resolve, reject) =>{
 		logTool.appendLog(refObj.tracker, "Getting the process details.");
 		getOne(refObj.id).
 		then(function(result){	var tracker = refObj.tracker; refObj = result; refObj.tracker = tracker; return refObj;	}).
@@ -188,13 +262,13 @@ function runAction(refObj){
 	});
 }
 function runSteps(refObj){
-	return new Promise(function(resolve, reject){
+	return new Promise((resolve, reject) =>{
 		if(refObj.tracker) logTool.appendLog(refObj.tracker, "Preparation is now complete. Process will run steps now.");
 		refObj.stepsToRun = refObj.steps;
 		runStepsAction(refObj).then(resolve, reject);
 	});}
 function runStepsAction(refObj){
-	return new Promise(function(resolve, reject){
+	return new Promise((resolve, reject) =>{
 		if(refObj.stepsToRun.length == 0){
 			resolve(refObj);
 		} else {
@@ -227,7 +301,7 @@ function runStepsAction(refObj){
 		}
 	});}
 function runTargetProcedure(refObj, curStep){
-	return new Promise(function(resolve, reject){
+	return new Promise((resolve, reject) =>{
 		logTool.appendLog(refObj.tracker, "Step Run Target Procedure: Initiating").
 		then(function(){
 			runTargetProcedurePrepareCombinations(refObj, curStep).
@@ -238,7 +312,7 @@ function runTargetProcedure(refObj, curStep){
 	});
 }
 function runTargetProcedurePrepareCombinations(refObj, curStep){
-	return new Promise(function(resolve, reject){
+	return new Promise((resolve, reject) =>{
 		logTool.appendLog(refObj.tracker, "Step Run Target Procedure: Preparing combinations").
 		then(function(){
 			curStep.details = JSON.parse(curStep.details);
@@ -1643,66 +1717,6 @@ function update(theProcess) {
 			var curId = theProcess.id;
 			delete theProcess.id;
 			db.query("UPDATE processes SET ? WHERE id = ?", [theProcess, curId], function (err, rows, fields) {
-				if (err) {
-					reject(err);
-				} else {
-					resolve("OK");
-				}
-			});
-		}
-	});
-}
-function stepGetOne(id) {
-	return new Promise(function (resolve, reject) {
-		db.query("SELECT * FROM processsteps WHERE id = ?", id, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else if (rows.length != 1) {
-				reject("Step is not found");
-			} else {
-				if (rows[0].details) rows[0].details = rows[0].details.toString('utf-8');
-				resolve(rows[0]);
-			}
-		});
-	});
-}
-function stepRemove(id) {
-	return new Promise(function (resolve, reject) {
-		var curStep;
-		stepGetOne(id).then(function (sStep) { curStep = sStep; return stepRemoveAction(id); }).
-			then(function () { return stepGetAll(curStep.process); }).
-			then(function (allSteps) {
-				var promises = [];
-				allSteps.forEach(function (sStep, curKey) {
-					sStep.sOrder = curKey + 1;
-					promises.push(stepUpdate(sStep));
-				});
-				return Promise.all(promises);
-			}).
-			then(resolve).
-			catch(reject);
-
-	});
-}
-function stepRemoveAction(id) {
-	return new Promise(function (resolve, reject) {
-		db.query("DELETE FROM processsteps WHERE id = ?", id, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve("OK");
-			}
-		});
-	});
-}
-function stepUpdate(theStep) {
-	return new Promise(function (resolve, reject) {
-		if (!theStep) {
-			reject("Empty body is not accepted");
-		} else {
-			var curId = theStep.id;
-			delete theStep.id;
-			db.query("UPDATE processsteps SET ? WHERE id = ?", [theStep, curId], function (err, rows, fields) {
 				if (err) {
 					reject(err);
 				} else {
