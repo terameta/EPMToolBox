@@ -1,8 +1,8 @@
-import { IPool } from "mysql";
+import { IPool } from 'mysql';
 
-import { MainTools } from "../config/config.tools";
-import { DimeStream } from "../../shared/model/dime/stream";
-import { EnvironmentTools } from "./tools.dime.environment";
+import { MainTools } from '../config/config.tools';
+import { DimeStream } from '../../shared/model/dime/stream';
+import { EnvironmentTools } from './tools.dime.environment';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -13,9 +13,9 @@ export class StreamTools {
 
 	public getAll = () => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM streams", (err, rows, fields) => {
+			this.db.query('SELECT * FROM streams', (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Retrieving stream list has failed" });
+					reject({ error: err, message: 'Retrieving stream list has failed' });
 				} else {
 					resolve(rows);
 				}
@@ -23,11 +23,11 @@ export class StreamTools {
 		});
 	}
 	public create = () => {
-		const newStream = { name: "New Stream (Please change name)", type: 0, environment: 0 };
+		const newStream = { name: 'New Stream (Please change name)', type: 0, environment: 0 };
 		return new Promise((resolve, reject) => {
-			this.db.query("INSERT INTO streams SET ?", newStream, function (err, result, fields) {
+			this.db.query('INSERT INTO streams SET ?', newStream, function (err, result, fields) {
 				if (err) {
-					reject({ error: err, message: "Failed to create a new stream." });
+					reject({ error: err, message: 'Failed to create a new stream.' });
 				} else {
 					resolve({ id: result.insertId });
 				}
@@ -36,11 +36,11 @@ export class StreamTools {
 	};
 	public getOne = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM streams WHERE id = ?", id, (err, rows, fields) => {
+			this.db.query('SELECT * FROM streams WHERE id = ?', id, (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Retrieving stream with id " + id + " has failed" });
+					reject({ error: err, message: 'Retrieving stream with id ' + id + ' has failed' });
 				} else if (rows.length !== 1) {
-					reject({ error: "Wrong number of records", message: "Wrong number of records for stream received from the server, 1 expected" });
+					reject({ error: 'Wrong number of records', message: 'Wrong number of records for stream received from the server, 1 expected' });
 				} else {
 					resolve(rows[0]);
 				}
@@ -49,9 +49,9 @@ export class StreamTools {
 	}
 	public listTypes = () => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM streamtypes", function (err, rows, fields) {
+			this.db.query('SELECT * FROM streamtypes', function (err, rows, fields) {
 				if (err) {
-					reject({ error: err, message: "Retrieving stream type list has failed" });
+					reject({ error: err, message: 'Retrieving stream type list has failed' });
 				} else {
 					resolve(rows);
 				}
@@ -61,9 +61,9 @@ export class StreamTools {
 	public update = (theStream: DimeStream) => {
 		return new Promise((resolve, reject) => {
 			const theID: number = theStream.id;
-			this.db.query("UPDATE streams SET ? WHERE id = " + theID, theStream, function (err, result, fields) {
+			this.db.query('UPDATE streams SET ? WHERE id = ' + theID, theStream, function (err, result, fields) {
 				if (err) {
-					reject({ error: err, message: "Failed to update the stream" });
+					reject({ error: err, message: 'Failed to update the stream' });
 				} else {
 					resolve(theStream);
 				}
@@ -72,9 +72,9 @@ export class StreamTools {
 	}
 	public delete = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("DELETE FROM streams WHERE id = ?", id, (err, result, fields) => {
+			this.db.query('DELETE FROM streams WHERE id = ?', id, (err, result, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to delete the stream" });
+					reject({ error: err, message: 'Failed to delete the stream' });
 				} else {
 					resolve({ id: id });
 				}
@@ -105,7 +105,7 @@ export class StreamTools {
 			};
 			this.buildQuery(toBuild).
 				then((innerObj: any) => {
-					return this.environmentTool.listFields({ id: refObj.environmentID, query: innerObj.finalQuery, database: refObj.field.descriptiveDB, table: refObj.field.descriptiveTable});
+					return this.environmentTool.listFields({ id: refObj.environmentID, query: innerObj.finalQuery, database: refObj.field.descriptiveDB, table: refObj.field.descriptiveTable });
 				}).
 				then((result: any) => {
 					result.forEach((curField: any, curKey: any) => {
@@ -118,16 +118,16 @@ export class StreamTools {
 	}
 	private buildQuery = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			if (refObj.tableName === "Custom Query") {
+			if (refObj.tableName === 'Custom Query') {
 				refObj.finalQuery = refObj.customQuery;
 				if (!refObj.finalQuery) {
-					reject("No query is defined or malformed query");
+					reject('No query is defined or malformed query');
 				} else {
-					if (refObj.finalQuery.substr(refObj.finalQuery.length - 1) === ";") { refObj.finalQuery = refObj.finalQuery.slice(0, -1); }
+					if (refObj.finalQuery.substr(refObj.finalQuery.length - 1) === ';') { refObj.finalQuery = refObj.finalQuery.slice(0, -1); }
 					resolve(refObj);
 				}
 			} else {
-				refObj.finalQuery = "SELECT * FROM " + refObj.tableName;
+				refObj.finalQuery = 'SELECT * FROM ' + refObj.tableName;
 				resolve(refObj);
 			}
 		});
@@ -135,13 +135,13 @@ export class StreamTools {
 	public assignFields = (refObj: any) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
-				reject("No data is provided");
+				reject('No data is provided');
 			} else if (!refObj.id) {
-				reject("No stream id is provided");
+				reject('No stream id is provided');
 			} else if (!refObj.fields) {
-				reject("No field list is provided");
+				reject('No field list is provided');
 			} else if (!Array.isArray(refObj.fields)) {
-				reject("Field list is not valid");
+				reject('Field list is not valid');
 			} else {
 				this.clearFields(refObj).
 					then((innerObj: any) => {
@@ -160,12 +160,12 @@ export class StreamTools {
 							if (curField.characters !== undefined) { toInsert.fCharacters = parseInt(curField.characters, 10); }
 							if (curField.dateFormat !== undefined) { toInsert.fDateFormat = curField.dateFormat; }
 
-							if (toInsert.type === "string" && toInsert.fCharacters === undefined) { toInsert.fCharacters = 1024; }
-							if (toInsert.type === "number" && toInsert.fPrecision === undefined) { toInsert.fPrecision = 28; }
-							if (toInsert.type === "number" && toInsert.fDecimals === undefined) { toInsert.fDecimals = 8; }
-							if (toInsert.type === "number" && toInsert.fPrecision <= toInsert.fDecimals) { toInsert.fDecimals = toInsert.fPrecision - 1; }
-							if (toInsert.type === "number" && toInsert.fDecimals < 0) { toInsert.fDecimals = 0; }
-							if (toInsert.type === "date" && toInsert.fDateFormat === undefined) { toInsert.fDateFormat = "YYYY-MM-DD"; }
+							if (toInsert.type === 'string' && toInsert.fCharacters === undefined) { toInsert.fCharacters = 1024; }
+							if (toInsert.type === 'number' && toInsert.fPrecision === undefined) { toInsert.fPrecision = 28; }
+							if (toInsert.type === 'number' && toInsert.fDecimals === undefined) { toInsert.fDecimals = 8; }
+							if (toInsert.type === 'number' && toInsert.fPrecision <= toInsert.fDecimals) { toInsert.fDecimals = toInsert.fPrecision - 1; }
+							if (toInsert.type === 'number' && toInsert.fDecimals < 0) { toInsert.fDecimals = 0; }
+							if (toInsert.type === 'date' && toInsert.fDateFormat === undefined) { toInsert.fDateFormat = 'YYYY-MM-DD'; }
 							promises.push(this.assignField(toInsert));
 
 							// console.log("====================");
@@ -176,7 +176,7 @@ export class StreamTools {
 						return Promise.all(promises);
 					}).
 					then((result) => {
-						resolve({ result: "OK" });
+						resolve({ result: 'OK' });
 					}).
 					catch(reject);
 			}
@@ -184,7 +184,7 @@ export class StreamTools {
 	}
 	private assignField = (fieldDefinition: any) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("INSERT INTO streamfields SET ?", fieldDefinition, (err, rows, fields) => {
+			this.db.query('INSERT INTO streamfields SET ?', fieldDefinition, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -195,7 +195,7 @@ export class StreamTools {
 	}
 	public clearFields = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("DELETE FROM streamfields WHERE stream = ?", refObj.id, (err, rows, fields) => {
+			this.db.query('DELETE FROM streamfields WHERE stream = ?', refObj.id, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -206,7 +206,7 @@ export class StreamTools {
 	}
 	public retrieveFields = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM streamfields WHERE stream = ? ORDER BY fOrder", id, (err, rows, fields) => {
+			this.db.query('SELECT * FROM streamfields WHERE stream = ? ORDER BY fOrder', id, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -218,13 +218,13 @@ export class StreamTools {
 	public saveFields = (refObj: any) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
-				reject("No data is provided");
+				reject('No data is provided');
 			} else if (!refObj.id) {
-				reject("No stream id is provided");
+				reject('No stream id is provided');
 			} else if (!refObj.fields) {
-				reject("No field list is provided");
+				reject('No field list is provided');
 			} else if (!Array.isArray(refObj.fields)) {
-				reject("Field list is not valid");
+				reject('Field list is not valid');
 			} else {
 				let promises: any[]; promises = [];
 				refObj.fields.forEach((curField: any) => {
@@ -232,7 +232,7 @@ export class StreamTools {
 				});
 				Promise.all(promises).
 					then((result) => {
-						resolve({ result: "OK" });
+						resolve({ result: 'OK' });
 					}).
 					catch(reject);
 			}
@@ -240,7 +240,7 @@ export class StreamTools {
 	}
 	private saveField = (fieldDefinition: any) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("UPDATE streamfields SET ? WHERE id = " + fieldDefinition.id, fieldDefinition, (err, rows, fields) => {
+			this.db.query('UPDATE streamfields SET ? WHERE id = ' + fieldDefinition.id, fieldDefinition, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {

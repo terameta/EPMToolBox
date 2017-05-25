@@ -1,7 +1,7 @@
-import { Injectable, Pipe, PipeTransform } from "@angular/core";
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-	name: "describedFieldFilter",
+	name: 'describedFieldFilter',
 	pure: false
 })
 @Injectable()

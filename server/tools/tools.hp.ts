@@ -1,8 +1,8 @@
-import * as request from "request";
-import * as xml2js from "xml2js";
+import * as request from 'request';
+import * as xml2js from 'xml2js';
 
-import { DimeEnvironmentHP } from "../../shared/model/dime/environmentHP";
-import { MainTools } from "../config/config.tools";
+import { DimeEnvironmentHP } from '../../shared/model/dime/environmentHP';
+import { MainTools } from '../config/config.tools';
 
 export class HPTools {
 	xmlParser: any;
@@ -31,20 +31,20 @@ export class HPTools {
 	private staticVerify = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
-				reject("No data provided");
+				reject('No data provided');
 			} else if (!refObj.username) {
-				reject("No username provided");
+				reject('No username provided');
 			} else if (!refObj.password) {
-				reject("No password provided");
+				reject('No password provided');
 			} else if (!refObj.server) {
-				reject("No server is provided");
+				reject('No server is provided');
 			} else if (!refObj.port) {
-				reject("No port is provided");
-			} else if (refObj.server.substr(0, 4) !== "http") {
-				reject("Server address is not valid. Make sure it starts with http:// or https://");
+				reject('No port is provided');
+			} else if (refObj.server.substr(0, 4) !== 'http') {
+				reject('Server address is not valid. Make sure it starts with http:// or https://');
 			} else {
-				refObj.address = refObj.server + ":" + refObj.port;
-				refObj.smartviewurl = refObj.address + "/workspace/SmartViewProviders";
+				refObj.address = refObj.server + ':' + refObj.port;
+				refObj.smartviewurl = refObj.address + '/workspace/SmartViewProviders';
 				resolve(refObj);
 			}
 		});
@@ -53,10 +53,10 @@ export class HPTools {
 	private hpEstablishConnection = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			request.post({
-				url: refObj.smartviewurl || "",
+				url: refObj.smartviewurl || '',
 				// tslint:disable-next-line:max-line-length
-				body: "<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc=\"0\">en_US</lngs><usr></usr><pwd></pwd></req_ConnectToProvider>",
-				headers: { "Content-Type": "application/xml" }
+				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd></req_ConnectToProvider>',
+				headers: { 'Content-Type': 'application/xml' }
 			}, (err, response, body) => {
 				if (err) {
 					reject(err);
@@ -71,10 +71,10 @@ export class HPTools {
 	private hpGetDataSources = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
 			request.post({
-				url: refObj.smartviewurl || "",
+				url: refObj.smartviewurl || '',
 				// tslint:disable-next-line:max-line-length
-				body: "<req_GetProvisionedDataSources><usr>" + refObj.username + "</usr><pwd>" + refObj.password + "</pwd><filters></filters></req_GetProvisionedDataSources>",
-				headers: { "Content-Type": "application/xml" }
+				body: '<req_GetProvisionedDataSources><usr>' + refObj.username + '</usr><pwd>' + refObj.password + '</pwd><filters></filters></req_GetProvisionedDataSources>',
+				headers: { 'Content-Type': 'application/xml' }
 			}, (err, response, body) => {
 				if (err) {
 					reject(err);
@@ -84,13 +84,13 @@ export class HPTools {
 						if (parseErr) {
 							reject(parseErr);
 						} else if (!result) {
-							reject("No result at step hpGetDataSources");
+							reject('No result at step hpGetDataSources');
 						} else if (!result.res_GetProvisionedDataSources) {
-							reject("Result is not valid at step hpGetDataSources");
+							reject('Result is not valid at step hpGetDataSources');
 						} else if (!result.res_GetProvisionedDataSources.sso) {
-							reject("Result is not valid at step hpGetDataSources [sso]");
+							reject('Result is not valid at step hpGetDataSources [sso]');
 						} else if (result.res_GetProvisionedDataSources.sso.length !== 1) {
-							reject("Result is not valid at step hpGetDataSources [sso invalid length]");
+							reject('Result is not valid at step hpGetDataSources [sso invalid length]');
 						} else {
 							refObj.sso = result.res_GetProvisionedDataSources.sso[0];
 							let productToAppend: any = {};
@@ -107,7 +107,7 @@ export class HPTools {
 								if (refObj.products) { refObj.products.push(productToAppend); }
 							});
 							refObj.products.forEach((curProduct) => {
-								if (curProduct.id === "HP") {
+								if (curProduct.id === 'HP') {
 									if (curProduct.servers) {
 										if (curProduct.servers[0]) {
 											if (curProduct.servers[0].context) {
@@ -133,12 +133,12 @@ export class HPTools {
 				then(this.hpGetDataSources).
 				then((innerObj: DimeEnvironmentHP) => {
 					if (!innerObj.planningurl) {
-						reject("No Planning url is found");
+						reject('No Planning url is found');
 					} else {
 						request.post({
 							url: innerObj.planningurl,
-							body: "<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc=\"0\">en_US</lngs><sso>" + innerObj.sso + "</sso></req_ConnectToProvider>",
-							headers: { "Content-Type": "application/xml" }
+							body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><sso>' + innerObj.sso + '</sso></req_ConnectToProvider>',
+							headers: { 'Content-Type': 'application/xml' }
 						}, (err, response, body) => {
 							if (err) {
 								reject(err);
@@ -147,13 +147,13 @@ export class HPTools {
 									if (pErr) {
 										reject(pErr);
 									} else if (!result) {
-										reject("No result at step hpConnectToProvider");
+										reject('No result at step hpConnectToProvider');
 									} else if (!result.res_ConnectToProvider) {
-										reject("Result is not valid at step hpConnectToProvider");
+										reject('Result is not valid at step hpConnectToProvider');
 									} else if (!result.res_ConnectToProvider.sID) {
-										reject("Result is not valid at step hpConnectToProvider [sID]");
+										reject('Result is not valid at step hpConnectToProvider [sID]');
 									} else if (result.res_ConnectToProvider.sID.length !== 1) {
-										reject("Result is not valid at step hpConnectToProvider [sID invalid length]");
+										reject('Result is not valid at step hpConnectToProvider [sID invalid length]');
 									} else {
 										innerObj.sID = result.res_ConnectToProvider.sID[0];
 										resolve(innerObj);
@@ -180,9 +180,9 @@ export class HPTools {
 			this.hpConnectToProvider(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
-						body: "<req_ListServers><sID>" + innerObj.sID + "</sID></req_ListServers>",
-						headers: { "Content-Type": "application/xml" }
+						url: innerObj.planningurl || '',
+						body: '<req_ListServers><sID>' + innerObj.sID + '</sID></req_ListServers>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -191,11 +191,11 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result  at hpListServers");
+									reject('No result  at hpListServers');
 								} else if (!pResult.res_ListServers) {
-									reject("Result is not valid at step hpListServers");
+									reject('Result is not valid at step hpListServers');
 								} else if (!pResult.res_ListServers.srvs) {
-									reject("Result is not valid at step hpListServers [srvs]");
+									reject('Result is not valid at step hpListServers [srvs]');
 								} else {
 									innerObj.server = pResult.res_ListServers.srvs[0]._;
 									resolve(innerObj);
@@ -212,9 +212,9 @@ export class HPTools {
 			this.hpListServers(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
-						body: "<req_ListApplications><sID>" + innerObj.sID + "</sID><srv>" + innerObj.server + "</srv><type></type><url></url></req_ListApplications>",
-						headers: { "Content-Type": "application/xml" }
+						url: innerObj.planningurl || '',
+						body: '<req_ListApplications><sID>' + innerObj.sID + '</sID><srv>' + innerObj.server + '</srv><type></type><url></url></req_ListApplications>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -223,17 +223,17 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpListApplications");
+									reject('No result at step hpListApplications');
 								} else if (!pResult.res_ListApplications) {
-									reject("Result is not valid at step hpListApplications");
+									reject('Result is not valid at step hpListApplications');
 								} else if (!pResult.res_ListApplications.apps) {
-									reject("Result is not valid at hpListApplications [apps]");
+									reject('Result is not valid at hpListApplications [apps]');
 								} else if (pResult.res_ListApplications.apps.length !== 1) {
-									reject("Result is not valid at step hpListApplications [apps length]");
+									reject('Result is not valid at step hpListApplications [apps length]');
 								} else {
-									innerObj.apps = pResult.res_ListApplications.apps[0]._.split("|").sort();
+									innerObj.apps = pResult.res_ListApplications.apps[0]._.split('|').sort();
 									if (!innerObj.apps) {
-										reject("No applications listed");
+										reject('No applications listed');
 									} else {
 										innerObj.apps.forEach((curApp, curKey) => {
 											if (innerObj.apps) { innerObj.apps[curKey] = { name: curApp }; }
@@ -252,12 +252,12 @@ export class HPTools {
 			this.hpListCubes(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					if (!innerObj.cubes) {
-						reject("No cubes are found");
+						reject('No cubes are found');
 					} else {
 						let toReturn: any[];
 						toReturn = [];
 						innerObj.cubes.forEach((curCube) => {
-							toReturn.push({ name: curCube, type: "cube" });
+							toReturn.push({ name: curCube, type: 'cube' });
 						});
 						resolve(toReturn)
 					}
@@ -267,22 +267,22 @@ export class HPTools {
 	};
 	// Old Step0600
 	private hpOpenApplication = (refObj: DimeEnvironmentHP) => {
-		let curBody = "";
+		let curBody = '';
 		return new Promise((resolve, reject) => {
 			this.hpListApplications(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
-					curBody = "<req_OpenApplication>";
-					curBody += "<sID>" + innerObj.sID + "</sID>";
-					curBody += "<srv>" + innerObj.server + "</srv>";
-					curBody += "<app>" + innerObj.database + "</app>";
-					curBody += "<type></type><url></url>";
-					curBody += "<sso>" + innerObj.sso + "</sso>";
-					curBody += "</req_OpenApplication>";
+					curBody = '<req_OpenApplication>';
+					curBody += '<sID>' + innerObj.sID + '</sID>';
+					curBody += '<srv>' + innerObj.server + '</srv>';
+					curBody += '<app>' + innerObj.database + '</app>';
+					curBody += '<type></type><url></url>';
+					curBody += '<sso>' + innerObj.sso + '</sso>';
+					curBody += '</req_OpenApplication>';
 
 					request.post({
-						url: innerObj.planningurl || "",
+						url: innerObj.planningurl || '',
 						body: curBody,
-						headers: { "Content-Type": "application/xml" }
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -291,11 +291,11 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpOpenApplication");
+									reject('No result at step hpOpenApplication');
 								} else if (!pResult.res_OpenApplication) {
-									reject("Result is not valid at step hpOpenApplication");
+									reject('Result is not valid at step hpOpenApplication');
 								} else if (!pResult.res_OpenApplication.sID) {
-									reject("Result is not valid at step hpOpenApplication [sID]");
+									reject('Result is not valid at step hpOpenApplication [sID]');
 								} else {
 									resolve(innerObj);
 								}
@@ -312,9 +312,9 @@ export class HPTools {
 			this.hpOpenApplication(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
-						body: "<req_GetAvailableServices><sID>" + refObj.sID + "</sID><CubeView/></req_GetAvailableServices>",
-						headers: { "Content-Type": "application/xml" }
+						url: innerObj.planningurl || '',
+						body: '<req_GetAvailableServices><sID>' + refObj.sID + '</sID><CubeView/></req_GetAvailableServices>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -323,9 +323,9 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpGetAvailableServices");
+									reject('No result at step hpGetAvailableServices');
 								} else if (!pResult.res_GetAvailableServices) {
-									reject("Result is not valid at step hpGetAvailableServices");
+									reject('Result is not valid at step hpGetAvailableServices');
 								} else {
 									resolve(innerObj);
 								}
@@ -342,9 +342,9 @@ export class HPTools {
 			this.hpGetAvailableServices(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
-						body: "<req_ListDocuments><sID>" + refObj.sID + "</sID><type>all</type><folder>/</folder><ODL_ECID>0000</ODL_ECID></req_ListDocuments>",
-						headers: { "Content-Type": "application/xml" }
+						url: innerObj.planningurl || '',
+						body: '<req_ListDocuments><sID>' + refObj.sID + '</sID><type>all</type><folder>/</folder><ODL_ECID>0000</ODL_ECID></req_ListDocuments>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -353,9 +353,9 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpListDocuments");
+									reject('No result at step hpListDocuments');
 								} else if (!pResult.res_ListDocuments) {
-									reject("Result is not valid at step hpListDocuments");
+									reject('Result is not valid at step hpListDocuments');
 								} else {
 									resolve(innerObj);
 								}
@@ -372,9 +372,9 @@ export class HPTools {
 			this.hpListDocuments(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
-						body: "<req_ListCubes><sID>" + refObj.sID + "</sID><srv>" + refObj.server + "</srv><app>" + refObj.database + "</app><type></type><url></url></req_ListCubes>",
-						headers: { "Content-Type": "application/xml" }
+						url: innerObj.planningurl || '',
+						body: '<req_ListCubes><sID>' + refObj.sID + '</sID><srv>' + refObj.server + '</srv><app>' + refObj.database + '</app><type></type><url></url></req_ListCubes>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -383,15 +383,15 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpListCubes");
+									reject('No result at step hpListCubes');
 								} else if (!pResult.res_ListCubes) {
-									reject("Result is not valid at step hpListCubes");
+									reject('Result is not valid at step hpListCubes');
 								} else if (!pResult.res_ListCubes.cubes) {
-									reject("Result is not valid at step hpListCubes [cubes]");
+									reject('Result is not valid at step hpListCubes [cubes]');
 								} else if (pResult.res_ListCubes.cubes.length !== 1) {
-									reject("Result is not valid at step hpListCubes [cubes length]");
+									reject('Result is not valid at step hpListCubes [cubes length]');
 								} else {
-									innerObj.cubes = pResult.res_ListCubes.cubes[0]._.split("|").sort();
+									innerObj.cubes = pResult.res_ListCubes.cubes[0]._.split('|').sort();
 									resolve(innerObj);
 								}
 							});
@@ -414,10 +414,10 @@ export class HPTools {
 			this.hpListCubes(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
+						url: innerObj.planningurl || '',
 						// tslint:disable-next-line:max-line-length
-						body: "<req_OpenCube><sID>" + innerObj.sID + "</sID><srv>" + innerObj.server + "</srv><app>" + innerObj.database + "</app><cube>" + innerObj.table + "</cube><type></type><url></url><form></form></req_OpenCube>",
-						headers: { "Content-Type": "application/xml" }
+						body: '<req_OpenCube><sID>' + innerObj.sID + '</sID><srv>' + innerObj.server + '</srv><app>' + innerObj.database + '</app><cube>' + innerObj.table + '</cube><type></type><url></url><form></form></req_OpenCube>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -426,7 +426,7 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpOpenCube");
+									reject('No result at step hpOpenCube');
 								} else {
 									resolve(innerObj);
 								}
@@ -442,9 +442,9 @@ export class HPTools {
 			this.hpOpenCube(refObj).
 				then((innerObj: DimeEnvironmentHP) => {
 					request.post({
-						url: innerObj.planningurl || "",
-						body: "<req_EnumDims><sID>" + innerObj.sID + "</sID><cube>" + innerObj.table + "</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>",
-						headers: { "Content-Type": "application/xml" }
+						url: innerObj.planningurl || '',
+						body: '<req_EnumDims><sID>' + innerObj.sID + '</sID><cube>' + innerObj.table + '</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>',
+						headers: { 'Content-Type': 'application/xml' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -453,7 +453,7 @@ export class HPTools {
 								if (pErr) {
 									reject(pErr);
 								} else if (!pResult) {
-									reject("No result at step hpListDimensions");
+									reject('No result at step hpListDimensions');
 								} else {
 									let toResolve: any[]; toResolve = [];
 									pResult.res_EnumDims.dimList[0].dim.forEach((curDim: any) => {
@@ -466,6 +466,75 @@ export class HPTools {
 					})
 				}).
 				catch(reject);
+		});
+	}
+	public listRules = (refObj: DimeEnvironmentHP) => {
+		return this.hpListRules(refObj);
+	}
+	private hpListRules = (refObj: DimeEnvironmentHP) => {
+		return new Promise((resolve, reject) => {
+			this.hpOpenCube(refObj).
+				then((innerObj: DimeEnvironmentHP) => {
+					request.post({
+						url: innerObj.planningurl || '',
+						body: '<req_EnumBusinessRules><sID>' + innerObj.sID + '</sID><cube>' + innerObj.table + '</cube><runOnSave>0</runOnSave><ODL_ECID>0000</ODL_ECID></req_EnumBusinessRules>',
+						headers: { 'Content-Type': 'application/xml' }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							this.xmlParser(body, (pErr: any, result: any) => {
+								if (pErr) {
+									reject(pErr);
+								} else if (!result) {
+									reject('No result at step hpListRules');
+								} else {
+									if (!result) {
+										reject('No result returned');
+									} else if (!result.res_EnumBusinessRules) {
+										reject('No rules are enumarated');
+									} else if (!result.res_EnumBusinessRules.rules) {
+										reject('No rules parent is lister under enumaration');
+									} else if (!Array.isArray(result.res_EnumBusinessRules.rules)) {
+										reject('Rules enumeration is not an array');
+									} else if (result.res_EnumBusinessRules.rules.length < 1) {
+										reject('Rules enumeration is an array, but the length is less than 1');
+									} else if (!result.res_EnumBusinessRules.rules[0]) {
+										resolve([]);
+									} else if (!result.res_EnumBusinessRules.rules[0].rule) {
+										reject('Rules list parent doesn\'t exist');
+									} else if (!Array.isArray(result.res_EnumBusinessRules.rules[0].rule)) {
+										reject('Rules list is not an array');
+									} else {
+										let rulesList: any[]; rulesList = [];
+										const curList = result.res_EnumBusinessRules.rules[0].rule;
+										let ruleToPush: any;
+										curList.forEach(function (curRule: any) {
+											ruleToPush = {};
+											if (curRule._) { ruleToPush.name = curRule._; }
+											if (curRule.$) {
+												if (curRule.$.rtp) { ruleToPush.hasRTP = curRule.$.rtp; }
+												if (curRule.$.type) { ruleToPush.type = curRule.$.type; }
+											}
+											rulesList.push(ruleToPush);
+										});
+
+										resolve(rulesList);
+									}
+								}
+							});
+						}
+					});
+				}).
+				catch(reject);
+		});
+	}
+	public listRuleDetails = (refObj: DimeEnvironmentHP) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update this part of the tools.pbcs.ts file');
+			console.log('!!!!!!!!!!!!');
+			resolve([]);
 		});
 	}
 }

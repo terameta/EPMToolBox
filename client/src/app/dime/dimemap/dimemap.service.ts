@@ -1,15 +1,15 @@
-import { ActivatedRoute, Router } from "@angular/router";
-import { Injectable } from "@angular/core";
-import { Http, Response, Headers } from "@angular/http";
+import { ActivatedRoute, Router } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { Http, Response, Headers } from '@angular/http';
 
-import { BehaviorSubject, Observable } from "rxjs/Rx";
-import { AuthHttp } from "angular2-jwt";
-import { ToastrService } from "ngx-toastr";
+import { BehaviorSubject, Observable } from 'rxjs/Rx';
+import { AuthHttp } from 'angular2-jwt';
+import { ToastrService } from 'ngx-toastr';
 
-import { DimeStreamService } from "../dimestream/dimestream.service";
+import { DimeStreamService } from '../dimestream/dimestream.service';
 
-import { DimeMap } from "../../../../../shared/model/dime/map";
-import { DimeStream } from "../../../../../shared/model/dime/stream";
+import { DimeMap } from '../../../../../shared/model/dime/map';
+import { DimeStream } from '../../../../../shared/model/dime/stream';
 
 @Injectable()
 export class DimeMapService {
@@ -29,7 +29,7 @@ export class DimeMapService {
 	private dataStore: {
 		items: DimeMap[]
 	};
-	private headers = new Headers({ "Content-Type": "application/json" });
+	private headers = new Headers({ 'Content-Type': 'application/json' });
 
 	constructor(
 		private http: Http,
@@ -39,13 +39,14 @@ export class DimeMapService {
 		private route: ActivatedRoute,
 		private streamService: DimeStreamService
 	) {
-		this.baseUrl = "/api/dime/map";
+		this.baseUrl = '/api/dime/map';
 		this.dataStore = { items: [] };
 		this._items = <BehaviorSubject<DimeMap[]>>new BehaviorSubject([]);
 		this.items = this._items.asObservable();
 		this.itemCount = this.items.count();
-		this.serviceName = "Maps";
+		this.serviceName = 'Maps';
 		this.resetCurItem();
+		this.getAll();
 	}
 
 	getAll = () => {
@@ -58,11 +59,11 @@ export class DimeMapService {
 				this.dataStore.items = data;
 				this._items.next(Object.assign({}, this.dataStore).items);
 			}, (error) => {
-				console.log("Could not load maps.");
+				console.log('Could not load maps.');
 			});
 	}
 	getOne = (id: number) => {
-		this.authHttp.get(this.baseUrl + "/" + id).
+		this.authHttp.get(this.baseUrl + '/' + id).
 			map(response => response.json()).
 			subscribe((result) => {
 				let notFound = true;
@@ -82,28 +83,28 @@ export class DimeMapService {
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.curItem = result;
 				this.curItemClean = true;
-				if (this.curItem.source) { this.getStreamDefinition(this.curItem.source, "source"); }
-				if (this.curItem.target) { this.getStreamDefinition(this.curItem.target, "target"); }
+				if (this.curItem.source) { this.getStreamDefinition(this.curItem.source, 'source'); }
+				if (this.curItem.target) { this.getStreamDefinition(this.curItem.target, 'target'); }
 				this.isReady(this.curItem.id);
 			}, (error) => {
-				this.toastr.error("Failed to get the item.", this.serviceName);
+				this.toastr.error('Failed to get the item.', this.serviceName);
 				console.log(error);
 			});
 	}
 	private getStreamDefinition = (id: number, srctar: string) => {
 		this.streamService.fetchOne(id).subscribe((result) => {
-			if (srctar === "source") { this.curItemSourceStream = result; }
-			if (srctar === "target") { this.curItemTargetStream = result; }
+			if (srctar === 'source') { this.curItemSourceStream = result; }
+			if (srctar === 'target') { this.curItemTargetStream = result; }
 		}, (error) => {
-			this.toastr.error("Failed to fetch stream definition.", this.serviceName);
+			this.toastr.error('Failed to fetch stream definition.', this.serviceName);
 			console.log(error);
 		});
 		this.streamService.retrieveFieldsFetch(id).subscribe((result) => {
-			if (srctar === "source") { this.curItemSourceStreamFields = result; }
-			if (srctar === "target") { this.curItemTargetStreamFields = result; }
+			if (srctar === 'source') { this.curItemSourceStreamFields = result; }
+			if (srctar === 'target') { this.curItemTargetStreamFields = result; }
 			if (!this.curItemFields) { this.getFields(); }
 		}, (error) => {
-			this.toastr.error("Failed to fetch stream fields list.", this.serviceName);
+			this.toastr.error('Failed to fetch stream fields list.', this.serviceName);
 			console.log(error);
 		})
 	}
@@ -115,10 +116,10 @@ export class DimeMapService {
 				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.resetCurItem();
-				this.router.navigate(["/dime/maps/map-detail", result.id]);
-				this.toastr.info("New item is created, navigating to the details", this.serviceName);
+				this.router.navigate(['/dime/maps/map-detail', result.id]);
+				this.toastr.info('New item is created, navigating to the details', this.serviceName);
 			}, (error) => {
-				this.toastr.error("Failed to create new item.", this.serviceName);
+				this.toastr.error('Failed to create new item.', this.serviceName);
 				console.log(error);
 			}
 			);
@@ -134,7 +135,7 @@ export class DimeMapService {
 				});
 				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
-				this.toastr.info("Item is successfully saved.", this.serviceName);
+				this.toastr.info('Item is successfully saved.', this.serviceName);
 				// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
 				// This shouldn't change the state of the current item.
 				if (shouldUpdate) { this.curItemClean = true; }

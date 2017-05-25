@@ -1,10 +1,11 @@
-import { IPool } from "mysql";
+import { IPool } from 'mysql';
 
-import { MainTools } from "../config/config.tools";
-import { DimeEnvironment } from "../../shared/model/dime/environment";
-import { MSSQLTools } from "./tools.mssql";
-import { HPTools } from "./tools.hp";
-import { PBCSTools } from "./tools.pbcs";
+import { MainTools } from '../config/config.tools';
+import { DimeEnvironment } from '../../shared/model/dime/environment';
+import { DimeStream } from '../../shared/model/dime/stream';
+import { MSSQLTools } from './tools.mssql';
+import { HPTools } from './tools.hp';
+import { PBCSTools } from './tools.pbcs';
 
 export class EnvironmentTools {
 	mssqlTool: MSSQLTools;
@@ -19,12 +20,12 @@ export class EnvironmentTools {
 
 	public getAll = () => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM environments", function (err, rows, fields) {
+			this.db.query('SELECT * FROM environments', function (err, rows, fields) {
 				if (err) {
-					reject({ error: err, message: "Retrieving environment list has failed" });
+					reject({ error: err, message: 'Retrieving environment list has failed' });
 				} else {
 					rows.forEach((curRow: DimeEnvironment) => {
-						curRow.password = "|||---protected---|||";
+						curRow.password = '|||---protected---|||';
 					});
 					resolve(rows);
 				}
@@ -38,16 +39,16 @@ export class EnvironmentTools {
 
 	public getEnvironmentDetails = (refObj: DimeEnvironment, shouldShowPassword?: boolean) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM environments WHERE id = ?", refObj.id, (err, rows, fields) => {
+			this.db.query('SELECT * FROM environments WHERE id = ?', refObj.id, (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Retrieving environment with id " + refObj.id + " has failed" });
+					reject({ error: err, message: 'Retrieving environment with id ' + refObj.id + ' has failed' });
 				} else if (rows.length !== 1) {
-					reject({ error: "Wrong number of records", message: "Wrong number of records for environment received from the server, 1 expected" });
+					reject({ error: 'Wrong number of records', message: 'Wrong number of records for environment received from the server, 1 expected' });
 				} else {
 					if (shouldShowPassword) {
 						rows[0].password = this.tools.decryptText(rows[0].password);
 					} else {
-						rows[0].password = "|||---protected---|||";
+						rows[0].password = '|||---protected---|||';
 					}
 					resolve(rows[0]);
 				}
@@ -57,9 +58,9 @@ export class EnvironmentTools {
 
 	public listTypes = () => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM environmenttypes", function (err, rows, fields) {
+			this.db.query('SELECT * FROM environmenttypes', function (err, rows, fields) {
 				if (err) {
-					reject({ error: err, message: "Retrieving environment type list has failed" });
+					reject({ error: err, message: 'Retrieving environment type list has failed' });
 				} else {
 					resolve(rows);
 				}
@@ -69,7 +70,7 @@ export class EnvironmentTools {
 
 	private getTypeDetails = (refObj: DimeEnvironment): Promise<DimeEnvironment> => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM environmenttypes WHERE id = ?", refObj.type, (err, results, fields) => {
+			this.db.query('SELECT * FROM environmenttypes WHERE id = ?', refObj.type, (err, results, fields) => {
 				if (err) {
 					reject(err);
 				} else if (results.length > 0) {
@@ -83,11 +84,11 @@ export class EnvironmentTools {
 	};
 
 	public create = () => {
-		const newEnv = { name: "New Environment (Please change name)", type: 0, server: "", port: "", username: "", password: "" };
+		const newEnv = { name: 'New Environment (Please change name)', type: 0, server: '', port: '', username: '', password: '' };
 		return new Promise((resolve, reject) => {
-			this.db.query("INSERT INTO environments SET ?", newEnv, function (err, result, fields) {
+			this.db.query('INSERT INTO environments SET ?', newEnv, function (err, result, fields) {
 				if (err) {
-					reject({ error: err, message: "Failed to create a new environment." });
+					reject({ error: err, message: 'Failed to create a new environment.' });
 				} else {
 					resolve({ id: result.insertId });
 				}
@@ -97,17 +98,17 @@ export class EnvironmentTools {
 
 	public update = (theEnvironment: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
-			if (theEnvironment.password === "|||---protected---|||") {
+			if (theEnvironment.password === '|||---protected---|||') {
 				delete theEnvironment.password;
 			} else if (theEnvironment.password) {
 				theEnvironment.password = this.tools.encryptText(theEnvironment.password);
 			}
 			const theID: number = theEnvironment.id;
-			this.db.query("UPDATE environments SET ? WHERE id = " + theID, theEnvironment, function (err, result, fields) {
+			this.db.query('UPDATE environments SET ? WHERE id = ' + theID, theEnvironment, function (err, result, fields) {
 				if (err) {
-					reject({ error: err, message: "Failed to update the environment" });
+					reject({ error: err, message: 'Failed to update the environment' });
 				} else {
-					theEnvironment.password = "|||---protected---|||";
+					theEnvironment.password = '|||---protected---|||';
 					resolve({ theEnvironment });
 				}
 			});
@@ -116,9 +117,9 @@ export class EnvironmentTools {
 
 	public delete = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("DELETE FROM environments WHERE id = ?", id, (err, result, fields) => {
+			this.db.query('DELETE FROM environments WHERE id = ?', id, (err, result, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to delete the environment" });
+					reject({ error: err, message: 'Failed to delete the environment' });
 				} else {
 					resolve({ id: id });
 				}
@@ -134,32 +135,32 @@ export class EnvironmentTools {
 				then(this.getTypeDetails).
 				then((curObj: DimeEnvironment) => {
 					if (!curObj.typedetails) {
-						return Promise.reject("No type definition on the environment object");
+						return Promise.reject('No type definition on the environment object');
 					} else if (!curObj.typedetails.value) {
-						return Promise.reject("No type value definition on the environment object");
-					} else if (curObj.typedetails.value === "MSSQL") {
+						return Promise.reject('No type value definition on the environment object');
+					} else if (curObj.typedetails.value === 'MSSQL') {
 						return this.mssqlTool.verify(curObj);
-					} else if (curObj.typedetails.value === "HP") {
+					} else if (curObj.typedetails.value === 'HP') {
 						return this.hpTool.verify(curObj);
-					} else if (curObj.typedetails.value === "PBCS") {
+					} else if (curObj.typedetails.value === 'PBCS') {
 						return this.pbcsTool.verify(curObj);
 					} else {
-						return Promise.reject("Undefined Environment Type");
+						return Promise.reject('Undefined Environment Type');
 					}
 				}).
 				then(this.setVerified).
 				then((result) => {
 					// console.log(result);
-					resolve({ result: "OK" });
+					resolve({ result: 'OK' });
 				}).catch((issue) => {
-					reject({ error: issue, message: "Failed to verify the environment" });
+					reject({ error: issue, message: 'Failed to verify the environment' });
 				});
 		});
 	}
 
 	private setVerified = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("UPDATE environments SET ? WHERE id = " + refObj.id, { verified: 1 }, (err, results, fields) => {
+			this.db.query('UPDATE environments SET ? WHERE id = ' + refObj.id, { verified: 1 }, (err, results, fields) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -171,28 +172,28 @@ export class EnvironmentTools {
 	};
 
 	public listDatabases = (refObj: DimeEnvironment) => {
-		console.log("Environment list databases");
+		// console.log('Environment list databases');
 		return new Promise((resolve, reject) => {
 			this.getEnvironmentDetails(refObj, true).
 				then(this.getTypeDetails).
 				then((curObj: DimeEnvironment) => {
 					if (!curObj.typedetails) {
-						return Promise.reject("No type definition on the environment object");
+						return Promise.reject('No type definition on the environment object');
 					} else if (!curObj.typedetails.value) {
-						return Promise.reject("No type value definition on the environment object");
-					} else if (curObj.typedetails.value === "MSSQL") {
+						return Promise.reject('No type value definition on the environment object');
+					} else if (curObj.typedetails.value === 'MSSQL') {
 						return this.mssqlTool.listDatabases(curObj);
-					} else if (curObj.typedetails.value === "HP") {
+					} else if (curObj.typedetails.value === 'HP') {
 						return this.hpTool.listApplications(curObj);
-					} else if (curObj.typedetails.value === "PBCS") {
+					} else if (curObj.typedetails.value === 'PBCS') {
 						return this.pbcsTool.listApplications(curObj);
 					} else {
-						return Promise.reject("Undefined Environment Type");
+						return Promise.reject('Undefined Environment Type');
 					}
 				}).
 				then(resolve).
 				catch((issue) => {
-					reject({ error: issue, message: "Failed to list the databases" });
+					reject({ error: issue, message: 'Failed to list the databases' });
 				});
 		});
 	}
@@ -204,23 +205,23 @@ export class EnvironmentTools {
 				then((curObj: DimeEnvironment) => {
 					curObj.database = refObj.database;
 					if (!curObj.typedetails) {
-						return Promise.reject("No type definition on the environment object");
+						return Promise.reject('No type definition on the environment object');
 					} else if (!curObj.typedetails.value) {
-						return Promise.reject("No type value definition on the environment object");
-					} else if (curObj.typedetails.value === "MSSQL") {
+						return Promise.reject('No type value definition on the environment object');
+					} else if (curObj.typedetails.value === 'MSSQL') {
 						// console.log(curObj);
 						return this.mssqlTool.listTables(curObj);
-					} else if (curObj.typedetails.value === "HP") {
+					} else if (curObj.typedetails.value === 'HP') {
 						return this.hpTool.listCubes(curObj);
-					} else if (curObj.typedetails.value === "PBCS") {
+					} else if (curObj.typedetails.value === 'PBCS') {
 						return this.pbcsTool.listCubes(curObj);
 					} else {
-						return Promise.reject("Undefined Environment Type");
+						return Promise.reject('Undefined Environment Type');
 					}
 				}).
 				then(resolve).
 				catch((issue) => {
-					reject({ error: issue, message: "Failed to list the tables" });
+					reject({ error: issue, message: 'Failed to list the tables' });
 				});
 		});
 	}
@@ -234,15 +235,67 @@ export class EnvironmentTools {
 					innerObj.query = refObj.query;
 					innerObj.table = refObj.table;
 					if (!innerObj.typedetails) {
-						return Promise.reject("No tpe definition on the environment object");
+						return Promise.reject('No type definition on the environment object');
 					} else if (!innerObj.typedetails.value) {
-						return Promise.reject("No type value definition on the environment object");
-					} else if (innerObj.typedetails.value === "MSSQL") {
+						return Promise.reject('No type value definition on the environment object');
+					} else if (innerObj.typedetails.value === 'MSSQL') {
 						return this.mssqlTool.listFields(innerObj);
-					} else if (innerObj.typedetails.value === "HP") {
+					} else if (innerObj.typedetails.value === 'HP') {
 						return this.hpTool.listDimensions(innerObj);
 					} else {
-						return Promise.reject("Undefined Environment Type");
+						return Promise.reject('Undefined Environment Type');
+					}
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	}
+
+	public listProcedures = (curStream: DimeStream) => {
+		return new Promise((resolve, reject) => {
+			// console.log(curStream);
+			this.getEnvironmentDetails({ id: curStream.environment }, true).
+				then(this.getTypeDetails).
+				then((innerObj: DimeEnvironment) => {
+					// console.log(innerObj);
+					innerObj.database = curStream.dbName;
+					innerObj.table = curStream.tableName;
+					if (!innerObj.typedetails) {
+						return Promise.reject('No type definition on the environment object');
+					} else if (!innerObj.typedetails.value) {
+						return Promise.reject('No type value definition on the environment object');
+					} else if (innerObj.typedetails.value === 'HP') {
+						return this.hpTool.listRules(innerObj);
+					} else if (innerObj.typedetails.value === 'PBCS') {
+						return this.pbcsTool.listRules(innerObj);
+					} else {
+						return Promise.reject('Undefined Environment Type');
+					}
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+
+	public listProcedureDetails = (refObj: { curStream: DimeStream, procedureName: string }) => {
+		return new Promise((resolve, reject) => {
+			this.getEnvironmentDetails({ id: refObj.curStream.environment }, true).
+				then(this.getTypeDetails).
+				then((innerObj: any) => {
+					// console.log(innerObj);
+					innerObj.database = refObj.curStream.dbName;
+					innerObj.table = refObj.curStream.tableName;
+					innerObj.procedure = refObj.procedureName;
+					if (!innerObj.typedetails) {
+						return Promise.reject('No type definition on the environment object');
+					} else if (!innerObj.typedetails.value) {
+						return Promise.reject('No type value definition on the environment object');
+					} else if (innerObj.typedetails.value === 'HP') {
+						return this.hpTool.listRuleDetails(innerObj);
+					} else if (innerObj.typedetails.value === 'PBCS') {
+						return this.pbcsTool.listRuleDetails(innerObj);
+					} else {
+						return Promise.reject('Undefined Environment Type');
 					}
 				}).
 				then(resolve).

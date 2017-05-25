@@ -34,7 +34,7 @@
 	"editor.formatOnSave": true,
 	"terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
 	"terminal.integrated.fontSize": 12,
-	"workbench.iconTheme": "vs-seti",
+	"workbench.iconTheme": null,
 	"html.format.wrapLineLength": 0,
 	"html.format.indentInnerHtml": true,
 	"html.format.endWithNewline": true,

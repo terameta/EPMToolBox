@@ -1,8 +1,8 @@
-import * as request from "request";
-import * as xml2js from "xml2js";
+import * as request from 'request';
+import * as xml2js from 'xml2js';
 
-import { DimeEnvironmentPBCS } from "../../shared/model/dime/environmentPBCS";
-import { MainTools } from "../config/config.tools";
+import { DimeEnvironmentPBCS } from '../../shared/model/dime/environmentPBCS';
+import { MainTools } from '../config/config.tools';
 
 export class PBCSTools {
 	xmlParser: any;
@@ -22,20 +22,20 @@ export class PBCSTools {
 	private staticVerify = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
-				reject("No data provided");
+				reject('No data provided');
 			} else if (!refObj.username) {
-				reject("No username provided");
+				reject('No username provided');
 			} else if (!refObj.password) {
-				reject("No password provided");
+				reject('No password provided');
 			} else if (!refObj.server) {
-				reject("No server is provided");
+				reject('No server is provided');
 			} else if (!refObj.port) {
-				reject("No port is provided");
-			} else if (refObj.server.substr(0, 4) !== "http") {
-				reject("Server address is not valid. Make sure it starts with http:// or https://");
+				reject('No port is provided');
+			} else if (refObj.server.substr(0, 4) !== 'http') {
+				reject('Server address is not valid. Make sure it starts with http:// or https://');
 			} else {
-				refObj.address = refObj.server + ":" + refObj.port;
-				refObj.resturl = refObj.address + "/HyperionPlanning/rest";
+				refObj.address = refObj.server + ':' + refObj.port;
+				refObj.resturl = refObj.address + '/HyperionPlanning/rest';
 				// console.log("PBCS staticVerify, success");
 				resolve(refObj);
 			}
@@ -45,13 +45,13 @@ export class PBCSTools {
 		// console.log(refObj.resturl);
 		return new Promise((resolve, reject) => {
 			request.get({
-				url: refObj.resturl + "/",
+				url: refObj.resturl + '/',
 				auth: {
 					user: refObj.username,
 					pass: refObj.password,
 					sendImmediately: true
 				},
-				headers: { "Content-Type": "application/json" }
+				headers: { 'Content-Type': 'application/json' }
 			}, (err, response: request.RequestResponse, body) => {
 				if (err) {
 					reject(err);
@@ -59,19 +59,19 @@ export class PBCSTools {
 					this.tools.parseJsonString(body).
 						then((result: any) => {
 							if (!result.items) {
-								reject("No version items");
+								reject('No version items');
 							} else {
 								result.items.forEach((curItem: any) => {
-									if (curItem.lifecycle === "active") {
+									if (curItem.lifecycle === 'active') {
 										refObj.version = curItem.version
-										refObj.resturl += "/" + refObj.version;
+										refObj.resturl += '/' + refObj.version;
 									}
 								});
 								if (refObj.version) {
 									// console.log(refObj);
 									resolve(refObj);
 								} else {
-									reject("No active version found");
+									reject('No active version found');
 								}
 							}
 						}).
@@ -94,13 +94,13 @@ export class PBCSTools {
 			this.initiateRest(refObj).
 				then((innerObj: DimeEnvironmentPBCS) => {
 					request.get({
-						url: innerObj.resturl + "/applications",
+						url: innerObj.resturl + '/applications',
 						auth: {
 							user: innerObj.username,
 							pass: innerObj.password,
 							sendImmediately: true
 						},
-						headers: { "Content-Type": "application/json" }
+						headers: { 'Content-Type': 'application/json' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -108,9 +108,9 @@ export class PBCSTools {
 							this.tools.parseJsonString(body).
 								then((result: any) => {
 									if (!result) {
-										reject("No response received at pbcsGetApplications");
+										reject('No response received at pbcsGetApplications');
 									} else if (!result.items) {
-										reject("No items received at pbcsGetApplications");
+										reject('No items received at pbcsGetApplications');
 									} else {
 										innerObj.apps = [];
 										result.items.forEach((curItem: any) => {
@@ -131,7 +131,7 @@ export class PBCSTools {
 		return new Promise((resolve, reject) => {
 			this.pbcsGetCubes(refObj).
 				then((innerObj: DimeEnvironmentPBCS) => {
-					reject("Not yet");
+					reject('Not yet');
 				}).
 				catch(reject);
 		});
@@ -141,13 +141,13 @@ export class PBCSTools {
 			this.initiateRest(refObj).
 				then((innerObj: DimeEnvironmentPBCS) => {
 					request.get({
-						url: innerObj.resturl + "/applications/" + innerObj.database + "/",
+						url: innerObj.resturl + '/applications/' + innerObj.database + '/',
 						auth: {
 							user: innerObj.username,
 							pass: innerObj.password,
 							sendImmediately: true
 						},
-						headers: { "Content-Type": "application/json" }
+						headers: { 'Content-Type': 'application/json' }
 					}, (err, response, body) => {
 						if (err) {
 							reject(err);
@@ -156,13 +156,29 @@ export class PBCSTools {
 							this.tools.parseJsonString(body).
 								then((result: any) => {
 									console.log(result);
-									reject("Hdere");
+									reject('Hdere');
 								}).
 								catch(reject);
 						}
 					});
 				}).
 				catch(reject);
+		});
+	}
+	public listRules = (refObj: DimeEnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update this part of the tools.pbcs.ts file');
+			console.log('!!!!!!!!!!!!');
+			resolve([]);
+		});
+	}
+	public listRuleDetails = (refObj: DimeEnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update this part of the tools.pbcs.ts file');
+			console.log('!!!!!!!!!!!!');
+			resolve([]);
 		});
 	}
 }

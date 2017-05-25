@@ -8,7 +8,7 @@
 				<div class="form-group">
 					<label for="stepType" class="col-xs-1 control-label">Type:</label>
 					<div class="col-xs-11">
-						<select name="stepType" id="stepType" id="" class="form-control" [(ngModel)]="mainService.curStep.type">
+						<select name="stepType" id="stepType" id="stepType" class="form-control" [(ngModel)]="mainService.curStep.type" (change)="mainService.stepPrepare()">
 							<option *ngFor="let type of mainService.stepTypes" [value]="type.value">{{type.name}}</option>
 						</select>
 					</div>
@@ -24,9 +24,119 @@
 					</div>
 				</div>
 				<div class="form-group" *ngIf="mainService.curStep.type == 'pulldata'">
-					<label for="steppulldata" class="col-xs-1 control-label">Definition:</label>
+					<label for="steppulldata" class="col-xs-1 control-label">Source Stream:</label>
 					<div class="col-xs-11">
-						Pull data definition is here.
+						<select name="steppulldata" id="steppulldata" class="form-control" [(ngModel)]="mainService.curStep.referedid">
+							<option *ngFor="let stream of streamService.items | async | dimeProcessFilter: {environment: mainService.curItem.source}" [value]="stream.id"> {{ stream.name }} </option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'pushdata'" >
+					<label for="steppushdata" class="col-xs-1 control-label">Target Stream:</label>
+					<div class="col-xs-11">
+						<select name="steppushdata" id="steppushdata" class="form-control" [(ngModel)]="mainService.curStep.referedid">
+							<option *ngFor="let stream of streamService.items | async | dimeProcessFilter: {environment: mainService.curItem.target}" [value]="stream.id"> {{ stream.name }} </option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'mapdata'">
+					<label for="stepmapdata{{mainService.curStep.id}}" class="col-xs-1 control-label">Map:</label>
+					<div class="col-xs-11">
+						<select name="stepmapdata{{mainService.curStep.id}}" id="stepmapdata{{mainService.curStep.id}}" class="form-control" [(ngModel)]="mainService.curStep.referedid">
+							<option *ngFor="let map of mapService.items
+										| async
+										| dimeProcessFilter: { source: ((mainService.curItemSteps | dimeProcessFilter: {type:'pulldata'}) || [{referedid: 0}])[0].referedid }
+										| dimeProcessFilter: { target: ((mainService.curItemSteps | dimeProcessFilter: {type:'pushdata'}) || [{referedid: 0}])[0].referedid }"
+								[value]="map.id">
+								{{ map.name }}
+							</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'manipulate'">
+					<label for="stepmanipulate" class="col-xs-1 control-label">Definition:</label>
+					<div class="col-xs-11">
+						<button type="button" class="btn btn-xs btn-default" (click)="mainService.stepManipulationAdd();"><i class="fa fa-plus fa-fw"></i> New Transformation</button>
+						<hr>
+						<div *ngFor="let curManipulation of mainService.curStepManipulations; let i = index;let last = last; let first = first">
+							<form class="form-inline">
+								<div class="input-group">
+									<span class="input-group-addon">When {{curManipulation.mOrder}}</span>
+									<select name="manipulation{{i}}when" class="form-control" [(ngModel)]="curManipulation.when" (change)="curManipulation.field = ''">
+										<option value="SRC">Source Field</option>
+										<option value="TAR">Target Field</option>
+									</select>
+
+									<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+									<select name="manipulation{{i}}field" class="form-control" *ngIf="curManipulation.when == 'SRC'" [(ngModel)]="curManipulation.field">
+										<option *ngFor="let field of mainService.curItemSourceFields" [value]="field.name">{{field.name}}</option>
+									</select>
+									<select name="manipulation{{i}}field" class="form-control" *ngIf="curManipulation.when == 'TAR'" [(ngModel)]="curManipulation.field">
+										<option *ngFor="let field of mainService.curItemTargetFields" [value]="field.name">{{field.name}}</option>
+									</select>
+
+									<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+									<select name="manipulation{{i}}comparer" class="form-control" [(ngModel)]="curManipulation.comparer">
+										<option value="like">is like</option>
+										<option value="equals">is equal to</option>
+									</select>
+
+									<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+									<input type="text" name="manipulation{{i}}comparison" class="form-control" size="6" [(ngModel)]="curManipulation.comparison">
+
+									<span class="input-group-addon">then edit</span>
+									<select name="manipulation{{i}}whichfield" class="form-control" [(ngModel)]="curManipulation.whichField">
+										<option value="current">Current Field</option>
+										<option value="data">Data Field</option>
+									</select>
+
+									<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+									<select name="manipulation{{i}}operation" class="form-control" [(ngModel)]="curManipulation.operation" (change)="curManipulation.operator = ''">
+										<option value="set">by setting to</option>
+										<option value="multiply">by multiplying with</option>
+										<option value="divide">by dividing with</option>
+										<option value="add">by adding</option>
+										<option value="subtract">by subtracting</option>
+									</select>
+
+									<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+									<input type="text" name="manipulation{{i}}operator" class="form-control" size="6" [(ngModel)]="curManipulation.operator">
+
+									<span class="input-group-addon" style="padding:0 2px">
+										<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.stepManipulationMove(curManipulation, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+										<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
+										<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.stepManipulationMove(curManipulation, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
+										<button type="button" class="btn btn-xs btn-danger" (click)="mainService.stepManipulationDelete(curManipulation, i)"><i class="fa fa-trash fa-fw" aria-hidden="true"></i></button>
+									</span>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'tarprocedure'">
+					<label for="steptarprocedure" class="col-xs-1 control-label">Definition:</label>
+					<div class="col-xs-11">
+						<span *ngIf="mainService.curItemTargetProcedures.length == 0"><i class="fa fa-circle-o-notch fa-spin fa-fw"></i> Please wait, retrieving items...</span>
+						<form *ngIf="mainService.curItemTargetProcedures.length > 0" class="form-horizontal">
+							<span *ngFor="let curProcedure of mainService.curItemTargetProcedures;let i = index">
+								<label>
+									<input
+										type="radio"
+										name="steptarprocedure{{i}}selection"
+										[(ngModel)]="mainService.curItemSelectedProcedure"
+										[value]="curProcedure"
+										(ngChange)="console.log('I am changed')">
+										{{curProcedure.name}}
+								</label>
+							</span>
+						</form>
+						<pre>{{mainService.curItemTargetProcedures | json}}</pre>
+						<pre>{{mainService.curItemSelectedProcedure | json}}</pre>
 					</div>
 				</div>
 				<div class="form-group">
@@ -39,10 +149,37 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-xs-6">
-		<pre class="col-xs-6">{{ mainService.curStep | json }}</pre>
+	<div class="col-xs-2">
+		<pre>Maps Filtered:{{
+			mapService.items
+			| async
+			| dimeProcessFilter: { source: ((mainService.curItemSteps | dimeProcessFilter: {type:'pulldata'}) || [{referedid: 0}])[0].referedid }
+			| dimeProcessFilter: { target: ((mainService.curItemSteps | dimeProcessFilter: {type:'pushdata'}) || [{referedid: 0}])[0].referedid }
+			| json
+			}}</pre>
 	</div>
-	<div class="col-xs-6">
-		<pre class="col-xs-6">{{ mainService.stepTypes | json }}</pre>
+	<div class="col-xs-2">
+		<pre>curStep:{{ mainService.curStep | json }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>curItem:{{ mainService.curItem | json }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>stepTypes:{{ mainService.stepTypes | json }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Item Steps:{{ mainService.curItemSteps | json }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Item Steps:{{ ((mainService.curItemSteps | dimeProcessFilter: {type:'pulldata'}) || [{referedid: 0}])[0].referedid }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Item Steps:{{ ((mainService.curItemSteps | dimeProcessFilter: {type:'pulldata'}) || {referedid: 0}) | json }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Maps:{{ mapService.items | async | dimeProcessFilter: {source: 1} | json }}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Filtered streams:{{ streamService.items | async | dimeProcessFilter: {environment: mainService.curItem.source}  | json }}</pre>
 	</div>
 </div>

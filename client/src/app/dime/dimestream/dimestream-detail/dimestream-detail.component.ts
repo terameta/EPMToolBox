@@ -1,17 +1,17 @@
-import { ActivatedRoute, Router, Params } from "@angular/router";
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { NgForm } from "@angular/forms";
+import { ActivatedRoute, Router, Params } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { NgForm } from '@angular/forms';
 
-import { ToastrService } from "ngx-toastr";
-import { Subscription } from "rxjs/Subscription";
+import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs/Subscription';
 
-import { DimeStreamService } from "../dimestream.service";
-import { DimeEnvironmentService } from "../../dimeenvironment/dimeenvironment.service";
+import { DimeStreamService } from '../dimestream.service';
+import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
 
 @Component({
-	selector: "app-dimestream-detail",
-	templateUrl: "./dimestream-detail.component.html",
-	styleUrls: ["./dimestream-detail.component.css"]
+	selector: 'app-dimestream-detail',
+	templateUrl: './dimestream-detail.component.html',
+	styleUrls: ['./dimestream-detail.component.css']
 })
 export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	paramsSubscription: Subscription;
@@ -26,7 +26,7 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	ngOnInit() {
 		this.paramsSubscription = this.route.params.subscribe(
 			(params: Params) => {
-				this.mainService.getOne(params["id"]);
+				this.mainService.getOne(params['id']);
 			}
 		);
 	}

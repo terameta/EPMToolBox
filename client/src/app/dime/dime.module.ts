@@ -9,23 +9,19 @@ import { AuthGuard } from '../welcome/auth-guard.service';
 import { DimeComponent } from './dime/dime.component';
 import { DimemenuComponent } from './dimemenu/dimemenu.component';
 
-import { DimeprocessesComponent } from 'app/dime/dimeprocess/dimeprocesses/dimeprocesses.component';
-import { DimeschedulesComponent } from 'app/dime/dimeschedule/dimeschedules/dimeschedules.component';
-import { DimeenvironmentsComponent } from 'app/dime/dimeenvironment/dimeenvironments/dimeenvironments.component';
+import { DimeprocessesComponent } from './dimeprocess/dimeprocesses/dimeprocesses.component';
+import { DimeschedulesComponent } from './dimeschedule/dimeschedules/dimeschedules.component';
+import { DimeenvironmentsComponent } from './dimeenvironment/dimeenvironments/dimeenvironments.component';
 import { DimestreamsComponent } from './dimestream/dimestreams/dimestreams.component';
-import { DimemapsComponent } from 'app/dime/dimemap/dimemaps/dimemaps.component';
+import { DimemapsComponent } from './dimemap/dimemaps/dimemaps.component';
 
-import { DimescheduleModule } from 'app/dime/dimeschedule/dimeschedule.module';
-import { DimeprocessModule } from 'app/dime/dimeprocess/dimeprocess.module';
-import { DimeenvironmentModule } from 'app/dime/dimeenvironment/dimeenvironment.module';
-import { DimestreamModule } from 'app/dime/dimestream/dimestream.module';
+import { DimescheduleModule } from './dimeschedule/dimeschedule.module';
+import { DimeprocessModule } from './dimeprocess/dimeprocess.module';
+import { DimeenvironmentModule } from './dimeenvironment/dimeenvironment.module';
+import { DimestreamModule } from './dimestream/dimestream.module';
 import { DimemapModule } from './dimemap/dimemap.module';
 
 import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
-
-
-
-
 
 const dimeRoutes: Routes = [
 	{
@@ -56,6 +52,10 @@ const dimeRoutes: Routes = [
 	exports: [
 		RouterModule
 	],
-	declarations: [DimeComponent, DimemenuComponent, DimedashboardComponent]
+	declarations: [
+		DimeComponent,
+		DimemenuComponent,
+		DimedashboardComponent
+	]
 })
 export class DimeModule { }

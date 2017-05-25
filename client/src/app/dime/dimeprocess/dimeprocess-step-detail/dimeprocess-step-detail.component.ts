@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs/Rx';
 
 import { DimeProcessService } from '../dimeprocess.service';
 import { DimeStreamService } from '../../dimestream/dimestream.service';
+import { DimeMapService } from '../../dimemap/dimemap.service';
 
 @Component({
 	selector: 'app-dimeprocess-step-detail',
@@ -17,7 +18,8 @@ export class DimeprocessStepDetailComponent implements OnInit {
 	constructor(
 		private route: ActivatedRoute,
 		private mainService: DimeProcessService,
-		private streamService: DimeStreamService
+		private streamService: DimeStreamService,
+		private mapService: DimeMapService
 	) { }
 
 	ngOnInit() {
