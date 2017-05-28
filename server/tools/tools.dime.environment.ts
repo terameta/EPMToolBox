@@ -277,15 +277,16 @@ export class EnvironmentTools {
 		});
 	};
 
-	public listProcedureDetails = (refObj: { curStream: DimeStream, procedureName: string }) => {
+	public listProcedureDetails = (refObj: { stream: DimeStream, procedure: any }) => {
+		console.log(refObj);
 		return new Promise((resolve, reject) => {
-			this.getEnvironmentDetails({ id: refObj.curStream.environment }, true).
+			this.getEnvironmentDetails({ id: refObj.stream.environment }, true).
 				then(this.getTypeDetails).
 				then((innerObj: any) => {
 					// console.log(innerObj);
-					innerObj.database = refObj.curStream.dbName;
-					innerObj.table = refObj.curStream.tableName;
-					innerObj.procedure = refObj.procedureName;
+					innerObj.database = refObj.stream.dbName;
+					innerObj.table = refObj.stream.tableName;
+					innerObj.procedure = refObj.procedure;
 					if (!innerObj.typedetails) {
 						return Promise.reject('No type definition on the environment object');
 					} else if (!innerObj.typedetails.value) {

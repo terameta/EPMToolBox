@@ -29,6 +29,9 @@ export class DimeProcessService {
 	curItemTargetFields: any[];
 	curItemTargetProcedures: any[];
 	curItemSelectedProcedure: any;
+	curItemLogRecepients: { address: string }[];
+	curItemDataRecepients: { address: string }[];
+	curItemMissingMapRecepients: { address: string }[];
 	curStep: DimeProcessStep;
 	curStepManipulations: any[];
 	stepTypes: DimeProcessStepType[];
@@ -168,6 +171,9 @@ export class DimeProcessService {
 		this.curItemTargetFields = [];
 		this.curItemTargetProcedures = [];
 		this.curItemSelectedProcedure = {};
+		this.curItemLogRecepients = [];
+		this.curItemDataRecepients = [];
+		this.curItemMissingMapRecepients = [];
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -203,6 +209,18 @@ export class DimeProcessService {
 				console.error(error);
 			});
 	}
+	public stepSaveAll = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.put(this.baseUrl + '/steps/' + id, this.curItemSteps, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.toastr.info('Changes are saved.', this.serviceName);
+				this.stepGetAll(id);
+			}, (error) => {
+				this.toastr.error('Failed to save changes on the steps', this.serviceName);
+				console.error(error);
+			});
+	};
 	public stepGetAll = (id?: number) => {
 		if (!id) { id = this.curItem.id; }
 		this.authHttp.get(this.baseUrl + '/steps/' + id).
@@ -263,8 +281,18 @@ export class DimeProcessService {
 		if (this.curStep.type === 'manipulate' && this.curStep.details) {
 			this.curStepManipulations = JSON.parse(this.curStep.details);
 		}
-		if (this.curStep.type === 'tarprocedure') {
+		if (this.curStep.type === 'tarprocedure' && this.curStep.details) {
+			this.curItemSelectedProcedure = JSON.parse(this.curStep.details);
 			this.stepListProcedures();
+		}
+		if (this.curStep.type === 'sendlogs' && this.curStep.details) {
+			this.curItemLogRecepients = JSON.parse(this.curStep.details);
+		}
+		if (this.curStep.type === 'senddata' && this.curStep.details) {
+			this.curItemDataRecepients = JSON.parse(this.curStep.details);
+		}
+		if (this.curStep.type === 'sendmissing' && this.curStep.details) {
+			this.curItemMissingMapRecepients = JSON.parse(this.curStep.details);
 		}
 	}
 	public stepDelete = (id: number) => {
@@ -284,9 +312,23 @@ export class DimeProcessService {
 		if (shouldUpdate && curStep.type === 'tarprocedure') { curStep.referedid = this.curItem.target; }
 		if (curStep.type === 'manipulate') {
 			curStep.details = JSON.stringify(this.curStepManipulations);
-			if (shouldUpdate) {
-				this.curStep.details = curStep.details;
-			}
+			if (shouldUpdate) { this.curStep.details = curStep.details; }
+		}
+		if (curStep.type === 'tarprocedure') {
+			curStep.details = JSON.stringify(this.curItemSelectedProcedure);
+			if (shouldUpdate) { this.curStep.details = curStep.details; }
+		}
+		if (curStep.type === 'sendlogs') {
+			curStep.details = JSON.stringify(this.curItemLogRecepients);
+			if (shouldUpdate) { this.curStep.details = curStep.details; }
+		}
+		if (curStep.type === 'senddata') {
+			curStep.details = JSON.stringify(this.curItemDataRecepients);
+			if (shouldUpdate) { this.curStep.details = curStep.details; }
+		}
+		if (curStep.type === 'sendmissing') {
+			curStep.details = JSON.stringify(this.curItemMissingMapRecepients);
+			if (shouldUpdate) { this.curStep.details = curStep.details; }
 		}
 		this.authHttp.put(this.baseUrl + '/step', curStep, { headers: this.headers }).
 			map(response => response.json()).
@@ -336,21 +378,106 @@ export class DimeProcessService {
 	};
 	public stepListProcedures = (numTry?: number) => {
 		if (numTry === undefined) { numTry = 0; }
-		if (this.curItem.target && this.curItemTargetStream.id && numTry < 100) {
+		if (this.curItem.target && this.curItemTargetStream.id) {
 			this.environmentService.listProcedures(this.curItem.target, this.curItemTargetStream).
 				subscribe((data) => {
-					console.log(data);
 					this.curItemTargetProcedures = data;
 					this.toastr.info('Received procedure list');
 				}, (error) => {
 					this.toastr.error('Failed to list procedures.', this.serviceName);
 					console.error(error);
 				});
-		} else {
+		} else if (numTry < 100) {
 			setTimeout(() => {
 				// console.log('Environment: ' + this.curItem.source + ', Target Stream: ' + this.curItemTargetStream.id + ' we will retry.', numTry);
 				this.stepListProcedures(++numTry);
 			}, 1000);
+		} else {
+			this.toastr.error('Failed to list procedures.', this.serviceName);
 		}
 	}
+	public stepProcedureSelected = (selectedProcedure: any, numTry?: number) => {
+		if (selectedProcedure !== undefined) {
+			this.curItemSelectedProcedure = selectedProcedure;
+		}
+		if (numTry === undefined) { numTry = 0; }
+		if (this.curItem.target && this.curItemTargetStream.id) {
+			this.environmentService.listProcedureDetails(this.curItem.target, { stream: this.curItemTargetStream, procedure: selectedProcedure }).
+				subscribe((data) => {
+					console.log(data);
+					this.curItemSelectedProcedure.variables = data;
+					this.toastr.info('Received procedure details');
+				}, (error) => {
+					this.toastr.error('Failed to receive procedure details.', this.serviceName);
+					console.log(error);
+				})
+		} else if (numTry < 100) {
+			setTimeout(() => {
+				this.stepProcedureSelected(selectedProcedure, ++numTry);
+			}, 1000);
+		} else {
+			this.toastr.error('Failed to fetch procedure details.', this.serviceName);
+		}
+	}
+	public stepRecepientAdd = (curList: any[]) => {
+		if (!curList) {
+			this.toastr.error('There is no list assigned to add recepient. Please consult system admin about this issue.');
+		} else {
+			curList.push({ address: '' });
+		}
+	}
+	public stepRecepientDelete = (curList: any[], index: number) => {
+		console.log(index, curList[index]);
+		if (index !== undefined) {
+			console.log(curList.splice(index, 1));
+		}
+	};
+	public stepDetailPresenter = (detail: string, type: string): string => {
+		let toReturn: string; toReturn = '';
+		if ((type === 'sendmissing' || type === 'senddata' || type === 'sendlogs') && detail) {
+			const recepientList: { address: string }[] = JSON.parse(detail);
+			toReturn = recepientList.map(curRecepient => curRecepient.address).join('; ');
+		} else if (type === 'tarprocedure' && detail) {
+			const procedureDetails = JSON.parse(detail);
+			toReturn = procedureDetails.name;
+		} else if (type === 'manipulate' && detail) {
+			const manipulations = JSON.parse(detail);
+			toReturn = manipulations.length + ' transformations.';
+		} else if (type === 'pushdata') {
+			toReturn = 'Data push to the target stream.';
+		} else if (type === 'pulldata') {
+			toReturn = 'Data pull from the source stream.';
+		} else if (type === 'srcprocedure') {
+			toReturn = detail.toString().substr(0, 30);
+			if (detail.toString().length > 30) { toReturn += '...'; }
+		} else if (type === 'mapdata') {
+			toReturn = 'Data map between streams.';
+		} else {
+			console.log('Missing step definition. Please complete the definition for each step.');
+		}
+		return toReturn;
+	}
+	public stepMoveOrder = (curStep: any, direction: string) => {
+		const curOrder = curStep.sOrder;
+		const nextOrder = parseInt(curOrder, 10) + (direction === 'down' ? 1 : -1);
+		this.curItemSteps.forEach((curField) => {
+			if (curField.sOrder === nextOrder) { curField.sOrder = curOrder; }
+		});
+		curStep.sOrder = nextOrder;
+		this.stepSort();
+	};
+	public stepSort = () => {
+		this.curItemSteps.sort((e1, e2) => {
+			if (e1.sOrder > e2.sOrder) {
+				return 1;
+			} else if (e1.sOrder < e2.sOrder) {
+				return -1;
+			} else {
+				return 0;
+			}
+		});
+		this.curItemSteps.forEach((curManip, curKey) => {
+			curManip.sOrder = curKey + 1;
+		})
+	};
 }

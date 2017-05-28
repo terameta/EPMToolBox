@@ -530,11 +530,86 @@ export class HPTools {
 		});
 	}
 	public listRuleDetails = (refObj: DimeEnvironmentHP) => {
+		return this.hpListRuleDetails(refObj);
+	}
+	private hpListRuleDetails = (refObj: DimeEnvironmentHP) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('Update this part of the tools.pbcs.ts file');
-			console.log('!!!!!!!!!!!!');
-			resolve([]);
+			this.hpOpenCube(refObj).
+				then((innerObj: DimeEnvironmentHP) => {
+					if (!innerObj.procedure) {
+						reject('No procedure detail is provided');
+					} else {
+						let curBody: string; curBody = '';
+						curBody += '<req_EnumRunTimePrompts>';
+						curBody += '<sID>' + innerObj.sID + '</sID>';
+						curBody += '<cube>' + innerObj.table + '</cube >';
+						curBody += '<rule type="' + innerObj.procedure.type + '">' + innerObj.procedure.name + '</rule>';
+						curBody += '<ODL_ECID>0000</ODL_ECID>';
+						curBody += '</req_EnumRunTimePrompts>';
+						request.post({
+							url: innerObj.planningurl || '',
+							body: curBody,
+							headers: { 'Content-Type': 'application/xml' }
+						}, (err, response, body) => {
+							if (err) {
+								reject(err);
+							} else {
+								this.xmlParser(body, (pErr: any, result: any) => {
+									if (pErr) {
+										reject(pErr);
+									} else {
+										// console.log(curBody);
+										// console.log(result);
+										if (!result.res_EnumRunTimePrompts) {
+											reject('Run Time Prompts reception failed');
+										} else if (!result.res_EnumRunTimePrompts.prompts) {
+											reject('RTPs list is not received');
+										} else if (!Array.isArray(result.res_EnumRunTimePrompts.prompts)) {
+											reject('RTPs list is not array');
+										} else if (result.res_EnumRunTimePrompts.prompts.length < 1) {
+											reject('RTPs list does not have length');
+										} else if (!result.res_EnumRunTimePrompts.prompts[0]) {
+											reject('RTPs list item 0 does not exist');
+										} else if (!result.res_EnumRunTimePrompts.prompts[0].rtp) {
+											reject('RTPs list RTP member does not exist');
+										} else if (!Array.isArray(result.res_EnumRunTimePrompts.prompts[0].rtp)) {
+											reject('RTPs list RTP member is not an array');
+										} else if (result.res_EnumRunTimePrompts.prompts[0].rtp.length < 1) {
+											reject('RTPs list RTP member does not have length');
+										} else {
+											const curRTPs = result.res_EnumRunTimePrompts.prompts[0].rtp;
+											let toResolve: any[]; toResolve = [];
+											let curResolver: any;
+											curRTPs.forEach(function (curRTP: any) {
+												curResolver = {};
+												// console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+												// console.log("Name:", curRTP.name);
+												// console.log("Desc:", curRTP.description);
+												// console.log("Memb:", curRTP.member);
+												// console.log("AlMi:", curRTP.allowMissing);
+												curResolver.name = (Array.isArray(curRTP.name) ? curRTP.name[0] : curRTP.name);
+												curResolver.description = (Array.isArray(curRTP.description) ? curRTP.description[0] : curRTP.description);
+												curResolver.allowMissing = (Array.isArray(curRTP.allowMissing) ? curRTP.allowMissing[0] : curRTP.allowMissing);
+												if (Array.isArray(curRTP.member)) {
+													curResolver.dimension = curRTP.member[0].$.dim;
+													curResolver.choice = curRTP.member[0].$.choice;
+													curResolver.defaultMember = curRTP.member[0].default[0];
+													curResolver.cube = curRTP.member[0].cube[0];
+												}
+												// console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+												// console.log(curResolver);
+												// console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+												toResolve.push(curResolver);
+											});
+											// console.log(result.res_EnumRunTimePrompts.prompts[0].rtp);
+											resolve(toResolve);
+										}
+									}
+								})
+							}
+						});
+					}
+				}).catch(reject);
 		});
 	}
 }

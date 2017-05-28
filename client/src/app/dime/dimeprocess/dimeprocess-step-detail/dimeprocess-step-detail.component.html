@@ -61,7 +61,7 @@
 						<div *ngFor="let curManipulation of mainService.curStepManipulations; let i = index;let last = last; let first = first">
 							<form class="form-inline">
 								<div class="input-group">
-									<span class="input-group-addon">When {{curManipulation.mOrder}}</span>
+									<span class="input-group-addon">When</span>
 									<select name="manipulation{{i}}when" class="form-control" [(ngModel)]="curManipulation.when" (change)="curManipulation.field = ''">
 										<option value="SRC">Source Field</option>
 										<option value="TAR">Target Field</option>
@@ -124,19 +124,103 @@
 						<span *ngIf="mainService.curItemTargetProcedures.length == 0"><i class="fa fa-circle-o-notch fa-spin fa-fw"></i> Please wait, retrieving items...</span>
 						<form *ngIf="mainService.curItemTargetProcedures.length > 0" class="form-horizontal">
 							<span *ngFor="let curProcedure of mainService.curItemTargetProcedures;let i = index">
-								<label>
+								<!--<label>
 									<input
 										type="radio"
 										name="steptarprocedure{{i}}selection"
 										[(ngModel)]="mainService.curItemSelectedProcedure"
 										[value]="curProcedure"
-										(ngChange)="console.log('I am changed')">
+										(change)="mainService.stepProcedureSelected(curProcedure)">
+										{{curProcedure.name}}
+								</label>-->
+								<label>
+									<input
+										type="radio"
+										name="steptarprocedure{{i}}selection"
+										[checked]="mainService.curItemSelectedProcedure.name == curProcedure.name"
+										[value]="curProcedure"
+										(change)="mainService.stepProcedureSelected(curProcedure)">
 										{{curProcedure.name}}
 								</label>
+								<span *ngIf="curProcedure.name == mainService.curItemSelectedProcedure.name">
+									<span *ngFor="let curVariable of mainService.curItemSelectedProcedure.variables">
+										<div class="input-group">
+											<span class="input-group-addon" style="width:200px;text-align:left">{{curVariable.description}}</span>
+											<select name="valuetype{{curVariable.name}}" class="form-control" [(ngModel)]="curVariable.valuetype">
+												<option value="filteredvalues">Filtered Distinct Values of</option>
+												<option value="allvalues">All Distinct Values of</option>
+												<option value="manualvalue">Assign Value:</option>
+											</select>
+											<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+											<select name="variable{{curVariable.name}}field" class="form-control" [(ngModel)]="curVariable.value" *ngIf="curVariable.valuetype!='manualvalue'" style="width:150px">
+												<option *ngFor="let field of mainService.curItemTargetFields" [value]="field.name">{{field.name}}</option>
+											</select>
+											<input type="text" class="form-control" [(ngModel)]="curVariable.value" name="variable{{curVariable.name}}field" *ngIf="curVariable.valuetype=='manualvalue'" style="width:150px">
+										</div>
+									</span>
+								</span>
 							</span>
 						</form>
-						<pre>{{mainService.curItemTargetProcedures | json}}</pre>
-						<pre>{{mainService.curItemSelectedProcedure | json}}</pre>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'sendlogs'">
+					<label for="stepsendlogs" class="col-xs-1 control-label">Recepients:</label>
+					<div class="col-xs-11">
+						<form class="form-horizontal">
+							<button class="btn btn-xs btn-default" (click)="mainService.stepRecepientAdd(mainService.curItemLogRecepients)">Add Recepient</button>
+							<hr>
+							<span *ngFor="let curRecepient of mainService.curItemLogRecepients; let i = index;">
+								<div class="input-group">
+									<span class="input-group-addon">{{i+1}}</span>
+									<input type="text" class="form-control" [(ngModel)]="curRecepient.address" name="stepsendlogsrecepient{{i}}">
+									<span class="input-group-addon" style="padding:0 2px">
+										<button type="button" class="btn btn-xs btn-danger" (click)="mainService.stepRecepientDelete(mainService.curItemLogRecepients, i)">
+											<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+										</button>
+									</span>
+								</div>
+							</span>
+						</form>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'senddata'">
+					<label for="stepsenddata" class="col-xs-1 control-label">Recepients:</label>
+					<div class="col-xs-11">
+						<form class="form-horizontal">
+							<button class="btn btn-xs btn-default" (click)="mainService.stepRecepientAdd(mainService.curItemDataRecepients)">Add Recepient</button>
+							<hr>
+							<span *ngFor="let curRecepient of mainService.curItemDataRecepients; let i = index;">
+								<div class="input-group">
+									<span class="input-group-addon">{{i+1}}</span>
+									<input type="text" class="form-control" [(ngModel)]="curRecepient.address" name="stepsenddatarecepient{{i}}">
+									<span class="input-group-addon" style="padding:0 2px">
+										<button type="button" class="btn btn-xs btn-danger" (click)="mainService.stepRecepientDelete(mainService.curItemDataRecepients, i)">
+											<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+										</button>
+									</span>
+								</div>
+							</span>
+						</form>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="mainService.curStep.type == 'sendmissing'">
+					<label for="stepsendmissing" class="col-xs-1 control-label">Recepients:</label>
+					<div class="col-xs-11">
+						<form class="form-horizontal">
+							<button class="btn btn-xs btn-default" (click)="mainService.stepRecepientAdd(mainService.curItemMissingMapRecepients)">Add Recepient</button>
+							<hr>
+							<span *ngFor="let curRecepient of mainService.curItemMissingMapRecepients; let i = index;">
+								<div class="input-group">
+									<span class="input-group-addon">{{i+1}}</span>
+									<input type="text" class="form-control" [(ngModel)]="curRecepient.address" name="stepsendmissingrecepient{{i}}">
+									<span class="input-group-addon" style="padding:0 2px">
+										<button type="button" class="btn btn-xs btn-danger" (click)="mainService.stepRecepientDelete(mainService.curItemMissingMapRecepients, i)">
+											<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+										</button>
+									</span>
+								</div>
+							</span>
+						</form>
 					</div>
 				</div>
 				<div class="form-group">
@@ -148,7 +232,7 @@
 		</form>
 	</div>
 </div>
-<div class="row">
+<!--<div class="row">
 	<div class="col-xs-2">
 		<pre>Maps Filtered:{{
 			mapService.items
@@ -182,4 +266,4 @@
 	<div class="col-xs-2">
 		<pre>Filtered streams:{{ streamService.items | async | dimeProcessFilter: {environment: mainService.curItem.source}  | json }}</pre>
 	</div>
-</div>
+</div>-->

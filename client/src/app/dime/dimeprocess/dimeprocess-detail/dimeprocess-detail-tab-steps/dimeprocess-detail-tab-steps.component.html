@@ -2,6 +2,7 @@
 	<div class="btn-group btn-group-xs" role="group">
 		<button class="btn btn-default" type="button" title="New step" (click)="mainService.stepCreate()"><i class="fa fa-plus fa-fw"></i> New Step</button>
 		<button class="btn btn-default" type="button" title="Refresh Steps" (click)="mainService.stepGetAll()"><i class="fa fa-refresh fa-fw" aria-hidden="true"></i> Refresh Steps</button>
+		<button class="btn btn-default" type="button" title="Save Steps" (click)="mainService.stepSaveAll()"><i class="fa fa-floppy-o fa-fw" aria-hidden="true"></i> Save Changes</button>
 	</div>
 </div>
 <hr>
@@ -16,7 +17,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr *ngFor="let step of mainService.curItemSteps;">
+		<tr *ngFor="let step of mainService.curItemSteps;let last = last; let first = first;">
 			<td>
 				<span *ngFor="let steptype of mainService.stepTypes">
 					<span *ngIf="step.type == steptype.value">{{ steptype.name }}</span>
@@ -65,7 +66,7 @@
 				</span>
 			</td>
 			<td>
-				{{ step.details }}
+				{{ mainService.stepDetailPresenter(step.details, step.type) }}
 			</td>
 			<td width="80">
 				<div class="btn-toolbar" role="toolbar" aria-label="Process Steps Actions">
@@ -78,10 +79,10 @@
 				</div>
 			</td>
 			<td>
-				{{ step.sOrder }}
+				<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.stepMoveOrder(step, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>
+				<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!"><i class="fa fa-fw" aria-hidden="true"></i></button>
+				<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.stepMoveOrder(step, 'up')"><i class="fa fa-caret-up fa-fw" aria-hidden="true"></i></button>
 			</td>
 		</tr>
 	</tbody>
 </table>
-<pre>{{ mainService.stepTypes | json }}</pre>
-<pre>{{mainService.curItemSteps | json}}</pre>

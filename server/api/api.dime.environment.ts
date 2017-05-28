@@ -26,6 +26,7 @@ export class ApiEnvironment {
 		this.apiRoutes.get('/listDatabases/:id', (req, res) => { this.rester.respond(this.environment.listDatabases, { id: req.params.id }, req, res); });
 		this.apiRoutes.get('/listTables/:id/:db', (req, res) => { this.rester.respond(this.environment.listTables, { id: req.params.id, database: req.params.db }, req, res); });
 		this.apiRoutes.post('/listProcedures/:id', (req, res) => { this.rester.respond(this.environment.listProcedures, req.body, req, res); });
+		this.apiRoutes.post('/listProcedureDetails/:id', (req, res) => { this.rester.respond(this.environment.listProcedureDetails, req.body, req, res); });
 	}
 
 

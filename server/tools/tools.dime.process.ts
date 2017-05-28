@@ -137,6 +137,13 @@ export class ProcessTools {
 			})
 		});
 	}
+	public stepPutAll = (refObj: { processID: number, steps: any[] }) => {
+		let promises: any[]; promises = [];
+		refObj.steps.forEach((curStep) => {
+			promises.push(this.stepUpdate(curStep));
+		});
+		return Promise.all(promises);
+	}
 	private stepGetMaxOrder = (id?: number): Promise<number> => {
 		return new Promise((resolve, reject) => {
 			if (!id) {

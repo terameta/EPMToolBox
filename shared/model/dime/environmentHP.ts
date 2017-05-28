@@ -1,6 +1,6 @@
 import { DimeEnvironment } from './environment';
 
-export interface DimeEnvironmentHP extends DimeEnvironment{
+export interface DimeEnvironmentHP extends DimeEnvironment {
 	address?: string,
 	smartviewurl?: string,
 	planningurl?: string,
@@ -9,5 +9,10 @@ export interface DimeEnvironmentHP extends DimeEnvironment{
 	products?: any[],
 	server?: string,
 	apps?: any[],
-	cubes?: any[]
+	cubes?: any[],
+	procedure?: {
+		name: string,
+		hasRTP: number,
+		type: string
+	}
 }

@@ -188,4 +188,11 @@ export class DimeEnvironmentService {
 				return Observable.throw(error);
 			})
 	}
+	public listProcedureDetails = (environmentID: number, details: any) => {
+		return this.authHttp.post(this.baseUrl + '/listProcedureDetails/' + environmentID, details, { headers: this.headers }).
+			map(response => response.json()).
+			catch((error) => {
+				return Observable.throw(error);
+			});
+	}
 }
