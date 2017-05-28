@@ -6,6 +6,13 @@
 	</div>
 </div>
 <hr>
+<div class="well well-warning well-sm" *ngIf="!mainService.curItemIsPrepared">
+	This map definition is not ready for processing. <br>
+	<b>Issue List:</b>
+	<ol>
+		<li *ngFor="let issue of mainService.curItemIssueList">{{issue}}</li>
+	</ol>
+</div>
 <table class="table table-hover table-condensed">
 	<thead>
 		<tr>

@@ -228,6 +228,93 @@ export class ProcessTools {
 			}
 		});
 	}
+	public isPrepared = (id: number) => {
+		return new Promise((resolve, reject) => {
+			let isPrepared: boolean; isPrepared = true;
+			let issueArray: string[]; issueArray = [];
+			this.getOne(id).
+				then((innerObj: DimeProcess) => {
+					if (!innerObj.source) { isPrepared = false; issueArray.push('Process does not have a source environment defined'); }
+					if (!innerObj.target) { isPrepared = false; issueArray.push('Process does not have a target environment defined'); }
+					return this.stepGetAll(id);
+				}).
+				then((stepList) => {
+					let srcprocedureOrder = 0, pulldataOrder = 0, mapdataOrder = 0, pushdataOrder = 0;
+					let manipulateOrder = 0, tarprocedureOrder = 0, sendlogsOrder = 0, senddataOrder = 0, sendmissingOrder = 0;
+					stepList.forEach((curStep) => {
+						if (curStep.type === 'srcprocedure' && curStep.sOrder) { srcprocedureOrder = curStep.sOrder; }
+						if (curStep.type === 'pulldata' && curStep.sOrder) { pulldataOrder = curStep.sOrder; }
+						if (curStep.type === 'mapdata' && curStep.sOrder) { mapdataOrder = curStep.sOrder; }
+						if (curStep.type === 'pushdata' && curStep.sOrder) { pushdataOrder = curStep.sOrder; }
+						if (curStep.type === 'manipulate' && curStep.sOrder) { manipulateOrder = curStep.sOrder; }
+						if (curStep.type === 'tarprocedure' && curStep.sOrder) { tarprocedureOrder = curStep.sOrder; }
+						if (curStep.type === 'sendlogs' && curStep.sOrder) { sendlogsOrder = curStep.sOrder; }
+						if (curStep.type === 'senddata' && curStep.sOrder) { senddataOrder = curStep.sOrder; }
+						if (curStep.type === 'sendmissing' && curStep.sOrder) { sendmissingOrder = curStep.sOrder; }
+					});
+
+					if (pulldataOrder >= mapdataOrder) { isPrepared = false; issueArray.push('Please re-order the steps. Pull Data step should be assigned before map data.'); }
+					if (mapdataOrder >= pushdataOrder) { isPrepared = false; issueArray.push('Please re-order the steps. Map Data step should be assigned before push data.'); }
+					if (manipulateOrder >= pushdataOrder) { isPrepared = false; issueArray.push('Please re-order the steps. Transform Data step should be assigned before push data.'); }
+
+					resolve({ isPrepared: isPrepared, issueList: issueArray });
+				}).
+				catch(reject);
+		});
+	};
+	public fetchDefaults = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM processdefaulttargets WHERE process = ?', id, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(rows);
+				}
+			});
+		});
+	};
+	public applyDefaults = (refObj: { processID: number, defaults: any }) => {
+		return new Promise((resolve, reject) => {
+			this.clearDefaults(refObj.processID).
+				then(this.getOne).
+				then((innerObj: DimeProcess) => {
+					let promises: any[]; promises = [];
+					Object.keys(refObj.defaults).forEach((curKey) => {
+						promises.push(this.applyDefault({ process: refObj.processID, field: curKey, value: refObj.defaults[curKey] }));
+					});
+					return Promise.all(promises);
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	}
+	public applyDefault = (curDefault: { process: number, field: string, value: string }) => {
+		return new Promise((resolve, reject) => {
+			if (curDefault.value) {
+				this.db.query('INSERT INTO processdefaulttargets SET ?', curDefault, (err, rows, fields) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve('OK');
+					}
+				});
+			} else {
+				resolve('OK');
+			}
+		});
+	};
+
+	public clearDefaults = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('DELETE FROM processdefaulttargets WHERE process = ?', id, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(id);
+				}
+			});
+		});
+	}
 }
 
 /*
@@ -1731,57 +1818,6 @@ function update(theProcess) {
 				}
 			});
 		}
-	});
-}
-function fetchDefaults(id) {
-	return new Promise(function (resolve, reject) {
-		db.query("SELECT * FROM processdefaulttargets WHERE process = ?", id, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(rows);
-			}
-		});
-	});
-}
-function applyDefaults(refObj) {
-	return new Promise(function (resolve, reject) {
-		clearDefaults(refObj.process).
-			then(getOne).
-			then(function () {
-				var promises = [];
-				Object.keys(refObj.defaults).forEach(function (curKey) {
-					promises.push(applyDefault({ process: refObj.process, field: curKey, value: refObj.defaults[curKey] }));
-				});
-				Promise.all(promises).then(resolve).catch(reject);
-			}).
-			catch(reject);
-	});
-}
-function applyDefault(curDefault) {
-	return new Promise(function (resolve, reject) {
-		if (curDefault.value) {
-			db.query("INSERT INTO processdefaulttargets SET ?", curDefault, function (err, rows, fields) {
-				if (err) {
-					reject(err);
-				} else {
-					resolve("OK");
-				}
-			});
-		} else {
-			resolve("OK");
-		}
-	});
-}
-function clearDefaults(processid) {
-	return new Promise(function (resolve, reject) {
-		db.query("DELETE FROM processdefaulttargets WHERE process = ?", processid, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(processid);
-			}
-		});
 	});
 }
 function applyFilters(refObj) {

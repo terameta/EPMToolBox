@@ -20,7 +20,8 @@ import { DimeStreamService } from '../dimestream/dimestream.service';
 export class DimeProcessService {
 	items: Observable<DimeProcess[]>;
 	curItem: DimeProcess;
-	curItemIsReady: boolean;
+	curItemIsPrepared: boolean;
+	curItemIssueList: string[];
 	curItemSteps: DimeProcessStep[];
 	curItemClean: boolean;
 	curItemSourceStream: DimeStream;
@@ -34,6 +35,7 @@ export class DimeProcessService {
 	curItemMissingMapRecepients: { address: string }[];
 	curStep: DimeProcessStep;
 	curStepManipulations: any[];
+	curItemDefaultTargets: any;
 	stepTypes: DimeProcessStepType[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeProcess[]>;
@@ -96,8 +98,9 @@ export class DimeProcessService {
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.curItem = result;
 				this.curItemClean = true;
-				this.isReady(this.curItem.id);
+				this.isPrepared(this.curItem.id);
 				this.stepGetAll(this.curItem.id);
+				this.fetchDefaultTargets(this.curItem.id);
 			}, (error) => {
 				this.toastr.error('Failed to get the item.', this.serviceName);
 				console.log(error);
@@ -164,7 +167,8 @@ export class DimeProcessService {
 		this.curItem = { id: 0, name: '-' };
 		this.curItemSteps = undefined;
 		this.curItemClean = true;
-		this.curItemIsReady = false;
+		this.curItemIsPrepared = false;
+		this.curItemIssueList = [];
 		this.curItemSourceStream = { id: 0, name: '-', type: 0, environment: 0 };
 		this.curItemTargetStream = { id: 0, name: '-', type: 0, environment: 0 };
 		this.curItemSourceFields = [];
@@ -174,6 +178,7 @@ export class DimeProcessService {
 		this.curItemLogRecepients = [];
 		this.curItemDataRecepients = [];
 		this.curItemMissingMapRecepients = [];
+		this.curItemDefaultTargets = {};
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -184,10 +189,18 @@ export class DimeProcessService {
 			return 0;
 		}
 	};
-	public isReady = (id?: number) => {
+	public isPrepared = (id?: number) => {
 		if (!id) { id = this.curItem.id; }
-		this.toastr.warning('is Ready function should be implemented', this.serviceName);
-		this.curItemIsReady = false;
+		this.curItemIsPrepared = false;
+		this.authHttp.get(this.baseUrl + '/isPrepared/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.curItemIsPrepared = result.isPrepared;
+				this.curItemIssueList = result.issueList;
+			}, (error) => {
+				this.toastr.error('Can not check if the item is prepared. Please check logs.', this.serviceName);
+				console.error(error);
+			});
 	}
 	private stepFetchTypes = () => {
 		this.authHttp.get(this.baseUrl + '/steptypes').
@@ -259,6 +272,7 @@ export class DimeProcessService {
 						});
 					}
 				});
+				this.isPrepared(id);
 			}, (error) => {
 				this.toastr.error('Failed to get the steps.', this.serviceName);
 				console.log(error);
@@ -480,4 +494,28 @@ export class DimeProcessService {
 			curManip.sOrder = curKey + 1;
 		})
 	};
+	public applyDefaultTargets = () => {
+		this.authHttp.put(this.baseUrl + '/defaults/' + this.curItem.id, this.curItemDefaultTargets, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.toastr.info('Default targets are saved', this.serviceName);
+			}, (error) => {
+				this.toastr.error('Failed to save default targets.', this.serviceName);
+				console.error(error);
+			});
+	};
+	public fetchDefaultTargets = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.get(this.baseUrl + '/defaults/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				result.forEach((curDefault) => {
+					this.curItemDefaultTargets[curDefault.field] = curDefault.value;
+				});
+				// this.curItemDefaultTargets = result;
+			}, (error) => {
+				this.toastr.error('', this.serviceName);
+				console.error(error);
+			});
+	}
 }
