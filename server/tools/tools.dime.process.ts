@@ -315,6 +315,71 @@ export class ProcessTools {
 			});
 		});
 	}
+	public applyFilters = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			if (!refObj) {
+				reject('Object does not exist');
+			} else if (!refObj.process) {
+				reject('Object does not provide process id.');
+			} else if (!refObj.stream) {
+				reject('Object does not provide stream id.');
+			} else if (!refObj.filters) {
+				reject('Object does not provide filter list.');
+			} else if (!Array.isArray(refObj.filters)) {
+				reject('Object filter list is malformed.');
+			} else {
+				refObj.filters.forEach((curFilter: any) => {
+					curFilter.process = refObj.process;
+					curFilter.stream = refObj.stream;
+				});
+				this.clearFilters(refObj.process).
+					then(() => {
+						let promises: any[]; promises = [];
+						refObj.filters.forEach((curFilter: any) => {
+							console.log(curFilter);
+							promises.push(this.applyFilter(curFilter));
+						});
+						return Promise.all(promises);
+					}).
+					then(resolve).
+					catch(reject);
+			}
+			console.log('>>>', refObj);
+		});
+	}
+	public applyFilter = (curFilter: any) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('INSERT INTO processfilters SET ?', curFilter, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve('OK');
+				}
+			});
+		});
+	}
+	public clearFilters = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('DELETE FROM processfilters WHERE process = ?', id, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(id);
+				}
+			});
+		});
+	}
+	public fetchFilters = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM processfilters WHERE process = ?', id, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(rows);
+				}
+			});
+		});
+	};
 }
 
 /*
@@ -1818,53 +1883,6 @@ function update(theProcess) {
 				}
 			});
 		}
-	});
-}
-function applyFilters(refObj) {
-	return new Promise(function (resolve, reject) {
-		clearFilters(refObj.process).
-			then(function () {
-				var promises = [];
-				refObj.filters.forEach(function (curFilter) {
-					promises.push(applyFilter(curFilter));
-				});
-				return Promise.all(promises);
-			}).
-			then(resolve).
-			catch(reject);
-	});
-}
-function applyFilter(curFilter) {
-	return new Promise(function (resolve, reject) {
-		db.query("INSERT INTO processfilters SET ?", curFilter, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve("OK");
-			}
-		});
-	});
-}
-function clearFilters(processid) {
-	return new Promise(function (resolve, reject) {
-		db.query("DELETE FROM processfilters WHERE process = ?", processid, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(processid);
-			}
-		});
-	});
-}
-function fetchFilters(processid) {
-	return new Promise(function (resolve, reject) {
-		db.query("SELECT * FROM processfilters WHERE process = ?", processid, function (err, rows, fields) {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(rows);
-			}
-		});
 	});
 }
 */

@@ -36,6 +36,7 @@ export class DimeProcessService {
 	curStep: DimeProcessStep;
 	curStepManipulations: any[];
 	curItemDefaultTargets: any;
+	curItemFilters: any;
 	stepTypes: DimeProcessStepType[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeProcess[]>;
@@ -101,6 +102,7 @@ export class DimeProcessService {
 				this.isPrepared(this.curItem.id);
 				this.stepGetAll(this.curItem.id);
 				this.fetchDefaultTargets(this.curItem.id);
+				this.fetchFilters(this.curItem.id);
 			}, (error) => {
 				this.toastr.error('Failed to get the item.', this.serviceName);
 				console.log(error);
@@ -179,6 +181,7 @@ export class DimeProcessService {
 		this.curItemDataRecepients = [];
 		this.curItemMissingMapRecepients = [];
 		this.curItemDefaultTargets = {};
+		this.curItemFilters = {};
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -514,8 +517,78 @@ export class DimeProcessService {
 				});
 				// this.curItemDefaultTargets = result;
 			}, (error) => {
-				this.toastr.error('', this.serviceName);
+				this.toastr.error('Failed to receive default targets.', this.serviceName);
 				console.error(error);
 			});
 	}
+	public applyFilters = () => {
+		let toSend: any; toSend = {};
+		toSend.process = this.curItem.id;
+		toSend.stream = this.curItemSourceStream.id;
+		toSend.filters = [];
+		Object.keys(this.curItemFilters).forEach((curKey) => {
+			let toPush: any; toPush = {};
+			this.curItemSourceFields.forEach((curField) => {
+
+				if (curField.name === curKey) {
+					toPush.field = curField.id;
+				} else {
+				}
+			});
+			toPush.filterfrom = this.curItemFilters[curKey].filterfrom;
+			toPush.filterto = this.curItemFilters[curKey].filterto;
+			toPush.filtertext = this.curItemFilters[curKey].filtertext;
+			toPush.filterbeq = this.curItemFilters[curKey].filterbeq;
+			toPush.filterseq = this.curItemFilters[curKey].filterseq;
+			toSend.filters.push(toPush);
+		});
+		this.authHttp.put(this.baseUrl + '/filters/' + this.curItem.id, toSend, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe((result) => {
+				console.log(result);
+			}, (error) => {
+				this.toastr.error('Failed to apply filters.', this.serviceName);
+				console.error(error);
+			});
+	};
+	public fetchFilters = (id?: number) => {
+		if (!id) { id = this.curItem.id; }
+		this.authHttp.get(this.baseUrl + '/filters/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.prepareFilters(result);
+			}, (error) => {
+				this.toastr.error('', this.serviceName);
+				console.error(error);
+			});
+	};
+	private prepareFilters = (filterArray: any[], numTry?: number) => {
+		if (numTry === undefined) { numTry = 0; }
+		if (this.curItemSourceFields.length > 0) {
+			console.log(filterArray);
+			this.curItemSourceFields.forEach((curField) => {
+				if (curField.isFilter === 1) {
+					this.curItemFilters[curField.name] = {};
+				}
+			});
+			filterArray.forEach((curFilter) => {
+				this.curItemSourceFields.forEach((curField) => {
+					if (curField.id === curFilter.field) { curFilter.fieldname = curField.name; }
+				});
+				if (curFilter.stream === this.curItemSourceStream.id && curFilter.field) {
+					if (curFilter.filterfrom) { this.curItemFilters[curFilter.fieldname].filterfrom = new Date(curFilter.filterfrom); }
+					if (curFilter.filterto) { this.curItemFilters[curFilter.fieldname].filterto = curFilter.filterto; }
+					if (curFilter.filtertext) { this.curItemFilters[curFilter.fieldname].filtertext = curFilter.filtertext; }
+					if (curFilter.filterbeq) { this.curItemFilters[curFilter.fieldname].filterbeq = curFilter.filterbeq; }
+					if (curFilter.filterseq) { this.curItemFilters[curFilter.fieldname].filterseq = curFilter.filterseq; }
+				}
+			});
+		} else if (numTry < 100) {
+			setTimeout(() => {
+				this.prepareFilters(filterArray, ++numTry);
+			}, 1000);
+		} else {
+			this.toastr.error('Failed to prepare filters.', this.serviceName);
+		}
+	};
 }

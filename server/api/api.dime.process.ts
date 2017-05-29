@@ -33,5 +33,7 @@ export class ApiProcess {
 		this.apiRoutes.get('/isPrepared/:id', (req, res) => { this.rester.respond(this.processTools.isPrepared, req.params.id, req, res); });
 		this.apiRoutes.get('/defaults/:id', (req, res) => { this.rester.respond(this.processTools.fetchDefaults, req.params.id, req, res); });
 		this.apiRoutes.put('/defaults/:id', (req, res) => { this.rester.respond(this.processTools.applyDefaults, { processID: req.params.id, defaults: req.body }, req, res); });
+		this.apiRoutes.get('/filters/:id', (req, res) => { this.rester.respond(this.processTools.fetchFilters, req.params.id, req, res); });
+		this.apiRoutes.put('/filters/:id', (req, res) => { this.rester.respond(this.processTools.applyFilters, req.body, req, res); });
 	}
 }
