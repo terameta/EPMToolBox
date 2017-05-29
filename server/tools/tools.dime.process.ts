@@ -336,7 +336,6 @@ export class ProcessTools {
 					then(() => {
 						let promises: any[]; promises = [];
 						refObj.filters.forEach((curFilter: any) => {
-							console.log(curFilter);
 							promises.push(this.applyFilter(curFilter));
 						});
 						return Promise.all(promises);
@@ -344,7 +343,6 @@ export class ProcessTools {
 					then(resolve).
 					catch(reject);
 			}
-			console.log('>>>', refObj);
 		});
 	}
 	public applyFilter = (curFilter: any) => {
@@ -371,7 +369,12 @@ export class ProcessTools {
 	}
 	public fetchFilters = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query('SELECT * FROM processfilters WHERE process = ?', id, (err, rows, fields) => {
+			let theQuery: string; theQuery = '';
+			theQuery += 'SELECT id, process, stream, field,';
+			theQuery += 'DATE_FORMAT(filterfrom, \'%Y-%m-%d\') AS filterfrom,';
+			theQuery += 'DATE_FORMAT(filterto, \'%Y-%m-%d\') AS filterto,';
+			theQuery += 'filtertext, filterbeq, filterseq FROM processfilters WHERE process = ?';
+			this.db.query(theQuery, id, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {

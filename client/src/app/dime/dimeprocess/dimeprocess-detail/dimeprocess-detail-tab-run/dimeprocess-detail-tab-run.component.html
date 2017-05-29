@@ -1,3 +1,3 @@
-<p>
-  dimeprocess-detail-tab-run works!
-</p>
+<button type="button" class="btn btn-success btn-xs" (click)="mainService.processRun()" title="Initiate Process"><i class="fa fa-space-shuttle fa-fw" aria-hidden="true"></i> Initiate Process</button>
+<hr *ngIf="mainService.curItem.status != 'ready'">
+<pre *ngIf="mainService.curItem.status != 'ready'">{{currentLog}}</pre>

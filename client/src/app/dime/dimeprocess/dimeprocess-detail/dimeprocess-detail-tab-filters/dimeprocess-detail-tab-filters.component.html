@@ -1,15 +1,3 @@
-<!--<form class="form" (ngSubmit)="mainService.applyDefaultTargets()" #f="ngForm" class="form-horizontal">
-	<div class="form-group" *ngFor="let field of mainService.curItemTargetFields">
-		<div class="input-group">
-			<div class="input-group-addon" style="min-width:150px; text-align:left;">{{field.name}}:</div>
-			<input type="text" class="form-control" name="{{field.name}}defaultValue" placeholder="Please enter default value" [(ngModel)]="mainService.curItemDefaultTargets[field.name]">
-		</div>
-	</div>
-	<div class="form-group">
-		<button type="submit" class="btn btn-xs btn-success"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes</button>
-	</div>
-</form>-->
-
 <form (ngSubmit)="mainService.applyFilters()" #f="ngForm" class="form form-horizontal">
 	<div class="form-group" *ngFor="let field of mainService.curItemSourceFields | dimeProcessFilter: {isFilter:1}">
 		<div class="input-group" *ngIf="field.type == 'date' && mainService.curItemFilters[field.name]">
@@ -35,47 +23,3 @@
 		<button type="submit" class="btn btn-xs btn-success"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes</button>
 	</div>
 </form>
-<pre>{{mainService.curItemFilters | json}}</pre>
-<pre>{{mainService.curItemSourceFields | json}}</pre>
-
-<!--
-	<b>{{filterField.name}}</b><br />
-	<div class="form-group" ng-if="filterField.type == 'date'">
-		<div class="input-group">
-			<div class="input-group-addon">From:</div>
-			<input type="text" class="form-control" id="{{filterField.name}}from" placeholder="YYYYMMDD" ng-model="filterField.filterfrom" uib-datepicker-popup="{{'yyyyMMdd'}}" is-open="filterField.datefrompopup.opened">
-			<div class="input-group-btn">
-				<button type="button" class="btn btn-default" ng-click="filterField.datefrompopup.opened = true"><i class="fa fa-calendar fa-fw"></i></button>
-			</div>
-		</div>
-	</div>
-	<div class="form-group" ng-if="filterField.type == 'date'">
-		<div class="input-group">
-			<div class="input-group-addon">To:</div>
-			<input type="text" class="form-control" id="{{filterField.name}}to" placeholder="YYYYMMDD" ng-model="filterField.filterto" uib-datepicker-popup="{{'yyyyMMdd'}}" is-open="filterField.datetopopup.opened">
-			<div class="input-group-btn">
-				<button type="button" class="btn btn-default" ng-click="filterField.datetopopup.opened = true"><i class="fa fa-calendar fa-fw"></i></button>
-			</div>
-		</div>
-
-	</div>
-	<div class="form-group" ng-if="filterField.type == 'string'">
-		<div class="input-group">
-			<div class="input-group-addon">Filter:</div>
-			<input type="text" class="form-control" id="{{filterField.name}}textFilter" placeholder="ABC%?" ng-model="filterField.filtertext">
-		</div>
-	</div>
-	<div class="form-group" ng-if="filterField.type == 'number'">
-		<div class="input-group">
-			<div class="input-group-addon">Field >=</div>
-			<input type="text" class="form-control" id="{{filterField.name}}biggerthan" placeholder="###" ng-model="filterField.filterbeq">
-		</div>
-	</div>
-	<div class="form-group" ng-if="filterField.type == 'number'">
-		<div class="input-group">
-			<div class="input-group-addon">Field <=</div>
-			<input type="text" class="form-control" id="{{filterField.name}}smallerthan" placeholder="###" ng-model="filterField.filterseq">
-		</div>
-	</div>
-	<hr ng-if="!$last" />
-</form>-->

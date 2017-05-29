@@ -98,6 +98,7 @@ export class DimeProcessService {
 				this.dataStore.items.sort(this.sortByName);
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.curItem = result;
+				if (this.curItem.status === null) { this.curItem.status = 'ready'; }
 				this.curItemClean = true;
 				this.isPrepared(this.curItem.id);
 				this.stepGetAll(this.curItem.id);
@@ -545,7 +546,7 @@ export class DimeProcessService {
 		this.authHttp.put(this.baseUrl + '/filters/' + this.curItem.id, toSend, { headers: this.headers }).
 			map(response => response.json()).
 			subscribe((result) => {
-				console.log(result);
+				this.toastr.info('Successfully applied filters.', this.serviceName);
 			}, (error) => {
 				this.toastr.error('Failed to apply filters.', this.serviceName);
 				console.error(error);
@@ -565,7 +566,6 @@ export class DimeProcessService {
 	private prepareFilters = (filterArray: any[], numTry?: number) => {
 		if (numTry === undefined) { numTry = 0; }
 		if (this.curItemSourceFields.length > 0) {
-			console.log(filterArray);
 			this.curItemSourceFields.forEach((curField) => {
 				if (curField.isFilter === 1) {
 					this.curItemFilters[curField.name] = {};
@@ -576,7 +576,8 @@ export class DimeProcessService {
 					if (curField.id === curFilter.field) { curFilter.fieldname = curField.name; }
 				});
 				if (curFilter.stream === this.curItemSourceStream.id && curFilter.field) {
-					if (curFilter.filterfrom) { this.curItemFilters[curFilter.fieldname].filterfrom = new Date(curFilter.filterfrom); }
+					const theDate = new Date(curFilter.filterfrom);
+					if (curFilter.filterfrom) { this.curItemFilters[curFilter.fieldname].filterfrom = curFilter.filterfrom; }
 					if (curFilter.filterto) { this.curItemFilters[curFilter.fieldname].filterto = curFilter.filterto; }
 					if (curFilter.filtertext) { this.curItemFilters[curFilter.fieldname].filtertext = curFilter.filtertext; }
 					if (curFilter.filterbeq) { this.curItemFilters[curFilter.fieldname].filterbeq = curFilter.filterbeq; }
@@ -591,4 +592,15 @@ export class DimeProcessService {
 			this.toastr.error('Failed to prepare filters.', this.serviceName);
 		}
 	};
+	public processRun = () => {
+		this.authHttp.get(this.baseUrl + '/run/' + this.curItem.id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.toastr.info(result);
+				console.log(result);
+			}, (error) => {
+				this.toastr.error('', this.serviceName);
+				console.error(error);
+			});
+	}
 }

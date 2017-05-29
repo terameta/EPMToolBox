@@ -365,6 +365,7 @@ interface ModificationDefiner {
 	isFirst?: boolean;
 	isNullable?: boolean;
 	defaultValue?: any;
+	customQuery?: string;
 }
 
 const modificationList: Array<ModificationDefiner> = [];
@@ -379,6 +380,7 @@ modificationList.push({
 	isNullable: true,
 	defaultValue: 0
 });
+// modificationList.push({ type: 'custom', tableName: 'processfilters', customQuery: 'ALTER TABLE `processfilters` CHANGE `filterto` `filterto` DATE NULL DEFAULT NULL' });
 
 function modifyTables() {
 	return new Promise((resolve, reject) => {
@@ -393,6 +395,11 @@ function modifyTables() {
 						if (err) { console.log('!!! Error:', err); }
 					}
 				);
+			} else if (curMod.type === 'custom') {
+				console.log('=== Running custom query against ' + curMod.tableName);
+				db.query(curMod.customQuery || '', (err, results, fields) => {
+					if (err) { console.log('!!! Error:', err); }
+				});
 			} else if (curMod.type === 'addNewColumn') {
 				console.log('=== Adding Column ' + curMod.columnName + ' to Table ' + curMod.tableName);
 				let curQuery: string;
