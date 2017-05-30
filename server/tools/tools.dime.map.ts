@@ -1,10 +1,10 @@
-import { IPool } from "mysql";
+import { IPool } from 'mysql';
 
-import { MainTools } from "../config/config.tools";
-import { StreamTools } from "./tools.dime.stream";
+import { MainTools } from '../config/config.tools';
+import { StreamTools } from './tools.dime.stream';
 
-import { DimeMap } from "../../shared/model/dime/map";
-import { DimeStream } from "../../shared/model/dime/stream";
+import { DimeMap } from '../../shared/model/dime/map';
+import { DimeStream } from '../../shared/model/dime/stream';
 
 export class MapTools {
 	private streamTool: StreamTools;
@@ -16,9 +16,9 @@ export class MapTools {
 
 	public getAll = () => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM maps", (err, rows, fields) => {
+			this.db.query('SELECT * FROM maps', (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to get maps." });
+					reject({ error: err, message: 'Failed to get maps.' });
 				} else {
 					resolve(rows);
 				}
@@ -27,11 +27,11 @@ export class MapTools {
 	}
 	public getOne = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM maps WHERE id = ?", id, (err, rows, fields) => {
+			this.db.query('SELECT * FROM maps WHERE id = ?', id, (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to get map" });
+					reject({ error: err, message: 'Failed to get map' });
 				} else if (rows.length !== 1) {
-					reject({ error: "Wrong number of records", message: "Wrong number of records for map received from the server, 1 expected" });
+					reject({ error: 'Wrong number of records', message: 'Wrong number of records for map received from the server, 1 expected' });
 				} else {
 					resolve(rows[0]);
 				}
@@ -41,10 +41,10 @@ export class MapTools {
 	public create = () => {
 		return new Promise((resolve, reject) => {
 			let newMap: any = {};
-			newMap = { name: "New Map" };
-			this.db.query("INSERT INTO maps SET ?", { name: "New Map" }, (err, rows, fields) => {
+			newMap = { name: 'New Map' };
+			this.db.query('INSERT INTO maps SET ?', { name: 'New Map' }, (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to create a new map." });
+					reject({ error: err, message: 'Failed to create a new map.' });
 				} else {
 					newMap.id = rows.insertId;
 					resolve(newMap);
@@ -54,9 +54,9 @@ export class MapTools {
 	}
 	public update = (dimeMap: DimeMap) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("UPDATE maps SET ? WHERE id = ?", [dimeMap, dimeMap.id], (err, rows, fields) => {
+			this.db.query('UPDATE maps SET ? WHERE id = ?', [dimeMap, dimeMap.id], (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to update the map." });
+					reject({ error: err, message: 'Failed to update the map.' });
 				} else {
 					resolve(dimeMap);
 				}
@@ -65,9 +65,9 @@ export class MapTools {
 	}
 	public delete = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("DELETE FROM maps WHERE id = ?", id, (err, rows, fields) => {
+			this.db.query('DELETE FROM maps WHERE id = ?', id, (err, rows, fields) => {
 				if (err) {
-					reject({ error: err, message: "Failed to delete the map." });
+					reject({ error: err, message: 'Failed to delete the map.' });
 				} else {
 					resolve(id);
 				}
@@ -76,7 +76,7 @@ export class MapTools {
 	}
 	public getFields = (id: number) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("SELECT * FROM mapfields WHERE map = ?", id, (err, rows, fields) => {
+			this.db.query('SELECT * FROM mapfields WHERE map = ?', id, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -88,19 +88,19 @@ export class MapTools {
 	public setFields = (refObj: { map: number, type: string, list: string[] }) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
-				reject("No information passed.");
+				reject('No information passed.');
 			} else if (!refObj.map) {
-				reject("No map id passed.");
+				reject('No map id passed.');
 			} else if (!refObj.type) {
-				reject("No type passed.");
+				reject('No type passed.');
 			} else if (!refObj.list) {
-				reject("No list passed.");
+				reject('No list passed.');
 			} else if (!Array.isArray(refObj.list)) {
-				reject("Provided list is not correctly formatted.");
+				reject('Provided list is not correctly formatted.');
 			} else if (refObj.list.length < 1) {
-				reject("Provided list is empty.");
+				reject('Provided list is empty.');
 			} else {
-				this.db.query("DELETE FROM mapfields WHERE map = ? AND srctar = ?", [refObj.map, refObj.type], (err, rows, fields) => {
+				this.db.query('DELETE FROM mapfields WHERE map = ? AND srctar = ?', [refObj.map, refObj.type], (err, rows, fields) => {
 					if (err) {
 						reject(err);
 					} else {
@@ -117,7 +117,7 @@ export class MapTools {
 	}
 	private setFieldsAction = (id: number, field: string, type: string) => {
 		return new Promise((resolve, reject) => {
-			this.db.query("INSERT INTO mapfields SET ?", { map: id, srctar: type, name: field }, (err, rows, fields) => {
+			this.db.query('INSERT INTO mapfields SET ?', { map: id, srctar: type, name: field }, (err, rows, fields) => {
 				if (err) {
 					reject(err);
 				} else {
@@ -132,65 +132,65 @@ export class MapTools {
 				then((refObj: any) => {
 					let createQueries: any;
 					createQueries = {};
-					createQueries.maptbl = "CREATE TABLE MAP" + refObj.id + "_MAPTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
+					createQueries.maptbl = 'CREATE TABLE MAP' + refObj.id + '_MAPTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 					createQueries.drops = [];
-					createQueries.drops.push("DROP TABLE IF EXISTS MAP" + refObj.id + "_MAPTBL");
+					createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_MAPTBL');
 					refObj.fields.forEach((curField: any) => {
-						let curPrefix = "";
-						let curFieldDef = "";
-						if (curField.srctar === "source") { curPrefix = "SRC_"; }
-						if (curField.srctar === "target") { curPrefix = "TAR_"; }
-						curFieldDef = ", " + curPrefix + curField.name;
-						if (curField.type === "string" && (curField.environmentType === "RDBT" || curField.environmentType === "RDBS")) {
-							curFieldDef += " VARCHAR(" + curField.fCharacters + ")";
+						let curPrefix = '';
+						let curFieldDef = '';
+						if (curField.srctar === 'source') { curPrefix = 'SRC_'; }
+						if (curField.srctar === 'target') { curPrefix = 'TAR_'; }
+						curFieldDef = ', ' + curPrefix + curField.name;
+						if (curField.type === 'string' && (curField.environmentType === 'RDBT' || curField.environmentType === 'RDBS')) {
+							curFieldDef += ' VARCHAR(' + curField.fCharacters + ')';
 						}
-						if (curField.type === "number" && (curField.environmentType === "RDBT" || curField.environmentType === "RDBS")) {
-							curFieldDef += " NUMERIC(" + curField.fPrecision + "," + curField.fDecimals + ")";
+						if (curField.type === 'number' && (curField.environmentType === 'RDBT' || curField.environmentType === 'RDBS')) {
+							curFieldDef += ' NUMERIC(' + curField.fPrecision + ',' + curField.fDecimals + ')';
 						}
-						if (curField.type === "date" && (curField.environmentType === "RDBT" || curField.environmentType === "RDBS")) {
-							curFieldDef += " DATETIME";
+						if (curField.type === 'date' && (curField.environmentType === 'RDBT' || curField.environmentType === 'RDBS')) {
+							curFieldDef += ' DATETIME';
 						}
-						if (curField.environmentType === "HPDB") {
-							curFieldDef += " VARCHAR(80)";
+						if (curField.environmentType === 'HPDB') {
+							curFieldDef += ' VARCHAR(80)';
 						}
-						if (curField.mappable) { createQueries.maptbl += curFieldDef + ", INDEX (" + curPrefix + curField.name + ")"; }
+						if (curField.mappable) { createQueries.maptbl += curFieldDef + ', INDEX (' + curPrefix + curField.name + ')'; }
 						if (curField.isDescribed === 1 && curField.mappable) {
-							createQueries.drops.push("DROP TABLE IF EXISTS MAP" + refObj.id + "_DESCTBL" + curField.id + ";");
+							createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_DESCTBL' + curField.id + ';');
 							let curQuery: string;
-							curQuery = "CREATE TABLE MAP" + refObj.id + "_DESCTBL" + curField.id + " (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
-							curQuery += ", " + curPrefix + curField.name;
-							if (curField.drfType === "string") {
-								curQuery += " VARCHAR(" + curField.drfCharacters + ")";
+							curQuery = 'CREATE TABLE MAP' + refObj.id + '_DESCTBL' + curField.id + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+							curQuery += ', ' + curPrefix + curField.name;
+							if (curField.drfType === 'string') {
+								curQuery += ' VARCHAR(' + curField.drfCharacters + ')';
 							}
-							if (curField.drfType === "number") {
-								curQuery += " NUMERIC(" + curField.drfPrecision + ", " + curField.drfDecimals + ")";
+							if (curField.drfType === 'number') {
+								curQuery += ' NUMERIC(' + curField.drfPrecision + ', ' + curField.drfDecimals + ')';
 							}
-							if (curField.drfType === "date") {
-								curQuery += " DATETIME";
+							if (curField.drfType === 'date') {
+								curQuery += ' DATETIME';
 							}
-							if (curField.ddfType === "string") {
-								curQuery += ", Description VARCHAR(" + curField.ddfCharacters + ")";
+							if (curField.ddfType === 'string') {
+								curQuery += ', Description VARCHAR(' + curField.ddfCharacters + ')';
 							}
-							if (curField.ddfType === "number") {
-								curQuery += ", Description NUMERIC(" + curField.ddfPrecision + "," + curField.ddfDecimals + ")";
+							if (curField.ddfType === 'number') {
+								curQuery += ', Description NUMERIC(' + curField.ddfPrecision + ',' + curField.ddfDecimals + ')';
 							}
-							if (curField.ddfType === "date") {
-								curQuery += ", Description DATETIME";
+							if (curField.ddfType === 'date') {
+								curQuery += ', Description DATETIME';
 							}
-							curQuery += ", PRIMARY KEY(id) );";
-							createQueries["DESCTBL" + curField.id] = curQuery;
+							curQuery += ', PRIMARY KEY(id) );';
+							createQueries['DESCTBL' + curField.id] = curQuery;
 						}
-						if (curField.environmentType === "HPDB" && curField.mappable) {
-							createQueries.drops.push("DROP TABLE IF EXISTS MAP" + refObj.id + "_DESCTBL" + curField.id + ";");
+						if (curField.environmentType === 'HPDB' && curField.mappable) {
+							createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_DESCTBL' + curField.id + ';');
 							let curQuery: string;
-							curQuery = "CREATE TABLE MAP" + refObj.id + "_DESCTBL" + curField.id + " (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT";
-							curQuery += ", " + curPrefix + curField.name + " VARCHAR(255)";
-							curQuery += ", Description VARCHAR(1024)";
-							curQuery += ", PRIMARY KEY(id) );";
-							createQueries["DESCTBL" + curField.id] = curQuery;
+							curQuery = 'CREATE TABLE MAP' + refObj.id + '_DESCTBL' + curField.id + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+							curQuery += ', ' + curPrefix + curField.name + ' VARCHAR(255)';
+							curQuery += ', Description VARCHAR(1024)';
+							curQuery += ', PRIMARY KEY(id) );';
+							createQueries['DESCTBL' + curField.id] = curQuery;
 						}
 					});
-					createQueries.maptbl += ", PRIMARY KEY(id) );";
+					createQueries.maptbl += ', PRIMARY KEY(id) );';
 					refObj.queries = createQueries;
 					return refObj;
 				}).
@@ -236,7 +236,7 @@ export class MapTools {
 					});
 				}).
 				then(() => {
-					resolve({ result: "OK" });
+					resolve({ result: 'OK' });
 				}).
 				catch(reject);
 		});
@@ -288,12 +288,12 @@ export class MapTools {
 					refObj.sourceFields.sort(this.fieldSort);
 					refObj.targetFields.sort(this.fieldSort);
 					refObj.sourceFields.forEach((curField: any) => {
-						curField.srctar = "source";
+						curField.srctar = 'source';
 						curField.environmentType = refObj.sourceDetails.typeValue;
 						refObj.fields.push(curField);
 					});
 					refObj.targetFields.forEach((curField: any) => {
-						curField.srctar = "target";
+						curField.srctar = 'target';
 						curField.environmentType = refObj.targetDetails.typeValue;
 						refObj.fields.push(curField);
 					});
@@ -327,20 +327,20 @@ export class MapTools {
 			const systemDBName = this.tools.config.mysql.db;
 			this.prepareFields(id).
 				then((refObj: any) => {
-					this.db.query("SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?", [systemDBName, "MAP" + refObj.id + "_%"], (err, rows, fields) => {
+					this.db.query('SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?', [systemDBName, 'MAP' + refObj.id + '_%'], (err, rows, fields) => {
 						if (err) {
 							reject(err);
 						} else if (rows.length === 0) {
-							resolve({ result: "NO" });
+							resolve({ result: 'NO' });
 						} else {
 							rows.forEach((curTable: any) => {
-								if (curTable.TABLE_NAME === "MAP" + refObj.id + "_MAPTBL") { maptblExists = true; }
+								if (curTable.TABLE_NAME === 'MAP' + refObj.id + '_MAPTBL') { maptblExists = true; }
 							});
 							refObj.fields.forEach((curField: any) => {
-								if ((curField.isDescribed || curField.environmentType === "HPDB") && curField.mappable) {
+								if ((curField.isDescribed || curField.environmentType === 'HPDB') && curField.mappable) {
 									descriptivetblExists[curField.name + curField.id] = false;
 									rows.forEach((curTable: any) => {
-										if (curTable.TABLE_NAME === "MAP" + refObj.id + "_DESCTBL" + curField.id) { descriptivetblExists[curField.name + curField.id] = true; }
+										if (curTable.TABLE_NAME === 'MAP' + refObj.id + '_DESCTBL' + curField.id) { descriptivetblExists[curField.name + curField.id] = true; }
 									});
 								}
 							});
@@ -350,9 +350,9 @@ export class MapTools {
 								if (!descriptivetblExists[curTbl]) { allExists = false; }
 							});
 							if (allExists) {
-								resolve({ result: "YES" });
+								resolve({ result: 'YES' });
 							} else {
-								resolve({ result: "NO" });
+								resolve({ result: 'NO' });
 							}
 						}
 					});

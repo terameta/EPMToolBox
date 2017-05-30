@@ -1,6 +1,6 @@
-import { Request, Response, Router } from "express";
+import { Request, Response, Router } from 'express';
 
-import { MainTools } from "../config/config.tools";
+import { MainTools } from '../config/config.tools';
 
 export class Rester {
 	constructor(public tools: MainTools) { }
@@ -10,28 +10,28 @@ export class Rester {
 			res.send(result);
 		}).catch(function (issue: any) {
 			console.log(issue);
-			res.status(500).json({ status: "fail", message: issue });
+			res.status(500).json({ status: 'fail', message: issue });
 		});
 	}
 
 	public restify(router: Router, tool: any) {
-		router.get("/", (req: Request, res: Response) => {
+		router.get('/', (req: Request, res: Response) => {
 			this.respond(tool.getAll, null, req, res);
 		});
 
-		router.get("/:id", (req: Request, res: Response) => {
+		router.get('/:id', (req: Request, res: Response) => {
 			this.respond(tool.getOne, req.params.id, req, res);
 		});
 
-		router.post("/", (req: Request, res: Response) => {
+		router.post('/', (req: Request, res: Response) => {
 			this.respond(tool.create, req.body, req, res);
 		});
 
-		router.put("/", (req: Request, res: Response) => {
+		router.put('/', (req: Request, res: Response) => {
 			this.respond(tool.update, req.body, req, res);
 		});
 
-		router.delete("/:id", (req: Request, res: Response) => {
+		router.delete('/:id', (req: Request, res: Response) => {
 			this.respond(tool.delete, req.params.id, req, res);
 		});
 	}

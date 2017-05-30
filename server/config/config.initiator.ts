@@ -380,6 +380,22 @@ modificationList.push({
 	isNullable: true,
 	defaultValue: 0
 });
+modificationList.push({
+	type: 'addNewColumn',
+	tableName: 'logs',
+	columnName: 'reftype',
+	columnType: 'VARCHAR(256)',
+	afterCol: 'details',
+	isNullable: false
+});
+modificationList.push({
+	type: 'addNewColumn',
+	tableName: 'logs',
+	columnName: 'refid',
+	columnType: 'BIGINT UNSIGNED',
+	afterCol: 'details',
+	isNullable: false
+});
 // modificationList.push({ type: 'custom', tableName: 'processfilters', customQuery: 'ALTER TABLE `processfilters` CHANGE `filterto` `filterto` DATE NULL DEFAULT NULL' });
 
 function modifyTables() {

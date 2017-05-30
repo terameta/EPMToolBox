@@ -1,3 +1,4 @@
+import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { IPool } from 'mysql';
 
 import { MainTools } from '../config/config.tools';
@@ -215,6 +216,19 @@ export class StreamTools {
 			});
 		});
 	}
+	public retrieveField = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM streamfields WHERE id = ? ORDER BY fOrder', id, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else if (rows.length !== 1) {
+					reject('Field can not be found');
+				} else {
+					resolve(rows[0]);
+				}
+			});
+		});
+	}
 	public saveFields = (refObj: any) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
@@ -247,6 +261,125 @@ export class StreamTools {
 					resolve();
 				}
 			})
+		});
+	};
+	public isReady = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.checkTables(id).
+				then((tableList: any[]) => {
+					let toReturn = true;
+					tableList.forEach((curTable) => {
+						if (curTable.status === false) { toReturn = false; }
+					});
+					resolve(toReturn);
+				}).
+				catch(reject);
+		});
+	};
+	private checkTables = (id: number) => {
+		let topStream: any;
+		let tablesReady: { tableName: string, stream: number, streamType: string, field: number, status: boolean }[]; tablesReady = [];
+		return new Promise((resolve, reject) => {
+			this.getOne(id).
+				then((curStream: DimeStream) => {
+					topStream = curStream;
+					return this.listTypes();
+				}).
+				then((typeList: any[]) => {
+					typeList.forEach((curType) => {
+						if (curType.id === topStream.type) {
+							topStream.typeName = curType.value;
+						}
+					});
+					return this.retrieveFields(id);
+				}).
+				then((fields: DimeStreamField[]) => {
+					if (fields.length === 0) {
+						reject('No fields are defined for stream');
+					} else {
+						if (topStream.typeName === 'HPDB') {
+							fields.forEach((curField) => {
+								curField.isDescribed = true;
+							});
+						}
+						const systemDBname = this.tools.config.mysql.db;
+						const curQuery = 'SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?';
+						this.db.query(curQuery, [systemDBname, 'STREAM' + id + '_%'], (err, rows, rowfields) => {
+							if (err) {
+								reject(err);
+							} else {
+								fields.forEach((curField) => {
+									if (curField.isDescribed) {
+										const curTableName = 'STREAM' + topStream.id + '_DESCTBL' + curField.id;
+										tablesReady.push({ tableName: curTableName, stream: id, streamType: topStream.typeName, field: curField.id, status: false });
+										rows.forEach((curTable: any) => {
+											if (curTable.TABLE_NAME === curTableName) {
+												tablesReady.forEach((ct) => {
+													if (ct.tableName === curTableName) { ct.status = true; }
+												});
+											}
+										});
+									}
+								});
+								resolve(tablesReady);
+							}
+						});
+					}
+				}).
+				catch(reject);
+		});
+	};
+	public prepareTables = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.checkTables(id).
+				then((tableList: { tableName: string, stream: number, streamType: string, field: number, status: boolean }[]) => {
+					let promises: any[]; promises = [];
+					tableList.forEach((curTable) => {
+						promises.push(this.prepareTable(curTable));
+					});
+					return Promise.all(promises);
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private prepareTable = (tableStatus: { tableName: string, stream: number, streamType: string, field: number, status: boolean }) => {
+		return new Promise((resolve, reject) => {
+			if (tableStatus.status) {
+				resolve('OK');
+			} else {
+				this.retrieveField(tableStatus.field).
+					then((field: DimeStreamField) => {
+						let curQuery: string; curQuery = '';
+						curQuery += 'CREATE TABLE ' + tableStatus.tableName + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+						if (tableStatus.streamType !== 'HPDB') { curQuery += ', ' + field.drfName + ' '; }
+						if (field.drfType === 'string' && tableStatus.streamType !== 'HPDB') { curQuery += 'VARCHAR(' + field.drfCharacters + ')'; }
+						if (field.drfType === 'number' && tableStatus.streamType !== 'HPDB') { curQuery += 'NUMERIC(' + field.drfPrecision + ',' + field.drfDecimals + ')'; }
+						if (field.drfType === 'date' && tableStatus.streamType !== 'HPDB') { curQuery += 'DATETIME'; }
+						if (tableStatus.streamType !== 'HPDB') { curQuery += ', ' + field.ddfName + ' '; }
+						if (field.ddfType === 'string' && tableStatus.streamType !== 'HPDB') { curQuery += 'VARCHAR(' + field.ddfCharacters + ')'; }
+						if (field.ddfType === 'number' && tableStatus.streamType !== 'HPDB') { curQuery += 'NUMERIC(' + field.ddfPrecision + ',' + field.ddfDecimals + ')'; }
+						if (field.ddfType === 'date' && tableStatus.streamType !== 'HPDB') { curQuery += 'DATETIME'; }
+						if (tableStatus.streamType === 'HPDB') {
+							curQuery += ', RefField VARCHAR(256)';
+							curQuery += ', Description VARCHAR(1024)';
+						}
+						curQuery += ', PRIMARY KEY(id) );';
+						// console.log(field.name,
+						// 	field.drfName, field.drfType, field.drfCharacters, field.drfPrecision, field.drfDecimals,
+						// 	field.ddfName, field.ddfType, field.ddfCharacters, field.ddfPrecision, field.ddfDecimals);
+						// console.log(tableStatus);
+						// console.log(curQuery);
+						this.db.query(curQuery, (err, result, fields) => {
+							if (err) {
+								reject(err);
+							} else {
+								resolve('OK');
+							}
+						});
+					}).
+					catch(reject);
+			}
 		});
 	}
 }

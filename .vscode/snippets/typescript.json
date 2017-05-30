@@ -30,5 +30,18 @@
 			"\t});"
 		],
 		"description": "place a new auth request definition"
+	},
+	"New DB Query": {
+		"prefix": "newquery",
+		"body": [
+			"this.db.query('$1', {$2}, (err, result, fields) => {",
+			"\tif (err) {",
+			"\t\treject(err);",
+			"\t} else {",
+			"\t\t$0",
+			"\t}",
+			"});"
+		],
+		"description": "place a new this.db.query definition"
 	}
 }

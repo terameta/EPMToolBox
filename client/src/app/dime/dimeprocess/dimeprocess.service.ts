@@ -603,4 +603,18 @@ export class DimeProcessService {
 				console.error(error);
 			});
 	}
+	public processUnlock = () => {
+		if (confirm('Are you sure you want to unlock the process? This does not cancel the running process.')) {
+			this.authHttp.get(this.baseUrl + '/unlock/' + this.curItem.id).
+				map(response => response.json()).
+				subscribe((result) => {
+					this.toastr.info('Process unlocked successfully.', this.serviceName);
+				}, (error) => {
+					this.toastr.error('Unlocking process failed.', this.serviceName);
+					console.error(error);
+				});
+		} else {
+			this.toastr.info('Unlock of process cancelled.', this.serviceName);
+		}
+	}
 }

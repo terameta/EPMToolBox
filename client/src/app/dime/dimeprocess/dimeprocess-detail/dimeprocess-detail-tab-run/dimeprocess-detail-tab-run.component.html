@@ -1,3 +1,4 @@
 <button type="button" class="btn btn-success btn-xs" (click)="mainService.processRun()" title="Initiate Process"><i class="fa fa-space-shuttle fa-fw" aria-hidden="true"></i> Initiate Process</button>
+<button type="button" class="btn btn-danger btn-xs" (click)="mainService.processUnlock()" title="Unlock Process"><i class="fa fa-unlock fa-fw" aria-hidden="true"></i> Unlock Process</button>
 <hr *ngIf="mainService.curItem.status != 'ready'">
 <pre *ngIf="mainService.curItem.status != 'ready'">{{currentLog}}</pre>
