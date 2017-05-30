@@ -37,6 +37,7 @@ export class DimeProcessService {
 	curStepManipulations: any[];
 	curItemDefaultTargets: any;
 	curItemFilters: any;
+	currentLog: any;
 	stepTypes: DimeProcessStepType[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeProcess[]>;
@@ -99,6 +100,7 @@ export class DimeProcessService {
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.curItem = result;
 				if (this.curItem.status === null) { this.curItem.status = 'ready'; }
+				if (this.curItem.status !== 'ready') { this.checkLog(parseInt(this.curItem.status || '0', 10)); }
 				this.curItemClean = true;
 				this.isPrepared(this.curItem.id);
 				this.stepGetAll(this.curItem.id);
@@ -596,13 +598,29 @@ export class DimeProcessService {
 		this.authHttp.get(this.baseUrl + '/run/' + this.curItem.id).
 			map(response => response.json()).
 			subscribe((result) => {
-				this.toastr.info(result);
-				console.log(result);
+				this.curItem.status = result.status;
+				this.checkLog(result.status);
 			}, (error) => {
 				this.toastr.error('', this.serviceName);
 				console.error(error);
 			});
 	}
+	public checkLog = (id: number) => {
+		this.authHttp.get('/api/log/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.currentLog = result.details;
+				if (result.start === result.end) {
+					setTimeout(() => {
+						this.checkLog(id);
+					}, 2000);
+				}
+
+			}, (error) => {
+				this.toastr.error('Failed to retrieve log records.', this.serviceName);
+				console.error(error);
+			});
+	};
 	public processUnlock = () => {
 		if (confirm('Are you sure you want to unlock the process? This does not cancel the running process.')) {
 			this.authHttp.get(this.baseUrl + '/unlock/' + this.curItem.id).

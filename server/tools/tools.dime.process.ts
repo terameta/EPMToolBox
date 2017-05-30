@@ -474,6 +474,12 @@ export class ProcessTools {
 				if (curTable.type === 'datatable' && curTable.status === false) {
 					promises.push(this.createDataTable(refProcess, curKey));
 				}
+				if (curTable.type === 'sumtable' && curTable.status === false) {
+					promises.push(this.createSumTable(refProcess, curKey));
+				}
+				if (curTable.type === 'crosstable' && curTable.status === false) {
+					// Place here the crosstable structure creator.
+				}
 			});
 			Promise.all(promises).
 				then((result) => {
@@ -482,9 +488,37 @@ export class ProcessTools {
 				catch(reject);
 		});
 	};
+	private createSumTable = (refProcess: DimeProcessRunning, refKey: number) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Process sum table was missing. Creating now.');
+			let createQuery: string; createQuery = '';
+			createQuery += 'CREATE TABLE PROCESS' + refProcess.id + '_SUBTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+			refProcess.targetStreamFields.forEach((curField) => {
+				if (refProcess.targetStreamType === 'HPDB') {
+					createQuery += ', ' + curField.name + ' VARCHAR(80)';
+				} else if (curField.type === 'string') {
+					createQuery += ', ' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
+				} else if (curField.type === 'number') {
+					createQuery += ', ' + curField.name + ' NUMERIC(' + curField.fPrecision + ',' + curField.fDecimals + ')';
+				} else if (curField.type === 'date') {
+					createQuery += ', ' + curField.name + ' DATETIME';
+				}
+			});
+			createQuery += ', SUMMARIZEDRESULT NUMERIC(60,15)';
+			createQuery += ', PRIMARY KEY(id) );';
+			this.db.query(createQuery, (err, result, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve('OK');
+				}
+			});
+		});
+	}
 	private createDataTable = (refProcess: DimeProcessRunning, refKey: number) => {
 		return new Promise((resolve, reject) => {
 			// console.log(refProcess.isReady[refKey]);
+			this.logTool.appendLog(refProcess.status, 'Process data table was missing. Creating now.');
 			let createQuery: string; createQuery = '';
 			createQuery += 'CREATE TABLE PROCESS' + refProcess.id + '_DATATBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 			refProcess.sourceStreamFields.forEach((curField) => {
@@ -516,7 +550,6 @@ export class ProcessTools {
 				}
 			});
 			createQuery += ', PRIMARY KEY (id) );';
-			console.log(createQuery);
 			this.db.query(createQuery, (err, result, fields) => {
 				if (err) {
 					reject(err);

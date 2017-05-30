@@ -6,7 +6,7 @@ import { MainTools } from '../config/config.tools';
 import { EnvironmentTools } from '../tools/tools.dime.environment';
 import { Rester } from '../tools/tools.rester';
 
-export class ApiEnvironment {
+export class ApiDimeEnvironment {
 	environment: EnvironmentTools;
 	apiRoutes: express.Router;
 	rester: Rester;

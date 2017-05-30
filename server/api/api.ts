@@ -1,19 +1,24 @@
-import { Application } from "express";
-import { IPool } from "mysql";
+import { Application } from 'express';
+import { IPool } from 'mysql';
 
-import { MainTools } from "../config/config.tools";
+import { MainTools } from '../config/config.tools';
 
-import { ApiEnvironment } from "./api.dime.environment";
-import { ApiStream } from "./api.dime.stream";
-import { ApiMap } from "./api.dime.map";
-import { ApiProcess } from "./api.dime.process";
+import { ApiLog } from './api.log';
 
-import { apiAuth } from "./api.auth";
+import { ApiDimeEnvironment } from './api.dime.environment';
+import { ApiDimeStream } from './api.dime.stream';
+import { ApiDimeMap } from './api.dime.map';
+import { ApiDimeProcess } from './api.dime.process';
+
+
+import { apiAuth } from './api.auth';
 
 export function initializeRestApi(app: Application, refDB: IPool, refTools: MainTools) {
-	const apiEnvironment = new ApiEnvironment(app, refDB, refTools);
-	const apiStream = new ApiStream(app, refDB, refTools);
-	const apiMap = new ApiMap(app, refDB, refTools);
-	const apiProcess = new ApiProcess(app, refDB, refTools);
+	const apiLog = new ApiLog(app, refDB, refTools);
+
+	const apiDimeEnvironment = new ApiDimeEnvironment(app, refDB, refTools);
+	const apiStream = new ApiDimeStream(app, refDB, refTools);
+	const apiMap = new ApiDimeMap(app, refDB, refTools);
+	const apiProcess = new ApiDimeProcess(app, refDB, refTools);
 	apiAuth(app, refDB, refTools);
 }
