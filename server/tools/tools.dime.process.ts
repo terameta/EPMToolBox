@@ -431,7 +431,12 @@ export class ProcessTools {
 							targetStream: { id: 0, name: '', type: 0, environment: 0 },
 							targetStreamFields: [],
 							targetStreamType: '',
-							isReady: []
+							isReady: [],
+							curStep: 0,
+							filters: [],
+							wherers: [],
+							wherersWithSrc: [],
+							pullResult: []
 						};
 						this.runAction(curProcess);
 						resolve(innerObj);
@@ -490,6 +495,7 @@ export class ProcessTools {
 				refProcess.steps.forEach((fStep) => {
 					if (!isStepAssigned && fStep.isPending) {
 						curStep = fStep;
+						refProcess.curStep = curStep.sOrder;
 						isStepAssigned = true;
 					}
 				});
@@ -505,6 +511,13 @@ export class ProcessTools {
 										resolve(this.runStepsAction(refProcess));
 									}).
 									catch(reject);
+							} else if (curStep.type === 'pulldata') {
+								this.runPullData(refProcess, curStep).
+									then((result: any) => {
+										curStep.isPending = false;
+										resolve(this.runStepsAction(refProcess));
+									}).
+									catch(reject);
 							} else {
 								reject('This is not a known step type');
 							}
@@ -515,6 +528,161 @@ export class ProcessTools {
 					resolve(refProcess);
 				}
 			}
+		});
+	};
+	private runPullData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Pull Data is initiating.').
+				then(() => {
+					return this.fetchFiltersToRefProcess(refProcess);
+				}).
+				then(this.clearStaging).
+				then(this.pullFromSource).
+				then(this.insertToStaging).
+				then(this.assignDefaults).
+				then(resolve).
+				catch(reject);
+			/*
+			ok	fetchFiltersToRefObj(refObj).
+			ok	then(clearStaging).
+			ok	then(pullFromSource).
+			ok	then(insertToStaging).
+			on	then(assignDefaults).
+				then(resolve, reject);
+			*/
+		});
+	}
+	private assignDefaults = (refProcess: DimeProcessRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Assigning default targets to the staging table.').
+				then(() => {
+					reject('Assign Defaluts is not ready');
+				}).
+				catch(reject);
+		});
+	}
+	private insertToStaging = (refProcess: DimeProcessRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Inserting data to the staging table.').
+				then(() => {
+					if (refProcess.pullResult.length === 0) {
+						resolve(refProcess);
+					} else {
+						const curKeys = Object.keys(refProcess.pullResult[0]);
+						let insertQuery: string; insertQuery = '';
+						insertQuery += 'INSERT INTO PROCESS' + refProcess.id + '_DATATBL (' + curKeys.join(', ') + ') VALUES ?';
+						let curArray: any[];
+						refProcess.pullResult.forEach((curResult, curItem) => {
+							curArray = [];
+							curKeys.forEach((curKey) => {
+								curArray.push(curResult[curKey]);
+							});
+							refProcess.pullResult[curItem] = curArray;
+						});
+						this.db.query(insertQuery, [refProcess.pullResult], (err, rows, fields) => {
+							if (err) {
+								reject(err);
+							} else {
+								resolve(refProcess);
+							}
+						});
+					}
+				}).
+				catch(reject);
+		});
+	};
+	private pullFromSource = (refProcess: DimeProcessRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Pulling data from source stream with the given filters.').
+				then(() => {
+					let selectQuery: string; selectQuery = 'SELECT ';
+					let selectFields: string[]; selectFields = [];
+					let groupFields: string[]; groupFields = [];
+					refProcess.sourceStreamFields.forEach((curField) => {
+						if (curField.isData) {
+							if (curField.aggregateFunction) {
+								selectFields.push(curField.aggregateFunction + '(' + curField.name + ') AS SRC_' + curField.name);
+							} else {
+								selectFields.push(curField.name + ' AS SRC_' + curField.name);
+							}
+						} else {
+							groupFields.push(curField.name);
+							selectFields.push(curField.name + ' AS SRC_' + curField.name);
+						}
+					});
+					selectQuery += selectFields.join(', ');
+					selectQuery += ' FROM ';
+					if (refProcess.sourceStream.tableName === 'Custom Query') {
+						if (refProcess.sourceStream.customQuery) {
+							let subQuery: string; subQuery = refProcess.sourceStream.customQuery;
+							subQuery = subQuery.trim();
+							if (subQuery.substr(subQuery.length - 1) === ';') {
+								subQuery = subQuery.substr(0, subQuery.length - 1);
+							}
+							refProcess.sourceStream.customQuery = subQuery;
+						}
+						selectQuery += '(' + refProcess.sourceStream.customQuery + ') AS CSQ';
+					} else {
+						selectQuery += refProcess.sourceStream.tableName;
+					}
+					if (refProcess.wherers.length > 0) {
+						selectQuery += ' WHERE ' + refProcess.wherers.join(' AND ');
+					}
+					if (groupFields.length > 0) {
+						selectQuery += ' GROUP BY ' + groupFields.join(', ');
+					}
+					return this.environmentTool.runProcedure({ stream: refProcess.sourceStream, procedure: selectQuery });
+				}).
+				then((result: any[]) => {
+					refProcess.pullResult = result;
+					resolve(refProcess);
+				}).
+				catch(reject);
+		});
+	};
+	private clearStaging = (refProcess: DimeProcessRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Clearing staging table.').
+				then(() => {
+					let clearQuery: string;
+					clearQuery = 'DELETE FROM PROCESS' + refProcess.id + '_DATATBL';
+					if (refProcess.wherers.length > 0) {
+						clearQuery += ' WHERE ' + refProcess.wherersWithSrc.join(' AND ');
+					}
+					this.db.query(clearQuery, (err, result, fields) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(refProcess);
+						}
+					});
+				}).catch(reject);
+		});
+	};
+	private fetchFiltersToRefProcess = (refProcess: DimeProcessRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Fetching filters.').
+				then(() => {
+					return this.fetchFilters(refProcess.id);
+				}).
+				then((filters: any[]) => {
+					refProcess.filters = filters;
+					refProcess.filters.forEach((curFilter) => {
+						refProcess.sourceStreamFields.forEach((curField) => {
+							if (curField.id === curFilter.field) { curFilter.fieldName = curField.name; }
+						});
+						if (curFilter.filterfrom) { refProcess.wherers.push(curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\''); }
+						if (curFilter.filterto) { refProcess.wherers.push(curFilter.fieldName + '<=\'' + curFilter.filterto + '\''); }
+						if (curFilter.filtertext) { refProcess.wherers.push(curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\''); }
+						if (curFilter.filterbeq) { refProcess.wherers.push(curFilter.fieldName + '>=' + curFilter.filterbeq); }
+						if (curFilter.filterseq) { refProcess.wherers.push(curFilter.fieldName + '<=' + curFilter.filterseq); }
+					});
+					refProcess.wherers.forEach((curWherer) => {
+						refProcess.wherersWithSrc.push('SRC_' + curWherer);
+					});
+					resolve(refProcess);
+				}).
+				catch(reject);
 		});
 	};
 	private runSourceProcedure = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {

@@ -18,5 +18,10 @@ export interface DimeProcessRunning {
 	targetStream: DimeStream,
 	targetStreamFields: DimeStreamField[],
 	targetStreamType: string,
-	isReady: { tableName: string, process: number, type: string, status: boolean }[]
+	isReady: { tableName: string, process: number, type: string, status: boolean }[],
+	curStep: number,
+	filters: any[],
+	wherers: string[],
+	wherersWithSrc: string[],
+	pullResult: any[]
 }

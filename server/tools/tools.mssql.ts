@@ -141,15 +141,20 @@ export class MSSQLTools {
 				catch(reject);
 		});
 	};
-	public runProcedure = (refObj: DimeEnvironment) => {
+	public runProcedure = (refObj: { id: number, procedure: string }) => {
 		return new Promise((resolve, reject) => {
-			console.log('>>>', refObj);
-			reject('kekele');
-			// this.connect(refObj).
-			// 	then((innerObj: DimeEnvironment) => {
-
-			// 	}).
-			// 	catch(reject);
+			this.connect(refObj).
+				then((innerObj: DimeEnvironment) => {
+					innerObj.connection.request().query(refObj.procedure, (err: any, result: any) => {
+						if (err) {
+							reject(err);
+						} else {
+							// console.log(result);
+							resolve(result.recordset);
+						}
+					});
+				}).
+				catch(reject);
 		});
 	};
 }
