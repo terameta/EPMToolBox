@@ -1,7 +1,7 @@
-import * as mssql from "mssql";
+import * as mssql from 'mssql';
 
-import { MainTools } from "../config/config.tools";
-import { DimeEnvironment } from "../../shared/model/dime/environment";
+import { MainTools } from '../config/config.tools';
+import { DimeEnvironment } from '../../shared/model/dime/environment';
 
 export class MSSQLTools {
 
@@ -14,10 +14,10 @@ export class MSSQLTools {
 	private connect = (refObj: DimeEnvironment) => {
 		return new Promise((resolve, reject) => {
 			const dbConfig: any = {
-				user: refObj.username || "",
-				password: refObj.password || "",
-				server: refObj.server || "",
-				port: parseInt(refObj.port || "0", 10),
+				user: refObj.username || '',
+				password: refObj.password || '',
+				server: refObj.server || '',
+				port: parseInt(refObj.port || '0', 10),
 				connectionTimeout: 300000,
 				requestTimeout: 300000,
 			};
@@ -37,9 +37,9 @@ export class MSSQLTools {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
 				then((curObj: any) => {
-					curObj.connection.request().query("SELECT name FROM sys.databases WHERE name NOT IN ('master', 'tempdb', 'model', 'msdb')", (err: any, result: any) => {
+					curObj.connection.request().query('SELECT name FROM sys.databases WHERE name NOT IN (\'master\', \'tempdb\', \'model\', \'msdb\')', (err: any, result: any) => {
 						if (err) {
-							console.log("error", err);
+							console.log('error', err);
 							reject(err);
 						} else {
 							resolve(result.recordset);
@@ -54,18 +54,18 @@ export class MSSQLTools {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
 				then((curObj: any) => {
-					curObj.connection.request().query("SELECT TABLE_NAME, TABLE_TYPE FROM " + refObj.database + ".INFORMATION_SCHEMA.Tables ORDER BY 2, 1", (err: any, result: any) => {
+					curObj.connection.request().query('SELECT TABLE_NAME, TABLE_TYPE FROM ' + refObj.database + '.INFORMATION_SCHEMA.Tables ORDER BY 2, 1', (err: any, result: any) => {
 						if (err) {
-							console.log("error", err);
+							console.log('error', err);
 							reject(err);
 						} else {
 							result.recordset.forEach((curRecord: any) => {
 								curRecord.name = curRecord.TABLE_NAME;
-								curRecord.type = (curRecord.TABLE_TYPE === "VIEW" ? "View" : "Table");
+								curRecord.type = (curRecord.TABLE_TYPE === 'VIEW' ? 'View' : 'Table');
 								delete curRecord.TABLE_NAME;
 								delete curRecord.TABLE_TYPE;
 							});
-							result.recordset.push({ name: "Custom Query", type: "Custom Query" });
+							result.recordset.push({ name: 'Custom Query', type: 'Custom Query' });
 							// console.log(result.recordset);
 							resolve(result.recordset);
 						}
@@ -87,12 +87,12 @@ export class MSSQLTools {
 		return new Promise((resolve, reject) => {
 			this.connect(refObj).
 				then((innerObj: any) => {
-					const theQuery = "SELECT TOP 100 * FROM (" + refObj.query + ") T";
+					const theQuery = 'SELECT TOP 100 * FROM (' + refObj.query + ') T';
 					innerObj.connection.request().query(theQuery, (err: any, result: any) => {
 						if (err) {
 							reject(err);
 						} else if (result.recordset.length === 0) {
-							reject("No records received, can't process the fields");
+							reject('No records received, can\'t process the fields');
 						} else {
 							let fieldArray: any[];
 							fieldArray = Object.keys(result.recordset[0]);
@@ -102,9 +102,9 @@ export class MSSQLTools {
 							});
 							result.recordset.forEach((curTuple: any) => {
 								fieldArray.forEach((curField, curKey) => {
-									if (typeof curTuple[curField.name] === "string") {
+									if (typeof curTuple[curField.name] === 'string') {
 										fieldArray[curKey].isString++;
-									} else if (typeof curTuple[curField.name] === "number") {
+									} else if (typeof curTuple[curField.name] === 'number') {
 										fieldArray[curKey].isNumber++;
 									} else {
 										const curChecker = new Date(curTuple[curField.name]);
@@ -115,18 +115,18 @@ export class MSSQLTools {
 
 							fieldArray.sort(this.sortByName);
 							fieldArray.forEach(function (curField, curKey) {
-								fieldArray[curKey].type = "undefined";
+								fieldArray[curKey].type = 'undefined';
 								let typemax = 0;
 								if (parseInt(fieldArray[curKey].isString, 10) > typemax) {
-									fieldArray[curKey].type = "string";
+									fieldArray[curKey].type = 'string';
 									typemax = parseInt(fieldArray[curKey].isString, 10);
 								}
 								if (parseInt(fieldArray[curKey].isNumber, 10) > typemax) {
-									fieldArray[curKey].type = "number";
+									fieldArray[curKey].type = 'number';
 									typemax = parseInt(fieldArray[curKey].isNumber, 10);
 								}
 								if (parseInt(fieldArray[curKey].isDate, 10) > typemax) {
-									fieldArray[curKey].type = "date";
+									fieldArray[curKey].type = 'date';
 									typemax = parseInt(fieldArray[curKey].isDate, 10);
 								}
 								delete fieldArray[curKey].isString;
@@ -140,5 +140,16 @@ export class MSSQLTools {
 				}).
 				catch(reject);
 		});
-	}
+	};
+	public runProcedure = (refObj: DimeEnvironment) => {
+		return new Promise((resolve, reject) => {
+			console.log('>>>', refObj);
+			reject('kekele');
+			// this.connect(refObj).
+			// 	then((innerObj: DimeEnvironment) => {
+
+			// 	}).
+			// 	catch(reject);
+		});
+	};
 }

@@ -611,5 +611,13 @@ export class HPTools {
 					}
 				}).catch(reject);
 		});
-	}
+	};
+	public runProcedure = (refObj: DimeEnvironmentHP) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update this part of the tools.hp.ts file');
+			console.log('!!!!!!!!!!!!');
+			reject('Update this part of the tools.hp.ts file');
+		});
+	};
 }

@@ -302,5 +302,41 @@ export class EnvironmentTools {
 				then(resolve).
 				catch(reject);
 		});
+	};
+	public runProcedure = (refObj: { stream: DimeStream, procedure: any }) => {
+		return new Promise((resolve, reject) => {
+			if (!refObj) {
+				reject('No object passed.');
+			} else if (!refObj.stream) {
+				reject('No stream passed.');
+			} else if (!refObj.stream.environment) {
+				reject('Malformed stream object');
+			} else if (!refObj.procedure) {
+				reject('Procedure definition is missing');
+			} else {
+				this.getEnvironmentDetails({ id: refObj.stream.environment }, true).
+					then(this.getTypeDetails).
+					then((innerObj: any) => {
+						innerObj.database = refObj.stream.dbName;
+						innerObj.table = refObj.stream.tableName;
+						innerObj.procedure = refObj.procedure;
+						if (!innerObj.typedetails) {
+							return Promise.reject('No type deinition on the environment.');
+						} else if (!innerObj.typedetails.value) {
+							return Promise.reject('No type value definition on the environment object.');
+						} else if (innerObj.typedetails.value === 'HP') {
+							return this.hpTool.runProcedure(innerObj);
+						} else if (innerObj.typedetails.value === 'PBCS') {
+							return this.pbcsTool.runProcedure(innerObj);
+						} else if (innerObj.typedetails.value === 'MSSQL') {
+							return this.mssqlTool.runProcedure(innerObj);
+						} else {
+							return Promise.reject('Undefined Environment type.');
+						}
+					}).
+					then(resolve).
+					catch(reject);
+			}
+		});
 	}
 }

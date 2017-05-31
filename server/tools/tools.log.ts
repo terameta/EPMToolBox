@@ -55,7 +55,7 @@ export class ATLogger {
 	public appendLog = (id: number, details: string) => {
 		const curDate = new Date();
 		details = curDate.toString() + ': ' + details.toString().trim();
-		console.log(details);
+		// console.log(details);
 		return new Promise((resolve, reject) => {
 			this.db.query('UPDATE logs SET details = CONCAT_WS(\'\n\', details, ?) WHERE id = ?', [details, id], (err, result, fields) => {
 				if (err) {

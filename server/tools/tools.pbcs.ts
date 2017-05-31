@@ -164,21 +164,29 @@ export class PBCSTools {
 				}).
 				catch(reject);
 		});
-	}
+	};
 	public listRules = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			console.log('!!!!!!!!!!!!');
 			console.log('Update this part of the tools.pbcs.ts file');
 			console.log('!!!!!!!!!!!!');
-			resolve([]);
+			reject('Update this part of the tools.pbcs.ts file');
 		});
-	}
+	};
 	public listRuleDetails = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
 			console.log('!!!!!!!!!!!!');
 			console.log('Update this part of the tools.pbcs.ts file');
 			console.log('!!!!!!!!!!!!');
-			resolve([]);
+			reject('Update this part of the tools.pbcs.ts file');
 		});
-	}
+	};
+	public runProcedure = (refObj: DimeEnvironmentPBCS) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update this part of the tools.pbcs.ts file');
+			console.log('!!!!!!!!!!!!');
+			reject('Update this part of the tools.pbcs.ts file');
+		});
+	};
 }
