@@ -3,6 +3,7 @@ import { IPool } from 'mysql';
 import { MainTools } from '../config/config.tools';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeStream } from '../../shared/model/dime/stream';
+import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { MSSQLTools } from './tools.mssql';
 import { HPTools } from './tools.hp';
 import { PBCSTools } from './tools.pbcs';
@@ -338,5 +339,35 @@ export class EnvironmentTools {
 					catch(reject);
 			}
 		});
-	}
+	};
+	public getDescriptions = (refStream: DimeStream, refField: DimeStreamField) => {
+		return new Promise((resolve, reject) => {
+			if (!refStream.environment) {
+				reject('Malformed stream object');
+			} else {
+				this.getEnvironmentDetails({ id: refStream.environment }, true).
+					then(this.getTypeDetails).
+					then((innerObj: any) => {
+						innerObj.database = refStream.dbName;
+						innerObj.table = refStream.tableName;
+						innerObj.field = refField;
+						if (!innerObj.typedetails) {
+							return Promise.reject('No type definition on the environment');
+						} else if (!innerObj.typedetails.value) {
+							return Promise.reject('No type value definition on the environment object.');
+						} else if (innerObj.typedetails.value === 'HP') {
+							return this.hpTool.getDescriptions(innerObj);
+						} else if (innerObj.typedetails.value === 'PBCS') {
+							return this.pbcsTool.getDescriptions(innerObj);
+						} else if (innerObj.typedetails.value === 'MSSQL') {
+							return this.mssqlTool.getDescriptions(innerObj);
+						} else {
+							return Promise.reject('Undefined Environment type.');
+						}
+					}).
+					then(resolve).
+					catch(reject);
+			}
+		});
+	};
 }

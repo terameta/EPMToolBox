@@ -157,4 +157,31 @@ export class MSSQLTools {
 				catch(reject);
 		});
 	};
+	public getDescriptions = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			if (refObj.field.descriptiveDB) {
+				refObj.database = refObj.field.descriptiveDB;
+			}
+			this.connect(refObj).
+				then((innerObj: any) => {
+					let selectQuery: string; selectQuery = '';
+					selectQuery += 'SELECT DISTINCT ' + refObj.field.drfName + ', ' + refObj.field.ddfName + ' ';
+					selectQuery += 'FROM '
+					if (refObj.field.descriptiveTable === 'Custom Query') {
+						selectQuery += '(' + refObj.field.descriptiveQuery + ') AS TCQ';
+					} else {
+						selectQuery += refObj.field.descriptiveTable;
+					}
+					selectQuery += ' ORDER BY 1, 2';
+					innerObj.connection.request().query(selectQuery, (err: any, result: any) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(result.recordset);
+						}
+					});
+				}).
+				catch(reject);
+		});
+	};
 }

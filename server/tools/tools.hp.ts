@@ -620,4 +620,12 @@ export class HPTools {
 			reject('Update this part of the tools.hp.ts file');
 		});
 	};
+	public getDescriptions = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update getDescriptions part of the tools.hp.ts file');
+			console.log('!!!!!!!!!!!!');
+			reject('Update this part of the tools.hp.ts file');
+		});
+	}
 }

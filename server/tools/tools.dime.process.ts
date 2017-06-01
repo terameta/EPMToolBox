@@ -699,54 +699,26 @@ export class ProcessTools {
 		});
 	}
 	private populateStreamDescriptions = (refEnvironment: DimeEnvironment, refStream: DimeStream, refFields: DimeStreamField[]) => {
-		return new Promise((resolve, reject) => {
-			this.clearStreamDescriptions(refFields).
-				then(() => {
-					return this.pullStreamDescriptions(refEnvironment, refFields);
-				}).
-				then(resolve).
-				catch(reject);
-		});
-	};
-	private pullStreamDescriptions = (refEnvironment: DimeEnvironment, refFields: DimeStreamField[]) => {
-		return new Promise((resolve, reject) => {
-			this.environmentTool.listTypes().
-				then((typeList: DimeEnvironmentType[]) => {
-					let curType: string; curType = '';
-					typeList.forEach((theType) => {
-						if (theType.id === refEnvironment.type) {
-							curType = theType.value;
-						}
-					});
-					let promises: any[]; promises = [];
-					refFields.forEach((curField) => {
-						promises.push(this.pullStreamDescriptionsAction(refEnvironment, curType, curField));
-					});
-					return Promise.all(promises);
-				}).
-				then(resolve).
-				catch(reject);
-		});
-	};
-	private pullStreamDescriptionsAction = (refEnvironment: DimeEnvironment, refEnvType: string, refField: DimeStreamField) => {
-		return new Promise((resolve, reject) => {
-			if (refField.isDescribed) {
-
-			} else {
-				resolve('OK');
+		let promises: any[]; promises = [];
+		refFields.forEach((curField) => {
+			if (curField.isDescribed) {
+				promises.push(this.populateStreamDescriptionsAction(refEnvironment, refStream, curField));
 			}
 		});
+		return Promise.all(promises);
 	};
-	private clearStreamDescriptions = (refFields: DimeStreamField[]) => {
+	private populateStreamDescriptionsAction = (refEnvironment: DimeEnvironment, refStream: DimeStream, refField: DimeStreamField) => {
 		return new Promise((resolve, reject) => {
-			let promises: any[]; promises = [];
-			refFields.forEach((curField) => {
-				promises.push(this.clearStreamDescriptionsAction(curField));
-			});
-			Promise.all(promises).then(resolve).catch(reject);
+			this.clearStreamDescriptions(refField).
+				then(() => {
+					return this.environmentTool.getDescriptions(refStream, refField);
+				}).
+				then(this.setStreamDescriptions).
+				then(resolve).
+				catch(reject);
 		});
-	};
-	private clearStreamDescriptionsAction = (refField: DimeStreamField) => {
+	}
+	private clearStreamDescriptions = (refField: DimeStreamField) => {
 		return new Promise((resolve, reject) => {
 			if (refField.isDescribed) {
 				this.db.query('DELETE FROM STREAM' + refField.stream + '_DESCTBL' + refField.id, (err, result, fields) => {
@@ -759,6 +731,12 @@ export class ProcessTools {
 			} else {
 				resolve('OK');
 			}
+		});
+	}
+	private setStreamDescriptions = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			console.log(refObj);
+			reject('setStreamDescriptions is not ready yet');
 		});
 	}
 	private assignDefaults = (refProcess: DimeProcessRunning) => {
