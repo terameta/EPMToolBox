@@ -154,41 +154,41 @@ export class MapTools {
 							curFieldDef += ' VARCHAR(80)';
 						}
 						if (curField.mappable) { createQueries.maptbl += curFieldDef + ', INDEX (' + curPrefix + curField.name + ')'; }
-						if (curField.isDescribed === 1 && curField.mappable) {
-							createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_DESCTBL' + curField.id + ';');
-							let curQuery: string;
-							curQuery = 'CREATE TABLE MAP' + refObj.id + '_DESCTBL' + curField.id + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
-							curQuery += ', ' + curPrefix + curField.name;
-							if (curField.drfType === 'string') {
-								curQuery += ' VARCHAR(' + curField.drfCharacters + ')';
-							}
-							if (curField.drfType === 'number') {
-								curQuery += ' NUMERIC(' + curField.drfPrecision + ', ' + curField.drfDecimals + ')';
-							}
-							if (curField.drfType === 'date') {
-								curQuery += ' DATETIME';
-							}
-							if (curField.ddfType === 'string') {
-								curQuery += ', Description VARCHAR(' + curField.ddfCharacters + ')';
-							}
-							if (curField.ddfType === 'number') {
-								curQuery += ', Description NUMERIC(' + curField.ddfPrecision + ',' + curField.ddfDecimals + ')';
-							}
-							if (curField.ddfType === 'date') {
-								curQuery += ', Description DATETIME';
-							}
-							curQuery += ', PRIMARY KEY(id) );';
-							createQueries['DESCTBL' + curField.id] = curQuery;
-						}
-						if (curField.environmentType === 'HPDB' && curField.mappable) {
-							createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_DESCTBL' + curField.id + ';');
-							let curQuery: string;
-							curQuery = 'CREATE TABLE MAP' + refObj.id + '_DESCTBL' + curField.id + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
-							curQuery += ', ' + curPrefix + curField.name + ' VARCHAR(255)';
-							curQuery += ', Description VARCHAR(1024)';
-							curQuery += ', PRIMARY KEY(id) );';
-							createQueries['DESCTBL' + curField.id] = curQuery;
-						}
+						// if (curField.isDescribed === 1 && curField.mappable) {
+						// 	createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_DESCTBL' + curField.id + ';');
+						// 	let curQuery: string;
+						// 	curQuery = 'CREATE TABLE MAP' + refObj.id + '_DESCTBL' + curField.id + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+						// 	curQuery += ', ' + curPrefix + curField.name;
+						// 	if (curField.drfType === 'string') {
+						// 		curQuery += ' VARCHAR(' + curField.drfCharacters + ')';
+						// 	}
+						// 	if (curField.drfType === 'number') {
+						// 		curQuery += ' NUMERIC(' + curField.drfPrecision + ', ' + curField.drfDecimals + ')';
+						// 	}
+						// 	if (curField.drfType === 'date') {
+						// 		curQuery += ' DATETIME';
+						// 	}
+						// 	if (curField.ddfType === 'string') {
+						// 		curQuery += ', Description VARCHAR(' + curField.ddfCharacters + ')';
+						// 	}
+						// 	if (curField.ddfType === 'number') {
+						// 		curQuery += ', Description NUMERIC(' + curField.ddfPrecision + ',' + curField.ddfDecimals + ')';
+						// 	}
+						// 	if (curField.ddfType === 'date') {
+						// 		curQuery += ', Description DATETIME';
+						// 	}
+						// 	curQuery += ', PRIMARY KEY(id) );';
+						// 	createQueries['DESCTBL' + curField.id] = curQuery;
+						// }
+						// if (curField.environmentType === 'HPDB' && curField.mappable) {
+						// 	createQueries.drops.push('DROP TABLE IF EXISTS MAP' + refObj.id + '_DESCTBL' + curField.id + ';');
+						// 	let curQuery: string;
+						// 	curQuery = 'CREATE TABLE MAP' + refObj.id + '_DESCTBL' + curField.id + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+						// 	curQuery += ', ' + curPrefix + curField.name + ' VARCHAR(255)';
+						// 	curQuery += ', Description VARCHAR(1024)';
+						// 	curQuery += ', PRIMARY KEY(id) );';
+						// 	createQueries['DESCTBL' + curField.id] = curQuery;
+						// }
 					});
 					createQueries.maptbl += ', PRIMARY KEY(id) );';
 					refObj.queries = createQueries;
@@ -336,20 +336,13 @@ export class MapTools {
 							rows.forEach((curTable: any) => {
 								if (curTable.TABLE_NAME === 'MAP' + refObj.id + '_MAPTBL') { maptblExists = true; }
 							});
-							refObj.fields.forEach((curField: any) => {
-								if ((curField.isDescribed || curField.environmentType === 'HPDB') && curField.mappable) {
-									descriptivetblExists[curField.name + curField.id] = false;
-									rows.forEach((curTable: any) => {
-										if (curTable.TABLE_NAME === 'MAP' + refObj.id + '_DESCTBL' + curField.id) { descriptivetblExists[curField.name + curField.id] = true; }
-									});
-								}
-							});
-							let allExists = true;
-							if (!maptblExists) { allExists = false; }
-							Object.keys(descriptivetblExists).forEach(function (curTbl) {
-								if (!descriptivetblExists[curTbl]) { allExists = false; }
-							});
-							if (allExists) {
+							let numSrcFields = 0;
+							let numTarFields = 0;
+							refObj.mapFields.forEach((curField: any) => {
+								if (curField.srctar === 'source') { numSrcFields++; }
+								if (curField.srctar === 'target') { numTarFields++; }
+							})
+							if (maptblExists && numSrcFields > 0 && numTarFields > 0) {
 								resolve({ result: 'YES' });
 							} else {
 								resolve({ result: 'NO' });
@@ -358,6 +351,19 @@ export class MapTools {
 					});
 
 				});
+		});
+	};
+	public rejectIfNotReady = (id: number) => {
+		return new Promise((resolve, reject) => {
+			this.isReady(id).
+				then((isReady: { result: string }) => {
+					if (isReady.result === 'YES') {
+						resolve(id);
+					} else {
+						reject('Map is not ready');
+					}
+				}).
+				catch(reject);
 		});
 	}
 }
