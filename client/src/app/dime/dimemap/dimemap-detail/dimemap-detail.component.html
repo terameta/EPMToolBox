@@ -17,7 +17,10 @@
 				<app-dimemap-detail-tab-maindefinitions></app-dimemap-detail-tab-maindefinitions>
 			</div>
 			<div class="tab-pane fade in" id="maptabmaptable">
-				<app-dimemap-detail-tab-maptable></app-dimemap-detail-tab-maptable>
+				<app-dimemap-detail-tab-maptable *ngIf="mainService.curItemIsReady"></app-dimemap-detail-tab-maptable>
+				<div class="well well-warning well-sm" *ngIf="!mainService.curItemIsReady">
+					This map definition is not ready for mapping. <br>
+				</div>
 			</div>
 			<div class="tab-pane fade in" id="maptabsourcedefinitions">
 				<app-dimemap-detail-tab-sourcedefinitions></app-dimemap-detail-tab-sourcedefinitions>

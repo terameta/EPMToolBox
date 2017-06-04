@@ -6,6 +6,7 @@ import { MainTools } from '../config/config.tools';
 import { DimeProcess } from '../../shared/model/dime/process';
 import { DimeProcessRunning } from '../../shared/model/dime/processrunning';
 import { DimeProcessStep } from '../../shared/model/dime/processstep';
+import { DimeProcessManipulation } from '../../shared/model/dime/processmanipulation';
 import { DimeProcessStepRunning } from '../../shared/model/dime/processsteprunning';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentType } from '../../shared/model/dime/environmenttype';
@@ -531,6 +532,20 @@ export class ProcessTools {
 										resolve(this.runStepsAction(refProcess));
 									}).
 									catch(reject);
+							} else if (curStep.type === 'manipulate') {
+								this.runManipulations(refProcess, curStep).
+									then((result: any) => {
+										curStep.isPending = false;
+										resolve(this.runStepsAction(refProcess));
+									}).
+									catch(reject);
+							} else if (curStep.type === 'pushdata') {
+								this.runPushData(refProcess, curStep).
+									then((result: any) => {
+										curStep.isPending = false;
+										resolve(this.runStepsAction(refProcess));
+									}).
+									catch(reject);
 							} else {
 								reject('This is not a known step type');
 							}
@@ -543,6 +558,319 @@ export class ProcessTools {
 			}
 		});
 	};
+	private runPushData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Push data is initiating.').
+				then(() => { return this.clearSummaryTable(refProcess, refStep); }).
+				then(() => { return this.summarizeData(refProcess, refStep); }).
+				then(() => { return this.fetchSummarizedData(refProcess, refStep); }).
+				then((result) => {
+					console.log(result);
+					return Promise.reject('runPushdata is not ready yet');
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private clearSummaryTable = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Clearing Summary Table.').
+				then(() => {
+					this.db.query('DELETE FROM PROCESS' + refProcess.id + '_SUMTBL', (err, rows, fields) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve('OK');
+						}
+					});
+				}).
+				catch(reject);
+		});
+	};
+	private summarizeData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Populating summary table.').
+				then(() => {
+					let insertQuery: string; insertQuery = 'INSERT INTO PROCESS' + refProcess.id + '_SUMTBL (';
+					let insList: string[]; insList = [];
+					let selList: string[]; selList = [];
+					let grpList: string[]; grpList = [];
+					refProcess.targetStreamFields.forEach((curField) => {
+						insList.push(curField.name);
+						selList.push('TAR_' + curField.name);
+						grpList.push('TAR_' + curField.name);
+					});
+					let shouldGroup = false;
+					refProcess.sourceStreamFields.forEach((curField) => {
+						if (curField.isData) {
+							if (curField.aggregateFunction) {
+								shouldGroup = true;
+								selList.push(curField.aggregateFunction + '(SRC_' + curField.name + ')');
+							} else {
+								selList.push('SRC_' + curField.name);
+							}
+						}
+					});
+					insList.push('SUMMARIZEDRESULT');
+					insertQuery += insList.join(', ');
+					insertQuery += ') ';
+					insertQuery += 'SELECT ';
+					insertQuery += selList.join(', ');
+					insertQuery += ' FROM PROCESS' + refProcess.id + '_DATATBL';
+
+					let wherers: any[]; wherers = [];
+					refProcess.filters.forEach((curFilter) => {
+						refProcess.sourceStreamFields.forEach((curField) => {
+							if (curField.id === curFilter.field) { curFilter.fieldName = curField.name; }
+						});
+						if (curFilter.filterfrom) { wherers.push('SRC_' + curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\''); }
+						if (curFilter.filterto) { wherers.push('SRC_' + curFilter.fieldName + '<=\'' + curFilter.filterto + '\''); }
+						if (curFilter.filtertext) { wherers.push('SRC_' + curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\''); }
+						if (curFilter.filterbeq) { wherers.push('SRC_' + curFilter.fieldName + '>=' + curFilter.filterbeq); }
+						if (curFilter.filterseq) { wherers.push('SRC_' + curFilter.fieldName + '<=' + curFilter.filterseq); }
+					});
+					if (wherers.length > 0) {
+						insertQuery += ' WHERE ' + wherers.join(' AND ');
+						refProcess.wherers = wherers;
+					}
+
+					if (shouldGroup) { insertQuery += ' GROUP BY ' + grpList.join(', '); }
+					this.db.query(insertQuery, (err, rows, fields) => {
+						if (err) {
+							reject(err);
+						} else {
+							resolve(refProcess);
+						}
+					});
+				}).
+				catch(reject);
+		});
+	};
+	private fetchSummarizedData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Populating summary table.').
+				then(() => {
+					const denseField = refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name;
+					this.db.query('SELECT DISTINCT ' + denseField + ' FROM PROCESS' + refProcess.id + '_SUMTBL ORDER BY 1', (err, rows, fields) => {
+						if (err) {
+							reject(err);
+						} else {
+							let sQuery = 'SELECT ';
+							let selecters: string[]; selecters = [];
+							for (let i = 0; i < (refProcess.targetStreamFields.length - 1); i++) {
+								selecters.push(refProcess.targetStreamFields[i].name);
+							}
+							let concaters: string[]; concaters = [];
+							rows.forEach((curTuple: any) => {
+								if (curTuple[denseField] !== 'ignore' && curTuple[denseField] !== 'ignore:ignore' && curTuple[denseField] !== 'ignore::ignore' && curTuple[denseField] !== 'missing') {
+									concaters.push('GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)) AS \'' + curTuple[denseField] + '\'');
+								}
+							});
+							sQuery += selecters.join(', ');
+							sQuery += ', ';
+							sQuery += concaters.join(', ');
+							sQuery += ' FROM PROCESS' + refProcess.id + '_SUMTBL';
+							sQuery += ' WHERE ';
+							let wherers: string[]; wherers = [];
+							selecters.forEach(function (curField) {
+								wherers.push(curField + ' <> \'missing\'');
+								wherers.push(curField + ' <> \'ignore\'');
+								wherers.push(curField + ' <> \'ignore:ignore\'');
+							});
+							wherers.push('SUMMARIZEDRESULT <> 0');
+							wherers.push('SUMMARIZEDRESULT IS NOT NULL');
+							sQuery += wherers.join(' AND ');
+							sQuery += ' GROUP BY ' + selecters.join(', ');
+							// console.log(sQuery);
+							this.db.query(sQuery, (serr, srows, sfields) => {
+								if (serr) {
+									reject(serr);
+								} else {
+									resolve(srows);
+								}
+							});
+						}
+					});
+				}).
+				catch(reject);
+		});
+	};
+	private runManipulations = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Transform data is initiating.').
+				then(() => {
+					let manipulations: DimeProcessManipulation[];
+					manipulations = JSON.parse(refStep.details);
+					manipulations = manipulations.sort((a: any, b: any) => {
+						if (a.mOrder > b.mOrder) {
+							return 1;
+						} else if (a.mOrder < b.mOrder) {
+							return -1;
+						} else {
+							return 0;
+						}
+					});
+					return this.runManipulationsAction(refProcess, manipulations, refStep);
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private runManipulationsAction = (refProcess: DimeProcessRunning, refManipulations: DimeProcessManipulation[], refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			let logText: string;
+			if (refManipulations.length === 0) {
+				logText = 'Step ' + refStep.sOrder + ' - Transform data: Completed';
+			} else {
+				logText = 'Step ' + refStep.sOrder + ' - Transform data: Transformation ' + (refManipulations[0].mOrder + 1) + ' is running.';
+			}
+			this.logTool.appendLog(refProcess.status, logText).
+				then(() => {
+					if (refManipulations.length === 0) {
+						resolve();
+					} else {
+						const curManipulation = refManipulations.shift();
+						if (!curManipulation) {
+							reject('Transformation is not defined');
+						} else if (!curManipulation.when) {
+							reject('Transformation does not have a when statement');
+						} else if (!curManipulation.field) {
+							reject('Transformation does not have an assigned field');
+						} else if (!curManipulation.comparer) {
+							reject('Transformation does not have a comparison operator');
+						} else if (!curManipulation.comparison) {
+							reject('Transformation does not have a comparison value');
+						} else if (!curManipulation.whichField) {
+							reject('Transformation does not identify the column to be manipulated');
+						} else if (!curManipulation.operation) {
+							reject('Transformation does not have an assigned operation');
+						} else if (!curManipulation.operator) {
+							reject('Transformation does not have an assigned value');
+						} else {
+							let updateQuery: string; updateQuery = 'UPDATE PROCESS' + refProcess.id + '_DATATBL';
+							updateQuery += ' SET ';
+							if (curManipulation.whichField === 'current') {
+								if (curManipulation.when === 'SRC') {
+									refProcess.sourceStreamFields.forEach((curField) => {
+										if (curField.name === curManipulation.field) {
+											curManipulation.fieldToManipulate = curField;
+											curManipulation.fieldToManipulate.qName = 'SRC_' + curField.name;
+										}
+									});
+								} else {
+									refProcess.targetStreamFields.forEach((curField) => {
+										if (curField.name === curManipulation.field) {
+											curManipulation.fieldToManipulate = curField;
+											curManipulation.fieldToManipulate.qName = 'TAR_' + curField.name;
+										}
+									});
+								}
+							} else {
+								refProcess.sourceStreamFields.forEach((curField) => {
+									if (curField.isData) {
+										curManipulation.fieldToManipulate = curField;
+										curManipulation.fieldToManipulate.qName = 'SRC_' + curField.name;
+									}
+								});
+							}
+							updateQuery += curManipulation.fieldToManipulate.qName + ' = ';
+
+							let shouldReject = false;
+							let rejectReason = '';
+							let valueArray: any[]; valueArray = [];
+
+							if (curManipulation.operation === 'multiply') {
+								if (curManipulation.fieldToManipulate.type !== 'number') {
+									shouldReject = true;
+									rejectReason = 'Non-number type fields can not be multiplied.';
+								} else if (!this.isNumeric(curManipulation.operator)) {
+									shouldReject = true;
+									rejectReason = 'Operator field is not numeric';
+								} else {
+									updateQuery += curManipulation.fieldToManipulate.qName + ' * (?)';
+									valueArray.push(parseFloat(curManipulation.operator));
+								}
+							}
+							if (curManipulation.operation === 'divide') {
+								if (curManipulation.fieldToManipulate.type !== 'number') {
+									shouldReject = true;
+									rejectReason = 'Non-number type fields can not be divided.';
+								} else if (!this.isNumeric(curManipulation.operator)) {
+									shouldReject = true;
+									rejectReason = 'Operator field is not numeric';
+								} else {
+									updateQuery += curManipulation.fieldToManipulate.qName + ' / (?)';
+									valueArray.push(parseFloat(curManipulation.operator));
+								}
+							}
+							if (curManipulation.operation === 'add') {
+								if (curManipulation.fieldToManipulate.type !== 'number') {
+									shouldReject = true;
+									rejectReason = 'Non-number type fields can not be added.';
+								} else if (!this.isNumeric(curManipulation.operator)) {
+									shouldReject = true;
+									rejectReason = 'Operator field is not numeric';
+								} else {
+									updateQuery += curManipulation.fieldToManipulate.qName + ' + (?)';
+									valueArray.push(parseFloat(curManipulation.operator));
+								}
+							}
+							if (curManipulation.operation === 'subtract') {
+								if (curManipulation.fieldToManipulate.type !== 'number') {
+									shouldReject = true;
+									rejectReason = 'Non-number type fields can not be subtracted.';
+								} else if (!this.isNumeric(curManipulation.operator)) {
+									shouldReject = true;
+									rejectReason = 'Operator field is not numeric';
+								} else {
+									updateQuery += curManipulation.fieldToManipulate.qName + ' - (?)';
+									valueArray.push(parseFloat(curManipulation.operator));
+								}
+							}
+							if (curManipulation.operation === 'set') {
+								updateQuery += '?';
+								valueArray.push(curManipulation.operator);
+							}
+							updateQuery += ' WHERE ';
+							updateQuery += curManipulation.when + '_' + curManipulation.field;
+							if (curManipulation.comparer === 'like') { updateQuery += ' LIKE ? ' }
+							if (curManipulation.comparer === 'equals') { updateQuery += ' = ? ' }
+							valueArray.push(curManipulation.comparison);
+
+							let wherers: any[]; wherers = [];
+							refProcess.filters.forEach((curFilter) => {
+								if (curFilter.filterfrom) { wherers.push('SRC_' + curFilter.fieldName + '>= \'' + curFilter.filterfrom + '\''); }
+								if (curFilter.filterto) { wherers.push('SRC_' + curFilter.fieldName + '<=\'' + curFilter.filterto + '\''); }
+								if (curFilter.filtertext) { wherers.push('SRC_' + curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\''); }
+								if (curFilter.filterbeq) { wherers.push('SRC_' + curFilter.fieldName + '>=' + curFilter.filterbeq); }
+								if (curFilter.filterseq) { wherers.push('SRC_' + curFilter.fieldName + '<=' + curFilter.filterseq); }
+							});
+							if (wherers.length > 0) {
+								updateQuery += 'AND ' + wherers.join(' AND ');
+							}
+
+							/*
+							console.log("====================================================");
+							console.log(updateQuery, shouldReject, rejectReason, valueArray);
+							console.log("====================================================");
+							*/
+							if (shouldReject) {
+								reject(rejectReason);
+							} else {
+								this.db.query(updateQuery, valueArray, (err, rows, fields) => {
+									if (err) {
+										reject(err);
+									} else {
+										resolve(this.runManipulationsAction(refProcess, refManipulations, refStep));
+									}
+								});
+							}
+						}
+					}
+				}).
+				catch(reject);
+		});
+	}
 	private runMapData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Map Data is initiating.').
@@ -713,7 +1041,9 @@ export class ProcessTools {
 				then(() => {
 					return this.environmentTool.getDescriptions(refStream, refField);
 				}).
-				then(this.setStreamDescriptions).
+				then((result: any[]) => {
+					return this.setStreamDescriptions(result, refStream, refField);
+				}).
 				then(resolve).
 				catch(reject);
 		});
@@ -733,10 +1063,30 @@ export class ProcessTools {
 			}
 		});
 	}
-	private setStreamDescriptions = (refObj: any) => {
+	private setStreamDescriptions = (refObj: any[], refStream: DimeStream, refField: DimeStreamField) => {
 		return new Promise((resolve, reject) => {
-			console.log(refObj);
-			reject('setStreamDescriptions is not ready yet');
+			if (refObj.length > 0) {
+				const curKeys = Object.keys(refObj[0]);
+				let insertQuery: string; insertQuery = '';
+				insertQuery += 'INSERT INTO STREAM' + refStream.id + '_DESCTBL' + refField.id + '(' + curKeys.join(', ') + ') VALUES ?'
+				let curArray: any[];
+				refObj.forEach((curResult, curItem) => {
+					curArray = [];
+					curKeys.forEach((curKey) => {
+						curArray.push(curResult[curKey]);
+					});
+					refObj[curItem] = curArray;
+				});
+				this.db.query(insertQuery, [refObj], (err, rows, fields) => {
+					if (err) {
+						reject(err);
+					} else {
+						resolve('OK');
+					}
+				});
+			} else {
+				resolve('OK');
+			}
 		});
 	}
 	private assignDefaults = (refProcess: DimeProcessRunning) => {
@@ -1225,5 +1575,8 @@ export class ProcessTools {
 				then(resolve).
 				catch(reject);
 		});
+	}
+	private isNumeric = (n: any) => {
+		return !isNaN(parseFloat(n)) && isFinite(n);
 	}
 }

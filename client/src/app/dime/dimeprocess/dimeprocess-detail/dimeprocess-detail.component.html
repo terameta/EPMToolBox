@@ -19,7 +19,7 @@
 			<div class="tab-pane fade in" id="processtabrun">
 				<app-dimeprocess-detail-tab-run *ngIf="mainService.curItemIsPrepared"></app-dimeprocess-detail-tab-run>
 				<div class="well well-warning well-sm" *ngIf="!mainService.curItemIsPrepared">
-					This map definition is not ready for processing. <br>
+					This process definition is not ready for processing. <br>
 					<b>Issue List:</b>
 					<ol>
 						<li *ngFor="let issue of mainService.curItemIssueList">{{issue}}</li>

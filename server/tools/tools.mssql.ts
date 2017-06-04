@@ -165,7 +165,7 @@ export class MSSQLTools {
 			this.connect(refObj).
 				then((innerObj: any) => {
 					let selectQuery: string; selectQuery = '';
-					selectQuery += 'SELECT DISTINCT ' + refObj.field.drfName + ', ' + refObj.field.ddfName + ' ';
+					selectQuery += 'SELECT DISTINCT ' + refObj.field.drfName + ' AS RefField, ' + refObj.field.ddfName + ' AS Description ';
 					selectQuery += 'FROM '
 					if (refObj.field.descriptiveTable === 'Custom Query') {
 						selectQuery += '(' + refObj.field.descriptiveQuery + ') AS TCQ';

@@ -352,11 +352,11 @@ export class StreamTools {
 					then((field: DimeStreamField) => {
 						let curQuery: string; curQuery = '';
 						curQuery += 'CREATE TABLE ' + tableStatus.tableName + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
-						if (tableStatus.streamType !== 'HPDB') { curQuery += ', ' + field.drfName + ' '; }
+						if (tableStatus.streamType !== 'HPDB') { curQuery += ', RefField '; }
 						if (field.drfType === 'string' && tableStatus.streamType !== 'HPDB') { curQuery += 'VARCHAR(' + field.drfCharacters + ')'; }
 						if (field.drfType === 'number' && tableStatus.streamType !== 'HPDB') { curQuery += 'NUMERIC(' + field.drfPrecision + ',' + field.drfDecimals + ')'; }
 						if (field.drfType === 'date' && tableStatus.streamType !== 'HPDB') { curQuery += 'DATETIME'; }
-						if (tableStatus.streamType !== 'HPDB') { curQuery += ', ' + field.ddfName + ' '; }
+						if (tableStatus.streamType !== 'HPDB') { curQuery += ', Description '; }
 						if (field.ddfType === 'string' && tableStatus.streamType !== 'HPDB') { curQuery += 'VARCHAR(' + field.ddfCharacters + ')'; }
 						if (field.ddfType === 'number' && tableStatus.streamType !== 'HPDB') { curQuery += 'NUMERIC(' + field.ddfPrecision + ',' + field.ddfDecimals + ')'; }
 						if (field.ddfType === 'date' && tableStatus.streamType !== 'HPDB') { curQuery += 'DATETIME'; }

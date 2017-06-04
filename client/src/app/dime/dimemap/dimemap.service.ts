@@ -23,6 +23,7 @@ export class DimeMapService {
 	curItemSourceStreamFields: any[];
 	curItemTargetStream: DimeStream;
 	curItemTargetStreamFields: any[];
+	curItemMapData: any[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeMap[]>;
 	private baseUrl: string;
@@ -169,6 +170,7 @@ export class DimeMapService {
 		this.curItemFields = undefined;
 		this.curItemClean = true;
 		this.curItemIsReady = false;
+		this.curItemMapData = [];
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -274,4 +276,15 @@ export class DimeMapService {
 				console.log(error);
 			})
 	}
+	public refreshMapTable = () => {
+		this.authHttp.post(this.baseUrl + '/mapData?i=' + new Date().getTime(), { map: this.curItem.id }).
+			map(response => response.json()).
+			subscribe((result) => {
+				console.log(result.map);
+				this.toastr.info('Map data is received.', this.serviceName);
+			}, (error) => {
+				this.toastr.error('Failed to receive map data.', this.serviceName);
+				console.error(error);
+			});
+	};
 }

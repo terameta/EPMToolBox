@@ -366,4 +366,18 @@ export class MapTools {
 				catch(reject);
 		});
 	}
+	public retrieveMapData = (refObj: { map: number }) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM MAP' + refObj.map + '_MAPTBL', (err, result, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					const toReturn = {
+						map: result
+					};
+					resolve(toReturn);
+				}
+			});
+		});
+	}
 }
