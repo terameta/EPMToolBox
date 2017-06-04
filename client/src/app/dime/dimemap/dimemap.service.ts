@@ -24,7 +24,8 @@ export class DimeMapService {
 	curItemTargetStream: DimeStream;
 	curItemTargetStreamFields: any[];
 	curItemMapData: any[];
-	curItemMapColumns: string[];
+	curItemMapColumns: any[];
+	curItemMapColHeaders: string[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeMap[]>;
 	private baseUrl: string;
@@ -172,6 +173,7 @@ export class DimeMapService {
 		this.curItemClean = true;
 		this.curItemIsReady = false;
 		this.curItemMapData = [];
+		this.curItemMapColumns = [];
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -281,7 +283,32 @@ export class DimeMapService {
 		this.authHttp.post(this.baseUrl + '/mapData?i=' + new Date().getTime(), { map: this.curItem.id }).
 			map(response => response.json()).
 			subscribe((result) => {
-				console.log(result.map);
+				if (!result.map) {
+					this.curItemMapColumns = ['No map is presented'];
+				} else if (result.map.length === 0) {
+					this.curItemMapColumns = ['No map is presented'];
+				} else {
+					this.curItemMapColumns = [];
+					this.curItemMapColHeaders = [];
+					Object.keys(result.map[0]).forEach((curField) => {
+						this.curItemMapColHeaders.push(curField);
+						this.curItemMapColumns.push({ data: curField, type: 'text' })
+						console.log(curField);
+					});
+					this.curItemMapData = [];
+					let curTuple: any[];
+					result.map.forEach((curMap) => {
+						curTuple = [];
+						this.curItemMapColHeaders.forEach((curField) => {
+							curTuple[curField] = curMap[curField];
+						});
+						this.curItemMapData.push(curTuple);
+					});
+					console.log(result.map);
+					console.log(this.curItemMapData);
+					console.log(this.curItemMapColHeaders);
+					console.log(this.curItemMapColumns);
+				}
 				this.toastr.info('Map data is received.', this.serviceName);
 			}, (error) => {
 				this.toastr.error('Failed to receive map data.', this.serviceName);

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { DimeMapService } from 'app/dime/dimemap/dimemap.service';
+import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component({
 	selector: 'app-dimemap-detail-tab-maptable',
@@ -232,7 +233,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			contextMenu: true,
 			className: 'htCenter htMiddle',
 			readOnly: true,
-			fixedRowsTop: 1
+			fixedRowsTop: 1,
+			observeChanges: true,
+			manualColumnResize: true
 		};
 	}
 

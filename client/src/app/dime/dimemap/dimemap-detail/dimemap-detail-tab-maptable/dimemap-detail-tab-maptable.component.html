@@ -7,9 +7,15 @@
 		<button class="btn btn-default" type="button" title="Zen Mode" (click)="mainService.refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>
 	</div>
 </div>
-<hotTable [data]="data"
-           [columns]="columns"
-           [colHeaders]="colHeaders"
-           [colWidths]="colHeaders"
+<hotTable *ngIf="mainService.curItemMapData.length > 0" [data]="mainService.curItemMapData"
+           [columns]="mainService.curItemMapColumns"
+           [colHeaders]="mainService.curItemMapColHeaders"
            [options]="options">
 </hotTable>
+<!--
+<hotTable *ngIf="mainService.curItemMapData.length > 0" [data]="mainService.curItemMapData"
+           [columns]="mainService.curItemMapColumns"
+           [colHeaders]="mainService.curItemMapColHeaders"
+           [colWidths]="colHeaders"
+           [options]="options">
+</hotTable>-->
