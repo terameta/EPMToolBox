@@ -24,6 +24,7 @@ export class DimeMapService {
 	curItemTargetStream: DimeStream;
 	curItemTargetStreamFields: any[];
 	curItemMapData: any[];
+	curItemMapColumns: string[];
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeMap[]>;
 	private baseUrl: string;
