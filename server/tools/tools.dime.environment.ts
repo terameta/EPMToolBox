@@ -351,7 +351,6 @@ export class EnvironmentTools {
 						innerObj.database = refStream.dbName;
 						innerObj.table = refStream.tableName;
 						innerObj.field = refField;
-						console.log('>>>>>>>>>>>This is an:', innerObj.typedetails.value);
 						if (!innerObj.typedetails) {
 							return Promise.reject('No type definition on the environment');
 						} else if (!innerObj.typedetails.value) {

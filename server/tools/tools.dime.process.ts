@@ -1042,8 +1042,9 @@ export class ProcessTools {
 	private populateStreamDescriptions = (refEnvironment: DimeEnvironment, refStream: DimeStream, refFields: DimeStreamField[]) => {
 		let promises: any[]; promises = [];
 		refFields.forEach((curField) => {
-			if (curField.isDescribed) {
-				console.log('<<<', curField.name);
+			let envType: any; envType = refEnvironment.typedetails;
+			if (!envType) { envType = { value: '---' }; }
+			if (curField.isDescribed || envType.value === 'HP') {
 				promises.push(this.populateStreamDescriptionsAction(refEnvironment, refStream, curField));
 			}
 		});
@@ -1282,6 +1283,7 @@ export class ProcessTools {
 	private identifySourceEnvironment = (refProcess: DimeProcessRunning) => {
 		return new Promise((resolve, reject) => {
 			this.environmentTool.getEnvironmentDetails({ id: refProcess.source }, true).
+				then(this.environmentTool.getTypeDetails).
 				then((result: DimeEnvironment) => {
 					refProcess.sourceEnvironment = result;
 					resolve(refProcess);
@@ -1291,6 +1293,7 @@ export class ProcessTools {
 	private identifyTargetEnvironment = (refProcess: DimeProcessRunning) => {
 		return new Promise((resolve, reject) => {
 			this.environmentTool.getEnvironmentDetails({ id: refProcess.target }, true).
+				then(this.environmentTool.getTypeDetails).
 				then((result: DimeEnvironment) => {
 					refProcess.targetEnvironment = result;
 					resolve(refProcess);

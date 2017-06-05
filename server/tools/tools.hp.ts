@@ -622,10 +622,86 @@ export class HPTools {
 	};
 	public getDescriptions = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('Update getDescriptions part of the tools.hp.ts file');
-			console.log('!!!!!!!!!!!!');
-			reject('Update this part of the tools.hp.ts file');
+			this.hpOpenCube(refObj).
+				then(this.hpGetDescriptions).
+				then(resolve).
+				catch(reject);
 		});
 	}
+	private hpGetDescriptions = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			refObj.memberList = [];
+			refObj.dimension = refObj.field.name;
+			this.hpGetDescriptionsAction(refObj, refObj.dimension, refObj.memberList).
+				then((result) => {
+					refObj.members = result;
+					console.log(result);
+					// return refObj;
+					return Promise.reject('Not yet hpGetDescriptions');
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private hpGetDescriptionsAction = (refObj: any, curMbr: any, curParent: any) => {
+		return new Promise((resolve, reject) => {
+			let curBody: string; curBody = '';
+			curBody += '<req_EnumMembers>';
+			curBody += '<sID>' + refObj.sID + '</sID>';
+			curBody += '<dim>' + refObj.dimension + '</dim>';
+			curBody += '<memberFilter><filter name="Hierarchy"><arg id="0">' + curMbr + '</arg></filter></memberFilter>';
+			curBody += '<getAtts>1</getAtts>';
+			curBody += '<alsTbl>None</alsTbl>';
+			curBody += '<allGenerations>0</allGenerations>';
+			curBody += '<cube>' + refObj.table + '</cube>';
+			curBody += '<includeDescriptionInLabel>0</includeDescriptionInLabel>';
+			curBody += '<ODL_ECID>0000</ODL_ECID>';
+			curBody += '</req_EnumMembers>';
+			request.post({
+				url: refObj.planningurl || '',
+				body: curBody,
+				headers: { 'Content-Type': 'application/xml' }
+			}, (err, response, body) => {
+				if (err) {
+					reject(err);
+				} else {
+					this.xmlParser(body, (pErr: any, result: any) => {
+						if (pErr) {
+							reject(pErr);
+						} else {
+							if (!result.res_EnumMembers) {
+								resolve();
+							} else if (!result.res_EnumMembers.mbrs) {
+								resolve();
+							} else {
+								let promises: any[]; promises = [];
+								let curMember: any; curMember = {};
+								console.log('>>>', refObj.dimension);
+								console.log(result.res_EnumMembers);
+								let curmbrs: any[]; curmbrs = [];
+								let curatts: any[]; curatts = [];
+								let curdesc: any[]; curdesc = [];
+								if (result.res_EnumMembers.mbrs[0]._) { curmbrs = result.res_EnumMembers.mbrs[0]._.split('|'); }
+								if (result.res_EnumMembers.atts[0]._) { curatts = result.res_EnumMembers.atts[0]._.split('|'); }
+								if (result.res_EnumMembers.mbrDesc[0]._) { curdesc = result.res_EnumMembers.mbrDesc[0]._.split('|'); }
+								// console.log(refObj.dimension, " Overflow:", result.res_EnumMembers.overflow);
+								// console.log(refObj.dimension, " Members:", curmbrs);
+								// console.log(refObj.dimension, " Attributes:", curatts);
+								// console.log(refObj.dimension, " Descriptions:", curdesc);
+								for (let i = 0; i < curmbrs.length; i++) {
+									curMember = {};
+									curMember.name = curmbrs[i];
+									curMember.attribute = curatts[i];
+									curMember.Description = curdesc[i];
+									curParent.push(curMember);
+									if (curMember.attribute === '2') { promises.push(this.hpGetDescriptionsAction(refObj, curMember.name, curParent)); }
+								}
+								Promise.all(promises).then(resolve).catch(reject);
+							}
+						}
+					});
+				}
+			});
+		});
+	};
 }
