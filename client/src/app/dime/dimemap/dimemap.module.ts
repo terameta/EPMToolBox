@@ -3,7 +3,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 
-import { HotTableModule } from 'ng2-handsontable';
+
+import { AgGridModule } from 'ag-grid-angular/main';
 
 import { AuthModule } from '../../welcome/auth.module';
 
@@ -31,7 +32,9 @@ const dimeMapRoutes: Routes = [
 		FormsModule,
 		RouterModule.forChild(dimeMapRoutes),
 		AuthModule,
-		HotTableModule
+		AgGridModule.withComponents([
+			DimemapDetailTabMaptableComponent
+		])
 	],
 	exports: [
 		RouterModule

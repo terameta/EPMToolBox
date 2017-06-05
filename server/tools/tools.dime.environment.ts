@@ -69,7 +69,7 @@ export class EnvironmentTools {
 		});
 	};
 
-	private getTypeDetails = (refObj: DimeEnvironment): Promise<DimeEnvironment> => {
+	public getTypeDetails = (refObj: DimeEnvironment): Promise<DimeEnvironment> => {
 		return new Promise((resolve, reject) => {
 			this.db.query('SELECT * FROM environmenttypes WHERE id = ?', refObj.type, (err, results, fields) => {
 				if (err) {
@@ -351,6 +351,7 @@ export class EnvironmentTools {
 						innerObj.database = refStream.dbName;
 						innerObj.table = refStream.tableName;
 						innerObj.field = refField;
+						console.log('>>>>>>>>>>>This is an:', innerObj.typedetails.value);
 						if (!innerObj.typedetails) {
 							return Promise.reject('No type definition on the environment');
 						} else if (!innerObj.typedetails.value) {

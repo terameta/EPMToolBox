@@ -26,6 +26,8 @@ export class DimeMapService {
 	curItemMapData: any[];
 	curItemMapColumns: any[];
 	curItemMapColHeaders: string[];
+	curItemMapRowHeaders: string[];
+	curItemMapReadyToShow: boolean;
 	private serviceName: string;
 	private _items: BehaviorSubject<DimeMap[]>;
 	private baseUrl: string;
@@ -269,6 +271,7 @@ export class DimeMapService {
 			})
 	}
 	public isReady = (id?: number) => {
+		console.log('We are checking if is ready');
 		if (!id) { id = this.curItem.id; }
 		this.authHttp.get(this.baseUrl + '/isReady/' + id, { headers: this.headers }).
 			map(response => response.json()).
@@ -280,39 +283,11 @@ export class DimeMapService {
 			})
 	}
 	public refreshMapTable = () => {
-		this.authHttp.post(this.baseUrl + '/mapData?i=' + new Date().getTime(), { map: this.curItem.id }).
+		this.curItemMapReadyToShow = false;
+		return this.authHttp.post(this.baseUrl + '/mapData?i=' + new Date().getTime(), { map: this.curItem.id }).
 			map(response => response.json()).
-			subscribe((result) => {
-				if (!result.map) {
-					this.curItemMapColumns = ['No map is presented'];
-				} else if (result.map.length === 0) {
-					this.curItemMapColumns = ['No map is presented'];
-				} else {
-					this.curItemMapColumns = [];
-					this.curItemMapColHeaders = [];
-					Object.keys(result.map[0]).forEach((curField) => {
-						this.curItemMapColHeaders.push(curField);
-						this.curItemMapColumns.push({ data: curField, type: 'text' })
-						console.log(curField);
-					});
-					this.curItemMapData = [];
-					let curTuple: any[];
-					result.map.forEach((curMap) => {
-						curTuple = [];
-						this.curItemMapColHeaders.forEach((curField) => {
-							curTuple[curField] = curMap[curField];
-						});
-						this.curItemMapData.push(curTuple);
-					});
-					console.log(result.map);
-					console.log(this.curItemMapData);
-					console.log(this.curItemMapColHeaders);
-					console.log(this.curItemMapColumns);
-				}
-				this.toastr.info('Map data is received.', this.serviceName);
-			}, (error) => {
-				this.toastr.error('Failed to receive map data.', this.serviceName);
-				console.error(error);
+			catch((error) => {
+				return Observable.throw(new Error(error));
 			});
 	};
 }

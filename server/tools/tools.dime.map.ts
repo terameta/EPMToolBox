@@ -5,13 +5,18 @@ import { StreamTools } from './tools.dime.stream';
 
 import { DimeMap } from '../../shared/model/dime/map';
 import { DimeStream } from '../../shared/model/dime/stream';
+import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { EnvironmentTools } from './tools.dime.environment';
+import { DimeEnvironment } from '../../shared/model/dime/environment';
 
 export class MapTools {
 	private streamTool: StreamTools;
+	private environmentTool: EnvironmentTools;
 	constructor(
 		public db: IPool,
 		public tools: MainTools) {
 		this.streamTool = new StreamTools(this.db, this.tools);
+		this.environmentTool = new EnvironmentTools(this.db, this.tools);
 	}
 
 	public getAll = () => {
@@ -368,16 +373,135 @@ export class MapTools {
 	}
 	public retrieveMapData = (refObj: { map: number }) => {
 		return new Promise((resolve, reject) => {
-			this.db.query('SELECT * FROM MAP' + refObj.map + '_MAPTBL', (err, result, fields) => {
-				if (err) {
-					reject(err);
-				} else {
-					const toReturn = {
-						map: result
-					};
-					resolve(toReturn);
-				}
-			});
+			// tslint:disable-next-line:prefer-const
+			let curMap: DimeMap; curMap = { id: 0, name: '' };
+			let mapFields: any[]; mapFields = [];
+			let finalFields: any[]; finalFields = [];
+			let sourceFields: DimeStreamField[]; sourceFields = [];
+			let targetFields: DimeStreamField[]; targetFields = [];
+			let sourceStream: DimeStream; sourceStream = { id: 0, name: '', type: 0, environment: 0 };
+			let targetStream: DimeStream; targetStream = { id: 0, name: '', type: 0, environment: 0 };
+			let sourceEnvironment: DimeEnvironment; sourceEnvironment = { id: 0 };
+			let targetEnvironment: DimeEnvironment; targetEnvironment = { id: 0 };
+
+			this.getOne(refObj.map).
+				then((theMap: DimeMap) => {
+					curMap = theMap;
+					console.log(new Date(), 'Received map');
+					return this.streamTool.retrieveFields(curMap.source || 0);
+				}).
+				then((srcFields: DimeStreamField[]) => {
+					console.log(new Date(), 'Received source fields');
+					sourceFields = srcFields;
+					return this.streamTool.retrieveFields(curMap.target || 0);
+				}).
+				then((tarFields: DimeStreamField[]) => {
+					console.log(new Date(), 'Received target fields');
+					targetFields = tarFields;
+					return this.streamTool.getOne(curMap.source || 0);
+				}).
+				then((srcStream: DimeStream) => {
+					console.log(new Date(), 'Received source stream');
+					sourceStream = srcStream;
+					return this.streamTool.getOne(curMap.target || 0);
+				}).
+				then((tarStream: DimeStream) => {
+					console.log(new Date(), 'Received target stream');
+					targetStream = tarStream;
+					return this.environmentTool.getEnvironmentDetails({ id: sourceStream.environment }).then(this.environmentTool.getTypeDetails);
+				}).
+				then((srcEnvironment: DimeEnvironment) => {
+					console.log(new Date(), 'Received source environment');
+					sourceEnvironment = srcEnvironment;
+					return this.environmentTool.getEnvironmentDetails({ id: targetStream.environment }).then(this.environmentTool.getTypeDetails);
+				}).
+				then((tarEnvironment: DimeEnvironment) => {
+					console.log(new Date(), 'Received target environment');
+					targetEnvironment = tarEnvironment;
+					return this.getFields(curMap.id);
+				}).
+				then((mapFieldList: any) => {
+					mapFields = mapFieldList;
+					return 'OK';
+				}).
+				then(() => {
+					if (sourceEnvironment.typedetails === undefined) {
+						reject('Source environment details are not valid.');
+					} else if (!targetEnvironment.typedetails) {
+						reject('Target environment details are not valid.');
+					} else {
+						sourceFields.forEach((curField) => {
+							mapFields.forEach((mapField) => {
+								if (sourceEnvironment.typedetails && mapField.srctar === 'source' && mapField.name === curField.name) {
+									console.log(curField.name, curField.isDescribed, sourceEnvironment.typedetails.value);
+									finalFields.push({
+										id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL'
+									});
+									if (curField.isDescribed || sourceEnvironment.typedetails.value === 'HP') {
+										finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + sourceStream.id + '_DESCTBL' + curField.id });
+									}
+								}
+							});
+						});
+						targetFields.forEach((curField) => {
+							mapFields.forEach((mapField) => {
+								if (targetEnvironment.typedetails && mapField.srctar === 'target' && mapField.name === curField.name) {
+									console.log(curField.name, curField.isDescribed, targetEnvironment.typedetails.value);
+									finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL' });
+									if (curField.isDescribed || targetEnvironment.typedetails.value === 'HP') {
+										finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + targetStream.id + '_DESCTBL' + curField.id });
+									}
+								}
+							});
+						});
+						// console.log(curMap);
+						// console.log(mapFields);
+						finalFields.forEach((curField) => {
+							console.log(curField);
+						});
+						let selectQuery: string; selectQuery = '';
+						selectQuery += 'SELECT MAP' + curMap.id + '_MAPTBL.id, ';
+						selectQuery += finalFields.map((curField) => {
+							let toReturn: string; toReturn = '\n\t';
+							if (curField.type === 'main') {
+								toReturn += curField.table + '.';
+								toReturn += curField.srctar === 'source' ? 'SRC_' : 'TAR_';
+								toReturn += curField.name;
+							} else {
+								toReturn += curField.table + '.Description';
+								toReturn += ' AS ';
+								toReturn += curField.srctar === 'source' ? 'SRC_' : 'TAR_';
+								toReturn += curField.name;
+								toReturn += '_DESC';
+							}
+							return toReturn;
+						}).join(', ');
+						selectQuery += '\n FROM MAP' + curMap.id + '_MAPTBL ';
+						finalFields.forEach((curField) => {
+							if (curField.type === 'description') {
+								selectQuery += '\n\t' + 'LEFT JOIN ';
+								selectQuery += curField.table;
+								selectQuery += ' ON ';
+								selectQuery += 'MAP' + curMap.id + '_MAPTBL.' + (curField.srctar === 'source' ? 'SRC_' : 'TAR_') + curField.name;
+								selectQuery += ' = ';
+								selectQuery += curField.table + '.RefField';
+							}
+						});
+						console.log(selectQuery);
+						this.db.query(selectQuery, (err, result, fields) => {
+							if (err) {
+								reject(err);
+							} else {
+								const toReturn = {
+									map: result
+								};
+								// console.log(result);
+								resolve(toReturn);
+							}
+						});
+					}
+				}).
+				catch(reject);
 		});
 	}
 }

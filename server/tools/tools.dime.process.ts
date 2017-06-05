@@ -561,6 +561,7 @@ export class ProcessTools {
 	private runPushData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Push data is initiating.').
+				then(() => { return this.populateTargetStreamDescriptions(refProcess); }).
 				then(() => { return this.clearSummaryTable(refProcess, refStep); }).
 				then(() => { return this.summarizeData(refProcess, refStep); }).
 				then(() => { return this.fetchSummarizedData(refProcess, refStep); }).
@@ -572,6 +573,18 @@ export class ProcessTools {
 				catch(reject);
 		});
 	};
+	private populateTargetStreamDescriptions = (refProcess: DimeProcessRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refProcess.curStep + ' - Push Data: Populating field descriptions.').
+				then(() => {
+					return this.populateStreamDescriptions(refProcess.targetEnvironment, refProcess.targetStream, refProcess.targetStreamFields);
+				}).
+				then(() => {
+					resolve(refProcess);
+				}).
+				catch(reject);
+		});
+	}
 	private clearSummaryTable = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Clearing Summary Table.').
@@ -1030,6 +1043,7 @@ export class ProcessTools {
 		let promises: any[]; promises = [];
 		refFields.forEach((curField) => {
 			if (curField.isDescribed) {
+				console.log('<<<', curField.name);
 				promises.push(this.populateStreamDescriptionsAction(refEnvironment, refStream, curField));
 			}
 		});
