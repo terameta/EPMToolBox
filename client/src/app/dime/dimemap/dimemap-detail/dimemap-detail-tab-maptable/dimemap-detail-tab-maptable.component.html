@@ -1,10 +1,10 @@
 <div class="btn-toolbar" role="toolbar">
 	<div class="btn-group btn-group-xs" role="group">
-		<button class="btn btn-default" type="button" title="Refresh Map" (click)="mainService.refreshMapTable()"># of items</button>
+		<button class="btn btn-default" type="button">{{numberofRowsinMap}} rows</button>
 	</div>
 	<div class="btn-group btn-group-xs pull-right" role="group">
-		<button class="btn btn-default" type="button" title="Refresh Map" (click)="mainService.refreshMapTable()"><i class="fa fa-refresh fa-fw"></i> Refresh</button>
-		<button class="btn btn-default" type="button" title="Zen Mode" (click)="mainService.refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>
+		<button class="btn btn-default" type="button" title="Refresh Map" (click)="refreshMapTable()"><i class="fa fa-refresh fa-fw"></i> Refresh</button>
+		<button class="btn btn-default" type="button" title="Zen Mode" (click)="refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>
 	</div>
 </div>
 <!--<hotTable *ngIf="mainService.curItemMapReadyToShow" [data]="mainService.curItemMapData"

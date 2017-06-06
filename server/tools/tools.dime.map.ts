@@ -371,9 +371,43 @@ export class MapTools {
 				catch(reject);
 		});
 	}
-	public retrieveMapData = (refObj: { map: number }) => {
+	public retrieveMapData = (refObj: any) => {
+		return this.retrieveMapDataAction(refObj).
+			then(this.retrieveMapDescriptions);
+	}
+	private retrieveMapDescriptions = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			// tslint:disable-next-line:prefer-const
+			let promises: any[]; promises = [];
+			refObj.descriptions = {};
+			refObj.finalFields.forEach((curField: any) => {
+				if (curField.type === 'description' && curField.srctar === 'target') {
+					promises.push(this.retrieveMapDescriptionsAction(refObj, curField));
+				}
+			});
+			Promise.all(promises).
+				then(() => {
+					resolve(refObj);
+				}).
+				catch(reject);
+		});
+	};
+	private retrieveMapDescriptionsAction = (refObj: any, curField: any) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('SELECT * FROM ' + curField.table + ' ORDER BY 1,2', (err, result, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					let objectFieldName: string; objectFieldName = '';
+					if (curField.srctar === 'source') { objectFieldName = 'SRC_' + curField.name; }
+					if (curField.srctar === 'target') { objectFieldName = 'TAR_' + curField.name; }
+					refObj.descriptions[objectFieldName] = result;
+					resolve();
+				}
+			});
+		});
+	};
+	private retrieveMapDataAction = (refObj: any) => {
+		return new Promise((resolve, reject) => {
 			let curMap: DimeMap; curMap = { id: 0, name: '' };
 			let mapFields: any[]; mapFields = [];
 			let finalFields: any[]; finalFields = [];
@@ -384,39 +418,39 @@ export class MapTools {
 			let sourceEnvironment: DimeEnvironment; sourceEnvironment = { id: 0 };
 			let targetEnvironment: DimeEnvironment; targetEnvironment = { id: 0 };
 
-			this.getOne(refObj.map).
+			this.getOne(refObj.mapid).
 				then((theMap: DimeMap) => {
 					curMap = theMap;
-					console.log(new Date(), 'Received map');
+					// console.log(new Date(), 'Received map');
 					return this.streamTool.retrieveFields(curMap.source || 0);
 				}).
 				then((srcFields: DimeStreamField[]) => {
-					console.log(new Date(), 'Received source fields');
+					// console.log(new Date(), 'Received source fields');
 					sourceFields = srcFields;
 					return this.streamTool.retrieveFields(curMap.target || 0);
 				}).
 				then((tarFields: DimeStreamField[]) => {
-					console.log(new Date(), 'Received target fields');
+					// console.log(new Date(), 'Received target fields');
 					targetFields = tarFields;
 					return this.streamTool.getOne(curMap.source || 0);
 				}).
 				then((srcStream: DimeStream) => {
-					console.log(new Date(), 'Received source stream');
+					// console.log(new Date(), 'Received source stream');
 					sourceStream = srcStream;
 					return this.streamTool.getOne(curMap.target || 0);
 				}).
 				then((tarStream: DimeStream) => {
-					console.log(new Date(), 'Received target stream');
+					// console.log(new Date(), 'Received target stream');
 					targetStream = tarStream;
 					return this.environmentTool.getEnvironmentDetails({ id: sourceStream.environment }).then(this.environmentTool.getTypeDetails);
 				}).
 				then((srcEnvironment: DimeEnvironment) => {
-					console.log(new Date(), 'Received source environment');
+					// console.log(new Date(), 'Received source environment');
 					sourceEnvironment = srcEnvironment;
 					return this.environmentTool.getEnvironmentDetails({ id: targetStream.environment }).then(this.environmentTool.getTypeDetails);
 				}).
 				then((tarEnvironment: DimeEnvironment) => {
-					console.log(new Date(), 'Received target environment');
+					// console.log(new Date(), 'Received target environment');
 					targetEnvironment = tarEnvironment;
 					return this.getFields(curMap.id);
 				}).
@@ -433,7 +467,7 @@ export class MapTools {
 						sourceFields.forEach((curField) => {
 							mapFields.forEach((mapField) => {
 								if (sourceEnvironment.typedetails && mapField.srctar === 'source' && mapField.name === curField.name) {
-									console.log(curField.name, curField.isDescribed, sourceEnvironment.typedetails.value);
+									// console.log(curField.name, curField.isDescribed, sourceEnvironment.typedetails.value);
 									finalFields.push({
 										id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL'
 									});
@@ -446,7 +480,7 @@ export class MapTools {
 						targetFields.forEach((curField) => {
 							mapFields.forEach((mapField) => {
 								if (targetEnvironment.typedetails && mapField.srctar === 'target' && mapField.name === curField.name) {
-									console.log(curField.name, curField.isDescribed, targetEnvironment.typedetails.value);
+									// console.log(curField.name, curField.isDescribed, targetEnvironment.typedetails.value);
 									finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL' });
 									if (curField.isDescribed || targetEnvironment.typedetails.value === 'HP') {
 										finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + targetStream.id + '_DESCTBL' + curField.id });
@@ -456,9 +490,9 @@ export class MapTools {
 						});
 						// console.log(curMap);
 						// console.log(mapFields);
-						finalFields.forEach((curField) => {
-							console.log(curField);
-						});
+						// finalFields.forEach((curField) => {
+						// 	console.log(curField);
+						// });
 						let selectQuery: string; selectQuery = '';
 						selectQuery += 'SELECT MAP' + curMap.id + '_MAPTBL.id, ';
 						selectQuery += finalFields.map((curField) => {
@@ -492,16 +526,32 @@ export class MapTools {
 							if (err) {
 								reject(err);
 							} else {
-								const toReturn = {
-									map: result
-								};
-								// console.log(result);
-								resolve(toReturn);
+								refObj.map = result;
+								// refObj.mapFields = mapFields;
+								refObj.finalFields = finalFields;
+								// refObj.sourceFields = sourceFields;
+								// refObj.targetFields = targetFields;
+								// refObj.sourceStream = sourceStream;
+								// refObj.targetStream = targetStream;
+								// refObj.sourceEnvironment = sourceEnvironment;
+								// refObj.targetEnvironment = targetEnvironment;
+								resolve(refObj);
 							}
 						});
 					}
 				}).
 				catch(reject);
+		});
+	}
+	public saveMapTuple = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			this.db.query('UPDATE MAP' + refObj.mapid + '_MAPTBL SET ? WHERE id = ?', [refObj.tuple, refObj.tuple.id], (err, result, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve({ result: 'OK' });
+				}
+			});
 		});
 	}
 }

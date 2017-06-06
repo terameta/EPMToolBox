@@ -661,7 +661,7 @@ export class ProcessTools {
 	};
 	private fetchSummarizedData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
-			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Populating summary table.').
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Fetching summary table.').
 				then(() => {
 					const denseField = refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name;
 					this.db.query('SELECT DISTINCT ' + denseField + ' FROM PROCESS' + refProcess.id + '_SUMTBL ORDER BY 1', (err, rows, fields) => {
@@ -694,7 +694,7 @@ export class ProcessTools {
 							wherers.push('SUMMARIZEDRESULT IS NOT NULL');
 							sQuery += wherers.join(' AND ');
 							sQuery += ' GROUP BY ' + selecters.join(', ');
-							// console.log(sQuery);
+							console.log(sQuery);
 							this.db.query(sQuery, (serr, srows, sfields) => {
 								if (serr) {
 									reject(serr);
@@ -1065,17 +1065,13 @@ export class ProcessTools {
 	}
 	private clearStreamDescriptions = (refField: DimeStreamField) => {
 		return new Promise((resolve, reject) => {
-			if (refField.isDescribed) {
-				this.db.query('DELETE FROM STREAM' + refField.stream + '_DESCTBL' + refField.id, (err, result, fields) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve('OK');
-					}
-				});
-			} else {
-				resolve('OK');
-			}
+			this.db.query('DELETE FROM STREAM' + refField.stream + '_DESCTBL' + refField.id, (err, result, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve('OK');
+				}
+			});
 		});
 	}
 	private setStreamDescriptions = (refObj: any[], refStream: DimeStream, refField: DimeStreamField) => {

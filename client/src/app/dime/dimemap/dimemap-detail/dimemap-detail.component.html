@@ -4,8 +4,8 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="#maptabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
-			<li><a href="#maptabmaptable" data-toggle="tab">Map Table</a></li>
+			<li><a href="#maptabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
+			<li class="active"><a href="#maptabmaptable" data-toggle="tab">Map Table</a></li>
 			<li><a href="#maptabsourcedefinitions" data-toggle="tab">Source Definitions</a></li>
 			<li><a href="#maptabtargetdefinitions" data-toggle="tab">Target Definitions</a></li>
 			<li><a href="#maptabimportexport" data-toggle="tab">Import/Export</a></li>
@@ -13,10 +13,10 @@
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
-			<div class="tab-pane fade in active" id="maptabmaindefinitions">
+			<div class="tab-pane fade in" id="maptabmaindefinitions">
 				<app-dimemap-detail-tab-maindefinitions></app-dimemap-detail-tab-maindefinitions>
 			</div>
-			<div class="tab-pane fade in" id="maptabmaptable">
+			<div class="tab-pane fade in active" id="maptabmaptable">
 				<app-dimemap-detail-tab-maptable *ngIf="mainService.curItemIsReady"></app-dimemap-detail-tab-maptable>
 				<div class="well well-warning well-sm" *ngIf="!mainService.curItemIsReady">
 					This map definition is not ready for mapping. <br>

@@ -633,11 +633,18 @@ export class HPTools {
 			refObj.memberList = [];
 			refObj.dimension = refObj.field.name;
 			this.hpGetDescriptionsAction(refObj, refObj.dimension, refObj.memberList).
-				then((result) => {
-					refObj.members = result;
-					console.log(result);
-					// return refObj;
-					return Promise.reject('Not yet hpGetDescriptions');
+				then(() => {
+					return this.hpGetMemberAliases(refObj);
+				}).
+				then(() => {
+					let tempMember: any;
+					refObj.memberList.forEach((curMember: any, curKey: number) => {
+						tempMember = {};
+						tempMember.RefField = curMember.name;
+						tempMember.Description = curMember.Description;
+						refObj.memberList[curKey] = tempMember;
+					});
+					return refObj.memberList;
 				}).
 				then(resolve).
 				catch(reject);
@@ -676,18 +683,12 @@ export class HPTools {
 							} else {
 								let promises: any[]; promises = [];
 								let curMember: any; curMember = {};
-								console.log('>>>', refObj.dimension);
-								console.log(result.res_EnumMembers);
 								let curmbrs: any[]; curmbrs = [];
 								let curatts: any[]; curatts = [];
 								let curdesc: any[]; curdesc = [];
 								if (result.res_EnumMembers.mbrs[0]._) { curmbrs = result.res_EnumMembers.mbrs[0]._.split('|'); }
 								if (result.res_EnumMembers.atts[0]._) { curatts = result.res_EnumMembers.atts[0]._.split('|'); }
 								if (result.res_EnumMembers.mbrDesc[0]._) { curdesc = result.res_EnumMembers.mbrDesc[0]._.split('|'); }
-								// console.log(refObj.dimension, " Overflow:", result.res_EnumMembers.overflow);
-								// console.log(refObj.dimension, " Members:", curmbrs);
-								// console.log(refObj.dimension, " Attributes:", curatts);
-								// console.log(refObj.dimension, " Descriptions:", curdesc);
 								for (let i = 0; i < curmbrs.length; i++) {
 									curMember = {};
 									curMember.name = curmbrs[i];
@@ -697,6 +698,86 @@ export class HPTools {
 									if (curMember.attribute === '2') { promises.push(this.hpGetDescriptionsAction(refObj, curMember.name, curParent)); }
 								}
 								Promise.all(promises).then(resolve).catch(reject);
+							}
+						}
+					});
+				}
+			});
+		});
+	};
+	private hpGetMemberAliases = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			let selectedMember = -1;
+			refObj.memberList.forEach((curMember: any, curKey: number) => {
+				if (selectedMember < 0) {
+					if (!curMember.aliasReceived) { selectedMember = curKey; }
+				}
+			});
+			if (selectedMember >= 0) {
+				this.hpGetMemberAlias(refObj, refObj.memberList[selectedMember]).
+					then(() => {
+						refObj.memberList[selectedMember].aliasReceived = true;
+						resolve(this.hpGetMemberAliases(refObj));
+					}).
+					catch(reject);
+			} else {
+				resolve(refObj);
+			}
+		});
+	};
+	private hpGetMemberAlias = (refObj: any, curMember: any) => {
+		return new Promise((resolve, reject) => {
+			let curBody: string; curBody = '';
+			curBody += '<req_GetMemberInformation>';
+			curBody += '<sID>' + refObj.sID + '</sID>';
+			curBody += '<alsTbl>Default</alsTbl >';
+			curBody += '<dim>' + refObj.dimension + '</dim>';
+			curBody += '<member>' + curMember.name + '</member>';
+			curBody += '<ODL_ECID>0000</ODL_ECID>';
+			curBody += '</req_GetMemberInformation>';
+			request.post({
+				url: refObj.planningurl || '',
+				body: curBody,
+				headers: { 'Content-Type': 'application/xml' },
+				timeout: 60000
+			}, (err, response, body) => {
+				if (err) {
+					reject(err);
+				} else {
+					this.xmlParser(body, (pErr: any, result: any) => {
+						if (pErr) {
+							reject(pErr);
+						} else {
+							if (!result.res_GetMemberInformation) {
+								resolve();
+							} else if (!result.res_GetMemberInformation.property) {
+								resolve();
+							} else if (!Array.isArray(result.res_GetMemberInformation.property)) {
+								resolve();
+							} else {
+								result.res_GetMemberInformation.property.forEach((curProperty: any) => {
+									if (curProperty.$.name === 'Aliases') {
+										if (Array.isArray(curProperty.property)) {
+											let curAliases: any[]; curAliases = [];
+											let curAliasTables: any[]; curAliasTables = [];
+											curProperty.property.forEach((curProp: any) => {
+												if (curProp.$.name === 'AliasTables' && curProp._) { curAliasTables = curProp._.split('|'); }
+												if (curProp.$.name === 'AliasNames' && curProp._) { curAliases = curProp._.split('|'); }
+											});
+											curAliasTables.forEach((curAliasTable, curATKey) => {
+												if (curAliasTable === 'Default') {
+													if (curAliases[curATKey]) {
+														curMember.Description = curAliases[curATKey];
+													} else {
+														curMember.Description = curMember.name;
+													}
+												}
+											});
+										}
+									}
+
+								});
+								resolve();
 							}
 						}
 					});

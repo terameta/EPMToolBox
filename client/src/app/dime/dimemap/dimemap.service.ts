@@ -271,7 +271,6 @@ export class DimeMapService {
 			})
 	}
 	public isReady = (id?: number) => {
-		console.log('We are checking if is ready');
 		if (!id) { id = this.curItem.id; }
 		this.authHttp.get(this.baseUrl + '/isReady/' + id, { headers: this.headers }).
 			map(response => response.json()).
@@ -284,10 +283,17 @@ export class DimeMapService {
 	}
 	public refreshMapTable = () => {
 		this.curItemMapReadyToShow = false;
-		return this.authHttp.post(this.baseUrl + '/mapData?i=' + new Date().getTime(), { map: this.curItem.id }).
+		return this.authHttp.post(this.baseUrl + '/mapData?i=' + new Date().getTime(), { mapid: this.curItem.id }).
 			map(response => response.json()).
 			catch((error) => {
 				return Observable.throw(new Error(error));
 			});
 	};
+	public saveMapTuple = (data) => {
+		return this.authHttp.post(this.baseUrl + '/saveMapTuple', { mapid: this.curItem.id, tuple: data }).
+			map(response => response.json()).
+			catch((error) => {
+				return Observable.throw(new Error(error));
+			});
+	}
 }

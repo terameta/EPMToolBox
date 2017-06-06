@@ -28,5 +28,6 @@ export class ApiDimeMap {
 		this.apiRoutes.get('/prepare/:id', (req, res) => { this.rester.respond(this.mapTools.prepare, req.params.id, req, res); });
 		this.apiRoutes.get('/isReady/:id', (req, res) => { this.rester.respond(this.mapTools.isReady, req.params.id, req, res); });
 		this.apiRoutes.post('/mapData', (req, res) => { this.rester.respond(this.mapTools.retrieveMapData, req.body, req, res); });
+		this.apiRoutes.post('/saveMapTuple', (req, res) => { this.rester.respond(this.mapTools.saveMapTuple, req.body, req, res); });
 	}
 }

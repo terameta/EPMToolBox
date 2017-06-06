@@ -43,5 +43,38 @@
 			"});"
 		],
 		"description": "place a new this.db.query definition"
+	},
+	"New Log Between Equals": {
+		"prefix": "newlogequals",
+		"body": [
+			"console.log('===========================================');",
+			"console.log('===========================================');",
+			"console.log($0);",
+			"console.log('===========================================');",
+			"console.log('===========================================');"
+		],
+		"description": "place a logging blog to identify"
+	},
+	"New Log Between Greater Than": {
+		"prefix": "newloggreater",
+		"body": [
+			"console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');",
+			"console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');",
+			"console.log($0);",
+			"console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');",
+			"console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');"
+		],
+		"description": "place a logging blog to identify"
+	},
+	"New Log Between Less Than": {
+		"prefix": "newlogless",
+		"body": [
+			"console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');",
+			"console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');",
+			"console.log($0);",
+			"console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');",
+			"console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');"
+		],
+		"description": "place a logging blog to identify"
 	}
 }
