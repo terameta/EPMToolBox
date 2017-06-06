@@ -196,5 +196,13 @@ export class PBCSTools {
 			console.log('!!!!!!!!!!!!');
 			reject('Update this part of the tools.pbcs.ts file');
 		});
-	}
+	};
+	public writeData = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			console.log('!!!!!!!!!!!!');
+			console.log('Update writeData part of the tools.pbcs.ts file');
+			console.log('!!!!!!!!!!!!');
+			reject('Update this part of the tools.pbcs.ts file');
+		});
+	};
 }

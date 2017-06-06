@@ -370,4 +370,32 @@ export class EnvironmentTools {
 			}
 		});
 	};
+	public writeData = (refObj: any) => {
+		return new Promise((resolve, reject) => {
+			this.getEnvironmentDetails({ id: refObj.id }, true).
+				then(this.getTypeDetails).
+				then((innerObj: any) => {
+					innerObj.database = refObj.db;
+					innerObj.table = refObj.table;
+					innerObj.data = refObj.data;
+					innerObj.sparseDims = refObj.sparseDims;
+					innerObj.denseDim = refObj.denseDim;
+					if (!innerObj.typedetails) {
+						return Promise.reject('No type definiton on the environment.');
+					} else if (!innerObj.typedetails.value) {
+						return Promise.reject('no type value definition on the environment object.');
+					} else if (innerObj.typedetails.value === 'HP') {
+						return this.hpTool.writeData(innerObj);
+					} else if (innerObj.typedetails.value === 'PBCS') {
+						return this.pbcsTool.writeData(innerObj);
+					} else if (innerObj.typedetails.value === 'MSSQL') {
+						return this.mssqlTool.writeData(innerObj);
+					} else {
+						return Promise.reject('Undefined Environment type.');
+					}
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
 }

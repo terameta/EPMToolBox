@@ -481,8 +481,10 @@ export class ProcessTools {
 				then(resolve).
 				catch((issue) => {
 					console.error(issue);
-					this.logTool.appendLog(refProcess.status, 'Failed: ' + issue);
-					this.setCompleted(refProcess);
+					this.logTool.appendLog(refProcess.status, 'Failed: ' + issue).
+						then(() => {
+							this.setCompleted(refProcess);
+						});
 				});
 		});
 	};
@@ -546,8 +548,15 @@ export class ProcessTools {
 										resolve(this.runStepsAction(refProcess));
 									}).
 									catch(reject);
+							} else if (curStep.type === 'tarprocedure') {
+								this.runTargetProcedure(refProcess, curStep).
+									then((result: any) => {
+										curStep.isPending = false;
+										resolve(this.runStepsAction(refProcess));
+									}).
+									catch(reject);
 							} else {
-								reject('This is not a known step type');
+								reject('This is not a known step type (' + curStep.type + ')');
 							}
 						}).
 						catch(reject);
@@ -558,6 +567,85 @@ export class ProcessTools {
 			}
 		});
 	};
+	private runTargetProcedure = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Run target procedure.').
+				then(() => {
+
+				}).
+				then(() => {
+					return Promise.reject('runTargetProcedure is not ready yet');
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private runTargetProcedurePrepareCombinations = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise(function (resolve, reject) {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Run Target Procedure: Preparing combinations.').
+				then(() => {
+					let stepDetails: any; stepDetails = JSON.parse(refStep.details);
+					/*
+						We should order the variables in the dimension order as defined in the stream definition.
+						This way users will be able to manipulate the order of the business rules running.
+					*/
+					stepDetails.variables.forEach((curVariable: any) => {
+						if (curVariable.valuetype !== 'manualvalue') {
+							refProcess.targetStreamFields.forEach((curField) => {
+								if (curField.name === curVariable.value) { curVariable.vOrder = curField.fOrder; }
+							});
+						} else {
+							curVariable.vOrder = 0;
+						}
+					});
+					stepDetails.variables.sort((a: any, b: any) => { if (a.vOrder > b.vOrder) { return 1; } if (a.vOrder < b.vOrder) { return -1; } return 0; });
+					let promises: any[]; promises = [];
+					stepDetails.variables.forEach((curVariable: any) => {
+						promises.push(new Promise((iResolve, iReject) => {
+							if (curVariable.valuetype !== 'manualvalue') {
+								burada kaldım
+								getDataTableDistinctFields(refObj, { name: curVariable.dimension }, "target", curVariable.valuetype == "filteredvalues").
+									then(function (currentDistinctList) {
+										currentDistinctList.name = curVariable.name;
+										iResolve(currentDistinctList);
+									}).catch(iReject);
+							} else {
+								iResolve({ name: curVariable.name, rows: [{ DVALUE: curVariable.value, sorter: curVariable.value }] });
+							}
+						}));
+					});
+					Promise.all(promises).then(function (results) {
+						var cartesianFields = [];
+						results.forEach(function (curResult) {
+							cartesianFields.push(curResult.name);
+						});
+						var cartesianArray = [];
+						results.forEach(function (curField) {
+							//console.log(">>>>", curField);
+							if (cartesianArray.length == 0) {
+								curField.rows.forEach(function (curDVALUE) {
+									if (curDVALUE.DVALUE != 'ignore' && curDVALUE.DVALUE != 'ignore:ignore') cartesianArray.push(curDVALUE.DVALUE);
+								});
+							} else {
+								var tempCartesian = [];
+								cartesianArray.forEach(function (curCartesian) {
+									curField.rows.forEach(function (curDVALUE) {
+										if (curDVALUE.DVALUE != 'ignore' && curDVALUE.DVALUE != 'ignore:ignore') tempCartesian.push(curCartesian + "-|-" + curDVALUE.DVALUE);
+									});
+								});
+								cartesianArray = tempCartesian;
+							}
+						});
+						refObj.cartesianArray = cartesianArray;
+						refObj.cartesianFields = cartesianFields;
+						//console.log(cartesianArray);
+						refObj.curStep = curStep;
+						resolve(refObj);
+					}).catch(reject);
+				}).
+				catch(reject);
+		});
+	};
 	private runPushData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Push data is initiating.').
@@ -565,10 +653,7 @@ export class ProcessTools {
 				then(() => { return this.clearSummaryTable(refProcess, refStep); }).
 				then(() => { return this.summarizeData(refProcess, refStep); }).
 				then(() => { return this.fetchSummarizedData(refProcess, refStep); }).
-				then((result) => {
-					console.log(result);
-					return Promise.reject('runPushdata is not ready yet');
-				}).
+				then((result: any[]) => { return this.pushDataAction(refProcess, refStep, result); }).
 				then(resolve).
 				catch(reject);
 		});
@@ -694,7 +779,7 @@ export class ProcessTools {
 							wherers.push('SUMMARIZEDRESULT IS NOT NULL');
 							sQuery += wherers.join(' AND ');
 							sQuery += ' GROUP BY ' + selecters.join(', ');
-							console.log(sQuery);
+							// console.log(sQuery);
 							this.db.query(sQuery, (serr, srows, sfields) => {
 								if (serr) {
 									reject(serr);
@@ -708,6 +793,34 @@ export class ProcessTools {
 				catch(reject);
 		});
 	};
+	private pushDataAction = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, finalData: any[]) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Pushing data to the target.').
+				then(() => {
+					if (!finalData) {
+						this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.').then(() => { resolve(refProcess); });
+					} else if (finalData.length === 0) {
+						this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.').then(() => { resolve(refProcess); });
+					} else {
+						let sparseDims: string[]; sparseDims = [];
+						for (let i = 0; i < (refProcess.targetStreamFields.length - 1); i++) {
+							sparseDims.push(refProcess.targetStreamFields[i].name);
+						}
+						this.environmentTool.writeData({
+							id: refProcess.targetStream.environment,
+							data: finalData,
+							db: refProcess.targetStream.dbName,
+							table: refProcess.targetStream.tableName,
+							sparseDims: sparseDims,
+							denseDim: refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name
+						}).
+							then(resolve).
+							catch(reject);
+					}
+				}).
+				catch(reject);
+		});
+	}
 	private runManipulations = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Transform data is initiating.').
