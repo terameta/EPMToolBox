@@ -1,5 +1,7 @@
 import { IPool } from 'mysql';
 import * as async from 'async';
+// import * as excel from 'exceljs';
+const excel = require('exceljs');
 
 import { MainTools } from '../config/config.tools';
 // import { StreamTools } from './tools.dime.stream';
@@ -555,9 +557,9 @@ export class ProcessTools {
 				then(() => { return this.sendDataDropCrossTable(refProcess, refStep); }).
 				then(() => { return this.sendDataCreateCrossTable(refProcess, refStep); }).
 				then((result) => { return this.sendDataInsertDistincts(refProcess, refStep, result); }).
-				then(() => { return this.sendDataPopulateDataColumns(refProcess, refStep); }).
-				then(() => { return this.sendDataPopulateDescriptionColumns(refProcess, refStep); }).
-				then(() => { return this.sendDataCreateFile(refProcess, refStep); }).
+				then((result) => { return this.sendDataPopulateDataColumns(refProcess, refStep, result); }).
+				then((result) => { return this.sendDataPopulateDescriptionColumns(refProcess, refStep, result); }).
+				then((result) => { return this.sendDataCreateFile(refProcess, refStep, result); }).
 				then(() => { return this.sendDataSendFile(refProcess, refStep); }).
 				then(resolve).
 				catch(reject);
@@ -695,7 +697,6 @@ export class ProcessTools {
 
 						});
 						createQuery += '\n, PRIMARY KEY(id) );';
-						// console.log(createQuery);
 						this.db.query(createQuery, (err, rows, fields) => {
 							if (err) {
 								reject(err);
@@ -716,44 +717,201 @@ export class ProcessTools {
 					insertQuery += refDefinitions.inserterFields.join(', ');
 					insertQuery += ')\n';
 					insertQuery += 'SELECT DISTINCT ' + refDefinitions.inserterFields.join(', ') + ' FROM PROCESS' + refProcess.id + '_DATATBL';
-					this.db.query(insertQuery, function (err, rows, fields) {
+					this.db.query(insertQuery, (err, rows, fields) => {
 						if (err) {
 							reject(err);
 						} else {
-							resolve();
+							resolve(refDefinitions);
 						}
 					});
 				}).
 				catch(reject);
 		});
 	};
-	private sendDataPopulateDataColumns = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+	private sendDataPopulateDataColumns = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating data columns.').
 				then(() => {
-					return Promise.reject('sendDataPopulateDataColumns is not ready yet');
+					refDefinitions.cartesianTemp = [];
+					refDefinitions.cartesianArray.forEach((curItem: any) => {
+						refDefinitions.cartesianTemp.push(curItem);
+					});
+					return this.sendDataPopulateDataColumnsAction(refProcess, refDefinitions);
 				}).
 				then(resolve).
 				catch(reject);
 		});
 	};
-	private sendDataPopulateDescriptionColumns = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+	private sendDataPopulateDataColumnsAction = (refProcess: DimeProcessRunning, refDefinitions: any) => {
+		const curItem = refDefinitions.cartesianTemp.shift();
+		return new Promise((resolve, reject) => {
+			let updateWherers: string[]; updateWherers = [];
+			let updateQuery: string; updateQuery = 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ';
+
+			if (refDefinitions.dataFieldDefinition.aggregateFunction) {
+				let subQuery: string; subQuery = 'SELECT ';
+				subQuery += refDefinitions.inserterFields.join(', ');
+				refDefinitions.cartesianFields.forEach((curField: any, curKey: number) => { if (curField.srctar === 'source') { subQuery += ', SRC_' + curField.name; } });
+				subQuery += ', ';
+				subQuery += refDefinitions.dataFieldDefinition.aggregateFunction + '(SRC_' + refDefinitions.dataFieldDefinition.name + ') AS SRC_' + refDefinitions.dataFieldDefinition.name;
+				subQuery += ' FROM PROCESS' + refProcess.id + '_DATATBL ';
+				let whereFields: string[]; whereFields = [];
+				let whereValues: string[]; whereValues = [];
+				refDefinitions.cartesianFields.forEach((curField: any, curKey: number) => {
+					if (curField.srctar === 'source') {
+						whereFields.push('SRC_' + curField.name + ' = ?');
+						whereValues.push(curItem.split('-|-')[curKey]);
+					}
+				});
+				whereValues.forEach(function (curWhere) {
+					updateWherers.push(curWhere);
+				});
+				if (whereFields.length > 0) { subQuery += ' WHERE ' + whereFields.join(' AND '); }
+				subQuery += ' GROUP BY ';
+				subQuery += refDefinitions.inserterFields.join(', ');
+				refDefinitions.cartesianFields.forEach((curField: any, curKey: number) => { if (curField.srctar === 'source') { subQuery += ', SRC_' + curField.name; } });
+				subQuery += ' HAVING ' + refDefinitions.dataFieldDefinition.aggregateFunction + '(SRC_' + refDefinitions.dataFieldDefinition.name + ') <> 0';
+				updateQuery += '(' + subQuery + ') DT ON ';
+			} else {
+				updateQuery += 'PROCESS' + refProcess.id + '_DATATBL DT ON ';
+			}
+
+			let onFields: string[]; onFields = [];
+			refDefinitions.inserterFields.forEach((curField: any) => {
+				onFields.push('CT.' + curField + ' = DT.' + curField);
+			});
+
+			refDefinitions.cartesianFields.forEach((curField: any, curKey: number) => {
+				let curPrefix: string; curPrefix = '';
+				if (curField.srctar === 'source') { curPrefix = 'SRC_'; }
+				if (curField.srctar === 'target') { curPrefix = 'TAR_'; }
+				onFields.push('DT.' + curPrefix + curField.name + ' = ?');
+			});
+
+			updateQuery += onFields.join(' AND ');
+			updateQuery += ' SET CT.' + curItem.replace('-|-', '_') + ' = DT.SRC_' + refDefinitions.dataFieldDefinition.name;
+
+			curItem.split('-|-').forEach((curWhere: any) => {
+				updateWherers.push(curWhere);
+			});
+			this.db.query(updateQuery, updateWherers, (err, rows, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					if (refDefinitions.cartesianTemp.length === 0) {
+						resolve(refDefinitions);
+					} else {
+						resolve(this.sendDataPopulateDataColumnsAction(refProcess, refDefinitions));
+					}
+				}
+			});
+		});
+	};
+	private sendDataPopulateDescriptionColumns = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns.').
 				then(() => {
-					return Promise.reject('sendDataPopulateDescriptionColumns is not ready yet');
+					async.eachOfSeries(
+						refProcess.CRSTBLDescribedFields,
+						(item, key, callback) => {
+							this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns - checking table for ' + item.fieldname).
+								then(() => {
+									let selectQuery: string; selectQuery = '';
+									selectQuery += 'SELECT TABLE_NAME FROM information_schema.tables ';
+									selectQuery += 'WHERE TABLE_SCHEMA = \'' + this.tools.config.mysql.db + '\' AND TABLE_NAME LIKE \'STREAM%_DESCTBL' + item.fieldid + '\'';
+									this.db.query(selectQuery, (err, rows, fields) => {
+										if (err) {
+											this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns error, can not find table for ' + item.fieldname).
+												then(function () { callback(); });
+										} else {
+											let selectedTable: string; selectedTable = '';
+											rows.forEach((curTable: any) => {
+												selectedTable = curTable.TABLE_NAME;
+											});
+
+											if (selectedTable === '') {
+												const toLog = 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns - no table for ' + item.fieldname;
+												this.logTool.appendLog(refProcess.status, toLog).then(() => { callback(); });
+											} else {
+												// const toLog = 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns - Table for ' + item.fieldname + ' is ' + selectedTable
+												const toLog = 'Step ' + refStep.sOrder + ' - Send Data: Populating description column for ' + item.fieldname;
+												this.logTool.appendLog(refProcess.status, toLog).
+													then(() => {
+														let updateQuery: string; updateQuery = '';
+														updateQuery += 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ' + selectedTable + ' ST';
+														updateQuery += ' ON CT.' + item.fieldname + ' = ST.RefField';
+														updateQuery += ' SET ';
+														updateQuery += ' CT.' + item.fieldname + '_Desc = ST.Description';
+														this.db.query(updateQuery, (uErr, uRows, uFields) => {
+															if (uErr) {
+																const toLogC = 'Step ' + refStep.sOrder + ' - Send Data: Population description columns - ' + item.fieldname + ' population has failed';
+																this.logTool.appendLog(refProcess.status, toLogC).
+																	then(() => { callback(); });
+															} else {
+																const toLogC = 'Step ' + refStep.sOrder + ' - Send Data: Population description columns - ' + item.fieldname + ' population has completed';
+																this.logTool.appendLog(refProcess.status, toLogC).
+																	then(() => { callback(); });
+															}
+														});
+													});
+											}
+										}
+									});
+								});
+						}, () => {
+							resolve(refDefinitions);
+						}
+					);
 				}).
-				then(resolve).
 				catch(reject);
 		});
 	};
-	private sendDataCreateFile = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+	private sendDataCreateFile = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any) => {
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Creating data file.').
 				then(() => {
-					return Promise.reject('sendDataCreateFile is not ready yet');
+					let selectQuery: string; selectQuery = 'SELECT * FROM PROCESS' + refProcess.id + '_CRSTBL';
+					let wherers: string[]; wherers = [];
+					refDefinitions.cartesianArray.forEach((curItem: any) => {
+						wherers.push(curItem.replace('-|-', '_') + ' <> 0');
+					});
+					if (wherers.length > 0) {
+						selectQuery += ' WHERE (' + wherers.join(' OR ') + ')';
+					}
+					this.db.query(selectQuery, (err, rows, fields) => {
+						if (err) {
+							reject(err);
+						} else {
+							let workbook; workbook = new excel.Workbook();
+							workbook.creator = 'EPM ToolBox';
+							workbook.lastModifiedBy = 'EPM ToolBox';
+							workbook.created = new Date();
+							workbook.modified = new Date();
+
+							let sheet;
+
+							if (rows.length === 0) {
+								sheet = workbook.addWorksheet('Warning', { views: [{ ySplit: 1 }] });
+								sheet.addRow(['There is no data produced with the data file mechanism. If in doubt, please contact system admin.']);
+							} else {
+								let keys: any[]; keys = [];
+								Object.keys(rows[0]).forEach((dfkey) => {
+									keys.push(dfkey);
+								});
+								let curColumns: any[]; curColumns = [];
+								Object.keys(rows[0]).forEach((dfkey) => {
+									curColumns.push({ header: dfkey, key: dfkey });
+								});
+								sheet = workbook.addWorksheet('Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] });
+								sheet.columns = curColumns;
+								sheet.addRows(rows);
+							}
+							workbook.xlsx.writeFile('./PROCESS' + refProcess.id + '_CRSTBL.xlsx').then(function () {
+								resolve(refDefinitions);
+							}).catch(reject);
+						}
+					});
 				}).
-				then(resolve).
 				catch(reject);
 		});
 	};
