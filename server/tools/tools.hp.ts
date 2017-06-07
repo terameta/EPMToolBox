@@ -613,11 +613,54 @@ export class HPTools {
 		});
 	};
 	public runProcedure = (refObj: DimeEnvironmentHP) => {
+		return this.hpRunProcedure(refObj);
+	};
+	private hpRunProcedure = (refObj: any) => {
+		return this.hpOpenCube(refObj).then(this.hpRunProcedureAction);
+	};
+	private hpRunProcedureAction = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('Update this part of the tools.hp.ts file');
-			console.log('!!!!!!!!!!!!');
-			reject('Update this part of the tools.hp.ts file');
+			let theBody: string; theBody = '';
+			theBody += '<req_LaunchBusinessRule>';
+			theBody += '<sID>' + refObj.sID + '</sID>';
+			theBody += '<cube>' + refObj.table + '</cube>';
+			theBody += '<rule type="' + refObj.procedure.type + '">' + refObj.procedure.name + '</rule>';
+			theBody += '<prompts>';
+			refObj.procedure.variables.forEach((curRTP: any) => {
+				theBody += '<rtp>';
+				theBody += '<name>' + curRTP.name + '</name>';
+				theBody += '<val>' + curRTP.value + '</val>';
+				theBody += '</rtp>';
+			});
+			theBody += '</prompts>';
+			theBody += '<ODL_ECID>0000</ODL_ECID>';
+			theBody += '</req_LaunchBusinessRule>';
+			request.post({
+				url: refObj.planningurl || '',
+				body: theBody,
+				headers: { 'Content-Type': 'application/xml' }
+			}, (err, response, body) => {
+				if (err) {
+					reject(err);
+				} else {
+					this.xmlParser(body, (pErr: any, result: any) => {
+						if (pErr) {
+							reject(pErr);
+						} else {
+							if (!result.res_LaunchBusinessRule) {
+								reject('We did not receive a result');
+							} else if (!result.res_LaunchBusinessRule.message) {
+								reject('We did not receive a message');
+							} else if (!Array.isArray(result.res_LaunchBusinessRule.message)) {
+								reject('Message is not valid');
+							} else {
+								const toResolve = result.res_LaunchBusinessRule.message.join('. ');
+								resolve(toResolve);
+							}
+						}
+					});
+				}
+			});
 		});
 	};
 	public getDescriptions = (refObj: any) => {

@@ -38,7 +38,7 @@ export class EnvironmentTools {
 		return this.getEnvironmentDetails({ id: id });
 	}
 
-	public getEnvironmentDetails = (refObj: DimeEnvironment, shouldShowPassword?: boolean) => {
+	public getEnvironmentDetails = (refObj: DimeEnvironment, shouldShowPassword?: boolean): Promise<DimeEnvironment> => {
 		return new Promise((resolve, reject) => {
 			this.db.query('SELECT * FROM environments WHERE id = ?', refObj.id, (err, rows, fields) => {
 				if (err) {

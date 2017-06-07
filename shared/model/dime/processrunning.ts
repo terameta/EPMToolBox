@@ -23,5 +23,7 @@ export interface DimeProcessRunning {
 	filters: any[],
 	wherers: string[],
 	wherersWithSrc: string[],
-	pullResult: any[]
+	pullResult: any[],
+	recepients: string,
+	CRSTBLDescribedFields: any[]
 }
