@@ -36,7 +36,7 @@ export class MailTool {
 				if (settings.emailserverpass) { mailSettings.auth.pass = settings.emailserverpass; }
 
 				const transporter = nodemailer.createTransport(smtpTransport(mailSettings));
-				transporter.sendMail(refObj, function (err, info) {
+				transporter.sendMail(refObj, (err, info) => {
 					if (err) {
 						reject(err);
 					} else {

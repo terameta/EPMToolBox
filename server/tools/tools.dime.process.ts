@@ -494,6 +494,14 @@ export class ProcessTools {
 						}).
 						then(() => {
 							this.setCompleted(refProcess);
+						}).catch((fatalIssue) => {
+							console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+							console.log('xxxxxx Fatal Issue xxxxxxxxxxxxxxxxxxxxxxxx');
+							console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+							console.log(fatalIssue);
+							console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+							console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+							this.setCompleted(refProcess);
 						});
 				});
 		});
@@ -524,29 +532,32 @@ export class ProcessTools {
 					this.logTool.appendLog(refProcess.status, logText).
 						then(() => {
 							if (curStep.type === 'srcprocedure') {
-								// this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pulldata') {
-								// this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'mapdata') {
 								refProcess.mapList.push(curStep.referedid);
-								// this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'manipulate') {
-								// this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pushdata') {
-								// this.runPushData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runPushData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'tarprocedure') {
-								// this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'senddata') {
-								// this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'sendmissing') {
 								this.runSendMissing(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+							} else if (curStep.type === 'sendlogs') {
+								this.runSendLog(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else {
 								reject('This is not a known step type (' + curStep.type + ')');
@@ -561,10 +572,12 @@ export class ProcessTools {
 		});
 	};
 	private runSendMissing = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		refProcess.recepients = refStep.details.split(';').join(',');
 		return new Promise((resolve, reject) => {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Send missing maps.').
 				then(() => { return this.sendMissingPrepareAll(refProcess, refStep); }).
-				then((result) => { console.log(result); return Promise.resolve(refProcess); }).
+				then((result) => { return this.sendMissingCreateFile(result) }).
+				then((result) => { return this.sendMissingSendFile(refProcess, refStep, result) }).
 				then(resolve).
 				catch(reject);
 		});
@@ -578,21 +591,10 @@ export class ProcessTools {
 	};
 	private sendMissingPrepareOne = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, mapID: number) => {
 		return new Promise((resolve, reject) => {
+			let masterMap: DimeMap;
 			this.mapTool.getOne(mapID).
-				then((curMap: DimeMap) => {
-					return this.sendMissingPrepareQuery(refProcess, refStep, curMap);
-					// console.log('=========================');
-					// console.log('Source Fields');
-					// refProcess.sourceStreamFields.forEach((curField) => {
-					// 	console.log(curField.id, curField.name, curField.isDescribed, refProcess.sourceStreamType);
-					// });
-					// console.log('Target Fields');
-					// refProcess.targetStreamFields.forEach((curField) => {
-					// 	console.log(curField.id, curField.name, curField.isDescribed, refProcess.targetStreamType);
-					// });
-					// console.log('=========================');
-					// return Promise.resolve(curMap);
-				}).
+				then((curMap: DimeMap) => { masterMap = curMap; return this.sendMissingPrepareQuery(refProcess, refStep, curMap); }).
+				then((curQuery: string) => { return this.sendMissingRunQuery(curQuery, masterMap); }).
 				then(resolve).
 				catch(reject);
 		});
@@ -661,24 +663,129 @@ export class ProcessTools {
 					mapFieldList.forEach((curField) => {
 						if (curField.srctar === 'source') { curField.name = 'SRC_' + curField.name; }
 						if (curField.srctar === 'target') { curField.name = 'TAR_' + curField.name; }
-						if (curField.type === 'description') { curField.name += '_DESC'; }
+						if (curField.type === 'description') { curField.onField = curField.name; }
+						if (curField.type === 'description') { curField.name = 'Description'; }
 						if (curField.type === 'main') { curField.tableName = 'MAP' + refMap.id + '_MAPTBL'; }
 						if (curField.type === 'description') { curField.tableName = 'STREAM' + curField.streamid + '_DESCTBL' + curField.id; }
-						selects.push('\n\t' + curField.tableName + '.' + curField.name);
+
+						if (curField.type === 'description') {
+							selects.push('\n\t' + curField.tableName + '.' + curField.name + ' AS ' + curField.onField + '_DESC');
+						} else {
+							selects.push('\n\t' + curField.tableName + '.' + curField.name);
+						}
 					});
+					const mapTableName = 'MAP' + refMap.id + '_MAPTBL';
 					let selectQuery: string; selectQuery = '';
 					selectQuery += 'SELECT '
-					selectQuery += selects.join(', ');
-					console.log('===========================================');
-					console.log('===========================================');
-					console.log(selectQuery);
-					console.log('===========================================');
-					console.log('===========================================');
-					return Promise.resolve('OK');
+					selectQuery += selects.join(', ') + ' \n';
+					selectQuery += 'FROM ' + mapTableName + ' ';
+					mapFieldList.forEach((curField) => {
+						if (curField.type === 'description') {
+							selectQuery += '\n\tLEFT JOIN ' + curField.tableName + ' ON ' + curField.tableName + '.RefField = ' + mapTableName + '.' + curField.onField;
+						}
+					});
+					let wherers: string[]; wherers = [];
+					mapFieldList.forEach((curField) => {
+						if (curField.srctar === 'target' && curField.type === 'main') {
+							wherers.push('\n\t' + curField.name + ' IS NULL');
+							wherers.push(curField.name + ' = \'missing\'');
+						}
+					});
+					if (wherers.length > 0) {
+						selectQuery += ' \n';
+						selectQuery += 'WHERE ';
+						selectQuery += wherers.join(' OR ');
+					}
+					return Promise.resolve(selectQuery);
 				}).
 				then(resolve).
 				catch(reject);
 		});
+	};
+	private sendMissingRunQuery = (refQuery: string, refMap: DimeMap) => {
+		return new Promise((resolve, reject) => {
+			this.db.query(refQuery, (err, result, fields) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve({ map: refMap, result: result });
+				}
+			});
+		});
+	};
+	private sendMissingCreateFile = (mapsAndResults: any[]) => {
+		return new Promise((resolve, reject) => {
+			let workbook: any; workbook = new excel.Workbook();
+			workbook.creator = 'EPM ToolBox';
+			workbook.lastModifiedBy = 'EPM ToolBox';
+			workbook.created = new Date();
+			workbook.modified = new Date();
+
+			mapsAndResults.forEach((curMapAndResult: any) => {
+				const curMap = curMapAndResult.map;
+				const curResult = curMapAndResult.result;
+				console.log(curMapAndResult.map);
+				let sheet;
+				sheet = workbook.addWorksheet(curMap.name, { views: [{ ySplit: 1 }] });
+				if (curResult.length === 0) {
+					sheet.addRow(['There is no data produced with the missing map mechanism. If in doubt, please contact system admin.']);
+				} else {
+					let keys: any[]; keys = [];
+					Object.keys(curResult[0]).forEach((dfkey) => {
+						keys.push(dfkey);
+					});
+					let curColumns: any[]; curColumns = [];
+					Object.keys(curResult[0]).forEach((dfkey) => {
+						curColumns.push({ header: dfkey, key: dfkey });
+					});
+					// sheet = workbook.addWorksheet('Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] });
+					sheet.columns = curColumns;
+					sheet.addRows(curResult);
+				}
+			});
+
+			resolve(workbook);
+		});
+	};
+	private sendMissingSendFile = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refBook: any) => {
+		return new Promise((resolve, reject) => {
+			let fromAddress: string; fromAddress = '';
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Missing Maps: Sending data file.').
+				then(() => { return this.settingsTool.getOne('systemadminemailaddress'); }).
+				then((systemadminemailaddress: any) => {
+					fromAddress = systemadminemailaddress.value;
+					return this.workbookToStreamBuffer(refBook);
+				}).
+				then((theStreamBuffer: any) => {
+					return this.mailTool.sendMail({
+						from: fromAddress,
+						to: refProcess.recepients,
+						subject: 'Missing map list for Process: ' + refProcess.name,
+						text: 'Hi,\n\nYou can kindly find the file as attached.\n\nBest Regards\nHyperion Team',
+						attachments: [
+							{
+								filename: refProcess.name + ' Missing Map File (' + this.tools.getFormattedDateTime() + ').xlsx',
+								content: theStreamBuffer.getContents()
+							}
+						]
+					});
+				}).
+				then((result) => {
+					console.log(result);
+					return Promise.resolve('ok');
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private runSendLog = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		const toLogProcess = {
+			id: refProcess.id,
+			name: refProcess.name,
+			status: refProcess.status.toString(),
+			erroremail: refProcess.erroremail
+		};
+		return this.sendLogFile(toLogProcess, false);
 	};
 	private sendLogFile = (refProcess: DimeProcess, iserror: boolean) => {
 		return new Promise((resolve, reject) => {
@@ -1064,9 +1171,6 @@ export class ProcessTools {
 								sheet.addRows(rows);
 							}
 							resolve({ workbook: workbook, refDefinitions: refDefinitions });
-							// workbook.xlsx.writeFile('./PROCESS' + refProcess.id + '_CRSTBL.xlsx').then(function () {
-							// 	resolve(refDefinitions);
-							// }).catch(reject);
 						}
 					});
 				}).
@@ -1097,7 +1201,7 @@ export class ProcessTools {
 						from: fromAddress,
 						to: refProcess.recepients,
 						subject: 'Data File for Process: ' + refProcess.name,
-						text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\nKerzner Hyperion Team',
+						text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\nHyperion Team',
 						attachments: [
 							{
 								filename: refProcess.name + ' Data File (' + this.tools.getFormattedDateTime() + ').xlsx',
