@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 
-import { MainTools } from '../config/config.tools';
+import { MainTools } from './tools.main';
 
 export class Rester {
 	constructor(public tools: MainTools) { }

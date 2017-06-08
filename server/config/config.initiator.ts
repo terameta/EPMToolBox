@@ -390,6 +390,14 @@ modificationList.push({
 });
 modificationList.push({
 	type: 'addNewColumn',
+	tableName: 'processes',
+	columnName: 'erroremail',
+	columnType: 'VARCHAR(1024)',
+	afterCol: 'status',
+	isNullable: true
+});
+modificationList.push({
+	type: 'addNewColumn',
 	tableName: 'logs',
 	columnName: 'refid',
 	columnType: 'BIGINT UNSIGNED',

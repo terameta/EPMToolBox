@@ -23,6 +23,12 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label for="processTarget" class="col-xs-1 control-label">E-mail to Inform on Error:</label>
+			<div class="col-xs-11">
+				<input type="email" class="form-control" id="processerroremail" name="processerroremail" [(ngModel)]="mainService.curItem.erroremail" />
+			</div>
+		</div>
+		<div class="form-group">
 			<div class="col-xs-11 col-xs-offset-1">
 				<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
 			</div>

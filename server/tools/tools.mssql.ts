@@ -1,6 +1,6 @@
 import * as mssql from 'mssql';
 
-import { MainTools } from '../config/config.tools';
+import { MainTools } from './tools.main';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 
 export class MSSQLTools {

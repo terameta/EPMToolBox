@@ -3,5 +3,6 @@ export interface DimeProcess {
 	name?: string,
 	source?: number,
 	target?: number,
-	status?: string
+	status?: string,
+	erroremail?: string
 }

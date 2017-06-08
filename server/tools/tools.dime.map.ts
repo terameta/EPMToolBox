@@ -1,6 +1,6 @@
 import { IPool } from 'mysql';
 
-import { MainTools } from '../config/config.tools';
+import { MainTools } from './tools.main';
 import { StreamTools } from './tools.dime.stream';
 
 import { DimeMap } from '../../shared/model/dime/map';

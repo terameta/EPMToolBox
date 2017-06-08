@@ -1,10 +1,14 @@
+// import { ReadWriteStream } from 'NodeJS';
+// import { Stream, Writable, Readable, Duplex } from 'stream';
 import { IPool } from 'mysql';
 import * as async from 'async';
-// import * as excel from 'exceljs';
 const excel = require('exceljs');
+const streamBuffers = require('stream-buffers');
+import * as exceltypes from 'exceljs';
 
-import { MainTools } from '../config/config.tools';
-// import { StreamTools } from './tools.dime.stream';
+import { MainTools } from './tools.main';
+import { SettingsTool } from './tools.settings';
+import { MailTool } from './tools.mailer';
 
 import { DimeProcess } from '../../shared/model/dime/process';
 import { DimeProcessRunning } from '../../shared/model/dime/processrunning';
@@ -17,6 +21,8 @@ import { DimeStream } from '../../shared/model/dime/stream';
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { DimeStreamType } from '../../shared/model/dime/streamtype';
 import { DimeProcessDefaultTarget } from '../../shared/model/dime/processdefaulttarget';
+import { DimeMap } from '../../shared/model/dime/map';
+
 import { MapTools } from './tools.dime.map';
 
 import { EnvironmentTools } from './tools.dime.environment';
@@ -27,7 +33,9 @@ export class ProcessTools {
 	logTool: ATLogger;
 	streamTool: StreamTools;
 	environmentTool: EnvironmentTools;
-	mapTool: MapTools
+	mapTool: MapTools;
+	settingsTool: SettingsTool;
+	mailTool: MailTool;
 
 	constructor(
 		public db: IPool,
@@ -36,6 +44,8 @@ export class ProcessTools {
 		this.streamTool = new StreamTools(this.db, this.tools);
 		this.environmentTool = new EnvironmentTools(this.db, this.tools);
 		this.mapTool = new MapTools(this.db, this.tools);
+		this.settingsTool = new SettingsTool(this.db, this.tools);
+		this.mailTool = new MailTool(this.db, this.tools);
 	}
 
 	public getAll = () => {
@@ -431,6 +441,7 @@ export class ProcessTools {
 							source: innerObj.source,
 							target: innerObj.target,
 							status: parseInt(innerObj.status, 10),
+							erroremail: innerObj.erroremail || '',
 							steps: [],
 							sourceEnvironment: { id: 0 },
 							sourceStream: { id: 0, name: '', type: 0, environment: 0 },
@@ -447,7 +458,8 @@ export class ProcessTools {
 							wherersWithSrc: [],
 							pullResult: [],
 							recepients: '',
-							CRSTBLDescribedFields: []
+							CRSTBLDescribedFields: [],
+							mapList: []
 						};
 						this.runAction(curProcess);
 						resolve(innerObj);
@@ -458,22 +470,6 @@ export class ProcessTools {
 				}).catch(reject);
 		});
 	};
-	/*
-	function runAction(refObj){
-		return new Promise((resolve, reject) =>{
-			logTool.appendLog(refObj.tracker, 'Getting the process details.');
-		ok	getOne(refObj.id).
-		ok	then(function(result){	var tracker = refObj.tracker; refObj = result; refObj.tracker = tracker; return refObj;	}).
-		ok	then(identifySteps).
-		ok	then(identifyStreams).
-			//then(identifyEnvironments).
-		ok	then(isReady).
-		ok	then(createTables).
-		on	then(runSteps).
-			then(resolve).catch(reject);
-		});
-	}
-	*/
 	private runAction = (refProcess: DimeProcessRunning) => {
 		return new Promise((resolve, reject) => {
 			this.identifySteps(refProcess).
@@ -487,6 +483,15 @@ export class ProcessTools {
 				catch((issue) => {
 					console.error(issue);
 					this.logTool.appendLog(refProcess.status, 'Failed: ' + issue).
+						then(() => {
+							const toLogProcess = {
+								id: refProcess.id,
+								name: refProcess.name,
+								status: refProcess.status.toString(),
+								erroremail: refProcess.erroremail
+							};
+							return this.sendLogFile(toLogProcess, true);
+						}).
 						then(() => {
 							this.setCompleted(refProcess);
 						});
@@ -525,6 +530,7 @@ export class ProcessTools {
 								// this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'mapdata') {
+								refProcess.mapList.push(curStep.referedid);
 								// this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'manipulate') {
@@ -537,7 +543,11 @@ export class ProcessTools {
 								// this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'senddata') {
-								this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+							} else if (curStep.type === 'sendmissing') {
+								this.runSendMissing(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else {
 								reject('This is not a known step type (' + curStep.type + ')');
 							}
@@ -550,6 +560,153 @@ export class ProcessTools {
 			}
 		});
 	};
+	private runSendMissing = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Send missing maps.').
+				then(() => { return this.sendMissingPrepareAll(refProcess, refStep); }).
+				then((result) => { console.log(result); return Promise.resolve(refProcess); }).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private sendMissingPrepareAll = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+		let promises: any[]; promises = [];
+		refProcess.mapList.forEach((mapID) => {
+			promises.push(this.sendMissingPrepareOne(refProcess, refStep, mapID));
+		});
+		return Promise.all(promises);
+	};
+	private sendMissingPrepareOne = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, mapID: number) => {
+		return new Promise((resolve, reject) => {
+			this.mapTool.getOne(mapID).
+				then((curMap: DimeMap) => {
+					return this.sendMissingPrepareQuery(refProcess, refStep, curMap);
+					// console.log('=========================');
+					// console.log('Source Fields');
+					// refProcess.sourceStreamFields.forEach((curField) => {
+					// 	console.log(curField.id, curField.name, curField.isDescribed, refProcess.sourceStreamType);
+					// });
+					// console.log('Target Fields');
+					// refProcess.targetStreamFields.forEach((curField) => {
+					// 	console.log(curField.id, curField.name, curField.isDescribed, refProcess.targetStreamType);
+					// });
+					// console.log('=========================');
+					// return Promise.resolve(curMap);
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private sendMissingPrepareQuery = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refMap: DimeMap) => {
+		return new Promise((resolve, reject) => {
+			this.mapTool.getFields(refMap.id).
+				then((mapFields: any[]) => {
+					let mapFieldList: any[]; mapFieldList = [];
+					mapFields.forEach((curMapField) => {
+						if (curMapField.srctar === 'source') {
+							refProcess.sourceStreamFields.forEach((curStreamField) => {
+								if (curStreamField.name === curMapField.name) {
+									mapFieldList.push({ id: curStreamField.id, name: curStreamField.name, srctar: 'source', type: 'main', streamid: curStreamField.stream, order: curStreamField.fOrder });
+									if (curStreamField.isDescribed || refProcess.sourceStreamType === 'HPDB') {
+										mapFieldList.push({
+											id: curStreamField.id,
+											name: curStreamField.name,
+											srctar: 'source',
+											type: 'description',
+											streamid: curStreamField.stream,
+											order: curStreamField.fOrder
+										});
+									}
+								}
+							});
+						}
+						if (curMapField.srctar === 'target') {
+							refProcess.targetStreamFields.forEach((curStreamField) => {
+								if (curStreamField.name === curMapField.name) {
+									mapFieldList.push({
+										id: curStreamField.id,
+										name: curStreamField.name,
+										srctar: 'target',
+										type: 'main',
+										streamid: curStreamField.stream,
+										order: curStreamField.fOrder
+									});
+									if (curStreamField.isDescribed || refProcess.targetStreamType === 'HPDB') {
+										mapFieldList.push({
+											id: curStreamField.id,
+											name: curStreamField.name,
+											srctar: 'target',
+											type: 'description',
+											streamid: curStreamField.stream,
+											order: curStreamField.fOrder
+										});
+									}
+								}
+							});
+						}
+					});
+					mapFieldList.forEach((curField) => {
+						curField.order = parseInt(curField.order, 10) * 100;
+						if (curField.srctar === 'source') { curField.order += 1000000; }
+						if (curField.srctar === 'target') { curField.order += 2000000; }
+						if (curField.type === 'main') { curField.order += 1; }
+						if (curField.type === 'description') { curField.order += 2; }
+					})
+					mapFieldList.sort((a: any, b: any) => {
+						if (a.order > b.order) { return 1; }
+						if (a.order < b.order) { return -1; }
+						return 0;
+					});
+					let selects: string[]; selects = [];
+					mapFieldList.forEach((curField) => {
+						if (curField.srctar === 'source') { curField.name = 'SRC_' + curField.name; }
+						if (curField.srctar === 'target') { curField.name = 'TAR_' + curField.name; }
+						if (curField.type === 'description') { curField.name += '_DESC'; }
+						if (curField.type === 'main') { curField.tableName = 'MAP' + refMap.id + '_MAPTBL'; }
+						if (curField.type === 'description') { curField.tableName = 'STREAM' + curField.streamid + '_DESCTBL' + curField.id; }
+						selects.push('\n\t' + curField.tableName + '.' + curField.name);
+					});
+					let selectQuery: string; selectQuery = '';
+					selectQuery += 'SELECT '
+					selectQuery += selects.join(', ');
+					console.log('===========================================');
+					console.log('===========================================');
+					console.log(selectQuery);
+					console.log('===========================================');
+					console.log('===========================================');
+					return Promise.resolve('OK');
+				}).
+				then(resolve).
+				catch(reject);
+		});
+	};
+	private sendLogFile = (refProcess: DimeProcess, iserror: boolean) => {
+		return new Promise((resolve, reject) => {
+			let fromAddress: string; fromAddress = '';
+			this.settingsTool.getOne('systemadminemailaddress').
+				then((systemadminemailaddress: any) => {
+					fromAddress = systemadminemailaddress.value;
+					return this.logTool.checkLog(parseInt(refProcess.status || '0', 10));
+				}).
+				then((curLog: any) => {
+					let curEmail: any; curEmail = {};
+					curEmail.to = refProcess.erroremail;
+					curEmail.from = fromAddress;
+					curEmail.subject = '';
+					if (iserror) { curEmail.subject += 'Process Error - '; }
+					curEmail.subject += 'Log for process: ' + refProcess.name;
+					curEmail.text = curLog.details;
+					curEmail.html = '<pre>' + curLog.details + '</pre>';
+					if (curEmail.to === '' || !curEmail.to) { curEmail.to = fromAddress; }
+					this.mailTool.sendMail(curEmail).
+						then(() => {
+							resolve(refProcess);
+						}).
+						catch(reject);
+				}).
+				catch(reject);
+		});
+	};
 	private runSendData = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
 		return new Promise((resolve, reject) => {
 			refProcess.recepients = refStep.details.split(';').join(',');
@@ -560,7 +717,7 @@ export class ProcessTools {
 				then((result) => { return this.sendDataPopulateDataColumns(refProcess, refStep, result); }).
 				then((result) => { return this.sendDataPopulateDescriptionColumns(refProcess, refStep, result); }).
 				then((result) => { return this.sendDataCreateFile(refProcess, refStep, result); }).
-				then(() => { return this.sendDataSendFile(refProcess, refStep); }).
+				then((result) => { return this.sendDataSendFile(refProcess, refStep, result); }).
 				then(resolve).
 				catch(reject);
 		});
@@ -906,20 +1063,52 @@ export class ProcessTools {
 								sheet.columns = curColumns;
 								sheet.addRows(rows);
 							}
-							workbook.xlsx.writeFile('./PROCESS' + refProcess.id + '_CRSTBL.xlsx').then(function () {
-								resolve(refDefinitions);
-							}).catch(reject);
+							resolve({ workbook: workbook, refDefinitions: refDefinitions });
+							// workbook.xlsx.writeFile('./PROCESS' + refProcess.id + '_CRSTBL.xlsx').then(function () {
+							// 	resolve(refDefinitions);
+							// }).catch(reject);
 						}
 					});
 				}).
 				catch(reject);
 		});
 	};
-	private sendDataSendFile = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning) => {
+	private workbookToStreamBuffer = (workbook: any) => {
 		return new Promise((resolve, reject) => {
-			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Sending data file.').
+			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
+			workbook.xlsx.write(myWritableStreamBuffer).
 				then(() => {
-					return Promise.reject('sendDataSendFile is not ready yet');
+					resolve(myWritableStreamBuffer);
+				}).
+				catch(reject);
+		});
+	};
+	private sendDataSendFile = (refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefs: any) => {
+		return new Promise((resolve, reject) => {
+			let fromAddress: string; fromAddress = '';
+			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Sending data file.').
+				then(() => { return this.settingsTool.getOne('systemadminemailaddress'); }).
+				then((systemadminemailaddress: any) => {
+					fromAddress = systemadminemailaddress.value;
+					return this.workbookToStreamBuffer(refDefs.workbook);
+				}).
+				then((theStream: any) => {
+					return this.mailTool.sendMail({
+						from: fromAddress,
+						to: refProcess.recepients,
+						subject: 'Data File for Process: ' + refProcess.name,
+						text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\nKerzner Hyperion Team',
+						attachments: [
+							{
+								filename: refProcess.name + ' Data File (' + this.tools.getFormattedDateTime() + ').xlsx',
+								content: theStream.getContents()
+							}
+						]
+					});
+				}).
+				then((result) => {
+					console.log(result);
+					return Promise.resolve('ok');
 				}).
 				then(resolve).
 				catch(reject);

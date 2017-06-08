@@ -9,6 +9,7 @@ export interface DimeProcessRunning {
 	source: number,
 	target: number,
 	status: number,
+	erroremail: string,
 	steps: DimeProcessStepRunning[],
 	sourceEnvironment: DimeEnvironment,
 	sourceStream: DimeStream,
@@ -25,5 +26,6 @@ export interface DimeProcessRunning {
 	wherersWithSrc: string[],
 	pullResult: any[],
 	recepients: string,
-	CRSTBLDescribedFields: any[]
+	CRSTBLDescribedFields: any[],
+	mapList: number[]
 }

@@ -4,7 +4,7 @@ import * as express from 'express';
 import { IPool } from 'mysql';
 
 import { Rester } from '../tools/tools.rester';
-import { MainTools } from '../config/config.tools';
+import { MainTools } from '../tools/tools.main';
 import { ProcessTools } from '../tools/tools.dime.process';
 
 export class ApiDimeProcess {

@@ -12,11 +12,11 @@ import { SystemConfig } from '../../shared/model/systemconfig';
 
 import { Application } from 'express';
 import { initializeRestApi } from '../api/api';
-import { MainTools } from './config.tools';
+import { MainTools } from '../tools/tools.main';
 
 export function initiateApplicationWorker(refDB: IPool, refConfig: SystemConfig) {
 	const app: Application = express();
-	const mainTools = new MainTools(refConfig);
+	const mainTools = new MainTools(refConfig, refDB);
 
 	app.use(bodyParser.json({ limit: '100mb' }));
 	app.use(bodyParser.text({ limit: '100mb' }));

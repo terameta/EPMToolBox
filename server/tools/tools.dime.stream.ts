@@ -1,7 +1,7 @@
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { IPool } from 'mysql';
 
-import { MainTools } from '../config/config.tools';
+import { MainTools } from './tools.main';
 import { DimeStream } from '../../shared/model/dime/stream';
 import { EnvironmentTools } from './tools.dime.environment';
 

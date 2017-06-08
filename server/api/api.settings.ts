@@ -5,21 +5,22 @@ import { IPool } from 'mysql';
 import { MainTools } from '../tools/tools.main';
 import { Rester } from '../tools/tools.rester';
 import { ATLogger } from '../tools/tools.log';
+import { SettingsTool } from '../tools/tools.settings';
 
-export class ApiLog {
+export class ApiSettings {
 	apiRoutes: express.Router;
 	rester: Rester;
-	logTool: ATLogger;
+	settingsTool: SettingsTool;
 
 	constructor(public app: Application, public db: IPool, public tools: MainTools) {
 		this.apiRoutes = express.Router();
-		this.logTool = new ATLogger(this.db, this.tools);
+		this.settingsTool = new SettingsTool(this.db, this.tools);
 		this.rester = new Rester(this.tools);
 		this.setRoutes();
-		this.app.use('/api/log', this.apiRoutes);
+		this.app.use('/api/settings', this.apiRoutes);
 	}
 
 	private setRoutes = () => {
-		this.apiRoutes.get('/:id', (req, res) => { this.rester.respond(this.logTool.checkLog, req.params.id, req, res); });
+		this.apiRoutes.put('/all', (req, res) => { this.rester.respond(this.settingsTool.updateAll, req.body, req, res); });
 	}
 }
