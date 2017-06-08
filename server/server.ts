@@ -11,7 +11,7 @@ const numCPUs = cpus().length;
 const configuration = JSON.parse(fs.readFileSync('./system.conf', 'utf8'));
 
 const db: mysql.IPool = mysql.createPool({
-	connectionLimit: 100,
+	connectionLimit: 10,
 	queueLimit: 0,
 	host: configuration.mysql.host,
 	port: configuration.mysql.port,
@@ -40,3 +40,22 @@ if (cluster.isMaster) {
 	}
 }
 
+function exitHandler(options: any, err: any) {
+	if (options.cleanup) {
+		console.log('cleaning');
+		db.end(() => {
+			console.log('All connections are closed');
+		});
+	}
+	if (err) { console.log(err.stack); }
+	if (options.exit) { process.exit(); }
+}
+
+// do something when app is closing
+process.on('exit', exitHandler.bind(null, { cleanup: true }));
+
+// catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, { exit: true }));
+
+// catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
