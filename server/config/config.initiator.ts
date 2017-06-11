@@ -382,6 +382,15 @@ modificationList.push({
 });
 modificationList.push({
 	type: 'addNewColumn',
+	tableName: 'streamfields',
+	columnName: 'generation2members',
+	columnType: 'VARCHAR(4096)',
+	afterCol: 'ddfDateFormat',
+	isNullable: true,
+	defaultValue: ''
+});
+modificationList.push({
+	type: 'addNewColumn',
 	tableName: 'logs',
 	columnName: 'reftype',
 	columnType: 'VARCHAR(256)',
