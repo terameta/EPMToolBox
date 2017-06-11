@@ -206,9 +206,11 @@
 							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Cross Tab?</th>
 							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Month?</th>
 							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is Data?</th>
-							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' || mainService.curItemEnvironmentType != 'HP'">Should Ignore for Crosstab?</th>
+							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Is CrossTab?</th>
+							<th *ngIf="mainService.curItemEnvironmentType == 'PBCS' || mainService.curItemEnvironmentType == 'HP'">Should Ignore for Crosstab?</th>
 							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Aggregate Function</th>
 							<th *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">Assign Properties</th>
+							<th *ngIf="mainService.curItemEnvironmentType == 'PBCS'">Generation 2 Member List (Children of #root member)</th>
 							<th>Actions</th>
 						</tr>
 						<tr *ngFor="let curField of mainService.curItemAssignedFields;let i = index;let last=last;let first=first">
@@ -222,7 +224,7 @@
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isMonth" ng-true-value="1" ng-false-value="0"></td>
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isData" ng-true-value="1" ng-false-value="0"></td>
-							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' || mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
+							<td><input type="checkbox" [(ngModel)]="curField.isCrossTab" ng-true-value="1" ng-false-value="0"></td>
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">
 								<select *ngIf="curField.isData == 1" [(ngModel)]="curField.aggregateFunction">
 									<option value="">NONE</option>
@@ -252,6 +254,9 @@
 									<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
 								</div>
 							</td>
+							<th *ngIf="mainService.curItemEnvironmentType == 'PBCS'">
+								<input type="text" class="form-control" [(ngModel)]="curField.generation2members" >
+							</th>
 							<td>
 								<div class="btn-group btn-group-xs" role="group">
 									<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.fieldMove(mainService.curItemAssignedFields, curField, 'down')"><i class="fa fa-caret-down fa-fw" aria-hidden="true"></i></button>

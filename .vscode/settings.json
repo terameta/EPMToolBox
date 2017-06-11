@@ -39,5 +39,6 @@
 	"html.format.indentInnerHtml": true,
 	"html.format.endWithNewline": true,
 	"html.suggest.angular1": false,
-	"html.format.enable": false
+	"html.format.enable": false,
+	"editor.minimap.enabled": false
 }
