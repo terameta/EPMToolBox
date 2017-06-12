@@ -532,33 +532,33 @@ export class ProcessTools {
 					this.logTool.appendLog(refProcess.status, logText).
 						then(() => {
 							if (curStep.type === 'srcprocedure') {
-								this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pulldata') {
-								this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'mapdata') {
 								refProcess.mapList.push(curStep.referedid);
-								this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'manipulate') {
-								this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pushdata') {
 								this.runPushData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'tarprocedure') {
-								this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'senddata') {
-								this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'sendmissing') {
-								this.runSendMissing(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runSendMissing(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'sendlogs') {
-								this.runSendLog(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								// this.runSendLog(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else {
 								reject('This is not a known step type (' + curStep.type + ')');
 							}

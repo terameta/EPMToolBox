@@ -229,18 +229,11 @@ export class PBCSTools {
 				}).
 				then(resolve).
 				catch(reject);
-			// console.log('===========================================');
-			// console.log('===========================================');
-			// console.log(refObj);
-			// console.log('===========================================');
-			// console.log(refObj.procedure);
-			// console.log('===========================================');
 		});
 	};
 	private pbcsRunProcedureAction = (refObj: DimeEnvironmentPBCS, toPost: any) => {
 		return new Promise((resolve, reject) => {
 			const procedureURL = refObj.resturl + '/applications/' + refObj.database + '/jobs';
-			console.log(toPost);
 			request.post({
 				url: procedureURL,
 				auth: {
@@ -262,7 +255,7 @@ export class PBCSTools {
 							reject(JSON.stringify({ issue: issue, result: body }));
 						});
 				}
-			})
+			});
 		});
 	}
 	private pbcsRunProcedureWaitForCompletion = (refObj: DimeEnvironmentPBCS, curResult: any) => {
@@ -403,10 +396,83 @@ export class PBCSTools {
 	};
 	public writeData = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('writeData Update writeData part of the tools.pbcs.ts file');
-			console.log('!!!!!!!!!!!!');
-			reject('writaData Update this part of the tools.pbcs.ts file');
+			console.log(refObj);
+			let toSend: any; toSend = {};
+			toSend.aggregateEssbaseData = false;
+			toSend.cellNotesOption = 'Overwrite';
+			toSend.dateFormat = 'YYYY-MM-DD';
+			toSend.dataGrid = {};
+			toSend.dataGrid.pov = [];
+			Object.keys(refObj).forEach((curKey: any) => {
+				console.log(curKey);
+			});
+			let denseFields: string[]; denseFields = [];
+			let isFieldDense: boolean;
+			Object.keys(refObj.data[0]).forEach((curKey: string) => {
+				isFieldDense = true;
+				refObj.sparseDims.forEach((curSparseDim: string) => {
+					if (curSparseDim === curKey) {
+						isFieldDense = false;
+					}
+				});
+				if (isFieldDense) {
+					denseFields.push(curKey);
+				}
+			});
+			console.log(denseFields);
+			toSend.dataGrid.columns = denseFields;
+			toSend.dataGrid.rows = [];
+			const numberOfSparseDimensions = refObj.sparseDims.length;
+			let toPopulate: any;
+			refObj.data.forEach((curTuple: any) => {
+				toPopulate = {};
+				toPopulate.headers = [];
+				toPopulate.data = [];
+				Object.keys(curTuple).forEach((curSparseField: string, curKey: number) => {
+					if (curKey < numberOfSparseDimensions) {
+						toPopulate.headers.push(curTuple[curSparseField]);
+					}
+				});
+				denseFields.forEach((curDenseField: string) => {
+					toPopulate.data.push(curTuple[curDenseField]);
+				});
+				toSend.dataGrid.rows.push(toPopulate);
+			});
+
+			this.initiateRest(refObj).
+				then((innerObj: DimeEnvironmentPBCS) => {
+					const procedureURL = innerObj.resturl + '/applications/' + innerObj.database + '/plantypes/' + innerObj.table + '/importdataslice';
+					request.post({
+						url: procedureURL,
+						auth: {
+							user: refObj.username,
+							pass: refObj.password,
+							sendImmediately: true
+						},
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(toSend)
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							// console.log('===========================================');
+							// console.log('===========================================');
+							// console.log(body);
+							// console.log('===========================================');
+							// console.log('===========================================');
+							// reject('Data Injected');
+							this.tools.parseJsonString(body).
+								then((result: any) => {
+									console.log(result);
+									reject(JSON.stringify(body));
+								}).
+								catch((issue) => {
+									reject(JSON.stringify({ issue: issue, result: body }));
+								});
+						}
+					});
+				}).
+				catch(reject);
 		});
 	};
 }
