@@ -21,6 +21,7 @@ const db: mysql.IPool = mysql.createPool({
 });
 
 if (cluster.isMaster) {
+	let cronerpid: number;
 
 	interface ApplicationEnvironmentProperties { isCroner: boolean; }
 	const croner_env: ApplicationEnvironmentProperties = { isCroner: true };
@@ -31,7 +32,24 @@ if (cluster.isMaster) {
 	for (let i = 0; i < numCPUs; i++) {
 		cluster.fork(worker_env);
 	}
-	cluster.fork(croner_env);
+	cronerpid = cluster.fork(croner_env).process.pid;
+
+	cluster.on('exit', (worker, code, signal) => {
+		if (worker.process.pid === cronerpid) {
+			console.log('Croner', worker.process.pid, 'died');
+			cronerpid = cluster.fork(croner_env).process.pid;
+		} else {
+			console.log('Worker', worker.process.pid, 'died');
+			cluster.fork(worker_env);
+		}
+	});
+	cluster.on('online', (worker) => {
+		if (worker.process.pid === cronerpid) {
+			console.log('Croner ' + worker.process.pid + ' is online.');
+		} else {
+			console.log('Worker ' + worker.process.pid + ' is online.');
+		}
+	});
 } else /* this is not cluster master */ {
 	if (process.env.isCroner === 'true') {
 		initiateCronWorker(db);

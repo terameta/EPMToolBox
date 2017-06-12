@@ -471,7 +471,7 @@ export class MapTools {
 									finalFields.push({
 										id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL'
 									});
-									if (curField.isDescribed || sourceEnvironment.typedetails.value === 'HP') {
+									if (curField.isDescribed || sourceEnvironment.typedetails.value === 'HP' || sourceEnvironment.typedetails.value === 'PBCS') {
 										finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + sourceStream.id + '_DESCTBL' + curField.id });
 									}
 								}
@@ -482,7 +482,7 @@ export class MapTools {
 								if (targetEnvironment.typedetails && mapField.srctar === 'target' && mapField.name === curField.name) {
 									// console.log(curField.name, curField.isDescribed, targetEnvironment.typedetails.value);
 									finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL' });
-									if (curField.isDescribed || targetEnvironment.typedetails.value === 'HP') {
+									if (curField.isDescribed || targetEnvironment.typedetails.value === 'HP' || targetEnvironment.typedetails.value === 'PBCS') {
 										finalFields.push({ id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + targetStream.id + '_DESCTBL' + curField.id });
 									}
 								}
@@ -521,7 +521,7 @@ export class MapTools {
 								selectQuery += curField.table + '.RefField';
 							}
 						});
-						console.log(selectQuery);
+						// console.log(selectQuery);
 						this.db.query(selectQuery, (err, result, fields) => {
 							if (err) {
 								reject(err);

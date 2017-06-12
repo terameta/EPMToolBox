@@ -532,15 +532,15 @@ export class ProcessTools {
 					this.logTool.appendLog(refProcess.status, logText).
 						then(() => {
 							if (curStep.type === 'srcprocedure') {
-								// this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pulldata') {
-								// this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'mapdata') {
 								refProcess.mapList.push(curStep.referedid);
-								// this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'manipulate') {
 								this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
@@ -1322,7 +1322,10 @@ export class ProcessTools {
 						}
 					}
 					selector += curField.name;
-					this.db.query('SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart, (err, rows, fields) => {
+					const selectQuery = 'SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
+					console.log(curField);
+					console.log(selectQuery);
+					this.db.query(selectQuery, (err, rows, fields) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -1937,25 +1940,14 @@ export class ProcessTools {
 	}
 	private populateStreamDescriptions = (refEnvironment: DimeEnvironment, refStream: DimeStream, refFields: DimeStreamField[]) => {
 		let promises: any[]; promises = [];
-		// refFields.forEach((curField) => {
-		// 	let envType: any; envType = refEnvironment.typedetails;
-		// 	if (!envType) { envType = { value: '---' }; }
-		// 	if (curField.isDescribed || envType.value === 'HP' || envType.value === 'PBCS') {
-		// 		promises.push(this.populateStreamDescriptionsAction(refEnvironment, refStream, curField));
-		// 	}
-		// });
-		// return Promise.all(promises);
-		const curField = refFields[0];
-		return new Promise((resolve, reject) => {
-			this.populateStreamDescriptionsAction(refEnvironment, refStream, curField).then(() => {
-				console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-				console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-				console.log('burayı geri almak lazım');
-				console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-				console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-				reject('burayı geri almak lazım');
-			}).catch(reject);
+		refFields.forEach((curField) => {
+			let envType: any; envType = refEnvironment.typedetails;
+			if (!envType) { envType = { value: '---' }; }
+			if (curField.isDescribed || envType.value === 'HP' || envType.value === 'PBCS') {
+				promises.push(this.populateStreamDescriptionsAction(refEnvironment, refStream, curField));
+			}
 		});
+		return Promise.all(promises);
 	};
 	private populateStreamDescriptionsAction = (refEnvironment: DimeEnvironment, refStream: DimeStream, refField: DimeStreamField) => {
 		return new Promise((resolve, reject) => {

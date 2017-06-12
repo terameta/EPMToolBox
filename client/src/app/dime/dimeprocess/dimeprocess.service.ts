@@ -35,6 +35,7 @@ export class DimeProcessService {
 	curItemMissingMapRecepients: { address: string }[];
 	curStep: DimeProcessStep;
 	curStepManipulations: any[];
+	curStepIsPBCS: boolean;
 	curItemDefaultTargets: any;
 	curItemFilters: any;
 	currentLog: any;
@@ -185,6 +186,7 @@ export class DimeProcessService {
 		this.curItemMissingMapRecepients = [];
 		this.curItemDefaultTargets = {};
 		this.curItemFilters = {};
+		this.curStepIsPBCS = false;
 	};
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
@@ -297,12 +299,16 @@ export class DimeProcessService {
 			});
 	};
 	public stepPrepare = () => {
+		this.curStepIsPBCS = false;
 		this.curStepManipulations = [];
 		if (this.curStep.type === 'manipulate' && this.curStep.details) {
 			this.curStepManipulations = JSON.parse(this.curStep.details);
 		}
-		if (this.curStep.type === 'tarprocedure' && this.curStep.details) {
-			this.curItemSelectedProcedure = JSON.parse(this.curStep.details);
+		if (this.curStep.type === 'tarprocedure') {
+			if (this.curStep.details) {
+				this.curItemSelectedProcedure = JSON.parse(this.curStep.details);
+				this.stepProcedureSelected(this.curItemSelectedProcedure);
+			}
 			this.stepListProcedures();
 		}
 		if (this.curStep.type === 'sendlogs' && this.curStep.details) {
@@ -416,6 +422,12 @@ export class DimeProcessService {
 			this.toastr.error('Failed to list procedures.', this.serviceName);
 		}
 	}
+	public stepPBCSProcedureVariableAdd = () => {
+		if (!this.curItemSelectedProcedure.variables) {
+			this.curItemSelectedProcedure.variables = [];
+		}
+		this.curItemSelectedProcedure.variables.push({ description: '' });
+	}
 	public stepProcedureSelected = (selectedProcedure: any, numTry?: number) => {
 		if (selectedProcedure !== undefined) {
 			this.curItemSelectedProcedure = selectedProcedure;
@@ -424,9 +436,15 @@ export class DimeProcessService {
 		if (this.curItem.target && this.curItemTargetStream.id) {
 			this.environmentService.listProcedureDetails(this.curItem.target, { stream: this.curItemTargetStream, procedure: selectedProcedure }).
 				subscribe((data) => {
-					console.log(data);
-					this.curItemSelectedProcedure.variables = data;
-					this.toastr.info('Received procedure details');
+					if (Array.isArray(data)) {
+						this.curItemSelectedProcedure.variables = data;
+						this.toastr.info('Received procedure details');
+					} else if (data.environmentType === 'PBCS') {
+						this.curStepIsPBCS = true;
+						this.toastr.info('Received procedure details');
+					} else {
+						this.toastr.error('We could not receive a proper definition for the procedure.');
+					}
 				}, (error) => {
 					this.toastr.error('Failed to receive procedure details.', this.serviceName);
 					console.log(error);

@@ -169,28 +169,135 @@ export class PBCSTools {
 	};
 	public listRules = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('Update this part of the tools.pbcs.ts file');
-			console.log('!!!!!!!!!!!!');
-			reject('Update this part of the tools.pbcs.ts file');
+			this.initiateRest(refObj).
+				then((innerObj: DimeEnvironmentPBCS) => {
+					request.get({
+						url: innerObj.resturl + '/applications/' + innerObj.database + '/jobdefinitions',
+						auth: {
+							user: innerObj.username,
+							pass: innerObj.password,
+							sendImmediately: true
+						},
+						headers: { 'Content-Type': 'application/json' }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							const ruleList: { name: string, type: string }[] = [];
+							this.tools.parseJsonString(body).
+								then((result: any) => {
+									if (!result) {
+										reject('No rules object');
+									} else if (!result.items) {
+										resolve(ruleList);
+									} else {
+										result.items.forEach((curRule: { jobName: string, jobType: string }) => {
+											if (curRule.jobType === 'Rules') {
+												ruleList.push({ name: curRule.jobName, type: curRule.jobType });
+											}
+										});
+										resolve(ruleList);
+									}
+								}).
+								catch(reject);
+						}
+					});
+				}).
+				catch(reject);
 		});
 	};
 	public listRuleDetails = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('Update this part of the tools.pbcs.ts file');
-			console.log('!!!!!!!!!!!!');
-			reject('Update this part of the tools.pbcs.ts file');
+			resolve({ environmentType: 'PBCS' });
 		});
 	};
 	public runProcedure = (refObj: DimeEnvironmentPBCS) => {
 		return new Promise((resolve, reject) => {
-			console.log('!!!!!!!!!!!!');
-			console.log('Update this part of the tools.pbcs.ts file');
-			console.log('!!!!!!!!!!!!');
-			reject('Update this part of the tools.pbcs.ts file');
+			this.initiateRest(refObj).
+				then((innerObj: DimeEnvironmentPBCS) => {
+					const curProcedure: any = refObj.procedure;
+					let toPost: any; toPost = {};
+					toPost.jobType = 'RULES';
+					toPost.jobName = curProcedure.name;
+					if (curProcedure.variables) {
+						toPost.parameters = {};
+						curProcedure.variables.forEach((curVariable: { name: string, value: string }) => {
+							toPost.parameters[curVariable.name] = curVariable.value;
+						});
+					}
+					return this.pbcsRunProcedureAction(innerObj, toPost);
+				}).
+				then(resolve).
+				catch(reject);
+			// console.log('===========================================');
+			// console.log('===========================================');
+			// console.log(refObj);
+			// console.log('===========================================');
+			// console.log(refObj.procedure);
+			// console.log('===========================================');
 		});
 	};
+	private pbcsRunProcedureAction = (refObj: DimeEnvironmentPBCS, toPost: any) => {
+		return new Promise((resolve, reject) => {
+			const procedureURL = refObj.resturl + '/applications/' + refObj.database + '/jobs';
+			console.log(toPost);
+			request.post({
+				url: procedureURL,
+				auth: {
+					user: refObj.username,
+					pass: refObj.password,
+					sendImmediately: true
+				},
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(toPost)
+			}, (err, response, body) => {
+				if (err) {
+					reject(err);
+				} else {
+					this.tools.parseJsonString(body).
+						then((result: any) => {
+							resolve(this.pbcsRunProcedureWaitForCompletion(refObj, result));
+						}).
+						catch((issue) => {
+							reject(JSON.stringify({ issue: issue, result: body }));
+						});
+				}
+			})
+		});
+	}
+	private pbcsRunProcedureWaitForCompletion = (refObj: DimeEnvironmentPBCS, curResult: any) => {
+		return new Promise((resolve, reject) => {
+			const procedureURL = refObj.resturl + '/applications/' + refObj.database + '/jobs/' + curResult.jobId;
+			if (curResult.status < 0) {
+				setTimeout(() => {
+					request.get({
+						url: procedureURL,
+						auth: {
+							user: refObj.username,
+							pass: refObj.password,
+							sendImmediately: true
+						},
+						headers: { 'Content-Type': 'application/json' }
+					}, (err, response, body) => {
+						if (err) {
+							reject(err);
+						} else {
+							this.tools.parseJsonString(body).
+								then((result: any) => {
+									resolve(this.pbcsRunProcedureWaitForCompletion(refObj, result));
+								}).
+								catch((issue) => {
+									reject(JSON.stringify({ issue: issue, result: body }));
+								});
+						}
+					});
+				}, 3000);
+			} else {
+				resolve();
+			}
+		});
+
+	}
 	public getDescriptions = (refObj: any) => {
 		return new Promise((resolve, reject) => {
 			if (!refObj) {
@@ -212,29 +319,42 @@ export class PBCSTools {
 	};
 	private pbcsGetDescriptions = (refObj: DimeEnvironmentPBCS, memberList: any) => {
 		return new Promise((resolve, reject) => {
-			/*
-			const promises: any[] = [];
-			memberList.forEach((curMember) => {
-				promises.push(this.pbcsGetDescriptionsAction(refObj, curMember));
-			});
-			Promise.all(promises).
-				then((result) => {
-					console.log(result);
-					reject('pbcsGetDescriptions is not ready yet');
-				}).
-				catch(reject);
-			*/
+			const allMembers: any[] = [];
 			async.eachOfSeries(memberList, (item, key, callback) => {
 				this.pbcsGetDescriptionsAction(refObj, item).
 					then((result) => {
-						console.log(item, 'finished');
-						console.log(result);
+						if (Array.isArray(result)) {
+							const curLen = result.length;
+							let allLen: number;
+							let shouldPush: boolean;
+							for (let i = 0; i < curLen; i++) {
+								allLen = allMembers.length;
+								shouldPush = true;
+								for (let t = 0; t < allLen; t++) {
+									if (allMembers[t].RefField === result[i].RefField) {
+										shouldPush = false;
+										break;
+									}
+								}
+								if (shouldPush) {
+									allMembers.push(result[i]);
+								}
+							}
+						}
 						callback();
 					}).
 					catch(callback);
 			}, (err: any) => {
-				console.log('all finished', err);
-				reject('We fetched');
+				if (err) {
+					reject(err);
+				} else {
+					allMembers.sort((a: any, b: any) => {
+						if (a.RefField > b.RefField) { return 1; }
+						if (a.RefField < b.RefField) { return -1; }
+						return 0;
+					});
+					resolve(allMembers);
+				}
 			});
 		});
 	};
@@ -284,9 +404,9 @@ export class PBCSTools {
 	public writeData = (refObj: any) => {
 		return new Promise((resolve, reject) => {
 			console.log('!!!!!!!!!!!!');
-			console.log('Update writeData part of the tools.pbcs.ts file');
+			console.log('writeData Update writeData part of the tools.pbcs.ts file');
 			console.log('!!!!!!!!!!!!');
-			reject('Update this part of the tools.pbcs.ts file');
+			reject('writaData Update this part of the tools.pbcs.ts file');
 		});
 	};
 }

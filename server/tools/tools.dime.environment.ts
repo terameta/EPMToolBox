@@ -279,7 +279,6 @@ export class EnvironmentTools {
 	};
 
 	public listProcedureDetails = (refObj: { stream: DimeStream, procedure: any }) => {
-		console.log(refObj);
 		return new Promise((resolve, reject) => {
 			this.getEnvironmentDetails({ id: refObj.stream.environment }, true).
 				then(this.getTypeDetails).
