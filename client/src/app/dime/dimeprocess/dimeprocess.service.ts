@@ -652,5 +652,15 @@ export class DimeProcessService {
 		} else {
 			this.toastr.info('Unlock of process cancelled.', this.serviceName);
 		}
+	};
+	public sendDataFile = (id: number) => {
+		this.authHttp.get(this.baseUrl + '/sendDataFile/' + id).
+			map(response => response.json()).
+			subscribe((result) => {
+				this.toastr.info('Process data file will be sent to your inbox.');
+			}, (error) => {
+				this.toastr.error('Process file can not be send.', this.serviceName);
+				console.error(error);
+			});
 	}
 }

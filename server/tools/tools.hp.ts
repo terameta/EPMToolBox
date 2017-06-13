@@ -935,7 +935,7 @@ export class HPTools {
 								}
 								reject(issue);
 							} else {
-								resolve(refObj);
+								resolve('Data is pushed to Hyperion Planning');
 							}
 						}
 					});

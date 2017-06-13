@@ -396,16 +396,12 @@ export class PBCSTools {
 	};
 	public writeData = (refObj: any) => {
 		return new Promise((resolve, reject) => {
-			console.log(refObj);
 			let toSend: any; toSend = {};
 			toSend.aggregateEssbaseData = false;
 			toSend.cellNotesOption = 'Overwrite';
 			toSend.dateFormat = 'YYYY-MM-DD';
 			toSend.dataGrid = {};
 			toSend.dataGrid.pov = [];
-			Object.keys(refObj).forEach((curKey: any) => {
-				console.log(curKey);
-			});
 			let denseFields: string[]; denseFields = [];
 			let isFieldDense: boolean;
 			Object.keys(refObj.data[0]).forEach((curKey: string) => {
@@ -419,11 +415,12 @@ export class PBCSTools {
 					denseFields.push(curKey);
 				}
 			});
-			console.log(denseFields);
-			toSend.dataGrid.columns = denseFields;
+			toSend.dataGrid.columns = [];
+			toSend.dataGrid.columns.push(denseFields);
 			toSend.dataGrid.rows = [];
 			const numberOfSparseDimensions = refObj.sparseDims.length;
 			let toPopulate: any;
+			const numberOfTuples = refObj.data.length;
 			refObj.data.forEach((curTuple: any) => {
 				toPopulate = {};
 				toPopulate.headers = [];
@@ -438,7 +435,6 @@ export class PBCSTools {
 				});
 				toSend.dataGrid.rows.push(toPopulate);
 			});
-
 			this.initiateRest(refObj).
 				then((innerObj: DimeEnvironmentPBCS) => {
 					const procedureURL = innerObj.resturl + '/applications/' + innerObj.database + '/plantypes/' + innerObj.table + '/importdataslice';
@@ -455,16 +451,9 @@ export class PBCSTools {
 						if (err) {
 							reject(err);
 						} else {
-							// console.log('===========================================');
-							// console.log('===========================================');
-							// console.log(body);
-							// console.log('===========================================');
-							// console.log('===========================================');
-							// reject('Data Injected');
 							this.tools.parseJsonString(body).
 								then((result: any) => {
-									console.log(result);
-									reject(JSON.stringify(body));
+									resolve(body);
 								}).
 								catch((issue) => {
 									reject(JSON.stringify({ issue: issue, result: body }));

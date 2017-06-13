@@ -367,7 +367,9 @@ export class ProcessTools {
 					then(() => {
 						let promises: any[]; promises = [];
 						refObj.filters.forEach((curFilter: any) => {
-							promises.push(this.applyFilter(curFilter));
+							if (curFilter.filterfrom || curFilter.filterto || curFilter.filtertext || curFilter.filterbeq || curFilter.filterseq) {
+								promises.push(this.applyFilter(curFilter));
+							}
 						});
 						return Promise.all(promises);
 					}).
@@ -532,33 +534,33 @@ export class ProcessTools {
 					this.logTool.appendLog(refProcess.status, logText).
 						then(() => {
 							if (curStep.type === 'srcprocedure') {
-								// this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSourceProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pulldata') {
-								// this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runPullData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'mapdata') {
 								refProcess.mapList.push(curStep.referedid);
-								// this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runMapData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'manipulate') {
-								// this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runManipulations(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'pushdata') {
 								this.runPushData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'tarprocedure') {
-								// this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runTargetProcedure(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'senddata') {
-								// this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSendData(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'sendmissing') {
-								// this.runSendMissing(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSendMissing(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if (curStep.type === 'sendlogs') {
-								// this.runSendLog(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
-								curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+								this.runSendLog(refProcess, curStep).then((result: any) => { curStep.isPending = false; resolve(this.runStepsAction(refProcess)); }).catch(reject);
+								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else {
 								reject('This is not a known step type (' + curStep.type + ')');
 							}
@@ -854,7 +856,7 @@ export class ProcessTools {
 					refProcess.CRSTBLDescribedFields = [];
 
 					refProcess.sourceStreamFields.forEach((curField: any) => {
-						if (curField.isCrossTab === 0 && curField.isData === 0) {
+						if (curField.isCrossTab === 0 && curField.isData === 0 && curField.shouldIgnore === 0) {
 							createQuery += '\n';
 							if (refProcess.sourceStreamType === 'RDBT' && curField.type === 'string') {
 								createQuery += ', SRC_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -887,7 +889,7 @@ export class ProcessTools {
 					});
 
 					refProcess.targetStreamFields.forEach((curField) => {
-						if (!curField.isCrossTab) {
+						if (!curField.isCrossTab && !curField.shouldIgnore) {
 							createQuery += '\n';
 							if (refProcess.sourceStreamType === 'RDBT' && curField.type === 'string') {
 								createQuery += ', TAR_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -1323,8 +1325,8 @@ export class ProcessTools {
 					}
 					selector += curField.name;
 					const selectQuery = 'SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
-					console.log(curField);
-					console.log(selectQuery);
+					// console.log(curField);
+					// console.log(selectQuery);
 					this.db.query(selectQuery, (err, rows, fields) => {
 						if (err) {
 							reject(err);
@@ -1335,29 +1337,29 @@ export class ProcessTools {
 								});
 							} else {
 								rows.forEach((curRow: any, curKey: number) => {
-									if (curRow.DVALUE === 'Jan') {
+									if (curRow.DVALUE === 'Jan' || curRow.DVALUE === 'January') {
 										rows[curKey].sorter = 1;
-									} else if (curRow.DVALUE === 'Feb') {
+									} else if (curRow.DVALUE === 'Feb' || curRow.DVALUE === 'February') {
 										rows[curKey].sorter = 2;
-									} else if (curRow.DVALUE === 'Mar') {
+									} else if (curRow.DVALUE === 'Mar' || curRow.DVALUE === 'March') {
 										rows[curKey].sorter = 3;
-									} else if (curRow.DVALUE === 'Apr') {
+									} else if (curRow.DVALUE === 'Apr' || curRow.DVALUE === 'April') {
 										rows[curKey].sorter = 4;
 									} else if (curRow.DVALUE === 'May') {
 										rows[curKey].sorter = 5;
-									} else if (curRow.DVALUE === 'Jun') {
+									} else if (curRow.DVALUE === 'Jun' || curRow.DVALUE === 'June') {
 										rows[curKey].sorter = 6;
-									} else if (curRow.DVALUE === 'Jul') {
+									} else if (curRow.DVALUE === 'Jul' || curRow.DVALUE === 'July') {
 										rows[curKey].sorter = 7;
-									} else if (curRow.DVALUE === 'Aug') {
+									} else if (curRow.DVALUE === 'Aug' || curRow.DVALUE === 'August') {
 										rows[curKey].sorter = 8;
-									} else if (curRow.DVALUE === 'Sep') {
+									} else if (curRow.DVALUE === 'Sep' || curRow.DVALUE === 'September') {
 										rows[curKey].sorter = 9;
-									} else if (curRow.DVALUE === 'Oct') {
+									} else if (curRow.DVALUE === 'Oct' || curRow.DVALUE === 'October') {
 										rows[curKey].sorter = 10;
-									} else if (curRow.DVALUE === 'Nov') {
+									} else if (curRow.DVALUE === 'Nov' || curRow.DVALUE === 'November') {
 										rows[curKey].sorter = 11;
-									} else if (curRow.DVALUE === 'Dec') {
+									} else if (curRow.DVALUE === 'Dec' || curRow.DVALUE === 'December') {
 										rows[curKey].sorter = 12;
 									} else if (curRow.DVALUE === 'BegBalance') {
 										rows[curKey].sorter = 0;
@@ -1440,6 +1442,8 @@ export class ProcessTools {
 				then(() => { return this.summarizeData(refProcess, refStep); }).
 				then(() => { return this.fetchSummarizedData(refProcess, refStep); }).
 				then((result: any[]) => { return this.pushDataAction(refProcess, refStep, result); }).
+				then((result: any) => { return this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': ' + JSON.stringify(result)); }).
+				then((result: any) => { return this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ': Push data is completed.'); }).
 				then(resolve).
 				catch(reject);
 		});
@@ -1584,9 +1588,9 @@ export class ProcessTools {
 			this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Pushing data to the target.').
 				then(() => {
 					if (!finalData) {
-						this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.').then(() => { resolve(refProcess); });
+						this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.').then(() => { resolve('There is no data to push'); });
 					} else if (finalData.length === 0) {
-						this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.').then(() => { resolve(refProcess); });
+						this.logTool.appendLog(refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.').then(() => { resolve('There is no data to push'); });
 					} else {
 						let sparseDims: string[]; sparseDims = [];
 						for (let i = 0; i < (refProcess.targetStreamFields.length - 1); i++) {
@@ -2490,5 +2494,56 @@ export class ProcessTools {
 	}
 	private isNumeric = (n: any) => {
 		return !isNaN(parseFloat(n)) && isFinite(n);
-	}
+	};
+	public sendDataFile = (refObj: { id: number, requser: any }) => {
+		const id = refObj.id;
+		const requser = refObj.requser;
+		console.log('===========================================');
+		console.log('===========================================');
+		console.log(requser);
+		console.log('===========================================');
+		console.log('===========================================');
+		return new Promise((resolve, reject) => {
+			resolve({ result: 'OK' });
+			let logID: number;
+			let topProcess: DimeProcessRunning;
+			let topStep: DimeProcessStepRunning;
+			this.logTool.openLog('Sending Data File', 0, 'sendDataFile', id).
+				then((newlogid: number) => {
+					logID = newlogid;
+					return this.getOne(id);
+				}).
+				then((innerProcess: DimeProcessRunning) => {
+					topProcess = innerProcess;
+					topProcess.status = logID;
+					topProcess.recepients = requser.email;
+					topStep = { id: 0, process: id, type: '', referedid: id, details: '', sOrder: 1, isPending: false };
+					return this.sendDataCreateFile(topProcess, topStep, { cartesianArray: [] });
+				}).
+				then((result) => {
+					topStep.sOrder = 2;
+					return this.sendDataSendFile(topProcess, topStep, result);
+				}).
+				then(() => {
+					return this.logTool.appendLog(logID, 'Data file is successfully sent.');
+				}).
+				then(() => {
+					return this.logTool.closeLog(logID);
+				}).
+				catch((issue: any) => {
+					this.logTool.appendLog(logID, 'Failed:' + JSON.stringify(issue)).
+						then(() => {
+							return this.logTool.closeLog(logID);
+						}).catch((logissue: any) => {
+							console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+							console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+							console.log('Fatal issue:');
+							console.log(JSON.stringify(logissue));
+							console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+							console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
+						});
+				});
+
+		});
+	};
 }

@@ -134,19 +134,19 @@
 							<td>{{curField.type}}</td>
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'"><input type="checkbox" [(ngModel)]="curField.shouldIgnore"></td>
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">
-								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
+								<div class="input-group" *ngIf="curField.type=='number'">
 									<span class="input-group-addon"><b># of Digits:</b></span>
 									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.precision" min="1" max="65">
 									<span class="input-group-addon">(Min: 1, Max: 65)</span>
 									<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.decimals" min="0" max="{{curField.precision -1 || 0}}">
 									<span class="input-group-addon">(Min: 0, Max: {{curField.precision -1 || 0}})</span>
 								</div>
-								<div class="input-group" *ngIf="curField.type=='string' && !curField.shouldIgnore">
+								<div class="input-group" *ngIf="curField.type=='string'">
 									<span class="input-group-addon"><b># of Chars:</b></span>
 									<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.characters">
 									<span class="input-group-addon">(Max: 1024)</span>
 								</div>
-								<div class="input-group" *ngIf="curField.type=='date' && !curField.shouldIgnore">
+								<div class="input-group" *ngIf="curField.type=='date'">
 									<span class="input-group-addon"><b>Format:</b></span>
 									<input type="text" class="form-control" [(ngModel)]="curField.dateFormat" placeholder="YYYY-MM-DD HH:mm">
 									<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
@@ -236,19 +236,19 @@
 								</select>
 							</td>
 							<td *ngIf="mainService.curItemEnvironmentType != 'PBCS' && mainService.curItemEnvironmentType != 'HP'">
-								<div class="input-group" *ngIf="curField.type=='number' && !curField.shouldIgnore">
+								<div class="input-group" *ngIf="curField.type=='number'">
 									<span class="input-group-addon"><b># of Digits:</b></span>
 									<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.fPrecision" min="1" max="65">
 									<span class="input-group-addon">(Min: 1, Max: 65)</span>
 									<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.fDecimals" min="0" max="{{curField.fPrecision -1 || 0}}">
 									<span class="input-group-addon">(Min: 0, Max: {{curField.fPrecision -1 || 0}})</span>
 								</div>
-								<div class="input-group" *ngIf="curField.type=='string' && !curField.shouldIgnore">
+								<div class="input-group" *ngIf="curField.type=='string'">
 									<span class="input-group-addon"><b># of Chars:</b></span>
 									<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.fCharacters">
 									<span class="input-group-addon">(Max: 1024)</span>
 								</div>
-								<div class="input-group" *ngIf="curField.type=='date' && !curField.shouldIgnore">
+								<div class="input-group" *ngIf="curField.type=='date'">
 									<span class="input-group-addon"><b>Format:</b></span>
 									<input type="text" class="form-control" [(ngModel)]="curField.fDateFormat" placeholder="YYYY-MM-DD HH:mm">
 									<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>

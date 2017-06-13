@@ -37,5 +37,6 @@ export class ApiDimeProcess {
 		this.apiRoutes.put('/filters/:id', (req, res) => { this.rester.respond(this.processTools.applyFilters, req.body, req, res); });
 		this.apiRoutes.get('/run/:id', (req, res) => { this.rester.respond(this.processTools.run, req.params.id, req, res); });
 		this.apiRoutes.get('/unlock/:id', (req, res) => { this.rester.respond(this.processTools.unlock, req.params.id, req, res); });
+		this.apiRoutes.get('/sendDataFile/:id', (req, res) => { this.rester.respond(this.processTools.sendDataFile, { id: req.params.id, requser: req.user }, req, res); });
 	}
 }
