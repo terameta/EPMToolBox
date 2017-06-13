@@ -1,12 +1,12 @@
-import { Observable } from "rxjs/Rx";
-import { Component, OnInit } from "@angular/core";
+import { Observable } from 'rxjs/Rx';
+import { Component, OnInit } from '@angular/core';
 
-import { DimeMapService } from "../dimemap.service";
+import { DimeMapService } from '../dimemap.service';
 
 @Component({
-	selector: "app-dimemap-toolbar",
-	templateUrl: "./dimemap-toolbar.component.html",
-	styleUrls: ["./dimemap-toolbar.component.css"]
+	selector: 'app-dimemap-toolbar',
+	templateUrl: './dimemap-toolbar.component.html',
+	styleUrls: ['./dimemap-toolbar.component.css']
 })
 export class DimemapToolbarComponent implements OnInit {
 

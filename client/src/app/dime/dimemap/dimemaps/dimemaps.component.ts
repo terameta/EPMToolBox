@@ -1,9 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 
 @Component({
-	selector: "app-dimemaps",
-	templateUrl: "./dimemaps.component.html",
-	styleUrls: ["./dimemaps.component.css"]
+	selector: 'app-dimemaps',
+	templateUrl: './dimemaps.component.html',
+	styleUrls: ['./dimemaps.component.css']
 })
 export class DimemapsComponent implements OnInit {
 

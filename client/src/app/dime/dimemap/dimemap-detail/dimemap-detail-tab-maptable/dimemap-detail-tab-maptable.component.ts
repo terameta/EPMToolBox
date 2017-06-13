@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 
 import { DimeMapService } from 'app/dime/dimemap/dimemap.service';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
-import { GridOptions } from 'ag-grid/main';
 
 @Component({
 	selector: 'app-dimemap-detail-tab-maptable',
@@ -13,21 +12,24 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	// private data: any[];
 	// private colHeaders: string[];
 	// private columns: any[];
-	private gridOptions: GridOptions;
 	private rowData: any[];
 	private columnDefs: any[];
 	private sourceCols: any[];
 	private targetCols: any[];
 	private numberofRowsinMap: number;
 
+	private data: any[];
+
 	constructor(
 		private mainService: DimeMapService
 	) {
-		this.gridOptions = <GridOptions>{};
-		this.gridOptions.enableFilter = true;
-		this.gridOptions.enableColResize = true;
 		this.refreshMapTable();
 		this.numberofRowsinMap = 0;
+
+		this.data = [
+			['Afghanistan', '30.552', '1000s', '2013', '0.0244', '27.708', '24.019', '11.215'],
+			['Albania', '2.774', '1000s', '2013', '-0.0100', '2.884', '3.015', '3.228']
+		];
 	}
 
 	ngOnInit() {
@@ -86,13 +88,6 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						});
 					}
 				}
-				this.gridOptions.api.setRowData(result.map);
-				this.gridOptions.api.setColumnDefs(this.columnDefs);
-				this.gridOptions.api.sizeColumnsToFit();
-				this.gridOptions.api.hideOverlay();
-				this.gridOptions.singleClickEdit = true;
-				this.gridOptions.columnApi.autoSizeAllColumns();
-				// this.gridOptions.api.addEventListener('cellValueChanged', this.cellValueChanged);
 				this.windowResized();
 			}, (error) => {
 				console.log(error);
@@ -140,7 +135,6 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		let eGridDiv: any; eGridDiv = document.querySelector('#MapGrid');
 		eGridDiv.style.width = width;
 		eGridDiv.style.height = height;
-		this.gridOptions.api.doLayout();
 	};
 
 }
