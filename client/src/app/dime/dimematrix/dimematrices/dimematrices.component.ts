@@ -5,7 +5,7 @@ import { Component, OnInit } from '@angular/core';
 	templateUrl: './dimematrices.component.html',
 	styleUrls: ['./dimematrices.component.css']
 })
-export class DimematricesComponent implements OnInit {
+export class DimeMatricesComponent implements OnInit {
 
 	constructor() { }
 

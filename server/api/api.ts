@@ -9,6 +9,7 @@ import { ApiLog } from './api.log';
 import { ApiDimeEnvironment } from './api.dime.environment';
 import { ApiDimeStream } from './api.dime.stream';
 import { ApiDimeMap } from './api.dime.map';
+import { ApiDimeMatrix } from './api.dime.matrix';
 import { ApiDimeProcess } from './api.dime.process';
 
 // Access Management Route APIs
@@ -25,6 +26,7 @@ export function initializeRestApi(app: Application, refDB: IPool, refTools: Main
 	const apiDimeEnvironment = new ApiDimeEnvironment(app, refDB, refTools);
 	const apiDimeStream = new ApiDimeStream(app, refDB, refTools);
 	const apiDimeMap = new ApiDimeMap(app, refDB, refTools);
+	const apiDimeMatrix = new ApiDimeMatrix(app, refDB, refTools);
 	const apiDimeProcess = new ApiDimeProcess(app, refDB, refTools);
 
 	const apiAcmServer = new ApiAcmServers(app, refDB, refTools);

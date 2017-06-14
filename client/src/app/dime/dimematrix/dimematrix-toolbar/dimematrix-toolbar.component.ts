@@ -7,7 +7,7 @@ import { DimeMatrixService } from '../dimematrix.service';
 	templateUrl: './dimematrix-toolbar.component.html',
 	styleUrls: ['./dimematrix-toolbar.component.css']
 })
-export class DimematrixToolbarComponent implements OnInit {
+export class DimeMatrixToolbarComponent implements OnInit {
 
 	constructor(private mainService: DimeMatrixService) { }
 

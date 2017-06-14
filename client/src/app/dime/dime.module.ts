@@ -14,7 +14,7 @@ import { DimeschedulesComponent } from './dimeschedule/dimeschedules/dimeschedul
 import { DimeenvironmentsComponent } from './dimeenvironment/dimeenvironments/dimeenvironments.component';
 import { DimestreamsComponent } from './dimestream/dimestreams/dimestreams.component';
 import { DimemapsComponent } from './dimemap/dimemaps/dimemaps.component';
-import { DimematricesComponent } from './dimematrix/dimematrices/dimematrices.component';
+import { DimeMatricesComponent } from './dimematrix/dimematrices/dimematrices.component';
 
 import { DimescheduleModule } from './dimeschedule/dimeschedule.module';
 import { DimeprocessModule } from './dimeprocess/dimeprocess.module';
@@ -34,7 +34,7 @@ const dimeRoutes: Routes = [
 			{ path: 'environments', component: DimeenvironmentsComponent, loadChildren: 'app/dime/dimeenvironment/dimeenvironment.module#DimeenvironmentModule' },
 			{ path: 'streams', component: DimestreamsComponent, loadChildren: 'app/dime/dimestream/dimestream.module#DimestreamModule' },
 			{ path: 'maps', component: DimemapsComponent, loadChildren: 'app/dime/dimemap/dimemap.module#DimemapModule' },
-			{ path: 'matrices', component: DimematricesComponent, loadChildren: 'app/dime/dimematrix/dimematrix.module#DimematrixModule' }
+			{ path: 'matrices', component: DimeMatricesComponent, loadChildren: 'app/dime/dimematrix/dimematrix.module#DimematrixModule' }
 		]
 	}
 ];

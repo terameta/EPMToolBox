@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-dimematrix',
-  templateUrl: './dimematrix.component.html',
-  styleUrls: ['./dimematrix.component.css']
+	selector: 'app-dimematrix',
+	templateUrl: './dimematrix.component.html',
+	styleUrls: ['./dimematrix.component.css']
 })
-export class DimematrixComponent implements OnInit {
+export class DimeMatrixComponent implements OnInit {
 
-  constructor() { }
+	constructor() { }
 
-  ngOnInit() {
-  }
+	ngOnInit() {
+	}
 
 }

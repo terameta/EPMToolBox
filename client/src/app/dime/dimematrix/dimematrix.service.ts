@@ -1,5 +1,5 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { Http } from '@angular/http';
+import { Http, Headers } from '@angular/http';
 import { Injectable } from '@angular/core';
 
 import { BehaviorSubject, Observable } from 'rxjs/Rx';
@@ -42,32 +42,46 @@ export class DimeMatrixService {
 		this.itemCount = this.items.count();
 		this.serviceName = 'Matrices';
 		this.resetCurItem();
-		this.getAll();
+		this.getAll(true);
 	}
 
 	private resetCurItem = () => {
-		this.curItem = { id: 0, name: '', stream: 0 };
+		this.curItem = <DimeMatrix>{ id: 0 };
 		this.curItemClean = true;
-		this.curItemStream = { id: 0, name: '', type: 0, environment: 0 };
+		this.curItemStream = <DimeStream>{ id: 0 };
+		this.curItemStreamFields = [];
 	};
-
-	getAll = () => {
-		console.log('getting matrices');
-		this.authHttp.get(this.baseUrl).
-			map((response) => {
-				return response.json();
-			}).
-			subscribe((data) => {
-				data.sort(this.sortByName);
-				this.dataStore.items = data;
+	public getAll = (isSilent?: boolean) => {
+		this.fetchAll().subscribe((data) => {
+			data.sort(this.sortByName);
+			this.dataStore.items = data;
+			this._items.next(Object.assign({}, this.dataStore).items);
+			if (!isSilent) { this.toastr.info('Items are loaded.', this.serviceName); }
+		}, (error) => {
+			this.toastr.error('Failed to get items from server.', this.serviceName);
+			console.log(error);
+		});
+	};
+	public fetchAll = () => {
+		return this.authHttp.get(this.baseUrl).
+			map(response => response.json()).
+			catch(error => Observable.throw(error));
+	};
+	public create = () => {
+		this.authHttp.post(this.baseUrl, {}, { headers: this.headers })
+			.map(response => response.json()).subscribe(data => {
+				this.dataStore.items.push(data);
 				this._items.next(Object.assign({}, this.dataStore).items);
+				this.resetCurItem();
+				this.router.navigate(['/dime/matrices/matrix-detail', data.id]);
+				this.toastr.info('New item is created, navigating to the details', this.serviceName);
 			}, (error) => {
-				this.toastr.error('Could not load items.', this.serviceName);
+				this.toastr.error('Failed to create new item.', this.serviceName);
+				console.log(error);
 			});
 	};
 	getOne = (id: number) => {
-		this.authHttp.get(this.baseUrl + '/' + id).
-			map(response => response.json()).
+		this.fetchOne(id).
 			subscribe((result) => {
 				let notFound = true;
 
@@ -86,11 +100,57 @@ export class DimeMatrixService {
 				this._items.next(Object.assign({}, this.dataStore).items);
 				this.curItem = result;
 				this.curItemClean = true;
-				this.getStreamDefinition(this.curItem.stream);
+				if (this.curItem.stream) { this.getStreamDefinition(this.curItem.stream); }
 			}, (error) => {
 				this.toastr.error('Failed to get the item.', this.serviceName);
 				console.log(error);
 			});
+	};
+	public fetchOne = (id: number) => {
+		return this.authHttp.get(this.baseUrl + '/' + id).
+			map(response => response.json()).
+			catch(error => Observable.throw(error));
+	};
+	public update = (curItem?: DimeMatrix) => {
+		let shouldUpdate = false;
+		if (!curItem) { curItem = this.curItem; shouldUpdate = true; };
+		this.authHttp.put(this.baseUrl, curItem, { headers: this.headers }).
+			map(response => response.json()).
+			subscribe(data => {
+				this.dataStore.items.forEach((item, index) => {
+					if (item.id === data.id) { this.dataStore.items[index] = data; }
+				});
+
+				this._items.next(Object.assign({}, this.dataStore).items);
+				this.toastr.info('Item is successfully saved.', this.serviceName);
+				// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
+				// This shouldn't change the state of the current item.
+				if (shouldUpdate) { this.curItemClean = true; }
+				if (this.curItem.stream) { this.getStreamDefinition(this.curItem.stream); }
+			}, error => {
+				this.toastr.error('Failed to save the item.', this.serviceName);
+				console.log(error);
+			});
+	};
+	public delete(id: number, name?: string) {
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + (name !== undefined ? name : 'the item') + '?';
+		if (confirm(verificationQuestion)) {
+			this.authHttp.delete(this.baseUrl + '/' + id).subscribe(response => {
+				this.dataStore.items.forEach((item, index) => {
+					if (item.id === id) { this.dataStore.items.splice(index, 1); }
+				});
+
+				this._items.next(Object.assign({}, this.dataStore).items);
+				this.toastr.info('Item is deleted.', this.serviceName);
+				this.router.navigate(['/dime/matrices/matrix-list']);
+				this.resetCurItem();
+			}, (error) => {
+				this.toastr.error('Failed to delete item.', this.serviceName);
+				console.log(error);
+			});
+		} else {
+			this.toastr.info('Item deletion is cancelled.', this.serviceName);
+		}
 	};
 	private getStreamDefinition = (id: number) => {
 		this.streamService.fetchOne(id).subscribe((result) => {
@@ -107,7 +167,6 @@ export class DimeMatrixService {
 			console.log(error);
 		})
 	};
-
 	private sortByName = (e1, e2) => {
 		if (e1.name > e2.name) {
 			return 1;

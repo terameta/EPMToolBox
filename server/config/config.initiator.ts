@@ -255,6 +255,15 @@ tableList.push({
 	],
 	primaryKey: 'id'
 });
+tableList.push({
+	name: 'matrices',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'name VARCHAR(1024)',
+		'stream BIGINT UNSIGNED'
+	],
+	primaryKey: 'id'
+});
 
 
 export function initiateInitiator(refDB: IPool, refConf: any) {
