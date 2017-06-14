@@ -1,15 +1,15 @@
-import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { ToastrService } from "ngx-toastr";
+import { ToastrService } from 'ngx-toastr';
 
-import { DimeStreamService } from "../dimestream.service";
+import { DimeStreamService } from '../dimestream.service';
 
 
 @Component({
-	selector: "app-dimestream-toolbar",
-	templateUrl: "./dimestream-toolbar.component.html",
-	styleUrls: ["./dimestream-toolbar.component.css"]
+	selector: 'app-dimestream-toolbar',
+	templateUrl: './dimestream-toolbar.component.html',
+	styleUrls: ['./dimestream-toolbar.component.css']
 })
 export class DimestreamToolbarComponent implements OnInit {
 	// streamList: any[];

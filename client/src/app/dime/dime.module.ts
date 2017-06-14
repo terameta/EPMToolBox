@@ -31,7 +31,6 @@ const dimeRoutes: Routes = [
 			{ path: '', component: DimedashboardComponent, canActivate: [AuthGuard] },
 			{ path: 'schedules', component: DimeschedulesComponent, loadChildren: 'app/dime/dimeschedule/dimeschedule.module#DimescheduleModule' },
 			{ path: 'processes', component: DimeprocessesComponent, loadChildren: 'app/dime/dimeprocess/dimeprocess.module#DimeprocessModule' },
-			// tslint:disable-next-line:max-line-length
 			{ path: 'environments', component: DimeenvironmentsComponent, loadChildren: 'app/dime/dimeenvironment/dimeenvironment.module#DimeenvironmentModule' },
 			{ path: 'streams', component: DimestreamsComponent, loadChildren: 'app/dime/dimestream/dimestream.module#DimestreamModule' },
 			{ path: 'maps', component: DimemapsComponent, loadChildren: 'app/dime/dimemap/dimemap.module#DimemapModule' },

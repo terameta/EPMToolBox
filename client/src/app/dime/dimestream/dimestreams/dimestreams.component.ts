@@ -1,14 +1,14 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 
-import { ToastrService } from "ngx-toastr";
+import { ToastrService } from 'ngx-toastr';
 
-import { DimeStreamService } from "../dimestream.service";
+import { DimeStreamService } from '../dimestream.service';
 
 
 @Component({
-	selector: "app-dimestreams",
-	templateUrl: "./dimestreams.component.html",
-	styleUrls: ["./dimestreams.component.css"]
+	selector: 'app-dimestreams',
+	templateUrl: './dimestreams.component.html',
+	styleUrls: ['./dimestreams.component.css']
 })
 export class DimestreamsComponent implements OnInit {
 

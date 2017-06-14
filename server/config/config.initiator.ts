@@ -239,6 +239,22 @@ tableList.push({
 	],
 	fieldsToCheck: ['name', 'value']
 });
+tableList.push({
+	name: 'acmservers',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'name VARCHAR(1024)',
+		'description VARCHAR(4096)',
+		'hostname VARCHAR(1024)',
+		'port INT UNSIGNED',
+		'sslenabled TINYINT',
+		'istrusted TINYINT',
+		'basedn VARCHAR(1024)',
+		'userdn VARCHAR(1024)',
+		'password VARCHAR(4096)'
+	],
+	primaryKey: 'id'
+});
 
 
 export function initiateInitiator(refDB: IPool, refConf: any) {

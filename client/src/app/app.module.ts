@@ -14,13 +14,18 @@ import { WelcomeModule } from './welcome/welcome.module';
 import { AuthService } from './welcome/auth.service';
 import { AuthGuard } from './welcome/auth-guard.service';
 import { AuthModule } from './welcome/auth.module';
+import { AccessManagementModule } from './accessmanagement/accessmanagement.module';
 
-// Services
+// Dime Services
 import { DimeEnvironmentService } from './dime/dimeenvironment/dimeenvironment.service';
 import { DimeStreamService } from './dime/dimestream/dimestream.service';
 import { DimeMapService } from './dime/dimemap/dimemap.service';
 import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
 import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
+
+// Access Management Services
+import { AcmServerService } from './accessmanagement/acmserver/acmserver.service';
+import { AcmUserService } from './accessmanagement/acmuser/acmuser.service';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -37,6 +42,7 @@ const appRoutes: Routes = [
 		HttpModule,
 		WelcomeModule,
 		DimeModule,
+		AccessManagementModule,
 		RouterModule.forRoot(appRoutes),
 		ToastrModule.forRoot(),
 		BrowserAnimationsModule,
@@ -49,7 +55,9 @@ const appRoutes: Routes = [
 		DimeStreamService,
 		DimeMapService,
 		DimeMatrixService,
-		DimeProcessService
+		DimeProcessService,
+		AcmServerService,
+		AcmUserService
 	],
 	bootstrap: [AppComponent]
 })

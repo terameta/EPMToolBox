@@ -17,9 +17,7 @@ export class DimeStreamService {
 	typeList: DimeStreamType[];
 	private _items: BehaviorSubject<DimeStream[]>;
 	private baseUrl: string;
-	private dataStore: {
-		items: DimeStream[]
-	};
+	private dataStore: { items: DimeStream[] };
 	private headers = new Headers({ 'Content-Type': 'application/json' });
 	private serviceName: string;
 

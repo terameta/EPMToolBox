@@ -49,6 +49,10 @@ export class MainTools {
 		});
 	}
 
+	public isEmptyObject = (refObj: any) => {
+		return Object.keys(refObj).length === 0;
+	}
+
 	public encryptText = (plaintext: string) => {
 		// console.log('-------- Encrypt Start ----------------');
 		// console.log('Hash:', this.config.hash);
