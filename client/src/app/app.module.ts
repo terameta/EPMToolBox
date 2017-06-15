@@ -15,6 +15,7 @@ import { AuthService } from './welcome/auth.service';
 import { AuthGuard } from './welcome/auth-guard.service';
 import { AuthModule } from './welcome/auth.module';
 import { AccessManagementModule } from './accessmanagement/accessmanagement.module';
+import { EndUserModule } from './enduser/enduser.module';
 
 // Dime Services
 import { DimeEnvironmentService } from './dime/dimeenvironment/dimeenvironment.service';
@@ -27,12 +28,15 @@ import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
 import { AcmServerService } from './accessmanagement/acmserver/acmserver.service';
 import { AcmUserService } from './accessmanagement/acmuser/acmuser.service';
 
+// End User Services
+import { EndUserService } from './enduser/enduser.service';
+
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
 	{ path: '', pathMatch: 'full', redirectTo: 'welcome' }
 ];
 
-@NgModule({
+@NgModule( {
 	declarations: [
 		AppComponent
 	],
@@ -43,7 +47,8 @@ const appRoutes: Routes = [
 		WelcomeModule,
 		DimeModule,
 		AccessManagementModule,
-		RouterModule.forRoot(appRoutes),
+		EndUserModule,
+		RouterModule.forRoot( appRoutes ),
 		ToastrModule.forRoot(),
 		BrowserAnimationsModule,
 		AuthModule
@@ -57,8 +62,9 @@ const appRoutes: Routes = [
 		DimeMatrixService,
 		DimeProcessService,
 		AcmServerService,
-		AcmUserService
+		AcmUserService,
+		EndUserService
 	],
 	bootstrap: [AppComponent]
-})
+} )
 export class AppModule { }

@@ -20,17 +20,19 @@
 				AsyncBR: Asynchronous Business Rules
 			</span>
 		</div>
-		<div class="col-xs-3 col-xs-offset-2" style="text-align: center">
-				<div class="row" *ngIf="!authService.authenticated">
-					<button class="btn btn-primary btn-lg" routerLink="signin">Start Here</button>
-				</div>
-				<div class="row" *ngIf="authService.authenticated">
-					<button class="btn btn-primary btn-md btn-block" routerLink="/dime">Go to DIME</button>
-					<br>
-					<button class="btn btn-primary btn-md btn-block" routerLink="/accessmanagement"><i class="fa fa-handshake-o fa-fw"></i> Go to Access Management</button>
-					<br>
-					<button class="btn btn-primary btn-md btn-block" routerLink="/welcome/signout"><i class="fa fa-sign-out fa-fw"></i> Sign Out</button>
-				</div>
+		<div class="col-xs-3 col-xs-offset-2" style="text-align: center" *ngIf="!authService.authenticated">
+			<div class="row">
+				<button class="btn btn-primary btn-lg" routerLink="signin">Start Here</button>
+			</div>
+		</div>
+		<div class="col-xs-3 col-xs-offset-2" style="text-align: center" *ngIf="curUserRole === 'admin'">
+			<div class="row" *ngIf="authService.authenticated">
+				<button class="btn btn-primary btn-md btn-block" routerLink="/dime">Go to DIME</button>
+				<br>
+				<button class="btn btn-primary btn-md btn-block" routerLink="/accessmanagement"><i class="fa fa-handshake-o fa-fw"></i> Go to Access Management</button>
+				<br>
+				<button class="btn btn-primary btn-md btn-block" routerLink="/welcome/signout"><i class="fa fa-sign-out fa-fw"></i> Sign Out</button>
+			</div>
 		</div>
 	</div>
 </div>

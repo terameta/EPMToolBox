@@ -26,6 +26,12 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label for="serverPrefix" class="col-xs-1 control-label">Prefix:</label>
+							<div class="col-xs-11">
+								<input type="text" class="form-control" id="serverPrefix" name="serverPrefix" [(ngModel)]="mainService.curItem.prefix">
+							</div>
+						</div>
+						<div class="form-group">
 							<label for="hostName" class="col-xs-1 control-label">Hostname/IP:</label>
 							<div class="col-xs-11">
 								<input type="text" class="form-control" id="hostName" name="hostName" [(ngModel)]="mainService.curItem.hostname">

@@ -10,16 +10,17 @@ export class ApiAcmUsers {
 	rester: Rester;
 	userTool: AcmUserTool;
 
-	constructor(public app: Application, public db: IPool, public tools: MainTools) {
+	constructor( public app: Application, public db: IPool, public tools: MainTools ) {
 		this.apiRoutes = Router();
-		this.userTool = new AcmUserTool(this.db, this.tools);
-		this.rester = new Rester(this.tools);
+		this.userTool = new AcmUserTool( this.db, this.tools );
+		this.rester = new Rester( this.tools );
 		this.setRoutes();
-		this.rester.restify(this.apiRoutes, this.userTool);
-		this.app.use('/api/accessmanagement/user', this.apiRoutes);
+		this.rester.restify( this.apiRoutes, this.userTool );
+		this.app.use( '/api/accessmanagement/user', this.apiRoutes );
 	}
 
 	private setRoutes = () => {
-		// this.apiRoutes.put('/all', (req, res) => { this.rester.respond(this.settingsTool.updateAll, req.body, req, res); });
+		this.apiRoutes.get( '/userrights/:id', ( req, res ) => { this.rester.respond( this.userTool.getAccessRights, req.params.id, req, res ); } );
+		this.apiRoutes.put( '/userrights/:id', ( req, res ) => { this.rester.respond( this.userTool.setAccessRights, { user: req.params.id, rights: req.body }, req, res ); } );
 	};
 }

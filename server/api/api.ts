@@ -17,7 +17,9 @@ import { ApiAcmUsers } from './api.accessmanagement.user';
 import { ApiAcmServers } from './api.accessmanagement.server';
 
 
-import { apiAuth } from './api.auth';
+// import { apiAuth } from './api.auth';
+import { ApiAuth } from './api.auth';
+
 import { ApiSettings } from './api.settings';
 
 export function initializeRestApi(app: Application, refDB: IPool, refTools: MainTools) {
@@ -32,6 +34,7 @@ export function initializeRestApi(app: Application, refDB: IPool, refTools: Main
 	const apiAcmServer = new ApiAcmServers(app, refDB, refTools);
 	const apiAcmUser = new ApiAcmUsers(app, refDB, refTools);
 
-	apiAuth(app, refDB, refTools);
+	// apiAuth(app, refDB, refTools);
+	const apiAuth = new ApiAuth(app, refDB, refTools);
 	const apiSettings = new ApiSettings(app, refDB, refTools);
 }

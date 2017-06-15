@@ -4,6 +4,7 @@
 			<thead>
 				<tr>
 					<th>Name</th>
+					<th>Prefix</th>
 					<th>Hostname</th>
 					<th>Port</th>
 					<th>SSL Enabled</th>
@@ -16,6 +17,7 @@
 			<tbody>
 				<tr *ngFor="let server of mainService.items | async; let i = index;">
 					<td>{{ server.name }}</td>
+					<td>{{ server.prefix }}</td>
 					<td>{{ server.hostname }}</td>
 					<td>{{ server.port }}</td>
 					<td>{{ server.sslenabled }}</td>

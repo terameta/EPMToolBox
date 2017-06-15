@@ -13,7 +13,7 @@ let db: IPool;
 let configuration: any;
 let tableList: Array<TableDefiner>; tableList = [];
 
-tableList.push({
+tableList.push( {
 	name: 'users',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'username varchar(255) NOT NULL',
@@ -25,10 +25,10 @@ tableList.push({
 		'name varchar(255)',
 		'surname varchar(255)'],
 	primaryKey: 'id',
-	values: [{ username: 'admin', password: bcrypt.hashSync('interesting', 10), role: 'admin', type: 'local' }],
+	values: [{ username: 'admin', password: bcrypt.hashSync( 'interesting', 10 ), role: 'admin', type: 'local' }],
 	fieldsToCheck: ['username', 'role']
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'environmenttypes',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT', 'name varchar(255) NOT NULL', 'value varchar(255) NOT NULL'],
 	primaryKey: 'id',
@@ -38,8 +38,8 @@ tableList.push({
 		{ name: 'Hyperion Planning PBCS', value: 'PBCS' }
 	],
 	fieldsToCheck: ['name', 'value']
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'environments',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(255) NOT NULL',
@@ -50,8 +50,8 @@ tableList.push({
 		'username varchar(255) NOT NULL',
 		'password varchar(255) NOT NULL'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'streams',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(255) NOT NULL',
@@ -61,8 +61,8 @@ tableList.push({
 		'tableName varchar(255)',
 		'customQuery varchar(20000)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'streamtypes',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(255) NOT NULL',
@@ -71,8 +71,8 @@ tableList.push({
 	values: [{ name: 'Planning Database', value: 'HPDB' },
 	{ name: 'Relational Database Table/View', value: 'RDBT' }],
 	fieldsToCheck: ['name', 'value']
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'streamfields',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'stream BIGINT UNSIGNED NOT NULL',
@@ -106,16 +106,16 @@ tableList.push({
 		'ddfDateFormat varchar(1024)'
 	],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'streampreprocesses',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'pQuery varchar(20000)',
 		'pOrder INT UNSIGNED',
 		'stream BIGINT UNSIGNED'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'maps',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(255) NOT NULL',
@@ -123,8 +123,8 @@ tableList.push({
 		'source BIGINT UNSIGNED',
 		'target BIGINT UNSIGNED'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'maptypes',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(255) NOT NULL',
@@ -133,16 +133,16 @@ tableList.push({
 	values: [{ name: 'Intersection Based Map', value: 'IBM' },
 	{ name: 'Segment Based Map', value: 'SBM' }],
 	fieldsToCheck: ['name', 'value']
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'mapfields',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'map BIGINT UNSIGNED',
 		'srctar varchar(6)',
 		'name varchar(255)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'logs',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'parent BIGINT UNSIGNED',
@@ -150,8 +150,8 @@ tableList.push({
 		'end DATETIME',
 		'details BLOB'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'processes',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(255)',
@@ -159,8 +159,8 @@ tableList.push({
 		'target BIGINT UNSIGNED',
 		'status varchar(255)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'processsteps',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'process BIGINT UNSIGNED',
@@ -169,16 +169,16 @@ tableList.push({
 		'details BLOB',
 		'sOrder INT UNSIGNED'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'processdefaulttargets',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'process BIGINT UNSIGNED',
 		'field varchar(255)',
 		'value varchar(255)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'processfilters',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'process BIGINT UNSIGNED',
@@ -190,15 +190,15 @@ tableList.push({
 		'filterbeq NUMERIC(38,10)',
 		'filterseq NUMERIC(38,10)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'settings',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(1024)',
 		'value varchar(2048)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'ldapservers',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(1024)',
@@ -209,16 +209,16 @@ tableList.push({
 		'username varchar(1024)',
 		'password varchar(1024)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'secrets',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'secret VARCHAR(4096)',
 		'description VARCHAR(4096)',
 		'allowedips VARCHAR(4096)'],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'processsteptypes',
 	fields: [
 		'name VARCHAR(255) NOT NULL',
@@ -238,13 +238,14 @@ tableList.push({
 		{ name: 'Send Missing Maps', value: 'sendmissing', tOrder: 9 }
 	],
 	fieldsToCheck: ['name', 'value']
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'acmservers',
 	fields: [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name VARCHAR(1024)',
 		'description VARCHAR(4096)',
+		'prefix VARCHAR(1024)',
 		'hostname VARCHAR(1024)',
 		'port INT UNSIGNED',
 		'sslenabled TINYINT',
@@ -254,8 +255,8 @@ tableList.push({
 		'password VARCHAR(4096)'
 	],
 	primaryKey: 'id'
-});
-tableList.push({
+} );
+tableList.push( {
 	name: 'matrices',
 	fields: [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
@@ -263,121 +264,130 @@ tableList.push({
 		'stream BIGINT UNSIGNED'
 	],
 	primaryKey: 'id'
-});
+} );
+tableList.push( {
+	name: 'userdimeprocesses',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'user BIGINT UNSIGNED',
+		'process BIGINT UNSIGNED'
+	],
+	primaryKey: 'id'
+} );
 
 
-export function initiateInitiator(refDB: IPool, refConf: any) {
+export function initiateInitiator( refDB: IPool, refConf: any ) {
 	db = refDB;
 	configuration = refConf;
-	console.log('===============================================');
-	console.log('===============================================');
-	console.log('=== Initiator is now starting =================');
-	checkTables(configuration).
-		then(modifyTables);
+	console.log( '===============================================' );
+	console.log( '===============================================' );
+	console.log( '=== Initiator is now starting =================' );
+	checkTables( configuration ).
+		then( modifyTables );
 }
 
-function checkTables(curConfig: any): Promise<any> {
-	return new Promise((resolve, reject) => {
-		console.log('===============================================');
-		console.log('=== Checking Tables           =================');
+function checkTables( curConfig: any ): Promise<any> {
+	return new Promise(( resolve, reject ) => {
+		console.log( '===============================================' );
+		console.log( '=== Checking Tables           =================' );
 		db.query(
 			'SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = "' +
-			curConfig.mysql.db + '"', function (err, rows, fields) {
-				if (err) {
-					reject(err);
+			curConfig.mysql.db + '"', function ( err, rows, fields ) {
+				if ( err ) {
+					reject( err );
 				} else {
-					createTables(rows).
-						then(populateTables).
-						then(resolve).catch(reject);
+					createTables( rows ).
+						then( populateTables ).
+						then( resolve ).catch( reject );
 				}
-			});
-	});
+			} );
+	} );
 }
-function createTables(existingTables: any[]) {
-	return new Promise(function (resolve, reject) {
+function createTables( existingTables: any[] ) {
+	return new Promise( function ( resolve, reject ) {
 		let curTableExists;
 		const promises: any[] = [];
 
-		tableList.forEach(function (curTable) {
+		tableList.forEach( function ( curTable ) {
 			curTableExists = false;
-			existingTables.forEach(function (curExistingTable) {
-				if (curExistingTable.TABLE_NAME === curTable.name) { curTableExists = true; }
-			});
-			if (!curTableExists) {
-				console.log('=== Table', curTable.name, 'doesn\'t exist.');
-				promises.push(createTableAction(curTable));
+			existingTables.forEach( function ( curExistingTable ) {
+				if ( curExistingTable.TABLE_NAME === curTable.name ) { curTableExists = true; }
+			} );
+			if ( !curTableExists ) {
+				console.log( '=== Table', curTable.name, 'doesn\'t exist.' );
+				promises.push( createTableAction( curTable ) );
 			} else {
-				console.log('=== Table', curTable.name, 'exists.');
+				console.log( '=== Table', curTable.name, 'exists.' );
 			}
-		});
-		Promise.all(promises).then(function () {
-			resolve(existingTables);
-		}).catch(reject);
-	});
+		} );
+		Promise.all( promises ).then( function () {
+			resolve( existingTables );
+		} ).catch( reject );
+	} );
 }
-function createTableAction(curTable: any) {
-	return new Promise(function (resolve, reject) {
-		console.log('=== Creating Table:', curTable.name);
-		let createQuery = 'CREATE TABLE ' + curTable.name + '(' + curTable.fields.join(',');
-		if (curTable.primaryKey) { createQuery += ', PRIMARY KEY (' + curTable.primaryKey + ') '; }
+function createTableAction( curTable: any ) {
+	return new Promise( function ( resolve, reject ) {
+		console.log( '=== Creating Table:', curTable.name );
+		let createQuery = 'CREATE TABLE ' + curTable.name + '(' + curTable.fields.join( ',' );
+		if ( curTable.primaryKey ) { createQuery += ', PRIMARY KEY (' + curTable.primaryKey + ') '; }
 		createQuery += ')';
-		db.query(createQuery, function (err, rows, fields) {
-			if (err) {
-				reject(err);
+		db.query( createQuery, function ( err, rows, fields ) {
+			if ( err ) {
+				reject( err );
 			} else {
-				console.log('=== Created Table:', curTable.name);
+				console.log( '=== Created Table:', curTable.name );
 				resolve();
 			}
-		});
-	});
+		} );
+	} );
 }
-function populateTables(existingTables: any) {
-	return new Promise(function (resolve, reject) {
+function populateTables( existingTables: any ) {
+	return new Promise( function ( resolve, reject ) {
 		const promises: any[] = [];
-		tableList.forEach(function (curTable) {
-			if (curTable.values) {
-				console.log('=== Checking default records for', curTable.name);
-				promises.push(populateTablesAction(curTable));
+		tableList.forEach( function ( curTable ) {
+			if ( curTable.values ) {
+				console.log( '=== Checking default records for', curTable.name );
+				promises.push( populateTablesAction( curTable ) );
 			}
-		});
-		Promise.all(promises).then(function () {
-			resolve(existingTables);
-		}).catch(reject);
-	});
+		} );
+		Promise.all( promises ).then( function () {
+			resolve( existingTables );
+		} ).catch( reject );
+	} );
 }
-function populateTablesAction(curTable: any) {
-	return new Promise(function (resolve, reject) {
+function populateTablesAction( curTable: any ) {
+	return new Promise( function ( resolve, reject ) {
 		let query = '';
 		let checker: any[] = [];
 		let wherer: any[] = [];
-		curTable.values.forEach(function (curTuple: any) {
+		curTable.values.forEach( function ( curTuple: any ) {
 			query = 'SELECT COUNT(*) AS RESULT FROM ' + curTable.name + ' WHERE ';
 			checker = [];
 			wherer = [];
-			curTable.fieldsToCheck.forEach(function (curField: any) {
-				checker.push(curField);
-				checker.push(curTuple[curField]);
-				wherer.push('?? = ?');
-			});
-			query += wherer.join(' AND ');
-			db.query(query, checker, function (err, rows, fields) {
-				if (err) {
-					reject(err);
-				} else if (rows[0].RESULT === 0) {
-					db.query('INSERT INTO ' + curTable.name + ' SET ?', curTuple, function (ierr, irows, ifields) {
-						if (ierr) {
-							reject(ierr);
+			curTable.fieldsToCheck.forEach( function ( curField: any ) {
+				checker.push( curField );
+				checker.push( curTuple[curField] );
+				wherer.push( '?? = ?' );
+			} );
+			query += wherer.join( ' AND ' );
+			db.query( query, checker, function ( err, rows, fields ) {
+				if ( err ) {
+					reject( err );
+				} else if ( rows[0].RESULT === 0 ) {
+					db.query( 'INSERT INTO ' + curTable.name + ' SET ?', curTuple, function ( ierr, irows, ifields ) {
+						if ( ierr ) {
+							reject( ierr );
 						} else {
-							console.log('=== Inserted records for', curTable.name);
+							console.log( '=== Inserted records for', curTable.name );
 							resolve();
 						}
-					});
+					} );
 				} else {
 					resolve();
 				}
-			});
-		});
-	});
+			} );
+		} );
+	} );
 }
 
 interface ModificationDefiner {
@@ -395,8 +405,8 @@ interface ModificationDefiner {
 
 const modificationList: Array<ModificationDefiner> = [];
 
-modificationList.push({ type: 'alterVarCharColWidth', tableName: 'environments', columnName: 'password', newColWidth: 4096 });
-modificationList.push({
+modificationList.push( { type: 'alterVarCharColWidth', tableName: 'environments', columnName: 'password', newColWidth: 4096 } );
+modificationList.push( {
 	type: 'addNewColumn',
 	tableName: 'streamfields',
 	columnName: 'shouldIgnore',
@@ -404,8 +414,8 @@ modificationList.push({
 	afterCol: 'fOrder',
 	isNullable: true,
 	defaultValue: 0
-});
-modificationList.push({
+} );
+modificationList.push( {
 	type: 'addNewColumn',
 	tableName: 'streamfields',
 	columnName: 'generation2members',
@@ -413,81 +423,81 @@ modificationList.push({
 	afterCol: 'ddfDateFormat',
 	isNullable: true,
 	defaultValue: ''
-});
-modificationList.push({
+} );
+modificationList.push( {
 	type: 'addNewColumn',
 	tableName: 'logs',
 	columnName: 'reftype',
 	columnType: 'VARCHAR(256)',
 	afterCol: 'details',
 	isNullable: false
-});
-modificationList.push({
+} );
+modificationList.push( {
 	type: 'addNewColumn',
 	tableName: 'processes',
 	columnName: 'erroremail',
 	columnType: 'VARCHAR(1024)',
 	afterCol: 'status',
 	isNullable: true
-});
-modificationList.push({
+} );
+modificationList.push( {
 	type: 'addNewColumn',
 	tableName: 'logs',
 	columnName: 'refid',
 	columnType: 'BIGINT UNSIGNED',
 	afterCol: 'details',
 	isNullable: false
-});
+} );
 // modificationList.push({ type: 'custom', tableName: 'processfilters', customQuery: 'ALTER TABLE `processfilters` CHANGE `filterto` `filterto` DATE NULL DEFAULT NULL' });
 
 function modifyTables() {
-	return new Promise((resolve, reject) => {
-		console.log('===============================================');
-		console.log('=== Running Modifications     =================');
-		modificationList.forEach((curMod) => {
-			if (curMod.type === 'alterVarCharColWidth') {
-				console.log('=== Altering Column Width for', curMod.tableName, curMod.columnName, curMod.newColWidth);
+	return new Promise(( resolve, reject ) => {
+		console.log( '===============================================' );
+		console.log( '=== Running Modifications     =================' );
+		modificationList.forEach(( curMod ) => {
+			if ( curMod.type === 'alterVarCharColWidth' ) {
+				console.log( '=== Altering Column Width for', curMod.tableName, curMod.columnName, curMod.newColWidth );
 				db.query(
 					'ALTER TABLE ' + curMod.tableName + ' MODIFY ' + curMod.columnName + ' VARCHAR(' + curMod.newColWidth + ');',
-					(err, results, fields) => {
-						if (err) { console.log('!!! Error:', err); }
+					( err, results, fields ) => {
+						if ( err ) { console.log( '!!! Error:', err ); }
 					}
 				);
-			} else if (curMod.type === 'custom') {
-				console.log('=== Running custom query against ' + curMod.tableName);
-				db.query(curMod.customQuery || '', (err, results, fields) => {
-					if (err) { console.log('!!! Error:', err); }
-				});
-			} else if (curMod.type === 'addNewColumn') {
-				console.log('=== Adding Column ' + curMod.columnName + ' to Table ' + curMod.tableName);
+			} else if ( curMod.type === 'custom' ) {
+				console.log( '=== Running custom query against ' + curMod.tableName );
+				db.query( curMod.customQuery || '', ( err, results, fields ) => {
+					if ( err ) { console.log( '!!! Error:', err ); }
+				} );
+			} else if ( curMod.type === 'addNewColumn' ) {
+				console.log( '=== Adding Column ' + curMod.columnName + ' to Table ' + curMod.tableName );
 				let curQuery: string;
 				curQuery = 'ALTER TABLE `' + curMod.tableName + '` ';
 				curQuery += 'ADD COLUMN `' + curMod.columnName + '` ';
 				curQuery += curMod.columnType + ' ';
-				if (curMod.isNullable) { curQuery += 'NULL '; }
-				if (!curMod.isNullable) { curQuery += 'NOT NULL '; }
-				if (curMod.defaultValue !== undefined) { curQuery += 'DEFAULT \'' + curMod.defaultValue + '\' '; }
-				if (curMod.isFirst) { curQuery += 'FIRST '; }
-				if (curMod.afterCol) { curQuery += 'AFTER `' + curMod.afterCol + '` '; }
+				if ( curMod.isNullable ) { curQuery += 'NULL '; }
+				if ( !curMod.isNullable ) { curQuery += 'NOT NULL '; }
+				if ( curMod.defaultValue !== undefined ) { curQuery += 'DEFAULT \'' + curMod.defaultValue + '\' '; }
+				if ( curMod.isFirst ) { curQuery += 'FIRST '; }
+				if ( curMod.afterCol ) { curQuery += 'AFTER `' + curMod.afterCol + '` '; }
 
-				db.query('DESCRIBE ' + curMod.tableName, (err, results, fields) => {
-					if (err) {
-						console.log('!!! Error:', err);
+				db.query( 'DESCRIBE ' + curMod.tableName, ( err, results, fields ) => {
+					if ( err ) {
+						console.log( '!!! Error:', err );
 					} else {
 						let doesExist = false;
-						results.forEach((curField: any) => {
-							if (curField.Field === curMod.columnName) { doesExist = true; }
-						});
-						if (!doesExist) {
-							db.query(curQuery, (cerr, cresults, cfields) => {
-								if (cerr) {
-									console.log('!!! Error:', cerr);
+						results.forEach(( curField: any ) => {
+							if ( curField.Field === curMod.columnName ) { doesExist = true; }
+						} );
+						if ( !doesExist ) {
+							db.query( curQuery, ( cerr, cresults, cfields ) => {
+								if ( cerr ) {
+									console.log( '!!! Error:', cerr );
 								}
-							});
+							} );
 						}
 					}
-				});
+				} );
 			}
-		});
-	});
+		} );
+	} );
 }
