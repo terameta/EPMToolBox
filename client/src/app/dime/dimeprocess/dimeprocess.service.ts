@@ -83,8 +83,7 @@ export class DimeProcessService {
 			catch( error => Observable.throw( error ) );
 	}
 	getOne = ( id: number ) => {
-		this.authHttp.get( this.baseUrl + '/' + id ).
-			map( response => response.json() ).
+		this.fetchOne( id ).
 			subscribe(( result ) => {
 				let notFound = true;
 
@@ -113,6 +112,11 @@ export class DimeProcessService {
 				this.toastr.error( 'Failed to get the item.', this.serviceName );
 				console.log( error );
 			} );
+	}
+	public fetchOne = ( id: number ) => {
+		return this.authHttp.get( this.baseUrl + '/' + id ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
 	}
 	create = () => {
 		this.authHttp.post( this.baseUrl, {}, { headers: this.headers } ).
@@ -576,14 +580,18 @@ export class DimeProcessService {
 	};
 	public fetchFilters = ( id?: number ) => {
 		if ( !id ) { id = this.curItem.id; }
-		this.authHttp.get( this.baseUrl + '/filters/' + id ).
-			map( response => response.json() ).
+		this.fetchFiltersFetch( id ).
 			subscribe(( result ) => {
 				this.prepareFilters( result );
 			}, ( error ) => {
 				this.toastr.error( '', this.serviceName );
 				console.error( error );
 			} );
+	};
+	public fetchFiltersFetch = ( id: number ) => {
+		return this.authHttp.get( this.baseUrl + '/filters/' + id ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
 	};
 	private prepareFilters = ( filterArray: any[], numTry?: number ) => {
 		if ( numTry === undefined ) { numTry = 0; }

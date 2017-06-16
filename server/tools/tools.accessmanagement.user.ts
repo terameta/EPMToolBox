@@ -1,5 +1,7 @@
 import { MainTools } from './tools.main';
 import { IPool } from 'mysql';
+import * as async from 'async';
+import * as bcrypt from 'bcrypt';
 
 import { AcmUser } from '../../shared/model/accessmanagement/user';
 
@@ -66,9 +68,9 @@ export class AcmUserTool {
 			} );
 		} );
 	};
-	public setAccessRights = ( refObj: { id: number, rights: any } ) => {
+	public setAccessRights = ( refObj: { user: number, rights: any } ) => {
 		return new Promise(( resolve, reject ) => {
-			this.clearAccessRights( refObj.id ).
+			this.clearAccessRights( refObj.user ).
 				then(() => {
 					return this.populateAccessRights( refObj.rights );
 				} ).then( resolve ).catch( reject );
@@ -76,7 +78,8 @@ export class AcmUserTool {
 	};
 	private clearAccessRights = ( id: number ) => {
 		return new Promise(( resolve, reject ) => {
-			this.db.query( 'DELETE FROM userdimeprocesses WHERE user = ?', id, ( err, result, fields ) => {
+			const deleteQuery = 'DELETE FROM userdimeprocesses WHERE user = ?'
+			this.db.query( deleteQuery, id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
@@ -87,13 +90,20 @@ export class AcmUserTool {
 	};
 	private populateAccessRights = ( rights: { processes: any[] } ) => {
 		return new Promise(( resolve, reject ) => {
-			this.db.query( 'INSERT INTO userdimeprocesses SET ?', rights.processes, ( err, result, fields ) => {
-				if ( err ) {
-					reject( err );
-				} else {
+			async.eachOfSeries(
+				rights.processes,
+				( item, key, callback ) => {
+					this.db.query( 'INSERT INTO userdimeprocesses SET ?', item, ( err, result, fields ) => {
+						if ( err ) {
+							reject( err );
+						} else {
+							callback();
+						}
+					} );
+				}, () => {
 					resolve();
 				}
-			} );
+			);
 		} );
 	};
 	public update = ( item: AcmUser ) => {
@@ -101,13 +111,13 @@ export class AcmUserTool {
 			if ( item.password === '|||---protected---|||' ) {
 				delete item.password;
 			} else if ( item.password ) {
-				item.password = this.tools.encryptText( item.password );
+				item.password = bcrypt.hashSync( item.password, 10 );
 			}
 			this.db.query( 'UPDATE users SET ? WHERE id = ' + item.id, item, function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the item' } );
 				} else {
-					item.password = '|||---protected---|||';
+					delete item.password;
 					resolve( { item } );
 				}
 			} );

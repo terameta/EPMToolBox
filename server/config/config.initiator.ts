@@ -261,7 +261,7 @@ tableList.push( {
 	fields: [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name VARCHAR(1024)',
-		'stream BIGINT UNSIGNED'
+		'map BIGINT UNSIGNED'
 	],
 	primaryKey: 'id'
 } );

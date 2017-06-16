@@ -8,10 +8,56 @@
 	<div class="box-body">
 		<div class="tab-content">
 			<div class="tab-pane fade in active" id="tabNightRun">
-				zöbelek zöblek
+				<div class="box box-success" *ngFor="let process of userProcessDetails">
+					<div class="box-header with-border">
+						<h3 class="box-title">{{ process.name }}</h3>
+					</div>
+					<div class="box-body">
+						<br>
+						Filters: <br>
+						<span *ngFor="let filter of process.filters">
+							<span *ngIf="filter.filterfrom">From: {{ filter.filterfrom }} <br></span>
+							<span *ngIf="filter.filterto">To: {{ filter.filterto }} <br></span>
+							<span *ngIf="filter.filterbeq">From: {{ filter.filterbeq }} <br></span>
+							<span *ngIf="filter.filterseq">To: {{ filter.filterseq }} <br></span>
+							<span *ngIf="filter.filtertext">Specifically: {{ filter.filtertext }} <br></span>
+						</span>
+						<hr *ngIf="process.filters?.length > 0">
+						<span *ngIf="process.status == 'ready'">
+							Status: Ready <br>
+							<button 
+								type="button" 
+								class="btn btn-success btn-xs" 
+								(click)="processRun(process.id)" 
+								title="Initiate Process">
+									<i class="fa fa-space-shuttle fa-fw" aria-hidden="true"></i> Initiate Process
+							</button>
+						</span>
+						<span *ngIf="process.status != 'ready'">
+							Status: Running
+							<pre>{{process.log}}</pre>
+						</span>
+					</div>
+				</div>
+				<!--<pre>{{userProcessDetails | json}}</pre>
+				<pre>{{currentUser | json}}</pre>-->
 			</div>
 			<div class="tab-pane fade in" id="tabDataFile">
-				zöbelek data file
+				<div class="box box-success" *ngFor="let process of userProcessDetails">
+					<div class="box-header with-border">
+						<h3 class="box-title">{{ process.name }}</h3>
+					</div>
+					<div class="box-body">
+						<br>
+						<button 
+							type="button" 
+							class="btn btn-success btn-xs" 
+							(click)="processService.sendDataFile(process.id)" 
+							title="Initiate Process">
+								<i class="fa fa-table fa-fw" aria-hidden="true"></i> Send Data File
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>

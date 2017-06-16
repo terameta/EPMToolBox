@@ -75,6 +75,9 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 					}
 				} );
 			} );
+			this.assignedProcesses.forEach(( curAssignedProcess ) => {
+				curAssignedProcess.user = this.mainService.curItem.id;
+			} );
 		}
 	};
 	private processAccessRightChange = () => {

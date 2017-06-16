@@ -34,6 +34,14 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label for="itemPassword" class="col-xs-2 control-label">Password:</label>
+							<div class="col-xs-10">
+								<input type="text" class="form-control" id="itemPassword" name="itemPassword" [(ngModel)]="mainService.curItem.password"
+									[disabled]="mainService.curItem.type=='directory'"
+								>
+							</div>
+						</div>
+						<div class="form-group">
 							<label for="itemRole" class="col-xs-2 control-label">Role:</label>
 							<div class="col-xs-10">
 								<select name="itemRole" id="itemRole" class="form-control" [(ngModel)]="mainService.curItem.role">
@@ -82,8 +90,8 @@
 				<form (ngSubmit)="mainService.updateAccessRights()" #f="ngForm" class="form-horizontal">
 					<fieldset>
 						<div class="form-group" *ngFor="let process of assignedProcesses;">
-							<label for="isassigned{{process.id}}" class="col-xs-2 control-label">{{process.name}}</label>
-							<div class="col-xs-10 checkbox">
+							<label for="isassigned{{process.id}}" class="col-xs-6 col-md-2 control-label">{{process.name}}</label>
+							<div class="col-xs-6 col-md-10 checkbox">
 								<label>
 									<input
 										type="checkbox"
@@ -96,15 +104,15 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<div class="col-xs-10 col-xs-offset-2">
+							<div class="col-xs-6 col-md-10 col-xs-offset-6 col-md-offset-2">
 								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
 							</div>
 						</div>
 					</fieldset>
 				</form>
-				<pre>{{assignedProcesses | json}}</pre>
+				<!--<pre>{{assignedProcesses | json}}</pre>
 				<pre>{{dimeProcessService.items | async | json}}</pre>
-				<pre>{{mainService.curItemAccessRights | json}}</pre>
+				<pre>{{mainService.curItemAccessRights | json}}</pre>-->
 
 			</div>
 		</div>
