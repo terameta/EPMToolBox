@@ -138,5 +138,17 @@ export class DimeMatrixTool {
 				}
 			} );
 		} );
-	}
+	};
+	public getMatrixTable = ( refObj: { id: number, filters: any } ) => {
+		console.log( refObj );
+		return new Promise(( resolve, reject ) => {
+			this.db.query( 'SELECT * FROM MATRIX' + refObj.id + '_MATRIXTBL', ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( result );
+				}
+			} );
+		} );
+	};
 }

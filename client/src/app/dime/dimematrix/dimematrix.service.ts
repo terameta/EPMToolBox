@@ -342,4 +342,10 @@ export class DimeMatrixService {
 				console.error( error );
 			} );
 	};
+	public fetchMatrixTable = () => {
+		return this.authHttp.
+			post( this.baseUrl + '/getMatrixTable', { id: this.curItem.id, filters: {} } ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
+	}
 }
