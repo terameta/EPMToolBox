@@ -1,0 +1,19 @@
+<form (ngSubmit)="mainService.setMatrixFields()" #f="ngForm" class="form-horizontal">
+	<table class="table table-condensed">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>isDescribed</th>
+				<th>isAssigned</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr *ngFor="let field of mainService.curItemFields">
+				<td>{{field.name}}</td>
+				<td><label><input type="checkbox" name="isDescribed{{field.name}}" [(ngModel)]="field.isDescribed" [disabled]='true'></label></td>
+				<td><label><input type="checkbox" name="isAssigned{{field.name}}" [(ngModel)]="field.isAssigned"></label></td>
+			</tr>
+		</tbody>
+	</table>
+	<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+</form>

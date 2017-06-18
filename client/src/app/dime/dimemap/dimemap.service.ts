@@ -229,8 +229,7 @@ export class DimeMapService {
 	};
 	private getFields = ( id?: number ) => {
 		if ( !id ) { id = this.curItem.id; }
-		this.authHttp.get( this.baseUrl + '/fields/' + id, { headers: this.headers } ).
-			map( response => response.json() ).
+		this.fetchFields( id ).
 			subscribe(( result ) => {
 				this.curItemFields = result;
 				this.matchFields();
@@ -239,6 +238,11 @@ export class DimeMapService {
 				console.log( error );
 			} )
 	};
+	public fetchFields = ( id: number ) => {
+		return this.authHttp.get( this.baseUrl + '/fields/' + id, { headers: this.headers } ).
+			map( response => response.json() ).
+			catch(( error ) => { return Observable.throw( new Error( error ) ); } );
+	}
 	private matchFields = () => {
 		if ( this.curItemSourceStreamFields ) {
 			this.curItemSourceStreamFields.forEach(( curField: { name: string, mappable: boolean } ) => {

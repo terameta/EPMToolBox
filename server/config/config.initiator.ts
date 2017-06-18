@@ -266,6 +266,21 @@ tableList.push( {
 	primaryKey: 'id'
 } );
 tableList.push( {
+	name: 'matrixfields',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'name VARCHAR(1024)',
+		'matrix BIGINT UNSIGNED NOT NULL',
+		'map BIGINT UNSIGNED NOT NULL',
+		'stream BIGINT UNSIGNED NOT NULL',
+		'isDescribed TINYINT DEFAULT 0',
+		'streamFieldID BIGINT UNSIGNED NOT NULL',
+		'isAssigned TINYINT DEFAULT 0',
+		'fOrder INT UNSIGNED'
+	],
+	primaryKey: 'id'
+} );
+tableList.push( {
 	name: 'userdimeprocesses',
 	fields: [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',

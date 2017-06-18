@@ -4,40 +4,21 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="#matrixtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
-			<!--<li><a href="#matrixtabfields" data-toggle="tab">Fields</a></li>-->
+			<li><a href="#matrixtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
+			<li><a href="#matrixtabfields" data-toggle="tab">Fields</a></li>
+			<li class="active"><a href="#matrixtabmatrix" data-toggle="tab">Validity Matrix</a></li>
 		</ul>
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
-			<div class="tab-pane fade in active" id="matrixtabmaindefinitions">
-				<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
-					<fieldset>
-						<div class="form-group">
-							<label for="itemName" class="col-xs-6 col-md-2 control-label">Name:</label>
-							<div class="col-xs-6 col-md-10">
-								<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.curItem.name">
-							</div>
-						</div>
-						<div class="form-group">
-							<label for="itemMap" class="col-xs-6 col-md-2 control-label">Bound Map:</label>
-							<div class="col-xs-6 col-md-10">
-								<select name="itemMap" id="itemMap" class="form-control" [(ngModel)]="mainService.curItem.map">
-									<option
-										*ngFor="let map of (mapService.items | async)"
-										[value]="map.id">{{map.name}}</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<div class="col-xs-10 col-xs-offset-2">
-								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-								<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/matrices/matrix-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
-								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)"><i class="fa fa-trash fa-fw"></i> Delete Matrix</button>
-							</div>
-						</div>
-					</fieldset>
-				</form>
+			<div class="tab-pane fade in" id="matrixtabmaindefinitions">
+				<app-dimematrix-detail-maindefinitions></app-dimematrix-detail-maindefinitions>
+			</div>
+			<div class="tab-pane fade in" id="matrixtabfields">
+				<app-dimematrix-detail-fields></app-dimematrix-detail-fields>
+			</div>
+			<div class="tab-pane fade in active" id="matrixtabmatrix">
+				<app-dimematrix-detail-matrix></app-dimematrix-detail-matrix>
 			</div>
 		</div>
 	</div>

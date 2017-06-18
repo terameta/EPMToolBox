@@ -12,6 +12,9 @@ import { DimeMatrixToolbarComponent } from './dimematrix-toolbar/dimematrix-tool
 import { DimeMatrixListComponent } from './dimematrix-list/dimematrix-list.component';
 import { DimeMatrixDetailComponent } from './dimematrix-detail/dimematrix-detail.component';
 import { DimeMatrixComponent } from './dimematrix/dimematrix.component';
+import { DimematrixDetailMaindefinitionsComponent } from './dimematrix-detail/dimematrix-detail-maindefinitions/dimematrix-detail-maindefinitions.component';
+import { DimematrixDetailFieldsComponent } from './dimematrix-detail/dimematrix-detail-fields/dimematrix-detail-fields.component';
+import { DimematrixDetailMatrixComponent } from './dimematrix-detail/dimematrix-detail-matrix/dimematrix-detail-matrix.component';
 
 const dimeMatrixRoutes: Routes = [
 	{ path: 'dime/matrices', pathMatch: 'prefix', redirectTo: 'dime/matrices/matrix-list' },
@@ -35,7 +38,10 @@ const dimeMatrixRoutes: Routes = [
 		DimeMatrixToolbarComponent,
 		DimeMatrixListComponent,
 		DimeMatrixDetailComponent,
-		DimeMatrixComponent
+		DimeMatrixComponent,
+		DimematrixDetailMaindefinitionsComponent,
+		DimematrixDetailFieldsComponent,
+		DimematrixDetailMatrixComponent
 	]
 })
 export class DimematrixModule { }
