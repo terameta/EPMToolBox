@@ -37,7 +37,7 @@
   "devDependencies": {
     "@angular/cli": "^1.1.2",
     "@angular/compiler-cli": "^4.2.3",
-    "@types/jasmine": "^2.5.51",
+    "@types/jasmine": "^2.5.52",
     "@types/jquery": "^2.0.47",
     "@types/node": "^7.0.31",
     "@types/tether": "^1.4.2",

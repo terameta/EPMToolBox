@@ -113,10 +113,11 @@ export class DimeMatrixTool {
 				then( this.getFields ).then(( fieldList: DimeMatrixField[] ) => {
 					let createQuery: string; createQuery = '';
 					createQuery += 'CREATE TABLE MATRIX' + id + '_MATRIXTBL (';
+					createQuery += 'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, ';
 					createQuery += fieldList.map( curField => curField.name + ' VARCHAR(1024)' ).join( ',' );
-					createQuery += ')';
+					createQuery += ', PRIMARY KEY (id) )';
 					// console.log( fieldList );
-					// console.log( createQuery );
+					console.log( createQuery );
 					this.db.query( createQuery, ( err, result, fields ) => {
 						if ( err ) {
 							reject( err );

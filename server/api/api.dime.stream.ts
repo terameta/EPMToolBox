@@ -28,5 +28,6 @@ export class ApiDimeStream {
 		this.apiRoutes.get('/clearFields/:id', (req, res) => { this.rester.respond(this.stream.clearFields, { id: req.params.id }, req, res); });
 		this.apiRoutes.post('/listFieldsforField/', (req, res) => { this.rester.respond(this.stream.listFieldsforField, req.body, req, res); });
 		this.apiRoutes.post('/saveFields', (req, res) => { this.rester.respond(this.stream.saveFields, req.body, req, res); });
+		this.apiRoutes.post('/getFieldDescriptions', (req, res) => { this.rester.respond(this.stream.getFieldDescriptions, req.body, req, res); });
 	}
 }

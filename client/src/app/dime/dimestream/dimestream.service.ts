@@ -422,6 +422,11 @@ export class DimeStreamService {
 				console.log( error );
 			} );
 	};
+	public fetchFieldDescriptions = ( stream: number, field: number ) => {
+		return this.authHttp.post( this.baseUrl + '/getFieldDescriptions', { stream: stream, field: field } ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
+	};
 	setdrfType( field, event ) {
 		field.drfType = this.descriptiveFields[field.descriptiveDB][field.descriptiveTable][event.target.selectedIndex].type;
 	}
