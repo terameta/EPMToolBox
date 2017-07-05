@@ -48,6 +48,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			then( this.prepareColumns ).
 			then( this.getDescriptions ).
 			then( this.applyDescriptions ).
+			then( this.prepareDropdowns ).
 			then(() => {
 				console.log( 'We are ready, let\'s roll' );
 
@@ -58,19 +59,6 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				} );
 				this.hotSettings = {
 					data: this.dataObject,
-					// columns: [
-					// 	{ data: 'id', type: 'numeric', readonly: true },
-					// 	{ data: 'Account', type: 'text' },
-					// 	{ data: 'Account_DESC', type: 'text' },
-					// 	{ data: 'Entity', type: 'text' },
-					// 	{ data: 'Entity_DESC', type: 'text' },
-					// 	{ data: 'Product', type: 'text' },
-					// 	{ data: 'Product_DESC', type: 'text' },
-					// 	{ data: 'level', type: 'numeric', format: '0.0000' },
-					// 	{ data: 'units', type: 'text' },
-					// 	{ data: 'asOf', type: 'date', dateFormat: 'MM/DD/YYYY' },
-					// 	{ data: 'onedChng', type: 'numeric', format: '0.00%' }
-					// ],
 					columns: this.columns,
 					fixedRowsTop: 2,
 					stretchH: 'all',
@@ -88,9 +76,23 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 					minSpareRows: 1,
 					fillHandle: { direction: 'vertical', autoInsertRow: false },
 					colHeaders: this.colHeaders,
-					cell: [
-						{ row: 0, col: 1, type: 'autocomplete', source: ['Exact Match', 'Contains', 'Begins with', 'Ends With'] }
-					]
+					// cell: [
+					// 	{ row: 0, col: 1, type: 'dropdown', source: ['Exact Match', 'Contains', 'Begins with', 'Ends With'] }
+					// ],
+					cells: function ( row, col, prop ) {
+						if ( row === 0 ) {
+							if ( prop !== 'saveresult' ) {
+								this.type = 'dropdown';
+								this.source = ['Exact Match', 'Contains', 'Begins with', 'Ends With'];
+							}
+						}
+						if ( row === 1 ) {
+							if ( prop !== 'saveresult' ) {
+								this.readOnly = false;
+							}
+						}
+					},
+					afterChange: this.hotAfterChange
 				};
 				let hot: any; hot = new Handsontable( this.hotElement, this.hotSettings );
 				hot.updateSettings( {
@@ -124,31 +126,42 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			} );
 
 	};
-	private applyDescriptions = () => {
-		console.log( this.fieldDescriptions );
+	private hotAfterChange = ( changes: any, source: any ) => {
+		console.log( changes, source );
+	}
+	private prepareDropdowns = () => {
 		return new Promise(( resolve, reject ) => {
-			resolve();
-			setTimeout(() => {
-				this.dataObject.forEach(( curTuple ) => {
-					curTuple.Account_DESC = 'Account Description' + curTuple.id;
+			console.log( this.columns );
+			this.columns.forEach(( curColumn ) => {
+				Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
+					if ( curColumn.data === curFieldName ) {
+						console.log( curColumn.data, curFieldName );
+						curColumn.type = 'autocomplete';
+						curColumn.strict = true;
+						curColumn.allowInvalid = false;
+						curColumn.source = [];
+						this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
+							curColumn.source.push( curDescription.RefField + '::' + curDescription.Description );
+						} );
+					}
 				} );
-				console.log( 'Descriptions applied' );
-			}, 15000 );
-			setTimeout( function () { console.log( 1000 ); }, 1000 );
-			setTimeout( function () { console.log( 2000 ); }, 2000 );
-			setTimeout( function () { console.log( 3000 ); }, 3000 );
-			setTimeout( function () { console.log( 4000 ); }, 4000 );
-			setTimeout( function () { console.log( 5000 ); }, 5000 );
-			setTimeout( function () { console.log( 6000 ); }, 6000 );
-			setTimeout( function () { console.log( 7000 ); }, 7000 );
-			setTimeout( function () { console.log( 8000 ); }, 8000 );
-			setTimeout( function () { console.log( 9000 ); }, 9000 );
-			setTimeout( function () { console.log( 10000 ); }, 10000 );
-			setTimeout( function () { console.log( 11000 ); }, 11000 );
-			setTimeout( function () { console.log( 12000 ); }, 12000 );
-			setTimeout( function () { console.log( 13000 ); }, 13000 );
-			setTimeout( function () { console.log( 14000 ); }, 14000 );
-			setTimeout( function () { console.log( 15000 ); }, 15000 );
+			} );
+			console.log( this.fieldDescriptions );
+			resolve();
+		} );
+	};
+	private applyDescriptions = () => {
+		return new Promise(( resolve, reject ) => {
+			Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
+				this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
+					this.dataObject.forEach(( curTuple ) => {
+						if ( curTuple[curFieldName] === curDescription.RefField ) {
+							curTuple[curFieldName + '_DESC'] = curDescription.Description;
+						}
+					} );
+				} );
+			} );
+			resolve();
 		} );
 	};
 	private getDescriptions = () => {
@@ -194,6 +207,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 						this.dataObject[0][curField.name + '_DESC'] = 'Contains';
 						this.dataObject[1][curField.name + '_DESC'] = '';
 						toPushD.type = 'text';
+						// toPushD.readOnly = true;
 						this.columns.push( toPushD );
 						this.colHeaders.push( curField.name + ' Description' );
 					}
