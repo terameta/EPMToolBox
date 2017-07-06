@@ -25,5 +25,6 @@ export class ApiDimeMatrix {
 		this.apiRoutes.put( '/fields', ( req, res ) => { this.rester.respond( this.matrixTool.setFields, req.body, req, res ); } );
 		this.apiRoutes.get( '/prepareTables/:id', ( req, res ) => { this.rester.respond( this.matrixTool.prepareTables, req.params.id, req, res ); } );
 		this.apiRoutes.post( '/getMatrixTable', ( req, res ) => { this.rester.respond( this.matrixTool.getMatrixTable, req.body, req, res ); } );
+		this.apiRoutes.post( '/saveMatrixTuple', ( req, res ) => { this.rester.respond( this.matrixTool.saveMatrixTuple, req.body, req, res ); } );
 	};
 }

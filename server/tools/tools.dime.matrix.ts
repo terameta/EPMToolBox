@@ -4,6 +4,7 @@ import { IPool } from 'mysql';
 
 import { DimeMatrix } from '../../shared/model/dime/matrix';
 import { DimeMatrixField } from '../../shared/model/dime/matrixfield';
+
 export class DimeMatrixTool {
 
 	constructor( public db: IPool, public tools: MainTools ) {
@@ -140,14 +141,69 @@ export class DimeMatrixTool {
 			} );
 		} );
 	};
-	public getMatrixTable = ( refObj: { id: number, filters: any } ) => {
-		console.log( refObj );
+	public saveMatrixTuple = ( refObj: { id: number, tuple: any } ) => {
 		return new Promise(( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM MATRIX' + refObj.id + '_MATRIXTBL', ( err, result, fields ) => {
+			console.log( refObj );
+			reject( 'Not yet' );
+		} );
+	}
+	public getMatrixTable = ( refObj: { id: number, filters: any } ) => {
+		return new Promise(( resolve, reject ) => {
+			let selectQuery: string; selectQuery = '';
+			this.db.query( 'SELECT * FROM matrixfields WHERE matrix = ? AND isAssigned = 1 ORDER BY fOrder', refObj.id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
-					resolve( result );
+					const matrixTable = 'MATRIX' + refObj.id + '_MATRIXTBL';
+					selectQuery += 'SELECT * FROM ('
+					selectQuery += '\tSELECT \n\t\t' + matrixTable + '.id';
+					result.forEach(( curTuple: any ) => {
+						const descTable = 'STREAM' + curTuple.stream + '_DESCTBL' + curTuple.streamFieldID;
+						selectQuery += ',\n\t\t';
+						selectQuery += matrixTable + '.' + curTuple.name;
+						if ( curTuple.isDescribed ) {
+							selectQuery += ',\n\t';
+							selectQuery += descTable + '.Description AS ' + curTuple.name + '_DESC';
+						}
+					} );
+					selectQuery += '\nFROM \n\tMATRIX' + refObj.id + '_MATRIXTBL';
+					result.forEach(( curTuple: any ) => {
+						const descTable = 'STREAM' + curTuple.stream + '_DESCTBL' + curTuple.streamFieldID;
+						selectQuery += '\n\tLEFT JOIN ' + descTable;
+						selectQuery += ' ON ' + descTable + '.RefField = ' + matrixTable + '.' + curTuple.name;
+					} );
+					let wherers: string[]; wherers = [];
+					let wherevals: any[]; wherevals = [];
+					Object.keys( refObj.filters ).forEach(( curFilter ) => {
+						let filterText: string; filterText = curFilter;
+						if ( refObj.filters[curFilter].type === 'Exact Match' ) {
+							filterText += ' = ?';
+							wherevals.push( refObj.filters[curFilter].value );
+						} else if ( refObj.filters[curFilter].type === 'Contains' ) {
+							filterText += ' LIKE ?';
+							wherevals.push( '%' + refObj.filters[curFilter].value + '%' );
+						} else if ( refObj.filters[curFilter].type === 'Begins with' ) {
+							filterText += ' LIKE ?';
+							wherevals.push( refObj.filters[curFilter].value + '%' );
+						} else if ( refObj.filters[curFilter].type === 'Ends with' ) {
+							filterText += ' LIKE ?';
+							wherevals.push( '%' + refObj.filters[curFilter].value );
+						}
+						wherers.push( filterText );
+
+					} );
+					selectQuery += '\n) MATRIXDESCRIBED WHERE 1 = 1';
+					wherers.forEach(( curWhere: string ) => {
+						selectQuery += '\n\tAND ';
+						selectQuery += curWhere;
+					} );
+					this.db.query( selectQuery, wherevals, ( mErr, mResult, mFields ) => {
+						if ( mErr ) {
+							reject( mErr );
+						} else {
+							resolve( mResult );
+						}
+					} );
 				}
 			} );
 		} );

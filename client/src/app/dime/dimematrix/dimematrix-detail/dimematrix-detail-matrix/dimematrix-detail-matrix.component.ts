@@ -16,7 +16,10 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	private colHeaders: string[];
 	private options: any;
 	private dataObject;
-	private currencyCodes = ['EUR', 'JPY', 'GBP', 'CHF', 'CAD', 'AUD', 'NZD', 'SEK', 'NOK', 'BRL', 'CNY', 'RUB', 'INR', 'TRY', 'THB', 'IDR', 'MYR', 'MXN', 'ARS', 'DKK', 'ILS', 'PHP'];
+
+	private hot: Handsontable;
+
+	private filterChangeWaiter: any;
 
 	// @ViewChild( HotTable ) hotTableComponent;
 
@@ -34,7 +37,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 		private toastr: ToastrService,
 		private streamService: DimeStreamService
 	) {
-		this.filterOptions = ['Exact Match', 'Contains', 'Begins with', 'Ends With'];
+		this.filterOptions = ['Exact Match', 'Contains', 'Begins with', 'Ends with'];
 	}
 
 	ngOnInit() {
@@ -59,6 +62,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				} );
 				this.hotSettings = {
 					data: this.dataObject,
+					observeChanges: true,
 					columns: this.columns,
 					fixedRowsTop: 2,
 					stretchH: 'all',
@@ -77,43 +81,45 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 					fillHandle: { direction: 'vertical', autoInsertRow: false },
 					colHeaders: this.colHeaders,
 					// cell: [
-					// 	{ row: 0, col: 1, type: 'dropdown', source: ['Exact Match', 'Contains', 'Begins with', 'Ends With'] }
+					// 	{ row: 0, col: 1, type: 'dropdown', source: ['Exact Match', 'Contains', 'Begins with', 'Ends with'] }
 					// ],
 					cells: function ( row, col, prop ) {
 						if ( row === 0 ) {
 							if ( prop !== 'saveresult' ) {
 								this.type = 'dropdown';
-								this.source = ['Exact Match', 'Contains', 'Begins with', 'Ends With'];
+								this.source = ['Exact Match', 'Contains', 'Begins with', 'Ends with'];
+								this.readOnly = false;
 							}
 						}
 						if ( row === 1 ) {
 							if ( prop !== 'saveresult' ) {
+								this.type = 'text';
 								this.readOnly = false;
 							}
 						}
 					},
 					afterChange: this.hotAfterChange
 				};
-				let hot: any; hot = new Handsontable( this.hotElement, this.hotSettings );
-				hot.updateSettings( {
+				this.hot = new Handsontable( this.hotElement, this.hotSettings );
+				this.hot.updateSettings( {
 					contextMenu: {
 						items: {
 							'row_above': {
 								disabled: () => {
 									// if filtertype or filter row, don't enable add row above
-									return hot.getSelected()[0] === 0 || hot.getSelected()[0] === 1;
+									return this.hot.getSelected()[0] === 0 || this.hot.getSelected()[0] === 1;
 								}
 							},
 							'row_below': {
 								disabled: () => {
 									// if filtertype or filter row, don't enable add row above
-									return hot.getSelected()[0] === 0 || hot.getSelected()[0] === 1;
+									return this.hot.getSelected()[0] === 0 || this.hot.getSelected()[0] === 1;
 								}
 							},
 							'remove_row': {
 								disabled: () => {
 									// if filtertype or filter row, don't enable add row above
-									return hot.getSelected()[0] === 0 || hot.getSelected()[0] === 1;
+									return this.hot.getSelected()[0] === 0 || this.hot.getSelected()[0] === 1;
 								}
 							}
 						}
@@ -126,8 +132,58 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			} );
 
 	};
-	private hotAfterChange = ( changes: any, source: any ) => {
-		console.log( changes, source );
+	private hotAfterChange = ( changes: any[], source: string ) => {
+		// console.log( changes, source );
+		if ( source !== 'loadData' && changes && Array.isArray( changes ) ) {
+			console.log( 'We will put our logic here' );
+			console.log( 'Number of changed cells:', changes.length );
+			let dataChanged = false;
+			changes.forEach(( currentChange: any[] ) => {
+				const changedRowNumber = currentChange[0];
+				const changedFieldName = currentChange[1];
+				const changedOldValue = currentChange[2];
+				const changedNewValue = currentChange[3];
+				// console.log( 'Changed Row Number', changedRowNumber );
+				// console.log( 'Changed Field Name', changedFieldName );
+				// console.log( 'Changed Old Value', changedOldValue );
+				// console.log( 'Changed New Value', changedNewValue );
+				// console.log( this.dataObject[changedRowNumber] );
+				if ( this.dataObject[changedRowNumber].id === 'Filter' || this.dataObject[changedRowNumber].id === 'Filter Type' ) {
+					this.filterChange();
+				} else {
+					this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
+					dataChanged = true;
+				}
+			} );
+			if ( dataChanged ) {
+				this.applyDescriptions().then(() => {
+					this.hot.loadData( this.dataObject );
+				} );
+			}
+		}
+	}
+	private filterChange = () => {
+		clearTimeout( this.filterChangeWaiter );
+		this.filterChangeWaiter = setTimeout( this.filterChangeAction, 1000 );
+	};
+	private filterChangeAction = () => {
+		this.getMatrixTable().then(() => {
+			this.hot.loadData( this.dataObject );
+		} );
+	};
+	private hotEdited = ( change: any, changedFieldName: string ) => {
+		console.log( 'Data on hotable changed', change, changedFieldName );
+		change[changedFieldName] = change[changedFieldName].split( '::' )[0];
+		change.saveresult = '<i class="fa fa-circle-o-notch fa-spin"></i>';
+		this.mainService.saveMatrixTuple( change ).subscribe(( result ) => {
+			console.log( result );
+			change.saveresult = '<center><i class="fa fa-check-circle" style="color:green;font-size:12px;"></i></center>';
+			this.hot.loadData( this.dataObject );
+		}, ( error ) => {
+			change.saveresult = '<center><i class="fa fa-exclamation-circle" style="color:red;font-size:12px;"></i></center>';
+			this.hot.loadData( this.dataObject );
+			console.error( error );
+		} );
 	}
 	private prepareDropdowns = () => {
 		return new Promise(( resolve, reject ) => {
@@ -142,6 +198,9 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 						curColumn.source = [];
 						this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
 							curColumn.source.push( curDescription.RefField + '::' + curDescription.Description );
+						} );
+						this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
+							curColumn.source.push( curDescription.RefField );
 						} );
 					}
 				} );
@@ -207,21 +266,42 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 						this.dataObject[0][curField.name + '_DESC'] = 'Contains';
 						this.dataObject[1][curField.name + '_DESC'] = '';
 						toPushD.type = 'text';
-						// toPushD.readOnly = true;
+						toPushD.readOnly = true;
 						this.columns.push( toPushD );
 						this.colHeaders.push( curField.name + ' Description' );
 					}
 				}
 			} );
-			this.columns.push( { data: 'saveresult', type: 'text', readOnly: true } );
+			this.columns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html' } );
 			this.colHeaders.push( 'Save Result' );
 			resolve();
 		} );
 	};
 	private getMatrixTable = () => {
 		return new Promise(( resolve, reject ) => {
-			this.mainService.fetchMatrixTable().subscribe(( data ) => {
-				this.dataObject = [{ id: 'Filter Type' }, { id: 'Filter' }];
+			let currentFilter: any;
+			if ( this.dataObject ) {
+				currentFilter = {};
+				Object.keys( this.dataObject[0] ).forEach(( curKey ) => {
+					if ( this.dataObject[0][curKey] !== 'Filter Type' ) {
+						if ( this.dataObject[1][curKey] ) {
+							console.log( curKey, this.dataObject[0][curKey], this.dataObject[1][curKey] );
+							currentFilter[curKey] = {
+								type: this.dataObject[0][curKey],
+								value: this.dataObject[1][curKey]
+							};
+						}
+					}
+				} );
+			} else {
+				currentFilter = {};
+			}
+			this.mainService.fetchMatrixTable( currentFilter ).subscribe(( data ) => {
+				if ( this.dataObject ) {
+					this.dataObject = [this.dataObject[0], this.dataObject[1]];
+				} else {
+					this.dataObject = [{ id: 'Filter Type' }, { id: 'Filter' }];
+				}
 				data.forEach(( curData ) => {
 					this.dataObject.push( curData );
 				} );

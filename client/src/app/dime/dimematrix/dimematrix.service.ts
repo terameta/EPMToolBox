@@ -342,10 +342,18 @@ export class DimeMatrixService {
 				console.error( error );
 			} );
 	};
-	public fetchMatrixTable = () => {
+	public fetchMatrixTable = ( currentFilter?: any ) => {
+		if ( !currentFilter ) {
+			currentFilter = {};
+		}
 		return this.authHttp.
-			post( this.baseUrl + '/getMatrixTable', { id: this.curItem.id, filters: {} } ).
+			post( this.baseUrl + '/getMatrixTable', { id: this.curItem.id, filters: currentFilter } ).
 			map( response => response.json() ).
 			catch( error => Observable.throw( error ) );
-	}
+	};
+	public saveMatrixTuple = ( matrixEntry: any ) => {
+		return this.authHttp.post( this.baseUrl + '/saveMatrixTuple', matrixEntry ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
+	};
 }
