@@ -133,12 +133,18 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 
 	};
 	private hotAfterChange = ( changes: any[], source: string ) => {
-		// console.log( changes, source );
-		if ( source !== 'loadData' && changes && Array.isArray( changes ) ) {
+		console.log( changes, source );
+		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
+			let theUpdates: any[];
+			if ( Array.isArray( changes[0] ) ) {
+				theUpdates = changes;
+			} else {
+				theUpdates = [changes];
+			}
 			console.log( 'We will put our logic here' );
 			console.log( 'Number of changed cells:', changes.length );
 			let dataChanged = false;
-			changes.forEach(( currentChange: any[] ) => {
+			theUpdates.forEach(( currentChange: any[] ) => {
 				const changedRowNumber = currentChange[0];
 				const changedFieldName = currentChange[1];
 				const changedOldValue = currentChange[2];
@@ -151,8 +157,10 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				if ( this.dataObject[changedRowNumber].id === 'Filter' || this.dataObject[changedRowNumber].id === 'Filter Type' ) {
 					this.filterChange();
 				} else {
-					this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
-					dataChanged = true;
+					if ( changedFieldName !== 'saveresult' ) {
+						this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
+						dataChanged = true;
+					}
 				}
 			} );
 			if ( dataChanged ) {
@@ -177,6 +185,9 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 		change.saveresult = '<i class="fa fa-circle-o-notch fa-spin"></i>';
 		this.mainService.saveMatrixTuple( change ).subscribe(( result ) => {
 			console.log( result );
+			if ( result.insertId ) {
+				change.id = result.insertId;
+			}
 			change.saveresult = '<center><i class="fa fa-check-circle" style="color:green;font-size:12px;"></i></center>';
 			this.hot.loadData( this.dataObject );
 		}, ( error ) => {

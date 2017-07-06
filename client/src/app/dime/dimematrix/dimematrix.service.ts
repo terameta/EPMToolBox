@@ -352,7 +352,7 @@ export class DimeMatrixService {
 			catch( error => Observable.throw( error ) );
 	};
 	public saveMatrixTuple = ( matrixEntry: any ) => {
-		return this.authHttp.post( this.baseUrl + '/saveMatrixTuple', matrixEntry ).
+		return this.authHttp.post( this.baseUrl + '/saveMatrixTuple', { id: this.curItem.id, matrixEntry: matrixEntry } ).
 			map( response => response.json() ).
 			catch( error => Observable.throw( error ) );
 	};

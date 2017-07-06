@@ -141,12 +141,40 @@ export class DimeMatrixTool {
 			} );
 		} );
 	};
-	public saveMatrixTuple = ( refObj: { id: number, tuple: any } ) => {
+	public saveMatrixTuple = ( refObj: { id: number, matrixEntry: any } ) => {
 		return new Promise(( resolve, reject ) => {
 			console.log( refObj );
-			reject( 'Not yet' );
+			let saveQuery: string; saveQuery = '';
+			if ( refObj.matrixEntry.id ) {
+				saveQuery += 'UPDATE MATRIX' + refObj.id + '_MATRIXTBL SET ? WHERE id=' + refObj.matrixEntry.id;
+			} else {
+				saveQuery += 'INSERT INTO MATRIX' + refObj.id + '_MATRIXTBL SET ?';
+			}
+			let saverFields: any; saverFields = {};
+			Object.keys( refObj.matrixEntry ).forEach(( curFieldName ) => {
+				if ( curFieldName === 'id' ) {
+
+				} else if ( curFieldName.substr( -5 ) === '_DESC' ) {
+
+				} else if ( curFieldName === 'saveresult' ) {
+
+				} else {
+					saverFields[curFieldName] = refObj.matrixEntry[curFieldName];
+				}
+			} );
+			this.db.query( saveQuery, saverFields, ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( result );
+				}
+			} );
+			// console.log( refObj );
+			// console.log( saveQuery );
+			// console.log( saverFields );
+			// reject( 'Not yet' );
 		} );
-	}
+	};
 	public getMatrixTable = ( refObj: { id: number, filters: any } ) => {
 		return new Promise(( resolve, reject ) => {
 			let selectQuery: string; selectQuery = '';
