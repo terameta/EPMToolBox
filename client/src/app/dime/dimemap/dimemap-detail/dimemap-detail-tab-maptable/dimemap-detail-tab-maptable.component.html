@@ -4,27 +4,7 @@
 	</div>
 	<div class="btn-group btn-group-xs pull-right" role="group">
 		<button class="btn btn-default" type="button" title="Refresh Map" (click)="refreshMapTable()"><i class="fa fa-refresh fa-fw"></i> Refresh</button>
-		<button class="btn btn-default" type="button" title="Zen Mode" (click)="refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>
+		<!--<button class="btn btn-default" type="button" title="Zen Mode" (click)="refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>-->
 	</div>
 </div>
-<!--<hotTable *ngIf="mainService.curItemMapReadyToShow" [data]="mainService.curItemMapData"
-           [columns]="mainService.curItemMapColumns"
-           [colHeaders]="mainService.curItemMapColHeaders"
-           [options]="options">
-</hotTable>-->
-<!--
-<hotTable *ngIf="mainService.curItemMapData.length > 0" [data]="mainService.curItemMapData"
-           [columns]="mainService.curItemMapColumns"
-           [colHeaders]="mainService.curItemMapColHeaders"
-           [colWidths]="colHeaders"
-           [options]="options">
-</hotTable>-->
-<!--<ag-grid-angular id="MapGrid" class="ag-fresh" style="width:100%; height:100px;margin-top:5px;" (window:resize)="windowResized($event)"
-	[gridOptions]="gridOptions"
->
-</ag-grid-angular>-->
-
-<hotTable
-	[data]="data"
->
-</hotTable>
+<div id="mapHotTable{{mainService.curItem.id}}" (window:resize)="windowResized($event)"></div>

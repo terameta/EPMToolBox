@@ -297,6 +297,15 @@ export class DimeMapService {
 				return Observable.throw( new Error( error ) );
 			} );
 	};
+	public fetchMapTable = ( currentFilter?: any ) => {
+		if ( !currentFilter ) {
+			currentFilter = {};
+		}
+		return this.authHttp.
+			post( this.baseUrl + '/mapData?i=' + new Date().getTime(), { id: this.curItem.id, filters: currentFilter } ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
+	};
 	public saveMapTuple = ( data ) => {
 		return this.authHttp.post( this.baseUrl + '/saveMapTuple', { mapid: this.curItem.id, tuple: data } ).
 			map( response => response.json() ).

@@ -53,7 +53,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			then( this.applyDescriptions ).
 			then( this.prepareDropdowns ).
 			then(() => {
-				console.log( 'We are ready, let\'s roll' );
+				// console.log( 'We are ready, let\'s roll' );
 
 
 				this.rowHeaders = [];
@@ -77,7 +77,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 					sortIndicator: true,
 					rowHeaders: this.rowHeaders,
 					rowHeaderWidth: 75,
-					minSpareRows: 1,
+					minSpareRows: 10,
 					fillHandle: { direction: 'vertical', autoInsertRow: false },
 					colHeaders: this.colHeaders,
 					// cell: [
@@ -133,7 +133,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 
 	};
 	private hotAfterChange = ( changes: any[], source: string ) => {
-		console.log( changes, source );
+		// console.log( changes, source );
 		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
 			let theUpdates: any[];
 			if ( Array.isArray( changes[0] ) ) {
@@ -141,9 +141,10 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			} else {
 				theUpdates = [changes];
 			}
-			console.log( 'We will put our logic here' );
-			console.log( 'Number of changed cells:', changes.length );
+			// console.log( 'We will put our logic here' );
+			// console.log( 'Number of changed cells:', changes.length );
 			let dataChanged = false;
+			let changedRowNumbers: number[]; changedRowNumbers = [];
 			theUpdates.forEach(( currentChange: any[] ) => {
 				const changedRowNumber = currentChange[0];
 				const changedFieldName = currentChange[1];
@@ -157,12 +158,18 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				if ( this.dataObject[changedRowNumber].id === 'Filter' || this.dataObject[changedRowNumber].id === 'Filter Type' ) {
 					this.filterChange();
 				} else {
-					if ( changedFieldName !== 'saveresult' ) {
-						this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
+					if ( changedFieldName !== 'saveresult' && changedFieldName !== 'id' ) {
+						// this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
 						dataChanged = true;
+						if ( changedRowNumbers.indexOf( changedRowNumber ) < 0 ) {
+							changedRowNumbers.push( changedRowNumber );
+						}
 					}
 				}
 			} );
+			changedRowNumbers.forEach(( curChangedRow: number ) => {
+				this.hotEdited( this.dataObject[curChangedRow] );
+			} )
 			if ( dataChanged ) {
 				this.applyDescriptions().then(() => {
 					this.hot.loadData( this.dataObject );
@@ -179,30 +186,40 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			this.hot.loadData( this.dataObject );
 		} );
 	};
-	private hotEdited = ( change: any, changedFieldName: string ) => {
-		console.log( 'Data on hotable changed', change, changedFieldName );
-		change[changedFieldName] = change[changedFieldName].split( '::' )[0];
-		change.saveresult = '<i class="fa fa-circle-o-notch fa-spin"></i>';
-		this.mainService.saveMatrixTuple( change ).subscribe(( result ) => {
-			console.log( result );
-			if ( result.insertId ) {
-				change.id = result.insertId;
+	private hotEdited = ( change: any ) => {
+		// console.log( 'Data on hotable changed', change );
+		let isSaveable = true;
+		this.mainService.curItemAssignedFields.forEach(( curAssignedField ) => {
+			if ( !change[curAssignedField.name] ) {
+				isSaveable = false;
 			}
-			change.saveresult = '<center><i class="fa fa-check-circle" style="color:green;font-size:12px;"></i></center>';
-			this.hot.loadData( this.dataObject );
-		}, ( error ) => {
-			change.saveresult = '<center><i class="fa fa-exclamation-circle" style="color:red;font-size:12px;"></i></center>';
-			this.hot.loadData( this.dataObject );
-			console.error( error );
+			if ( change[curAssignedField.name] ) {
+				change[curAssignedField.name] = change[curAssignedField.name].toString().split( '::' )[0];
+			}
 		} );
+		if ( isSaveable ) {
+			change.saveresult = '<center><i class="fa fa-circle-o-notch fa-spin"></i></center>';
+			this.mainService.saveMatrixTuple( change ).subscribe(( result ) => {
+				// console.log( result );
+				if ( result.insertId ) {
+					change.id = result.insertId;
+				}
+				change.saveresult = '<center><i class="fa fa-check-circle" style="color:green;font-size:12px;"></i></center>';
+				this.hot.loadData( this.dataObject );
+			}, ( error ) => {
+				change.saveresult = '<center><i class="fa fa-exclamation-circle" style="color:red;font-size:12px;"></i></center>';
+				this.hot.loadData( this.dataObject );
+				console.error( error );
+			} );
+		}
 	}
 	private prepareDropdowns = () => {
 		return new Promise(( resolve, reject ) => {
-			console.log( this.columns );
+			// console.log( this.columns );
 			this.columns.forEach(( curColumn ) => {
 				Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
 					if ( curColumn.data === curFieldName ) {
-						console.log( curColumn.data, curFieldName );
+						// console.log( curColumn.data, curFieldName );
 						curColumn.type = 'autocomplete';
 						curColumn.strict = true;
 						curColumn.allowInvalid = false;
@@ -216,7 +233,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 					}
 				} );
 			} );
-			console.log( this.fieldDescriptions );
+			// console.log( this.fieldDescriptions );
 			resolve();
 		} );
 	};
