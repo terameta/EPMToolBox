@@ -46,6 +46,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 
 	private getReady = () => {
 		this.waitUntilItemIsReady().
+			then( this.prepareColumnOrders ).
 			then( this.defineHotItems ).
 			then( this.getMapTable ).
 			then( this.prepareColumns ).
@@ -130,7 +131,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			} ).
 			catch(( issue ) => {
 				console.log( issue );
-				this.toastr.error( 'Matrix is not ready for data entry' );
+				this.toastr.error( 'Map is not ready for data entry' );
 			} );
 	};
 	private hotAfterChange = () => {
@@ -138,15 +139,78 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	};
 	private waitUntilItemIsReady = () => {
 		return new Promise(( resolve, reject ) => {
-			if ( !this.mainService.curItemIsReady ) {
+			if ( !this.mainService.curItemIsReady || !this.mainService.curItemFields || !this.mainService.curItemSourceStreamFields || !this.mainService.curItemTargetStreamFields ) {
+				// console.log( 'Current  Item:', !!this.mainService.curItemIsReady );
+				// console.log( 'CurItemFields:', !!this.mainService.curItemFields );
+				// console.log( 'Source Fields:', !!this.mainService.curItemSourceStreamFields );
+				// console.log( 'Target Fields:', !!this.mainService.curItemTargetStreamFields );
 				setTimeout(() => {
 					resolve( this.waitUntilItemIsReady() );
 				}, 1000 );
 			} else {
+				// console.log( this.mainService.curItemFields );
+				// console.log( this.mainService.curItemSourceStreamFields );
+				// console.log( this.mainService.curItemTargetStreamFields );
 				resolve();
 			}
 		} );
 	};
+	private prepareColumnOrders = () => {
+		return new Promise(( resolve, reject ) => {
+			this.mainService.curItemFields.forEach(( curField ) => {
+				if ( curField.srctar === 'source' ) {
+					this.mainService.curItemSourceStreamFields.forEach(( curSourceField ) => {
+						if ( curSourceField.name === curField.name ) {
+							curField.fOrder = '00000' + curSourceField.fOrder;
+							curField.isDescribed = curSourceField.isDescribed;
+						}
+					} );
+				} else {
+					this.mainService.curItemTargetStreamFields.forEach(( curTargetField ) => {
+						if ( curTargetField.name === curField.name ) {
+							curField.fOrder = '00000' + curTargetField.fOrder;
+							curField.isDescribed = curTargetField.isDescribed;
+						}
+					} );
+				}
+				curField.fOrder = curField.srctar + curField.fOrder.toString().substr( -6 );
+			} );
+			this.mainService.curItemFields.sort(( a, b ) => {
+				if ( a.fOrder > b.fOrder ) {
+					return 1;
+				} else if ( a.fOrder < b.fOrder ) {
+					return -1;
+				} else {
+					return 0;
+				}
+			} );
+			this.streamService.listTypesFetch().subscribe(( result ) => {
+				let srcHyperionPlanning = false;
+				let tarHyperionPlanning = false;
+				result.forEach(( curType ) => {
+					if ( curType.id === this.mainService.curItemSourceStream.type && curType.value === 'HPDB' ) {
+						srcHyperionPlanning = true;
+					}
+					if ( curType.id === this.mainService.curItemTargetStream.type && curType.value === 'HPDB' ) {
+						tarHyperionPlanning = true;
+					}
+				} );
+				this.mainService.curItemFields.forEach(( curField ) => {
+					if ( curField.srctar === 'source' && srcHyperionPlanning ) {
+						curField.isDescribed = 1;
+					}
+					if ( curField.srctar === 'target' && tarHyperionPlanning ) {
+						curField.isDescribed = 1;
+					}
+				} );
+				this.mainService.curItemFields.forEach( console.log );
+				reject( 'Not yet' );
+			}, ( error ) => {
+				console.error( error );
+				reject( 'Error while getting stream type list' );
+			} )
+		} );
+	}
 	private defineHotItems = () => {
 		return new Promise(( resolve, reject ) => {
 			this.hotElement = document.querySelector( '#mapHotTable' + this.mainService.curItem.id );
@@ -194,25 +258,25 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			this.colHeaders = [];
 			// this.columns.push( { data: 'id', type: 'text', readOnly: true } );
 			// this.colHeaders.push( 'id' );
+			console.log( 'Prepare columns:', 'Length of the columns', this.mainService.curItemFields.length );
 			this.mainService.curItemFields.forEach(( curField ) => {
-				if ( curField.isAssigned ) {
-					let toPush: any; toPush = {};
-					toPush.data = curField.name;
-					toPush.type = 'text';
-					this.columns.push( toPush );
-					this.dataObject[0][curField.name] = 'Contains';
-					this.dataObject[1][curField.name] = '';
-					this.colHeaders.push( curField.name );
-					if ( curField.isDescribed ) {
-						let toPushD: any; toPushD = {};
-						toPushD.data = curField.name + '_DESC';
-						this.dataObject[0][curField.name + '_DESC'] = 'Contains';
-						this.dataObject[1][curField.name + '_DESC'] = '';
-						toPushD.type = 'text';
-						toPushD.readOnly = true;
-						this.columns.push( toPushD );
-						this.colHeaders.push( curField.name + ' Description' );
-					}
+				console.log( curField );
+				let toPush: any; toPush = {};
+				toPush.data = curField.name;
+				toPush.type = 'text';
+				this.columns.push( toPush );
+				this.dataObject[0][curField.name] = 'Contains';
+				this.dataObject[1][curField.name] = '';
+				this.colHeaders.push( curField.name );
+				if ( curField.isDescribed ) {
+					let toPushD: any; toPushD = {};
+					toPushD.data = curField.name + '_DESC';
+					this.dataObject[0][curField.name + '_DESC'] = 'Contains';
+					this.dataObject[1][curField.name + '_DESC'] = '';
+					toPushD.type = 'text';
+					toPushD.readOnly = true;
+					this.columns.push( toPushD );
+					this.colHeaders.push( curField.name + ' Description' );
 				}
 			} );
 			this.columns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html' } );
