@@ -163,6 +163,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						if ( curSourceField.name === curField.name ) {
 							curField.fOrder = '00000' + curSourceField.fOrder;
 							curField.isDescribed = curSourceField.isDescribed;
+							curField.stream = curSourceField.stream;
+							curField.streamFieldID = curSourceField.id;
 						}
 					} );
 				} else {
@@ -170,6 +172,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						if ( curTargetField.name === curField.name ) {
 							curField.fOrder = '00000' + curTargetField.fOrder;
 							curField.isDescribed = curTargetField.isDescribed;
+							curField.stream = curTargetField.stream;
+							curField.streamFieldID = curTargetField.id;
 						}
 					} );
 				}
@@ -203,8 +207,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						curField.isDescribed = 1;
 					}
 				} );
-				this.mainService.curItemFields.forEach( console.log );
-				reject( 'Not yet' );
+				resolve();
 			}, ( error ) => {
 				console.error( error );
 				reject( 'Error while getting stream type list' );
@@ -243,8 +246,10 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				} else {
 					this.dataObject = [{ id: 'Filter Type' }, { id: 'Filter' }];
 				}
+				console.log( 'We received data' );
 				data.forEach(( curData ) => {
 					this.dataObject.push( curData );
+					console.log( curData );
 				} );
 				resolve();
 			}, ( error ) => {
@@ -258,21 +263,23 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			this.colHeaders = [];
 			// this.columns.push( { data: 'id', type: 'text', readOnly: true } );
 			// this.colHeaders.push( 'id' );
-			console.log( 'Prepare columns:', 'Length of the columns', this.mainService.curItemFields.length );
 			this.mainService.curItemFields.forEach(( curField ) => {
-				console.log( curField );
+				// console.log( curField );
+				let curPrefix = '';
+				if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
+				if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
 				let toPush: any; toPush = {};
-				toPush.data = curField.name;
+				toPush.data = curPrefix + curField.name;
 				toPush.type = 'text';
 				this.columns.push( toPush );
-				this.dataObject[0][curField.name] = 'Contains';
-				this.dataObject[1][curField.name] = '';
+				this.dataObject[0][curPrefix + curField.name] = 'Contains';
+				this.dataObject[1][curPrefix + curField.name] = '';
 				this.colHeaders.push( curField.name );
 				if ( curField.isDescribed ) {
 					let toPushD: any; toPushD = {};
-					toPushD.data = curField.name + '_DESC';
-					this.dataObject[0][curField.name + '_DESC'] = 'Contains';
-					this.dataObject[1][curField.name + '_DESC'] = '';
+					toPushD.data = curPrefix + curField.name + '_DESC';
+					this.dataObject[0][curPrefix + curField.name + '_DESC'] = 'Contains';
+					this.dataObject[1][curPrefix + curField.name + '_DESC'] = '';
 					toPushD.type = 'text';
 					toPushD.readOnly = true;
 					this.columns.push( toPushD );
@@ -298,6 +305,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	};
 	private getDescriptionsAction = ( fieldName: string, stream: number, field: number ) => {
 		return new Promise(( resolve, reject ) => {
+			// console.log( 'getDescriptiansAction is running', fieldName, stream, field );
 			this.streamService.fetchFieldDescriptions( stream, field ).subscribe(( result ) => {
 				this.fieldDescriptions[fieldName] = result;
 				resolve();
