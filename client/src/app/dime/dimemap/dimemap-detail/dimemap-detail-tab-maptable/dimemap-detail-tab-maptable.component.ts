@@ -246,7 +246,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				} else {
 					this.dataObject = [{ id: 'Filter Type' }, { id: 'Filter' }];
 				}
-				console.log( 'We received data' );
+				// console.log( 'We received data' );
 				data.forEach(( curData ) => {
 					this.dataObject.push( curData );
 					console.log( curData );
@@ -271,6 +271,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				let toPush: any; toPush = {};
 				toPush.data = curPrefix + curField.name;
 				toPush.type = 'text';
+				if ( curField.srctar === 'source' ) { toPush.readOnly = true; }
 				this.columns.push( toPush );
 				this.dataObject[0][curPrefix + curField.name] = 'Contains';
 				this.dataObject[1][curPrefix + curField.name] = '';
@@ -296,18 +297,21 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			this.fieldDescriptions = {};
 			const promises = [];
 			this.mainService.curItemFields.forEach(( curField ) => {
-				if ( curField.isDescribed ) {
-					promises.push( this.getDescriptionsAction( curField.name, curField.stream, curField.streamFieldID ) );
+				let curPrefix = '';
+				if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
+				if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
+				if ( curField.isDescribed && curField.srctar === 'target' ) {
+					promises.push( this.getDescriptionsAction( curField.name, curField.stream, curField.streamFieldID, curPrefix ) );
 				}
 			} );
 			Promise.all( promises ).then( resolve ).catch( reject );
 		} );
 	};
-	private getDescriptionsAction = ( fieldName: string, stream: number, field: number ) => {
+	private getDescriptionsAction = ( fieldName: string, stream: number, field: number, prefix: string ) => {
 		return new Promise(( resolve, reject ) => {
 			// console.log( 'getDescriptiansAction is running', fieldName, stream, field );
 			this.streamService.fetchFieldDescriptions( stream, field ).subscribe(( result ) => {
-				this.fieldDescriptions[fieldName] = result;
+				this.fieldDescriptions[prefix + fieldName] = result;
 				resolve();
 			}, ( error ) => {
 				reject( error );
@@ -317,6 +321,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	private applyDescriptions = () => {
 		return new Promise(( resolve, reject ) => {
 			Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
+				console.log( curFieldName );
 				this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
 					this.dataObject.forEach(( curTuple ) => {
 						if ( curTuple[curFieldName] === curDescription.RefField ) {
