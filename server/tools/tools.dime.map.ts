@@ -408,7 +408,7 @@ export class MapTools {
 		} );
 	};
 	private retrieveMapDataAction = ( refObj: any ) => {
-		console.log( refObj );
+		// console.log( refObj );
 		return new Promise(( resolve, reject ) => {
 			let curMap: DimeMap; curMap = { id: 0, name: '' };
 			let mapFields: any[]; mapFields = [];
@@ -523,8 +523,34 @@ export class MapTools {
 								selectQuery += curField.table + '.RefField';
 							}
 						} );
-						// console.log(selectQuery);
-						this.db.query( selectQuery, ( err, result, fields ) => {
+						// console.log( selectQuery );
+						selectQuery = 'SELECT * FROM (' + selectQuery + ') FSQMAPDESCRIBED WHERE 1 = 1';
+						let wherers: string[]; wherers = [];
+						let wherevals: any[]; wherevals = [];
+						Object.keys( refObj.filters ).forEach(( curFilter ) => {
+							let filterText: string; filterText = curFilter;
+							if ( refObj.filters[curFilter].type === 'Exact Match' ) {
+								filterText += ' = ?';
+								wherevals.push( refObj.filters[curFilter].value );
+							} else if ( refObj.filters[curFilter].type === 'Contains' ) {
+								filterText += ' LIKE ?';
+								wherevals.push( '%' + refObj.filters[curFilter].value + '%' );
+							} else if ( refObj.filters[curFilter].type === 'Begins with' ) {
+								filterText += ' LIKE ?';
+								wherevals.push( refObj.filters[curFilter].value + '%' );
+							} else if ( refObj.filters[curFilter].type === 'Ends with' ) {
+								filterText += ' LIKE ?';
+								wherevals.push( '%' + refObj.filters[curFilter].value );
+							}
+							wherers.push( filterText );
+
+						} );
+						wherers.forEach(( curWhere: string ) => {
+							selectQuery += '\n\tAND ';
+							selectQuery += curWhere;
+						} );
+						// console.log( selectQuery );
+						this.db.query( selectQuery, wherevals, ( err, result, fields ) => {
 							if ( err ) {
 								reject( err );
 							} else {

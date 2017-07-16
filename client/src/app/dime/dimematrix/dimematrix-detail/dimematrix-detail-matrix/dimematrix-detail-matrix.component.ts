@@ -169,7 +169,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			} );
 			changedRowNumbers.forEach(( curChangedRow: number ) => {
 				this.hotEdited( this.dataObject[curChangedRow] );
-			} )
+			} );
 			if ( dataChanged ) {
 				this.applyDescriptions().then(() => {
 					this.hot.loadData( this.dataObject );

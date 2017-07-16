@@ -14,7 +14,7 @@ import { DimeMapService } from 'app/dime/dimemap/dimemap.service';
 } )
 export class DimemapDetailTabMaptableComponent implements OnInit {
 
-	private numberofRowsinMap: number;
+	private numberofRowsinMap: string;
 	private columns: any[];
 	private colHeaders: string[];
 	private options: any;
@@ -37,7 +37,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		private toastr: ToastrService,
 		private streamService: DimeStreamService
 	) {
-		this.numberofRowsinMap = 0;
+		this.numberofRowsinMap = 'Please wait, preparing...';
 	}
 
 	ngOnInit() {
@@ -54,11 +54,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			then( this.applyDescriptions ).
 			then( this.prepareDropdowns ).
 			then(() => {
-				console.log( 'We are ready, let\'s roll' );
-				console.log( this.dataObject );
-				console.log( this.columns );
-
-
+				// console.log( 'We are ready, let\'s roll' );
+				// console.log( this.dataObject );
+				// console.log( this.columns );
 				this.rowHeaders = [];
 				this.dataObject.forEach(( curData ) => {
 					this.rowHeaders.push( curData.id.toString() );
@@ -80,7 +78,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 					sortIndicator: true,
 					rowHeaders: this.rowHeaders,
 					rowHeaderWidth: 75,
-					minSpareRows: 10,
+					minSpareRows: 0,
 					fillHandle: { direction: 'vertical', autoInsertRow: false },
 					colHeaders: this.colHeaders,
 					// cell: [
@@ -134,8 +132,84 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				this.toastr.error( 'Map is not ready for data entry' );
 			} );
 	};
-	private hotAfterChange = () => {
-		console.log( 'A cell is changed' );
+	private hotAfterChange = ( changes: any[], source: string ) => {
+		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
+			let theUpdates: any[];
+			if ( Array.isArray( changes[0] ) ) {
+				theUpdates = changes;
+			} else {
+				theUpdates = [changes];
+			}
+			let dataChanged = false;
+			let changedRowNumbers: number[]; changedRowNumbers = [];
+			theUpdates.forEach(( currentChange: any[] ) => {
+				const changedRowNumber = currentChange[0];
+				const changedFieldName = currentChange[1];
+				const changedOldValue = currentChange[2];
+				const changedNewValue = currentChange[3];
+				// console.log( 'Changed Row Number', changedRowNumber );
+				// console.log( 'Changed Field Name', changedFieldName );
+				// console.log( 'Changed Old Value', changedOldValue );
+				// console.log( 'Changed New Value', changedNewValue );
+				// console.log( this.dataObject[changedRowNumber] );
+				if ( this.dataObject[changedRowNumber].id === 'Filter' || this.dataObject[changedRowNumber].id === 'Filter Type' ) {
+					this.filterChange();
+				} else {
+					if ( changedFieldName !== 'saveresult' && changedFieldName !== 'id' ) {
+						// this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
+						dataChanged = true;
+						if ( changedRowNumbers.indexOf( changedRowNumber ) < 0 ) {
+							changedRowNumbers.push( changedRowNumber );
+						}
+					}
+				}
+			} );
+			changedRowNumbers.forEach(( curChangedRow: number ) => {
+				this.hotEdited( this.dataObject[curChangedRow] );
+			} );
+			if ( dataChanged ) {
+				this.applyDescriptions().then(() => {
+					this.hot.loadData( this.dataObject );
+				} );
+			}
+		}
+	};
+	private filterChange = () => {
+		clearTimeout( this.filterChangeWaiter );
+		this.filterChangeWaiter = setTimeout( this.filterChangeAction, 1000 );
+	};
+	private filterChangeAction = () => {
+		this.getMapTable().then(() => {
+			this.hot.loadData( this.dataObject );
+		} );
+	};
+	private hotEdited = ( change: any ) => {
+		let isSaveable = true;
+		let toSubmit: any; toSubmit = { id: change.id };
+		this.mainService.curItemFields.forEach(( curField ) => {
+			if ( curField.srctar === 'target' ) {
+				toSubmit['TAR_' + curField.name] = change['TAR_' + curField.name];
+				if ( !change['TAR_' + curField.name] ) {
+					isSaveable = false;
+				} else {
+					change['TAR_' + curField.name] = change['TAR_' + curField.name].toString().split( '::' )[0];
+				}
+			}
+		} );
+		if ( isSaveable ) {
+			change.saveresult = '<center><i class="fa fa-circle-o-notch fa-spin"></i></center>';
+			this.mainService.saveMapTuple( toSubmit ).subscribe(( result ) => {
+				if ( result.insertId ) {
+					change.id = result.insertId;
+				}
+				change.saveresult = '<center><i class="fa fa-check-circle" style="color:green;font-size:12px;"></i></center>';
+				this.hot.loadData( this.dataObject );
+			}, ( error ) => {
+				change.saveresult = '<center><i class="fa fa-exclamation-circle" style="color:red;font-size:12px;"></i></center>';
+				this.hot.loadData( this.dataObject );
+				console.error( error );
+			} );
+		}
 	};
 	private waitUntilItemIsReady = () => {
 		return new Promise(( resolve, reject ) => {
@@ -222,6 +296,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		} );
 	};
 	private getMapTable = () => {
+		this.numberofRowsinMap = 'Please wait, refreshing...';
 		return new Promise(( resolve, reject ) => {
 			let currentFilter: any;
 			if ( this.dataObject ) {
@@ -229,7 +304,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				Object.keys( this.dataObject[0] ).forEach(( curKey ) => {
 					if ( this.dataObject[0][curKey] !== 'Filter Type' ) {
 						if ( this.dataObject[1][curKey] ) {
-							console.log( curKey, this.dataObject[0][curKey], this.dataObject[1][curKey] );
+							// console.log( curKey, this.dataObject[0][curKey], this.dataObject[1][curKey] );
 							currentFilter[curKey] = {
 								type: this.dataObject[0][curKey],
 								value: this.dataObject[1][curKey]
@@ -249,8 +324,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				// console.log( 'We received data' );
 				data.forEach(( curData ) => {
 					this.dataObject.push( curData );
-					console.log( curData );
+					// console.log( curData );
 				} );
+				this.numberofRowsinMap = data.length + ' rows';
 				resolve();
 			}, ( error ) => {
 				reject( error );
@@ -321,7 +397,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	private applyDescriptions = () => {
 		return new Promise(( resolve, reject ) => {
 			Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
-				console.log( curFieldName );
+				// console.log( curFieldName );
 				this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
 					this.dataObject.forEach(( curTuple ) => {
 						if ( curTuple[curFieldName] === curDescription.RefField ) {
