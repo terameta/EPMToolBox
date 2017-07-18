@@ -312,5 +312,22 @@ export class DimeMapService {
 			catch(( error ) => {
 				return Observable.throw( new Error( error ) );
 			} );
+	};
+	public mapExport = () => {
+		this.authHttp.get( this.baseUrl + '/mapExport/' + this.curItem.id ).subscribe(( response ) => {
+			// console.log( response.json() );
+			console.log( response );
+			this.mapExportDownload( response );
+		}, ( error ) => {
+			this.toastr.error( 'Failed to export the map. Please contact system administrator.' );
+			console.error( error );
+		} );
+	};
+	private mapExportDownload = ( data: any ) => {
+		let blob: any; blob = new Blob( [data._body], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' } );
+		// bb = new Blob( [ab2str( pot.data )], {  } );
+		// saveAs( bb, 'repo.xlsx' );
+		const url = window.URL.createObjectURL( blob );
+		window.open( url );
 	}
 }

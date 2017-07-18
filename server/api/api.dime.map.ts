@@ -12,22 +12,23 @@ export class ApiDimeMap {
 	apiRoutes: Router;
 	rester: Rester;
 
-	constructor(public app: Application, public db: IPool, public tools: MainTools) {
-		this.mapTools = new MapTools(this.db, this.tools);
+	constructor( public app: Application, public db: IPool, public tools: MainTools ) {
+		this.mapTools = new MapTools( this.db, this.tools );
 		this.apiRoutes = Router();
-		this.rester = new Rester(this.tools);
+		this.rester = new Rester( this.tools );
 
 		this.setRoutes();
-		this.rester.restify(this.apiRoutes, this.mapTools);
-		this.app.use('/api/dime/map', this.apiRoutes);
+		this.rester.restify( this.apiRoutes, this.mapTools );
+		this.app.use( '/api/dime/map', this.apiRoutes );
 	}
 
 	private setRoutes = () => {
-		this.apiRoutes.post('/fields', (req, res) => { this.rester.respond(this.mapTools.setFields, req.body, req, res); });
-		this.apiRoutes.get('/fields/:id', (req, res) => { this.rester.respond(this.mapTools.getFields, req.params.id, req, res); });
-		this.apiRoutes.get('/prepare/:id', (req, res) => { this.rester.respond(this.mapTools.prepare, req.params.id, req, res); });
-		this.apiRoutes.get('/isReady/:id', (req, res) => { this.rester.respond(this.mapTools.isReady, req.params.id, req, res); });
-		this.apiRoutes.post('/mapData', (req, res) => { this.rester.respond(this.mapTools.retrieveMapData, req.body, req, res); });
-		this.apiRoutes.post('/saveMapTuple', (req, res) => { this.rester.respond(this.mapTools.saveMapTuple, req.body, req, res); });
+		this.apiRoutes.post( '/fields', ( req, res ) => { this.rester.respond( this.mapTools.setFields, req.body, req, res ); } );
+		this.apiRoutes.get( '/fields/:id', ( req, res ) => { this.rester.respond( this.mapTools.getFields, req.params.id, req, res ); } );
+		this.apiRoutes.get( '/prepare/:id', ( req, res ) => { this.rester.respond( this.mapTools.prepare, req.params.id, req, res ); } );
+		this.apiRoutes.get( '/isReady/:id', ( req, res ) => { this.rester.respond( this.mapTools.isReady, req.params.id, req, res ); } );
+		this.apiRoutes.post( '/mapData', ( req, res ) => { this.rester.respond( this.mapTools.retrieveMapData, req.body, req, res ); } );
+		this.apiRoutes.post( '/saveMapTuple', ( req, res ) => { this.rester.respond( this.mapTools.saveMapTuple, req.body, req, res ); } );
+		this.apiRoutes.get( '/mapExport/:id', ( req, res ) => { this.rester.respond( this.mapTools.mapExport, req.params.id, req, res ); } );
 	}
 }

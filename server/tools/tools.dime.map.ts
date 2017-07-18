@@ -1,4 +1,6 @@
 import { IPool } from 'mysql';
+const excel = require( 'exceljs' );
+const streamBuffers = require( 'stream-buffers' );
 
 import { MainTools } from './tools.main';
 import { StreamTools } from './tools.dime.stream';
@@ -410,7 +412,7 @@ export class MapTools {
 	private retrieveMapDataAction = ( refObj: any ) => {
 		// console.log( refObj );
 		return new Promise(( resolve, reject ) => {
-			let curMap: DimeMap; curMap = { id: 0, name: '' };
+			let curMap: DimeMap; curMap = <DimeMap>{ id: 0, name: '' };
 			let mapFields: any[]; mapFields = [];
 			let finalFields: any[]; finalFields = [];
 			let sourceFields: DimeStreamField[]; sourceFields = [];
@@ -580,6 +582,73 @@ export class MapTools {
 					resolve( { result: 'OK' } );
 				}
 			} );
+		} );
+	};
+	public mapExport = ( id: number ) => {
+		return new Promise(( resolve, reject ) => {
+			this.getOne( id ).
+				then(( curMap: any ) => {
+					curMap.filters = {};
+					return curMap;
+				} ).
+				then( this.retrieveMapDataAction ).
+				then( this.mapExportConvertToExcel ).
+				then( resolve ).
+				catch( reject );
+		} );
+	};
+	private mapExportConvertToExcel = ( refObj: any ) => {
+		return new Promise(( resolve, reject ) => {
+
+			let workbook: any; workbook = new excel.Workbook();
+			workbook.creator = 'EPM ToolBox';
+			workbook.lastModifiedBy = 'EPM ToolBox';
+			workbook.created = new Date();
+			workbook.modified = new Date();
+
+			let sheet: any; sheet = workbook.addWorksheet( refObj.name, { views: [{ ySplit: 1 }] } );
+			if ( !refObj.map ) {
+				sheet.addRow( ['There is no map data produced. If in doubt, please contact system admin!'] );
+			} else if ( refObj.map.length === 0 ) {
+				sheet.addRow( ['There is no map data produced. If in doubt, please contact system admin.'] );
+			} else {
+				sheet.addRow( ['This is the current result.'] );
+			}
+
+			// resolve( workbook );
+			// resolve( refObj );
+			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
+			workbook.xlsx.write( myWritableStreamBuffer ).
+				then(() => {
+					resolve( myWritableStreamBuffer.getContents() );
+				} ).
+				catch( reject );
+
+
+			/*
+
+			refObj.forEach(( curMapAndResult: any ) => {
+				const curMap = curMapAndResult.map;
+				const curResult = curMapAndResult.result;
+				console.log( curMapAndResult.map );
+				let sheet;
+				sheet = workbook.addWorksheet( curMap.name, { views: [{ ySplit: 1 }] } );
+				if ( curResult.length === 0 ) {
+					sheet.addRow( ['There is no data produced with the missing map mechanism. If in doubt, please contact system admin.'] );
+				} else {
+					let keys: any[]; keys = [];
+					Object.keys( curResult[0] ).forEach(( dfkey ) => {
+						keys.push( dfkey );
+					} );
+					let curColumns: any[]; curColumns = [];
+					Object.keys( curResult[0] ).forEach(( dfkey ) => {
+						curColumns.push( { header: dfkey, key: dfkey } );
+					} );
+					// sheet = workbook.addWorksheet('Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] });
+					sheet.columns = curColumns;
+					sheet.addRows( curResult );
+				}
+			} );*/
 		} );
 	}
 }
