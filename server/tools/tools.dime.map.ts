@@ -4,6 +4,7 @@ const streamBuffers = require( 'stream-buffers' );
 
 import { MainTools } from './tools.main';
 import { StreamTools } from './tools.dime.stream';
+import { MailTool } from './tools.mailer';
 
 import { DimeMap } from '../../shared/model/dime/map';
 import { DimeStream } from '../../shared/model/dime/stream';
@@ -14,11 +15,13 @@ import { DimeEnvironment } from '../../shared/model/dime/environment';
 export class MapTools {
 	private streamTool: StreamTools;
 	private environmentTool: EnvironmentTools;
+	private mailTool: MailTool;
 	constructor(
 		public db: IPool,
 		public tools: MainTools ) {
 		this.streamTool = new StreamTools( this.db, this.tools );
 		this.environmentTool = new EnvironmentTools( this.db, this.tools );
+		this.mailTool = new MailTool( this.db, this.tools );
 	}
 
 	public getAll = () => {
@@ -584,15 +587,18 @@ export class MapTools {
 			} );
 		} );
 	};
-	public mapExport = ( id: number ) => {
+	public mapExport = ( refObj: { id: number, requser: any, res: any } ) => {
 		return new Promise(( resolve, reject ) => {
-			this.getOne( id ).
+			this.getOne( refObj.id ).
 				then(( curMap: any ) => {
 					curMap.filters = {};
 					return curMap;
 				} ).
 				then( this.retrieveMapDataAction ).
 				then( this.mapExportConvertToExcel ).
+				then(( theStreamBuffer ) => {
+					return this.mapExportSendToUser( theStreamBuffer, refObj.requser, refObj.res );
+				} ).
 				then( resolve ).
 				catch( reject );
 		} );
@@ -617,14 +623,13 @@ export class MapTools {
 
 			// resolve( workbook );
 			// resolve( refObj );
-			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
-			workbook.xlsx.write( myWritableStreamBuffer ).
-				then(() => {
-					resolve( myWritableStreamBuffer.getContents() );
-				} ).
-				catch( reject );
-
-
+			// let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
+			// workbook.xlsx.write( myWritableStreamBuffer ).
+			// 	then(() => {
+			// 		resolve( myWritableStreamBuffer );
+			// 	} ).
+			// 	catch( reject );
+			resolve( workbook );
 			/*
 
 			refObj.forEach(( curMapAndResult: any ) => {
@@ -650,5 +655,28 @@ export class MapTools {
 				}
 			} );*/
 		} );
-	}
+	};
+	private mapExportSendToUser = ( refBuffer: any, refUser: any, response: any ) => {
+		return new Promise(( resolve, reject ) => {
+			// resolve( refBuffer.getContents() );
+			response.setHeader( 'Content-Disposition', 'attachment; filename=Deneme.xlsx' );
+			refBuffer.xlsx.write( response ).then(( result: any ) => {
+				console.log( result );
+				response.end();
+			} ).catch( reject );
+			// reject( 'Not Yet' );
+			// return this.mailTool.sendMail( {
+			// 	from: 'admin@epmvirtual.com',
+			// 	to: 'aliriza.dikici@gmail.com',
+			// 	subject: 'Map File',
+			// 	text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\nHyperion Team',
+			// 	attachments: [
+			// 		{
+			// 			filename: 'Map File (' + this.tools.getFormattedDateTime() + ').xlsx',
+			// 			content: myWritableStreamBuffer.getContents()
+			// 		}
+			// 	]
+			// } );
+		} );
+	};
 }
