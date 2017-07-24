@@ -313,6 +313,24 @@ export class DimeMapService {
 				return Observable.throw( new Error( error ) );
 			} );
 	};
+	public mapImport = () => {
+		console.log( 'We are initiating the import' );
+		const f = ( <HTMLInputElement>document.getElementById( 'mapimportfile' ) ).files[0];
+		const r = new FileReader();
+		r.onloadend = ( e: any ) => {
+			const data = e.target.result;
+			console.log( data );
+			this.authHttp.post( this.baseUrl + '/mapImport', { map: this.curItem.id, data: data } ).
+				map( response => response.json() ).
+				subscribe(( result ) => {
+					console.log( result );
+				}, ( error ) => {
+					this.toastr.error( '', this.serviceName );
+					console.error( error );
+				} );
+		}
+		r.readAsBinaryString( f );
+	}
 	public mapExport = () => {
 		this.authHttp.get( this.baseUrl + '/mapExport/' + this.curItem.id, { responseType: ResponseContentType.Blob } ).
 			// map( res => { console.log( res ); return res.blob(); } ).

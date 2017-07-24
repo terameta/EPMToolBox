@@ -1,6 +1,7 @@
 import { IPool } from 'mysql';
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
+import { Readable } from 'stream';
 
 import { MainTools } from './tools.main';
 import { StreamTools } from './tools.dime.stream';
@@ -587,6 +588,32 @@ export class MapTools {
 			} );
 		} );
 	};
+	public mapImport = ( refObj: any ) => {
+		return new Promise(( resolve, reject ) => {
+			console.log( refObj );
+			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
+			myWritableStreamBuffer.put( refObj.data );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( myWritableStreamBuffer );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			myWritableStreamBuffer.stop();
+			const s = new Readable();
+			s.push( refObj.data );
+			s.push( null );
+			let workbook: any; workbook = new excel.Workbook();
+			workbook.xlsx.read( s ).then(( result: any ) => {
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( result );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			} );
+			reject( 'Not yet' );
+		} );
+
+	};
 	public mapExport = ( refObj: { id: number, requser: any, res: any } ) => {
 		return new Promise(( resolve, reject ) => {
 			this.getOne( refObj.id ).
@@ -641,47 +668,11 @@ export class MapTools {
 				sheet.addRow( mapIdentifiers );
 				sheet.lastRow.hidden = true;
 				sheet.addRows( refObj.map );
-				console.log( refObj.map[0] );
+				// console.log( refObj.map[0] );
 				// sheet.addRow( ['This is the current result.'] );
 			}
 
-			Object.keys( refObj ).forEach(( curKey: string ) => {
-				console.log( curKey );
-			} );
-
-			// resolve( workbook );
-			// resolve( refObj );
-			// let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
-			// workbook.xlsx.write( myWritableStreamBuffer ).
-			// 	then(() => {
-			// 		resolve( myWritableStreamBuffer );
-			// 	} ).
-			// 	catch( reject );
 			resolve( workbook );
-			/*
-
-			refObj.forEach(( curMapAndResult: any ) => {
-				const curMap = curMapAndResult.map;
-				const curResult = curMapAndResult.result;
-				console.log( curMapAndResult.map );
-				let sheet;
-				sheet = workbook.addWorksheet( curMap.name, { views: [{ ySplit: 1 }] } );
-				if ( curResult.length === 0 ) {
-					sheet.addRow( ['There is no data produced with the missing map mechanism. If in doubt, please contact system admin.'] );
-				} else {
-					let keys: any[]; keys = [];
-					Object.keys( curResult[0] ).forEach(( dfkey ) => {
-						keys.push( dfkey );
-					} );
-					let curColumns: any[]; curColumns = [];
-					Object.keys( curResult[0] ).forEach(( dfkey ) => {
-						curColumns.push( { header: dfkey, key: dfkey } );
-					} );
-					// sheet = workbook.addWorksheet('Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] });
-					sheet.columns = curColumns;
-					sheet.addRows( curResult );
-				}
-			} );*/
 		} );
 	};
 	private mapExportSendToUser = ( refBook: any, refUser: any, response: any ) => {
