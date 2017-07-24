@@ -1,6 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers } from '@angular/http';
+import { Headers, Http, Response, ResponseContentType } from '@angular/http';
 
 import { BehaviorSubject, Observable } from 'rxjs/Rx';
 import { AuthHttp } from 'angular2-jwt';
@@ -314,22 +314,42 @@ export class DimeMapService {
 			} );
 	};
 	public mapExport = () => {
-		this.authHttp.get( this.baseUrl + '/mapExport/' + this.curItem.id ).
+		this.authHttp.get( this.baseUrl + '/mapExport/' + this.curItem.id, { responseType: ResponseContentType.Blob } ).
 			// map( res => { console.log( res ); return res.blob(); } ).
 			subscribe(( response ) => {
-				// console.log( response.json() );
-				console.log( response );
 				this.mapExportDownload( response );
 			}, ( error ) => {
 				this.toastr.error( 'Failed to export the map. Please contact system administrator.' );
 				console.error( error );
 			} );
 	};
-	private mapExportDownload = ( data: any ) => {
-		let blob: any; blob = new Blob( [data._body], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' } );
+	private mapExportDownload = ( response: any ) => {
+		let blob: any; blob = new Blob( [response._body], { type: 'application/vnd.ms-excel' } );
 		// bb = new Blob( [ab2str( pot.data )], {  } );
 		// saveAs( bb, 'repo.xlsx' );
-		const url = window.URL.createObjectURL( blob );
-		window.open( url );
-	}
+		const url = window.URL.createObjectURL( blob, { oneTimeOnly: true } );
+		const a = document.createElement( 'a' );
+		// a.style = 'display:none';
+		a.href = url;
+		a.download = this.curItem.name + ' ' + this.getFormattedDate() + '.xlsx';
+		window.document.body.appendChild( a );
+		a.click();
+		window.document.body.removeChild( a );
+		window.URL.revokeObjectURL( url );
+	};
+
+	private getFormattedDate = () => {
+		const myDate = new Date();
+		let toReturn: string; toReturn = '';
+		toReturn += myDate.getFullYear() + '-';
+		toReturn += this.padDatePart( myDate.getMonth() + 1 ) + '-';
+		toReturn += this.padDatePart( myDate.getDate() ) + ' ';
+		toReturn += this.padDatePart( myDate.getHours() ) + '-';
+		toReturn += this.padDatePart( myDate.getMinutes() ) + '-';
+		toReturn += this.padDatePart( myDate.getSeconds() );
+		return toReturn;
+	};
+	private padDatePart = ( curPart: string | number ) => {
+		return ( '0' + curPart ).substr( -2 );
+	};
 }

@@ -612,14 +612,42 @@ export class MapTools {
 			workbook.created = new Date();
 			workbook.modified = new Date();
 
-			let sheet: any; sheet = workbook.addWorksheet( refObj.name, { views: [{ ySplit: 1 }] } );
+			let sheet: any; sheet = workbook.addWorksheet( refObj.name, { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] } );
 			if ( !refObj.map ) {
 				sheet.addRow( ['There is no map data produced. If in doubt, please contact system admin!'] );
 			} else if ( refObj.map.length === 0 ) {
 				sheet.addRow( ['There is no map data produced. If in doubt, please contact system admin.'] );
 			} else {
-				sheet.addRow( ['This is the current result.'] );
+				let curColumns: any[]; curColumns = [{ header: 'id', key: 'id' }];
+				let mapIdentifiers: any; mapIdentifiers = { id: 1 };
+				let curPrefix = '';
+				let curSuffix = '';
+				let curColumn = '';
+				let curIdentifier = 0;
+				refObj.finalFields.forEach(( curField: any ) => {
+					curPrefix = '';
+					curSuffix = '';
+					curColumn = '';
+					curIdentifier = 0;
+					if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
+					if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
+					if ( curField.type === 'description' ) { curSuffix = '_DESC'; }
+					if ( curField.type === 'main' ) { curIdentifier = 2; }
+					curColumn = curPrefix + curField.name + curSuffix;
+					curColumns.push( { header: curColumn, key: curColumn } );
+					mapIdentifiers[curColumn] = curIdentifier;
+				} );
+				sheet.columns = curColumns;
+				sheet.addRow( mapIdentifiers );
+				sheet.lastRow.hidden = true;
+				sheet.addRows( refObj.map );
+				console.log( refObj.map[0] );
+				// sheet.addRow( ['This is the current result.'] );
 			}
+
+			Object.keys( refObj ).forEach(( curKey: string ) => {
+				console.log( curKey );
+			} );
 
 			// resolve( workbook );
 			// resolve( refObj );
@@ -656,13 +684,27 @@ export class MapTools {
 			} );*/
 		} );
 	};
-	private mapExportSendToUser = ( refBuffer: any, refUser: any, response: any ) => {
+	private mapExportSendToUser = ( refBook: any, refUser: any, response: any ) => {
 		return new Promise(( resolve, reject ) => {
 			// resolve( refBuffer.getContents() );
-			response.setHeader( 'Content-Disposition', 'attachment; filename=Deneme.xlsx' );
-			refBuffer.xlsx.write( response ).then(( result: any ) => {
-				console.log( result );
+			// response.setHeader( 'Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
+			// response.setHeader( 'Content-Type', 'application/vnd.ms-excel' );
+			// response.setHeader( 'Content-Disposition', 'attachment; filename=Deneme.xlsx' );
+
+			// let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
+			// refBook.xlsx.write( myWritableStreamBuffer ).
+			// 	then(() => {
+			// 		response.json( myWritableStreamBuffer.getContents() );
+			// 		setTimeout( resolve, 3000 );
+			// 	} ).
+			// 	catch( reject );
+
+
+
+
+			refBook.xlsx.write( response ).then(( result: any ) => {
 				response.end();
+				resolve();
 			} ).catch( reject );
 			// reject( 'Not Yet' );
 			// return this.mailTool.sendMail( {

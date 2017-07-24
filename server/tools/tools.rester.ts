@@ -7,7 +7,7 @@ export class Rester {
 
 	public respond( theFunction: Function, theArgument: any, req: Request, res: Response ) {
 		theFunction( theArgument ).then( function ( result: any ) {
-			console.log( result );
+			// console.log( result );
 			res.send( result );
 		} ).catch( function ( issue: any ) {
 			console.log( issue );
