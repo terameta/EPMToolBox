@@ -355,24 +355,6 @@ export class DimeMapService {
 		return ( '0' + curPart ).substr( -2 );
 	};
 	public mapImport = () => {
-		console.log( 'We are initiating the import' );
-		// const f = ( <HTMLInputElement>document.getElementById( 'mapimportfile' ) ).files[0];
-		// const r = new FileReader();
-		// r.onloadend = ( e: any ) => {
-		// 	const data = e.target.result;
-		// 	// console.log( data );
-		// 	// console.log( e );
-		// 	// console.log( f );
-		// 	this.authHttp.post( this.baseUrl + '/mapImport', { map: this.curItem.id, data: data, name: f.name } ).
-		// 		map( response => response.json() ).
-		// 		subscribe(( result ) => {
-		// 			console.log( result );
-		// 		}, ( error ) => {
-		// 			this.toastr.error( '', this.serviceName );
-		// 			console.error( error );
-		// 		} );
-		// }
-		// r.readAsBinaryString( f );
 		let formData: any; formData = new FormData();
 		const files: Array<File> = this.filesToUpload;
 
@@ -381,7 +363,7 @@ export class DimeMapService {
 		this.authHttp.post( this.baseUrl + '/mapImport', formData ).
 			map( response => response.json() ).
 			subscribe(( result ) => {
-				console.log( result );
+				this.toastr.info( 'Map is now updated.', this.serviceName );
 			}, ( error ) => {
 				this.toastr.error( 'error', this.serviceName );
 				console.error( error );
@@ -389,6 +371,5 @@ export class DimeMapService {
 	};
 	public mapImportFileChangeEvent = ( fileInput: any ) => {
 		this.filesToUpload = <Array<File>>fileInput.target.files;
-		console.log( this.filesToUpload );
 	};
 }

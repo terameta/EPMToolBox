@@ -631,7 +631,7 @@ export class MapTools {
 	};*/
 	public mapImport = ( refObj: any ) => {
 		return new Promise(( resolve, reject ) => {
-			console.log( refObj );
+			// console.log( refObj );
 			if ( !refObj ) {
 				reject( 'No data is provided' );
 			} else if ( !refObj.body ) {
@@ -719,7 +719,6 @@ export class MapTools {
 		} );
 	};
 	public populateMapTable = ( id: number, tuples: any[] ) => {
-		console.log( tuples );
 		return new Promise(( resolve, reject ) => {
 			const curKeys = Object.keys( tuples[0] );
 			let curArray: any[];
@@ -734,7 +733,6 @@ export class MapTools {
 				if ( err ) {
 					reject( err );
 				} else {
-					console.log( result );
 					resolve( id );
 				}
 			} );
