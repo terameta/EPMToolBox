@@ -36,6 +36,8 @@ export class DimeMapService {
 	};
 	private headers = new Headers( { 'Content-Type': 'application/json' } );
 
+	private filesToUpload: Array<File> = [];
+
 	constructor(
 		private http: Http,
 		private authHttp: AuthHttp,
@@ -313,24 +315,6 @@ export class DimeMapService {
 				return Observable.throw( new Error( error ) );
 			} );
 	};
-	public mapImport = () => {
-		console.log( 'We are initiating the import' );
-		const f = ( <HTMLInputElement>document.getElementById( 'mapimportfile' ) ).files[0];
-		const r = new FileReader();
-		r.onloadend = ( e: any ) => {
-			const data = e.target.result;
-			console.log( data );
-			this.authHttp.post( this.baseUrl + '/mapImport', { map: this.curItem.id, data: data } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					console.log( result );
-				}, ( error ) => {
-					this.toastr.error( '', this.serviceName );
-					console.error( error );
-				} );
-		}
-		r.readAsBinaryString( f );
-	}
 	public mapExport = () => {
 		this.authHttp.get( this.baseUrl + '/mapExport/' + this.curItem.id, { responseType: ResponseContentType.Blob } ).
 			// map( res => { console.log( res ); return res.blob(); } ).
@@ -369,5 +353,42 @@ export class DimeMapService {
 	};
 	private padDatePart = ( curPart: string | number ) => {
 		return ( '0' + curPart ).substr( -2 );
+	};
+	public mapImport = () => {
+		console.log( 'We are initiating the import' );
+		// const f = ( <HTMLInputElement>document.getElementById( 'mapimportfile' ) ).files[0];
+		// const r = new FileReader();
+		// r.onloadend = ( e: any ) => {
+		// 	const data = e.target.result;
+		// 	// console.log( data );
+		// 	// console.log( e );
+		// 	// console.log( f );
+		// 	this.authHttp.post( this.baseUrl + '/mapImport', { map: this.curItem.id, data: data, name: f.name } ).
+		// 		map( response => response.json() ).
+		// 		subscribe(( result ) => {
+		// 			console.log( result );
+		// 		}, ( error ) => {
+		// 			this.toastr.error( '', this.serviceName );
+		// 			console.error( error );
+		// 		} );
+		// }
+		// r.readAsBinaryString( f );
+		let formData: any; formData = new FormData();
+		const files: Array<File> = this.filesToUpload;
+
+		formData.append( 'uploads[]', files[0], files[0].name );
+		formData.append( 'id', this.curItem.id );
+		this.authHttp.post( this.baseUrl + '/mapImport', formData ).
+			map( response => response.json() ).
+			subscribe(( result ) => {
+				console.log( result );
+			}, ( error ) => {
+				this.toastr.error( 'error', this.serviceName );
+				console.error( error );
+			} );
+	};
+	public mapImportFileChangeEvent = ( fileInput: any ) => {
+		this.filesToUpload = <Array<File>>fileInput.target.files;
+		console.log( this.filesToUpload );
 	};
 }

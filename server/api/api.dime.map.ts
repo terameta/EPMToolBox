@@ -30,6 +30,6 @@ export class ApiDimeMap {
 		this.apiRoutes.post( '/mapData', ( req, res ) => { this.rester.respond( this.mapTools.retrieveMapData, req.body, req, res ); } );
 		this.apiRoutes.post( '/saveMapTuple', ( req, res ) => { this.rester.respond( this.mapTools.saveMapTuple, req.body, req, res ); } );
 		this.apiRoutes.get( '/mapExport/:id', ( req, res ) => { this.rester.respond( this.mapTools.mapExport, { id: req.params.id, requser: req.user, res: res }, req, res ); } );
-		this.apiRoutes.post( '/mapImport', ( req, res ) => { this.rester.respond( this.mapTools.mapImport, req.body, req, res ); } );
+		this.apiRoutes.post( '/mapImport', ( req, res ) => { this.rester.respond( this.mapTools.mapImport, { body: req.body, files: req.files }, req, res ); } );
 	}
 }

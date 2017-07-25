@@ -2,6 +2,8 @@ import { IPool } from 'mysql';
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
 import { Readable } from 'stream';
+import * as tempy from 'tempy';
+import * as fs from 'fs';
 
 import { MainTools } from './tools.main';
 import { StreamTools } from './tools.dime.stream';
@@ -588,10 +590,12 @@ export class MapTools {
 			} );
 		} );
 	};
-	public mapImport = ( refObj: any ) => {
+	/*public mapImport = ( refObj: any ) => {
 		return new Promise(( resolve, reject ) => {
 			console.log( refObj );
 			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
+			const fileName = tempy.file( { extension: 'xlsx' } );
+
 			myWritableStreamBuffer.put( refObj.data );
 			console.log( '===========================================' );
 			console.log( '===========================================' );
@@ -610,9 +614,131 @@ export class MapTools {
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 			} );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( fileName );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			fs.writeFileSync( fileName, refObj.data );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( 'file is written' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
 			reject( 'Not yet' );
 		} );
 
+	};*/
+	public mapImport = ( refObj: any ) => {
+		return new Promise(( resolve, reject ) => {
+			console.log( refObj );
+			if ( !refObj ) {
+				reject( 'No data is provided' );
+			} else if ( !refObj.body ) {
+				reject( 'No body is provided' );
+			} else if ( !refObj.body.id ) {
+				reject( 'No map id is provided' );
+			} else if ( !refObj.files ) {
+				reject( 'No files are uploaded' );
+			} else if ( !Array.isArray( refObj.files ) ) {
+				reject( 'File list is not proper' );
+			} else if ( refObj.files.length !== 1 ) {
+				reject( 'System is expecting exactly one files. Wrong number of files are received.' );
+			} else {
+				let workbook: any; workbook = new excel.Workbook();
+				let myReadableStreamBuffer: any; myReadableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
+				myReadableStreamBuffer.put( refObj.files[0].buffer );
+				myReadableStreamBuffer.stop();
+				let toInsert: any[];
+				workbook.xlsx.read( myReadableStreamBuffer ).
+					then( this.mapImportGetExcelData ).
+					then(( tuples: any[] ) => {
+						toInsert = tuples;
+						return this.clearMapTable( refObj.body.id );
+					} ).
+					then(() => {
+						return this.populateMapTable( refObj.body.id, toInsert );
+					} ).
+					then( resolve ).
+					catch( reject );
+			}
+		} );
+	};
+	public mapImportGetExcelData = ( workbook: any ) => {
+		return new Promise(( resolve, reject ) => {
+			const colHeaders: string[] = [];
+			const colTypes: number[] = [];
+			const tuples: any[] = [];
+			let curTuple: any;
+			let curIndex: number;
+			if ( workbook.worksheets.length !== 1 ) {
+				reject( 'System is expecting exactly one sheet in the workbook. Wrong number of sheets are received.' );
+			} else if ( workbook.worksheets[0].rowCount < 3 ) {
+				reject( 'System is expecting at least 3 rows in the excel sheet. Wrong number of rows are received.' );
+			} else {
+				workbook.eachSheet(( worksheet: any, sheetId: any ) => {
+					worksheet.eachRow(( row: any, rowNumber: number ) => {
+						curTuple = {};
+						if ( rowNumber === 1 ) {
+							row.eachCell(( cell: any, colNumber: number ) => {
+								colHeaders.push( cell.value );
+							} );
+						} else if ( rowNumber === 2 ) {
+							row.eachCell(( cell: any, colNumber: number ) => {
+								colTypes.push( cell.value );
+							} );
+						} else {
+							row.eachCell(( cell: any, colNumber: number ) => {
+								curIndex = colNumber - 1;
+								if ( colTypes[curIndex] === 2 ) {
+									curTuple[colHeaders[curIndex]] = cell.value;
+								}
+							} );
+							tuples.push( curTuple );
+						}
+					} );
+				} );
+			}
+
+			if ( tuples.length === 0 ) {
+				reject( 'No map data is found.' );
+			} else {
+				resolve( tuples );
+			}
+		} );
+	};
+	public clearMapTable = ( id: number ) => {
+		return new Promise(( resolve, reject ) => {
+			this.db.query( 'TRUNCATE MAP' + id + '_MAPTBL', ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve();
+				}
+			} );
+		} );
+	};
+	public populateMapTable = ( id: number, tuples: any[] ) => {
+		console.log( tuples );
+		return new Promise(( resolve, reject ) => {
+			const curKeys = Object.keys( tuples[0] );
+			let curArray: any[];
+			tuples.forEach(( curResult, curItem ) => {
+				curArray = [];
+				curKeys.forEach(( curKey ) => {
+					curArray.push( curResult[curKey] );
+				} );
+				tuples[curItem] = curArray;
+			} );
+			this.db.query( 'INSERT INTO MAP' + id + '_MAPTBL (' + curKeys.join( ', ' ) + ') VALUES ?', [tuples], ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					console.log( result );
+					resolve( id );
+				}
+			} );
+		} );
 	};
 	public mapExport = ( refObj: { id: number, requser: any, res: any } ) => {
 		return new Promise(( resolve, reject ) => {
