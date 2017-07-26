@@ -1,0 +1,3 @@
+export function EnumToArray( curEnum, shouldSort?: boolean ) { return Object.keys( curEnum ).filter( Number ).map(( item, index ) => ( { value: item, name: curEnum[item] } ) ).sort( shouldSort ? SortByName : SortByNothing ); }
+export function SortByName( e1, e2 ) { if ( e1.name > e2.name ) { return 1; } else if ( e1.name < e2.name ) { return -1; } else { return 0; } }
+export function SortByNothing( e1, e2 ) { return 0; }

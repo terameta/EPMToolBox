@@ -698,12 +698,11 @@ export class MapTools {
 						}
 					} );
 				} );
-			}
-
-			if ( tuples.length === 0 ) {
-				reject( 'No map data is found.' );
-			} else {
-				resolve( tuples );
+				if ( tuples.length === 0 ) {
+					reject( 'No map data is found.' );
+				} else {
+					resolve( tuples );
+				}
 			}
 		} );
 	};

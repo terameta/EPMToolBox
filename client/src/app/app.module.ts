@@ -23,6 +23,7 @@ import { DimeStreamService } from './dime/dimestream/dimestream.service';
 import { DimeMapService } from './dime/dimemap/dimemap.service';
 import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
 import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
+import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
 
 // Access Management Services
 import { AcmServerService } from './accessmanagement/acmserver/acmserver.service';
@@ -61,6 +62,7 @@ const appRoutes: Routes = [
 		DimeMapService,
 		DimeMatrixService,
 		DimeProcessService,
+		DimeScheduleService,
 		AcmServerService,
 		AcmUserService,
 		EndUserService
