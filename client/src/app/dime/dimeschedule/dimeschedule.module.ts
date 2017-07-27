@@ -10,15 +10,16 @@ import { DimescheduleDetailComponent } from './dimeschedule-detail/dimeschedule-
 import { DimescheduleToolbarComponent } from './dimeschedule-toolbar/dimeschedule-toolbar.component';
 
 const dimeScheduleRoutes: Routes = [
+	{ path: 'dime/schedules', pathMatch: 'prefix', redirectTo: 'dime/schedules/schedule-list' },
 	{ path: 'schedule-list', component: DimescheduleListComponent },
 	{ path: 'schedule-detail', component: DimescheduleDetailComponent }
 ];
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild(dimeScheduleRoutes)
+		RouterModule.forChild( dimeScheduleRoutes )
 	],
 	exports: [
 		RouterModule
@@ -30,5 +31,5 @@ const dimeScheduleRoutes: Routes = [
 		DimescheduleDetailComponent,
 		DimescheduleToolbarComponent
 	]
-})
+} )
 export class DimescheduleModule { }

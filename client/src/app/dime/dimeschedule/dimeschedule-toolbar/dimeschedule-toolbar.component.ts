@@ -12,6 +12,7 @@ export class DimescheduleToolbarComponent implements OnInit {
 	constructor( private mainService: DimeScheduleService ) { }
 
 	ngOnInit() {
+		this.mainService.getAll();
 	}
 
 }

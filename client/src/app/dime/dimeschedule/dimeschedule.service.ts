@@ -1,6 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
-import { Http } from '@angular/http';
+import { Headers, Http, Response } from '@angular/http';
 
 import { AuthHttp } from 'angular2-jwt';
 import { BehaviorSubject, Observable } from 'rxjs/Rx';
@@ -30,14 +30,17 @@ export class DimeScheduleService {
 		private router: Router,
 		private route: ActivatedRoute
 	) {
-		this.baseUrl = '/api/dime/process';
+		this.baseUrl = '/api/dime/schedule';
 		this.dataStore = { items: [] };
 		this._items = <BehaviorSubject<DimeSchedule[]>>new BehaviorSubject( [] );
 		this.items = this._items.asObservable();
 		this.serviceName = 'Schedules';
-		this.curItem = <DimeSchedule>{};
+		this.resetCurItem();
 	}
 
+	private resetCurItem = () => {
+		this.curItem = <DimeSchedule>{};
+	};
 	getAll = () => {
 		this.fetchAll().
 			subscribe(( data ) => {
@@ -90,15 +93,15 @@ export class DimeScheduleService {
 			map( response => response.json() ).
 			catch( error => Observable.throw( error ) );
 	}
-	/*create = () => {
+	create = () => {
 		this.authHttp.post( this.baseUrl, {}, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe(( result ) => {
 				this.dataStore.items.push( result );
-				this.dataStore.items.sort( this.sortByName );
+				this.dataStore.items.sort( SortByName );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				this.resetCurItem();
-				this.router.navigate( ['/dime/processes/process-detail', result.id] );
+				this.router.navigate( ['/dime/schedules/schedule-detail', result.id] );
 				this.toastr.info( 'New item is created, navigating to the details', this.serviceName );
 			}, ( error ) => {
 				this.toastr.error( 'Failed to create new item.', this.serviceName );
@@ -106,22 +109,16 @@ export class DimeScheduleService {
 			}
 			);
 	};
-	update = ( curItem?: DimeProcess ) => {
-		let shouldUpdate = false;
-		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; };
+	update = ( curItem?: DimeSchedule ) => {
 		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe(( result ) => {
 				this.dataStore.items.forEach(( item, index ) => {
 					if ( item.id === result.id ) { this.dataStore.items[index] = result; }
 				} );
-				this.dataStore.items.sort( this.sortByName );
+				this.dataStore.items.sort( SortByName );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				this.toastr.info( 'Item is successfully saved.', this.serviceName );
-				// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
-				// This shouldn't change the state of the current item.
-				if ( shouldUpdate ) { this.curItemClean = true; }
-				this.stepGetAll( this.curItem.id );
 			}, error => {
 				this.toastr.error( 'Failed to save the item.', this.serviceName );
 				console.log( error );
@@ -134,10 +131,10 @@ export class DimeScheduleService {
 				this.dataStore.items.forEach(( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );
-				this.dataStore.items.sort( this.sortByName );
+				this.dataStore.items.sort( SortByName );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				this.toastr.info( 'Item is deleted.', this.serviceName );
-				this.router.navigate( ['/dime/processes/process-list'] );
+				this.router.navigate( ['/dime/schedules/schedule-list'] );
 				this.resetCurItem();
 			}, ( error ) => {
 				this.toastr.error( 'Failed to delete item.', this.serviceName );
@@ -147,5 +144,4 @@ export class DimeScheduleService {
 			this.toastr.info( 'Item deletion is cancelled.', this.serviceName );
 		}
 	};
-*/
 }

@@ -289,6 +289,27 @@ tableList.push( {
 	],
 	primaryKey: 'id'
 } );
+tableList.push( {
+	name: 'schedules',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'name VARCHAR(2048)',
+		'schedule VARCHAR(4096)',
+		'status INT UNSIGNED'
+	],
+	primaryKey: 'id'
+} );
+tableList.push( {
+	name: 'schedulesteps',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'schedule BIGINT UNSIGNED',
+		'type INT UNSIGNED',
+		'referedid BIGINT UNSIGNED',
+		'fOrder INT UNSIGNED'
+	],
+	primaryKey: 'id'
+} );
 
 
 export function initiateInitiator( refDB: IPool, refConf: any ) {

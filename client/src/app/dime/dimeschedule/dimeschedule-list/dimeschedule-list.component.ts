@@ -1,13 +1,18 @@
+import { DimeScheduleService } from '../dimeschedule.service';
 import { Component, OnInit } from '@angular/core';
 
-@Component({
+@Component( {
 	selector: 'app-dimeschedule-list',
 	templateUrl: './dimeschedule-list.component.html',
 	styleUrls: ['./dimeschedule-list.component.css']
-})
+} )
 export class DimescheduleListComponent implements OnInit {
 
-	constructor() { }
+	constructor(
+		private mainService: DimeScheduleService
+	) {
+
+	}
 
 	ngOnInit() {
 	}

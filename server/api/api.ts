@@ -11,6 +11,7 @@ import { ApiDimeStream } from './api.dime.stream';
 import { ApiDimeMap } from './api.dime.map';
 import { ApiDimeMatrix } from './api.dime.matrix';
 import { ApiDimeProcess } from './api.dime.process';
+import { ApiDimeSchedule } from './api.dime.schedule';
 
 // Access Management Route APIs
 import { ApiAcmUsers } from './api.accessmanagement.user';
@@ -22,19 +23,20 @@ import { ApiAuth } from './api.auth';
 
 import { ApiSettings } from './api.settings';
 
-export function initializeRestApi(app: Application, refDB: IPool, refTools: MainTools) {
-	const apiLog = new ApiLog(app, refDB, refTools);
+export function initializeRestApi( app: Application, refDB: IPool, refTools: MainTools ) {
+	const apiLog = new ApiLog( app, refDB, refTools );
 
-	const apiDimeEnvironment = new ApiDimeEnvironment(app, refDB, refTools);
-	const apiDimeStream = new ApiDimeStream(app, refDB, refTools);
-	const apiDimeMap = new ApiDimeMap(app, refDB, refTools);
-	const apiDimeMatrix = new ApiDimeMatrix(app, refDB, refTools);
-	const apiDimeProcess = new ApiDimeProcess(app, refDB, refTools);
+	const apiDimeEnvironment = new ApiDimeEnvironment( app, refDB, refTools );
+	const apiDimeStream = new ApiDimeStream( app, refDB, refTools );
+	const apiDimeMap = new ApiDimeMap( app, refDB, refTools );
+	const apiDimeMatrix = new ApiDimeMatrix( app, refDB, refTools );
+	const apiDimeProcess = new ApiDimeProcess( app, refDB, refTools );
+	const apiDimeSchedule = new ApiDimeSchedule( app, refDB, refTools );
 
-	const apiAcmServer = new ApiAcmServers(app, refDB, refTools);
-	const apiAcmUser = new ApiAcmUsers(app, refDB, refTools);
+	const apiAcmServer = new ApiAcmServers( app, refDB, refTools );
+	const apiAcmUser = new ApiAcmUsers( app, refDB, refTools );
 
 	// apiAuth(app, refDB, refTools);
-	const apiAuth = new ApiAuth(app, refDB, refTools);
-	const apiSettings = new ApiSettings(app, refDB, refTools);
+	const apiAuth = new ApiAuth( app, refDB, refTools );
+	const apiSettings = new ApiSettings( app, refDB, refTools );
 }
