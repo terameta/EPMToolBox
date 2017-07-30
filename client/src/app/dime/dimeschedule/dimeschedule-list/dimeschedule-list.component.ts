@@ -1,3 +1,5 @@
+import { EnumToArray } from '../../../../../../shared/utilities/utilityFunctions';
+import { ATStatusType } from '../../../../../../shared/enums/generic/statustypes';
 import { DimeScheduleService } from '../dimeschedule.service';
 import { Component, OnInit } from '@angular/core';
 
@@ -7,6 +9,7 @@ import { Component, OnInit } from '@angular/core';
 	styleUrls: ['./dimeschedule-list.component.css']
 } )
 export class DimescheduleListComponent implements OnInit {
+	private statusTypeArray = EnumToArray( ATStatusType );
 
 	constructor(
 		private mainService: DimeScheduleService
@@ -17,4 +20,13 @@ export class DimescheduleListComponent implements OnInit {
 	ngOnInit() {
 	}
 
+	private findStatus = ( n ) => {
+		let toReturn: string; toReturn = 'Unknown status';
+		this.statusTypeArray.forEach(( curStatus ) => {
+			if ( parseInt( curStatus.value, 10 ) === parseInt( n, 10 ) ) {
+				toReturn = curStatus.label;
+			}
+		} );
+		return toReturn;
+	};
 }

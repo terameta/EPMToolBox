@@ -110,6 +110,9 @@ export class DimeScheduleService {
 			);
 	};
 	update = ( curItem?: DimeSchedule ) => {
+		if ( !curItem ) {
+			curItem = this.curItem;
+		}
 		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe(( result ) => {

@@ -39,7 +39,7 @@ const dimeRoutes: Routes = [
 	}
 ];
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
@@ -49,7 +49,7 @@ const dimeRoutes: Routes = [
 		DimestreamModule,
 		DimemapModule,
 		DimematrixModule,
-		RouterModule.forChild(dimeRoutes),
+		RouterModule.forChild( dimeRoutes ),
 		AuthModule
 	],
 	exports: [
@@ -60,5 +60,5 @@ const dimeRoutes: Routes = [
 		DimemenuComponent,
 		DimedashboardComponent
 	]
-})
+} )
 export class DimeModule { }

@@ -8,11 +8,14 @@ import { DimescheduleListComponent } from './dimeschedule-list/dimeschedule-list
 import { DimescheduleComponent } from './dimeschedule/dimeschedule.component';
 import { DimescheduleDetailComponent } from './dimeschedule-detail/dimeschedule-detail.component';
 import { DimescheduleToolbarComponent } from './dimeschedule-toolbar/dimeschedule-toolbar.component';
+import { DimescheduleDetailMaindefinitionsComponent } from './dimeschedule-detail/dimeschedule-detail-maindefinitions/dimeschedule-detail-maindefinitions.component';
+import { DimescheduleDetailStepsComponent } from './dimeschedule-detail/dimeschedule-detail-steps/dimeschedule-detail-steps.component';
+import { DimescheduleDetailHistoryComponent } from './dimeschedule-detail/dimeschedule-detail-history/dimeschedule-detail-history.component';
 
 const dimeScheduleRoutes: Routes = [
 	{ path: 'dime/schedules', pathMatch: 'prefix', redirectTo: 'dime/schedules/schedule-list' },
 	{ path: 'schedule-list', component: DimescheduleListComponent },
-	{ path: 'schedule-detail', component: DimescheduleDetailComponent }
+	{ path: 'schedule-detail/:id', component: DimescheduleDetailComponent }
 ];
 
 @NgModule( {
@@ -29,7 +32,10 @@ const dimeScheduleRoutes: Routes = [
 		DimescheduleListComponent,
 		DimescheduleComponent,
 		DimescheduleDetailComponent,
-		DimescheduleToolbarComponent
+		DimescheduleToolbarComponent,
+		DimescheduleDetailMaindefinitionsComponent,
+		DimescheduleDetailStepsComponent,
+		DimescheduleDetailHistoryComponent
 	]
 } )
 export class DimescheduleModule { }

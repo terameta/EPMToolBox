@@ -5,5 +5,5 @@ export interface DimeScheduleStep {
 	schedule: number,
 	type: DimeScheduleStepType,
 	referedid: number,
-	fOrder: number
+	position: number
 }

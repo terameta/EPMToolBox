@@ -306,7 +306,7 @@ tableList.push( {
 		'schedule BIGINT UNSIGNED',
 		'type INT UNSIGNED',
 		'referedid BIGINT UNSIGNED',
-		'fOrder INT UNSIGNED'
+		'position INT UNSIGNED'
 	],
 	primaryKey: 'id'
 } );
