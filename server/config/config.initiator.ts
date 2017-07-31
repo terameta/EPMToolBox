@@ -1,3 +1,4 @@
+import { ATStatusType } from '../../shared/enums/generic/statustypes';
 import * as bcrypt from 'bcrypt';
 import { IPool } from 'mysql';
 
@@ -294,23 +295,12 @@ tableList.push( {
 	fields: [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name VARCHAR(2048)',
-		'schedule VARCHAR(4096)',
+		'schedule VARCHAR(24576)',
+		'steps VARCHAR(24576)',
 		'status INT UNSIGNED'
 	],
 	primaryKey: 'id'
 } );
-tableList.push( {
-	name: 'schedulesteps',
-	fields: [
-		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-		'schedule BIGINT UNSIGNED',
-		'type INT UNSIGNED',
-		'referedid BIGINT UNSIGNED',
-		'position INT UNSIGNED'
-	],
-	primaryKey: 'id'
-} );
-
 
 export function initiateInitiator( refDB: IPool, refConf: any ) {
 	db = refDB;
@@ -319,8 +309,17 @@ export function initiateInitiator( refDB: IPool, refConf: any ) {
 	console.log( '===============================================' );
 	console.log( '=== Initiator is now starting =================' );
 	checkTables( configuration ).
-		then( modifyTables );
+		then( modifyTables ).
+		then( clearResidue );
 }
+function clearResidue() {
+	return new Promise(( resolve, reject ) => {
+		console.log( '===============================================' );
+		console.log( '=== Clearing Residue          =================' );
+		db.query( 'UPDATE schedules SET status = ?', ATStatusType.Ready, function ( err, result, fields ) { if ( err ) { console.log( err ); } } );
+		resolve();
+	} );
+};
 
 function checkTables( curConfig: any ): Promise<any> {
 	return new Promise(( resolve, reject ) => {
@@ -535,5 +534,6 @@ function modifyTables() {
 				} );
 			}
 		} );
+		resolve();
 	} );
 }

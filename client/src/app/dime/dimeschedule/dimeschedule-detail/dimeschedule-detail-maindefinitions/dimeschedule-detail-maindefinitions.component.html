@@ -1,14 +1,14 @@
 <form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
 	<fieldset>
 		<div class="form-group">
-			<label for="itemName" class="col-xs-6 col-md-2 control-label">Name:</label>
-			<div class="col-xs-6 col-md-10">
+			<label for="itemName" class="col-xs-6 col-md-1 control-label">Name:</label>
+			<div class="col-xs-6 col-md-11">
 				<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.curItem.name">
 			</div>
 		</div>
 		<div class="form-group">
-			<label for="itemSchedule" class="col-xs-6 col-md-2 control-label">Schedule:</label>
-			<div class="col-xs-6 col-md-10" *ngIf="mainService.curItem">
+			<label for="itemSchedule" class="col-xs-6 col-md-1 control-label">Schedule:</label>
+			<div class="col-xs-6 col-md-11" *ngIf="mainService.curItem">
 					<div class="input-group" *ngFor="let curSchedule of mainService.curItem.schedule; let i = index;let last = last; let first = first">
 						<span class="input-group-addon">Second:</span>
 						<select name="schedule{{i}}Second" class="form-control" [(ngModel)]="curSchedule.second">
@@ -42,7 +42,7 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<div class="col-xs-10 col-xs-offset-2">
+			<div class="col-xs-11 col-xs-offset-1">
 				<button class="btn btn-success btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
 				<button class="btn btn-primary btn-xs" type="button" (click)="addScheduleItem()"><i class="fa fa-plus fa-fw"></i> Add Schedule Item</button>
 				<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/schedules/schedule-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
@@ -51,11 +51,3 @@
 		</div>
 	</fieldset>
 </form>
-<pre>{{mainService.curItem|json}}</pre>
-
-<!--
-	name: string,
-	steps: DimeScheduleStep[],
-	schedule: string,
-	status: ATStatusType
-  -->

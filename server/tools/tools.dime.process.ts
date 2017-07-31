@@ -430,6 +430,31 @@ export class ProcessTools {
 	public unlock = ( id: number ) => {
 		return this.setStatus( id, 'ready' );
 	}
+	public runAndWait = ( id: number ) => {
+		return new Promise(( resolve, reject ) => {
+			this.run( id ).
+				then((result: any) => {
+					return this.runAndWaitWait( result.status );
+				} ).
+				then(resolve).
+				catch( reject );
+		} );
+	};
+	private runAndWaitWait = (logid: number) => {
+		return new Promise((resolve, reject) => {
+			this.logTool.checkLog( logid ).
+				then((result: any) => {
+					if ( result.start === result.end ) {
+						setTimeout(() => {
+							resolve( this.runAndWaitWait( logid ) );
+						}, 2000 );
+					} else {
+						resolve();
+					}
+				}).
+			catch(reject);
+		});
+	}
 	public run = ( id: number ) => {
 		return new Promise(( resolve, reject ) => {
 			this.getOne( id ).
