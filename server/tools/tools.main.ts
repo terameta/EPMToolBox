@@ -44,7 +44,7 @@ export class MainTools {
 				const toReturn = JSON.parse( toParse );
 				resolve( toReturn );
 			} catch ( e ) {
-				reject( 'Not a valid json' );
+				reject( 'Not a valid json:' + toParse );
 			}
 		} );
 	}

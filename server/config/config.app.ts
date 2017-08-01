@@ -40,7 +40,7 @@ export function initiateApplicationWorker( refDB: IPool, refConfig: SystemConfig
 
 	initializeRestApi( app, refDB, mainTools );
 
-	app.set( 'port', 8000 );
+	app.set( 'port', 7000 );
 
 	app.get( '*', ( req, res ) => {
 		res.sendFile( path.join( __dirname, '../../client/dist/index.html' ) );
