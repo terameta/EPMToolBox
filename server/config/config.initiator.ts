@@ -295,8 +295,8 @@ tableList.push( {
 	fields: [
 		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name VARCHAR(2048)',
-		'schedule VARCHAR(24576)',
-		'steps VARCHAR(24576)',
+		'schedule VARCHAR(20000)',
+		'steps VARCHAR(20000)',
 		'status INT UNSIGNED'
 	],
 	primaryKey: 'id'
