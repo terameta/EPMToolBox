@@ -1580,12 +1580,15 @@ export class ProcessTools {
 									concaters.push( 'GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)) AS \'' + curTuple[denseField] + '\'' );
 								}
 							} );
-							console.log( selecters );
+							// console.log( selecters );
 							sQuery += selecters.join( ', ' );
-							console.log( concaters );
-							console.log( sQuery );
-							sQuery += ', ';
-							sQuery += concaters.join( ', ' );
+							if ( concaters.length > 0 ) {
+								sQuery += ', ';
+								sQuery += concaters.join( ', ' );
+							}
+							// console.log( concaters );
+							// console.log( sQuery );
+
 							sQuery += ' FROM PROCESS' + refProcess.id + '_SUMTBL';
 							sQuery += ' WHERE ';
 							let wherers: string[]; wherers = [];
