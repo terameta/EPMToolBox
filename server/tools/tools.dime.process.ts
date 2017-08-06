@@ -1637,7 +1637,9 @@ export class ProcessTools {
 							denseDim: refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name
 						} ).
 							then( resolve ).
-							catch( reject );
+							catch( (issue: any) => {
+								reject( JSON.stringify( issue ) );
+							} );
 					}
 				} ).
 				catch( reject );
