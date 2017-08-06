@@ -8,14 +8,14 @@ import { Component, OnInit } from '@angular/core';
 } )
 export class DimescheduleDetailMaindefinitionsComponent implements OnInit {
 
-	constructor( private mainService: DimeScheduleService ) { }
+	constructor( public mainService: DimeScheduleService ) { }
 
 	ngOnInit() {
 	}
-	private addScheduleItem = () => {
+	public addScheduleItem = () => {
 		this.mainService.curItem.schedule.push( { second: '*', minute: '*', hour: '*', dayofmonth: '*', month: '*', dayofweek: '*' } );
 	}
-	private deleteScheduleItem = ( id: number ) => {
+	public deleteScheduleItem = ( id: number ) => {
 		this.mainService.curItem.schedule.splice( id, 1 );
 	}
 	private listSeconds = () => {

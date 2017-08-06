@@ -9,7 +9,7 @@ import { DimeProcessService } from '../dimeprocess.service';
 } )
 export class DimeprocessToolbarComponent implements OnInit {
 
-	constructor( private mainService: DimeProcessService ) { }
+	constructor( public mainService: DimeProcessService ) { }
 
 	ngOnInit() {
 		this.mainService.getAll();

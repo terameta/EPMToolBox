@@ -12,7 +12,7 @@ export class WelcomedashboardComponent implements OnInit {
 	curUserRole: string;
 
 	constructor(
-		private authService: AuthService,
+		public authService: AuthService,
 		private router: Router
 	) {
 		this.curUserRole = this.authService.getCurrentUser().role;

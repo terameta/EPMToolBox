@@ -4,24 +4,24 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { AcmServerService } from '../acmserver.service';
 
-@Component({
+@Component( {
 	selector: 'app-acmserver-detail',
 	templateUrl: './acmserver-detail.component.html',
 	styleUrls: ['./acmserver-detail.component.css']
-})
+} )
 export class AcmServerDetailComponent implements OnInit, OnDestroy {
 	paramsSubscription: Subscription;
 
 	constructor(
 		private route: ActivatedRoute,
 		private router: Router,
-		private mainService: AcmServerService,
+		public mainService: AcmServerService,
 	) { }
 
 	ngOnInit() {
 		this.paramsSubscription = this.route.params.subscribe(
-			(params: Params) => {
-				this.mainService.getOne(params['id']);
+			( params: Params ) => {
+				this.mainService.getOne( params['id'] );
 			}
 		);
 	}

@@ -42,8 +42,8 @@ export class DimeMatrixService {
 		private toastr: ToastrService,
 		private router: Router,
 		private route: ActivatedRoute,
-		private mapService: DimeMapService,
-		private streamService: DimeStreamService
+		public mapService: DimeMapService,
+		public streamService: DimeStreamService
 	) {
 		this.baseUrl = '/api/dime/matrix';
 		this.dataStore = { items: [] };
@@ -255,7 +255,7 @@ export class DimeMatrixService {
 		} );
 
 	};
-	private setMatrixFields = () => {
+	public setMatrixFields = () => {
 		this.authHttp.put( this.baseUrl + '/fields/', { id: this.curItem.id, fields: this.curItemFields } ).
 			map( response => response.json() ).
 			subscribe(( result ) => {
@@ -332,7 +332,7 @@ export class DimeMatrixService {
 			resolve( 'OK' );
 		} );
 	};
-	private prepareMatrixTables = () => {
+	public prepareMatrixTables = () => {
 		this.authHttp.get( this.baseUrl + '/prepareTables/' + this.curItem.id ).
 			map( response => response.json() ).
 			subscribe(( result ) => {

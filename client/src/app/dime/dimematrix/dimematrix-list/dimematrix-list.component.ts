@@ -11,7 +11,7 @@ import { DimeMapService } from '../../dimemap/dimemap.service';
 export class DimeMatrixListComponent implements OnInit {
 
 	constructor(
-		private mainService: DimeMatrixService,
+		public mainService: DimeMatrixService,
 		private mapService: DimeMapService
 	) { }
 

@@ -11,8 +11,8 @@ import { Component, OnInit } from '@angular/core';
 export class DimematrixDetailMaindefinitionsComponent implements OnInit {
 
 	constructor(
-		private mainService: DimeMatrixService,
-		private mapService: DimeMapService
+		public mainService: DimeMatrixService,
+		public mapService: DimeMapService
 	) { }
 
 	ngOnInit() {

@@ -12,7 +12,7 @@ export class DimescheduleListComponent implements OnInit {
 	private statusTypeArray = EnumToArray( ATStatusType );
 
 	constructor(
-		private mainService: DimeScheduleService
+		public mainService: DimeScheduleService
 	) {
 
 	}

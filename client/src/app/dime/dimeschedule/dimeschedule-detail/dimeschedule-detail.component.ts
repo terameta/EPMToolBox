@@ -13,7 +13,7 @@ export class DimescheduleDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
-		private mainService: DimeScheduleService
+		public mainService: DimeScheduleService
 	) { }
 
 	ngOnInit() {

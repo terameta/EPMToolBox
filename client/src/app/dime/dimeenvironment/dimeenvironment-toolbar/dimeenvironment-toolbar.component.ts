@@ -6,14 +6,14 @@ import { ToastrService } from "ngx-toastr";
 import { DimeEnvironmentService } from "../dimeenvironment.service";
 
 
-@Component({
+@Component( {
 	selector: "app-dimeenvironment-toolbar",
 	templateUrl: "./dimeenvironment-toolbar.component.html",
 	styleUrls: ["./dimeenvironment-toolbar.component.css"]
-})
+} )
 export class DimeenvironmentToolbarComponent implements OnInit {
 
-	constructor(private mainService: DimeEnvironmentService) { }
+	constructor( public mainService: DimeEnvironmentService ) { }
 
 	ngOnInit() {
 		// this.mainService.getAll();

@@ -14,7 +14,7 @@ import { DimeMapService } from 'app/dime/dimemap/dimemap.service';
 } )
 export class DimemapDetailTabMaptableComponent implements OnInit {
 
-	private numberofRowsinMap: string;
+	public numberofRowsinMap: string;
 	private columns: any[];
 	private colHeaders: string[];
 	private options: any;
@@ -33,7 +33,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	private fieldDescriptions: any;
 
 	constructor(
-		private mainService: DimeMapService,
+		public mainService: DimeMapService,
 		private toastr: ToastrService,
 		private streamService: DimeStreamService
 	) {
@@ -171,6 +171,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			}
 		}
 	};
+	public windowResized = () => {
+		console.log( 'Window Resized called' );
+	}
 	private filterChange = () => {
 		clearTimeout( this.filterChangeWaiter );
 		this.filterChangeWaiter = setTimeout( this.filterChangeAction, 1000 );
@@ -292,6 +295,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			resolve();
 		} );
 	};
+	public refreshMapTable = () => {
+		this.getMapTable();
+	}
 	private getMapTable = () => {
 		this.numberofRowsinMap = 'Please wait, refreshing...';
 		return new Promise(( resolve, reject ) => {

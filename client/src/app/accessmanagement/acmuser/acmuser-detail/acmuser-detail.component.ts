@@ -22,9 +22,9 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 	constructor(
 		private route: ActivatedRoute,
 		private router: Router,
-		private mainService: AcmUserService,
-		private serverService: AcmServerService,
-		private dimeProcessService: DimeProcessService,
+		public mainService: AcmUserService,
+		public serverService: AcmServerService,
+		public dimeProcessService: DimeProcessService,
 		private toastr: ToastrService
 	) { }
 
@@ -57,7 +57,7 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 		this.paramsSubscription.unsubscribe();
 	}
 
-	private onEmailChange = () => {
+	public onEmailChange = () => {
 		if ( this.mainService.curItem.type === 'directory' ) {
 			this.mainService.curItem.username = this.mainService.curItem.email;
 		}

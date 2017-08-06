@@ -6,11 +6,11 @@ import { ToastrService } from 'ngx-toastr';
 import { DimeStreamService } from '../dimestream.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
 
-@Component({
+@Component( {
 	selector: 'app-dimestream-list',
 	templateUrl: './dimestream-list.component.html',
 	styleUrls: ['./dimestream-list.component.css']
-})
+} )
 export class DimestreamListComponent implements OnInit {
 
 	// streamList: any[];
@@ -18,7 +18,7 @@ export class DimestreamListComponent implements OnInit {
 	// environmentList: any[];
 
 	constructor(
-		private mainService: DimeStreamService,
+		public mainService: DimeStreamService,
 		private environmentService: DimeEnvironmentService,
 		private toastr: ToastrService,
 		// private router: Router

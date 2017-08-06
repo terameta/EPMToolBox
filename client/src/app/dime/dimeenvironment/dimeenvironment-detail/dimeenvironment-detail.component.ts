@@ -9,11 +9,11 @@ import { DimeEnvironmentService } from "../dimeenvironment.service";
 
 // import { DimeEnvironment } from "../../../../../../shared/model/dime/environment";
 
-@Component({
+@Component( {
 	selector: "app-dimeenvironment-detail",
 	templateUrl: "./dimeenvironment-detail.component.html",
 	styleUrls: ["./dimeenvironment-detail.component.css"]
-})
+} )
 export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	// curItem: Environment;
 	paramsSubscription: Subscription;
@@ -23,19 +23,19 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
-		private mainService: DimeEnvironmentService
+		public mainService: DimeEnvironmentService
 	) { }
 
 	ngOnInit() {
 		// this.curItem = { id: 0 };
 		this.paramsSubscription = this.route.params.subscribe(
-			(params: Params) => {
-				this.mainService.getOne(params["id"]);
+			( params: Params ) => {
+				this.mainService.getOne( params["id"] );
 			}
 		);
 	}
 
 	ngOnDestroy() {
-		this.mainService.curItem = {id: 0};
+		this.mainService.curItem = { id: 0 };
 	}
 }

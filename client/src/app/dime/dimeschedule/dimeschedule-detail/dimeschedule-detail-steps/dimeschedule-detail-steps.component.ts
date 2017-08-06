@@ -15,7 +15,7 @@ export class DimescheduleDetailStepsComponent implements OnInit {
 	private stepType = DimeScheduleStepType;
 
 	constructor(
-		private mainService: DimeScheduleService,
+		public mainService: DimeScheduleService,
 		private processService: DimeProcessService
 	) { }
 
@@ -23,7 +23,7 @@ export class DimescheduleDetailStepsComponent implements OnInit {
 		this.processService.getAll();
 	}
 
-	private stepAdd = () => {
+	public stepAdd = () => {
 		let curMax = 0;
 		this.mainService.curItem.steps.forEach(( curStep ) => {
 			if ( curStep.position >= curMax ) {

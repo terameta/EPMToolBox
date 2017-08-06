@@ -16,7 +16,7 @@ export class DimeMatrixDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
-		private mainService: DimeMatrixService,
+		public mainService: DimeMatrixService,
 		private mapService: DimeMapService
 	) { }
 

@@ -135,7 +135,7 @@ export class DimeEnvironmentService {
 				this.toastr.error( 'Listing types has failed', this.serviceName );
 			} );
 	}
-	private isPBCS() {
+	public isPBCS() {
 		let toReturn = false;
 		if ( this.curItem.type ) {
 			this.typeList.forEach(( curType ) => {
@@ -146,7 +146,7 @@ export class DimeEnvironmentService {
 		}
 		return toReturn;
 	}
-	private verify = ( itemID: number ) => {
+	public verify = ( itemID?: number ) => {
 		if ( !itemID ) { itemID = this.curItem.id; }
 		this.authHttp.get( this.baseUrl + '/verify/' + itemID ).
 			map(( response: Response ) => {

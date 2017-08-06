@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
 export class EnduserDimeComponent implements OnInit {
 	private currentUser;
 	private userProcesses: any[];
-	private userProcessDetails: any[];
+	public userProcessDetails: any[];
 
 	constructor(
 		private authService: AuthService,

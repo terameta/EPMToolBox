@@ -127,7 +127,7 @@ export class DimeStreamService {
 				console.log( error );
 			} );
 	}
-	private setCurItemEnvironmentType = () => {
+	public setCurItemEnvironmentType = () => {
 		if ( this.environmentService.typeList.length === 0 ) {
 			setTimeout( this.setCurItemEnvironmentType, 1000 );
 		} else {

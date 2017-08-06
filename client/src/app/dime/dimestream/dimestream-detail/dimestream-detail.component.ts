@@ -8,25 +8,25 @@ import { Subscription } from 'rxjs/Subscription';
 import { DimeStreamService } from '../dimestream.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
 
-@Component({
+@Component( {
 	selector: 'app-dimestream-detail',
 	templateUrl: './dimestream-detail.component.html',
 	styleUrls: ['./dimestream-detail.component.css']
-})
+} )
 export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	paramsSubscription: Subscription;
 
 	constructor(
 		private route: ActivatedRoute,
 		private router: Router,
-		private mainService: DimeStreamService,
-		private environmentService: DimeEnvironmentService,
+		public mainService: DimeStreamService,
+		public environmentService: DimeEnvironmentService,
 	) { }
 
 	ngOnInit() {
 		this.paramsSubscription = this.route.params.subscribe(
-			(params: Params) => {
-				this.mainService.getOne(params['id']);
+			( params: Params ) => {
+				this.mainService.getOne( params['id'] );
 			}
 		);
 	}

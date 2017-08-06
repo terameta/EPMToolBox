@@ -12,7 +12,7 @@ import { Component, OnInit } from '@angular/core';
 export class DimematrixDetailFieldsComponent implements OnInit {
 
 	constructor(
-		private mainService: DimeMatrixService,
+		public mainService: DimeMatrixService,
 		private mapService: DimeMapService,
 		private streamService: DimeStreamService
 	) { }

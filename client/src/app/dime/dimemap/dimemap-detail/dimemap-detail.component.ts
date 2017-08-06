@@ -5,23 +5,23 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { DimeMapService } from '../dimemap.service';
 
-@Component({
+@Component( {
 	selector: 'app-dimemap-detail',
 	templateUrl: './dimemap-detail.component.html',
 	styleUrls: ['./dimemap-detail.component.css']
-})
+} )
 export class DimemapDetailComponent implements OnInit, OnDestroy {
 	paramSubscription: Subscription;
 
 	constructor(
 		private route: ActivatedRoute,
-		private mainService: DimeMapService
+		public mainService: DimeMapService
 	) { }
 
 	ngOnInit() {
-		this.paramSubscription = this.route.params.subscribe((params: Params) => {
-			this.mainService.getOne(params['id']);
-		});
+		this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
+			this.mainService.getOne( params['id'] );
+		} );
 	}
 
 	ngOnDestroy() {

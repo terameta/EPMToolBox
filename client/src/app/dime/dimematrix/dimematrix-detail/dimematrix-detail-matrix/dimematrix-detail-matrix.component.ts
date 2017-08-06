@@ -33,7 +33,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	private fieldDescriptions: any;
 
 	constructor(
-		private mainService: DimeMatrixService,
+		public mainService: DimeMatrixService,
 		private toastr: ToastrService,
 		private streamService: DimeStreamService
 	) {
@@ -361,10 +361,10 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	//
 	// BELOW IS TO BE DELETED
 	//
-	private windowResized = () => {
+	public windowResized = () => {
 		// this.setWidthAndHeight( '100%', window.innerHeight - 320 + 'px' );
 		// this.setWidthAndHeight( '100%', window.innerHeight - 284 );
-		console.log( 'Window is resized' );
+		console.log( 'Window is resized', event );
 	};
 
 	private setWidthAndHeight = ( width, height ) => {

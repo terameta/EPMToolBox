@@ -7,14 +7,14 @@ import { ToastrService } from "ngx-toastr";
 import { DimeEnvironmentService } from "../dimeenvironment.service";
 // import { Environment } from "../../../../../../shared/model/environment";
 
-@Component({
+@Component( {
 	selector: "app-dimeenvironment-list",
 	templateUrl: "./dimeenvironment-list.component.html",
 	styleUrls: ["./dimeenvironment-list.component.css"]
-})
+} )
 export class DimeenvironmentListComponent implements OnInit {
 
-	constructor(private mainService: DimeEnvironmentService) { }
+	constructor( public mainService: DimeEnvironmentService ) { }
 
 	ngOnInit() {
 	}

@@ -5,15 +5,15 @@ import { DimeEnvironmentService } from '../../../dimeenvironment/dimeenvironment
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMapService } from '../../../dimemap/dimemap.service';
 
-@Component({
+@Component( {
 	selector: 'app-dimeprocess-detail-tab-steps',
 	templateUrl: './dimeprocess-detail-tab-steps.component.html',
 	styleUrls: ['./dimeprocess-detail-tab-steps.component.css']
-})
+} )
 export class DimeprocessDetailTabStepsComponent implements OnInit {
 
 	constructor(
-		private mainService: DimeProcessService,
+		public mainService: DimeProcessService,
 		private environmentService: DimeEnvironmentService,
 		private streamService: DimeStreamService,
 		private mapService: DimeMapService
