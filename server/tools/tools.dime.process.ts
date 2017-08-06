@@ -1637,7 +1637,7 @@ export class ProcessTools {
 							denseDim: refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name
 						} ).
 							then( resolve ).
-							catch( (issue: any) => {
+							catch(( issue: any ) => {
 								reject( JSON.stringify( issue ) );
 							} );
 					}
@@ -2003,7 +2003,7 @@ export class ProcessTools {
 	}
 	private clearStreamDescriptions = ( refField: DimeStreamField ) => {
 		return new Promise(( resolve, reject ) => {
-			this.db.query( 'DELETE FROM STREAM' + refField.stream + '_DESCTBL' + refField.id, ( err, result, fields ) => {
+			this.db.query( 'TRUNCATE TABLE STREAM' + refField.stream + '_DESCTBL' + refField.id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
