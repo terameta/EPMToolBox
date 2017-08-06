@@ -1580,7 +1580,9 @@ export class ProcessTools {
 									concaters.push( 'GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)) AS \'' + curTuple[denseField] + '\'' );
 								}
 							} );
+							console.log( selecters );
 							sQuery += selecters.join( ', ' );
+							console.log(sQuery);
 							sQuery += ', ';
 							sQuery += concaters.join( ', ' );
 							sQuery += ' FROM PROCESS' + refProcess.id + '_SUMTBL';
