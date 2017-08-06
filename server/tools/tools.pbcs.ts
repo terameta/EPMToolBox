@@ -462,7 +462,7 @@ export class PBCSTools {
 									console.log( '===========================================' );
 									console.log( body );
 									console.log( '===========================================' );
-									reject( JSON.stringify( { issue: issue, result: body } ) );
+									reject( JSON.stringify( { issue: JSON.stringify( issue ), result: JSON.stringify( body ) } ) );
 								} );
 						}
 					} );
