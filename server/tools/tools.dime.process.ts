@@ -433,17 +433,17 @@ export class ProcessTools {
 	public runAndWait = ( id: number ) => {
 		return new Promise(( resolve, reject ) => {
 			this.run( id ).
-				then((result: any) => {
+				then(( result: any ) => {
 					return this.runAndWaitWait( result.status );
 				} ).
-				then(resolve).
+				then( resolve ).
 				catch( reject );
 		} );
 	};
-	private runAndWaitWait = (logid: number) => {
-		return new Promise((resolve, reject) => {
+	private runAndWaitWait = ( logid: number ) => {
+		return new Promise(( resolve, reject ) => {
 			this.logTool.checkLog( logid ).
-				then((result: any) => {
+				then(( result: any ) => {
 					if ( result.start === result.end ) {
 						setTimeout(() => {
 							resolve( this.runAndWaitWait( logid ) );
@@ -451,9 +451,9 @@ export class ProcessTools {
 					} else {
 						resolve();
 					}
-				}).
-			catch(reject);
-		});
+				} ).
+				catch( reject );
+		} );
 	}
 	public run = ( id: number ) => {
 		return new Promise(( resolve, reject ) => {
@@ -1582,7 +1582,8 @@ export class ProcessTools {
 							} );
 							console.log( selecters );
 							sQuery += selecters.join( ', ' );
-							console.log(sQuery);
+							console.log( concaters );
+							console.log( sQuery );
 							sQuery += ', ';
 							sQuery += concaters.join( ', ' );
 							sQuery += ' FROM PROCESS' + refProcess.id + '_SUMTBL';
@@ -1932,7 +1933,7 @@ export class ProcessTools {
 					} );
 					updateQuery += onFields.join( ' AND ' );
 					updateQuery += ' SET ' + setFields.join( ', ' );
-					console.log( updateQuery );
+					// console.log( updateQuery );
 					this.db.query( updateQuery, ( err, result, fields ) => {
 						if ( err ) {
 							reject( err );
