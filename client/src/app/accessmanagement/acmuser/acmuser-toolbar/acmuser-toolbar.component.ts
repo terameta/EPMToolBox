@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 
 import { AcmUserService } from '../acmuser.service';
 
-@Component({
+@Component( {
 	selector: 'app-acmuser-toolbar',
 	templateUrl: './acmuser-toolbar.component.html',
 	styleUrls: ['./acmuser-toolbar.component.css']
-})
+} )
 export class AcmUserToolbarComponent implements OnInit {
 
-	constructor(private mainService: AcmUserService) { }
+	constructor( public mainService: AcmUserService ) { }
 
 	ngOnInit() {
 	}
