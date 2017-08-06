@@ -81,9 +81,6 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 					minSpareRows: 0,
 					fillHandle: { direction: 'vertical', autoInsertRow: false },
 					colHeaders: this.colHeaders,
-					// cell: [
-					// 	{ row: 0, col: 1, type: 'dropdown', source: ['Exact Match', 'Contains', 'Begins with', 'Ends with'] }
-					// ],
 					cells: function ( row, col, prop ) {
 						if ( row === 0 ) {
 							if ( prop !== 'saveresult' ) {
@@ -388,6 +385,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			// console.log( 'getDescriptiansAction is running', fieldName, stream, field );
 			this.streamService.fetchFieldDescriptions( stream, field ).subscribe(( result ) => {
 				this.fieldDescriptions[prefix + fieldName] = result;
+				this.fieldDescriptions[prefix + fieldName].push( { RefField: 'ignore', Description: 'ignore' } );
 				resolve();
 			}, ( error ) => {
 				reject( error );
@@ -426,10 +424,11 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
 							curColumn.source.push( curDescription.RefField );
 						} );
+						// console.log( curColumn.source );
 					}
 				} );
 			} );
-			// console.log( this.fieldDescriptions );
+			// console.log( this.columns );
 			resolve();
 		} );
 	};
