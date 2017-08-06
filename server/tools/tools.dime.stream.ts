@@ -364,12 +364,13 @@ export class StreamTools {
 							curQuery += ', RefField VARCHAR(256)';
 							curQuery += ', Description VARCHAR(1024)';
 						}
+						curQuery += ', INDEX (RefField)'
 						curQuery += ', PRIMARY KEY(id) );';
 						// console.log(field.name,
 						// 	field.drfName, field.drfType, field.drfCharacters, field.drfPrecision, field.drfDecimals,
 						// 	field.ddfName, field.ddfType, field.ddfCharacters, field.ddfPrecision, field.ddfDecimals);
 						// console.log(tableStatus);
-						// console.log(curQuery);
+						// console.log( curQuery );
 						this.db.query( curQuery, ( err, result, fields ) => {
 							if ( err ) {
 								reject( err );
