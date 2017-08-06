@@ -1930,6 +1930,7 @@ export class ProcessTools {
 					} );
 					updateQuery += onFields.join( ' AND ' );
 					updateQuery += ' SET ' + setFields.join( ', ' );
+					console.log( updateQuery );
 					this.db.query( updateQuery, ( err, result, fields ) => {
 						if ( err ) {
 							reject( err );
