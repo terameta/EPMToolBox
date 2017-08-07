@@ -435,10 +435,13 @@ export class PBCSTools {
 				} );
 				rows.push( toPopulate );
 			} );
-			let rowsHowMany: number; rowsHowMany = 100;
+			let rowsHowMany: number; rowsHowMany = 10;
 			if ( rows.length > 0 ) {
 				rowsHowMany = rowsHowMany / rows[0].data.length;
-				rowsHowMany = Math.ceil( rowsHowMany );
+				rowsHowMany = Math.floor( rowsHowMany );
+			}
+			if ( rowsHowMany < 1 ) {
+				rowsHowMany = 1;
 			}
 			this.writeDataAction( refObj, toSend, rows, rowsHowMany, '' ).then( resolve ).catch( reject );
 		} );
