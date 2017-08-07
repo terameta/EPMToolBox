@@ -439,7 +439,7 @@ export class PBCSTools {
 				} );
 				rows.push( toPopulate );
 			} );
-			let rowsHowMany: number; rowsHowMany = 100;
+			let rowsHowMany: number; rowsHowMany = 5000;
 			if ( rows.length > 0 ) {
 				rowsHowMany = rowsHowMany / rows[0].data.length;
 				rowsHowMany = Math.floor( rowsHowMany );
