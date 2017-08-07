@@ -454,6 +454,12 @@ export class PBCSTools {
 			this.initiateRest( refObj ).
 				then(( innerObj: DimeEnvironmentPBCS ) => {
 					const procedureURL = innerObj.resturl + '/applications/' + innerObj.database + '/plantypes/' + innerObj.table + '/importdataslice';
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( procedureURL );
+					console.log( toSend );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
 					request.post( {
 						url: procedureURL,
 						auth: {
