@@ -431,11 +431,15 @@ export class PBCSTools {
 					}
 				} );
 				denseFields.forEach(( curDenseField: string ) => {
-					toPopulate.data.push( curTuple[curDenseField] );
+					if ( curTuple[curDenseField] ) {
+						toPopulate.data.push( curTuple[curDenseField] );
+					} else {
+						toPopulate.data.push( '#missing' );
+					}
 				} );
 				rows.push( toPopulate );
 			} );
-			let rowsHowMany: number; rowsHowMany = 10;
+			let rowsHowMany: number; rowsHowMany = 100;
 			if ( rows.length > 0 ) {
 				rowsHowMany = rowsHowMany / rows[0].data.length;
 				rowsHowMany = Math.floor( rowsHowMany );
