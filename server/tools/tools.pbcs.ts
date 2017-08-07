@@ -435,7 +435,7 @@ export class PBCSTools {
 				} );
 				rows.push( toPopulate );
 			} );
-			this.writeDataAction( refObj, toSend, rows, 1000, '' ).then( resolve ).catch( reject );
+			this.writeDataAction( refObj, toSend, rows, 500, '' ).then( resolve ).catch( reject );
 		} );
 	};
 	private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: string ) => {
