@@ -417,7 +417,7 @@ export class PBCSTools {
 			} );
 			toSend.dataGrid.columns = [];
 			toSend.dataGrid.columns.push( denseFields );
-			toSend.dataGrid.rows = [];
+			const rows: any[] = [];
 			const numberOfSparseDimensions = refObj.sparseDims.length;
 			let toPopulate: any;
 			const numberOfTuples = refObj.data.length;
@@ -433,8 +433,15 @@ export class PBCSTools {
 				denseFields.forEach(( curDenseField: string ) => {
 					toPopulate.data.push( curTuple[curDenseField] );
 				} );
-				toSend.dataGrid.rows.push( toPopulate );
+				rows.push( toPopulate );
 			} );
+			this.writeDataAction( refObj, toSend, rows, 1000, '' ).then( resolve ).catch( reject );
+		} );
+	};
+	private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: string ) => {
+		// console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
+		return new Promise(( resolve, reject ) => {
+			toSend.dataGrid.rows = rows.splice( 0, howMany );
 			this.initiateRest( refObj ).
 				then(( innerObj: DimeEnvironmentPBCS ) => {
 					const procedureURL = innerObj.resturl + '/applications/' + innerObj.database + '/plantypes/' + innerObj.table + '/importdataslice';
@@ -453,21 +460,29 @@ export class PBCSTools {
 						} else {
 							this.tools.parseJsonString( body ).
 								then(( result: any ) => {
-									resolve( body );
+									if ( rows.length > 0 ) {
+										toLog += '>>>>>>>>>>>>>>>>>>>\n';
+										toLog += JSON.stringify( body );
+										this.writeDataAction( refObj, toSend, rows, howMany, toLog ).then( resolve ).catch( reject );
+									} else {
+										toLog += '>>>>>>>>>>>>>>>>>>>\n';
+										toLog += JSON.stringify( body );
+										toLog += '>>>>>>>>>>>>>>>>>>>\n';
+										resolve( toLog );
+									}
 								} ).
 								catch(( issue ) => {
-									console.log( '===========================================' );
-									console.log( '===========================================' );
-									console.log( issue );
-									console.log( '===========================================' );
-									console.log( body );
-									console.log( '===========================================' );
-									reject( JSON.stringify( { issue: JSON.stringify( issue ), result: JSON.stringify( body ) } ) );
+									toLog += '>>>>>>>>>>>>>>>>>>>\n';
+									toLog += JSON.stringify( issue );
+									toLog += '>>>>>>>>>>>>>>>>>>>\n';
+									toLog += JSON.stringify( body );
+									toLog += '>>>>>>>>>>>>>>>>>>>\n';
+									reject( toLog );
 								} );
 						}
 					} );
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 }
