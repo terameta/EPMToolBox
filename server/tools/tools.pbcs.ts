@@ -457,7 +457,7 @@ export class PBCSTools {
 					console.log( '===========================================' );
 					console.log( '===========================================' );
 					console.log( procedureURL );
-					console.log( toSend );
+					console.log( JSON.stringify( toSend ) );
 					console.log( '===========================================' );
 					console.log( '===========================================' );
 					request.post( {
