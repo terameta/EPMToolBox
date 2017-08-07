@@ -435,11 +435,17 @@ export class PBCSTools {
 				} );
 				rows.push( toPopulate );
 			} );
-			this.writeDataAction( refObj, toSend, rows, 500, '' ).then( resolve ).catch( reject );
+			let rowsHowMany: number; rowsHowMany = 1000;
+			if ( rows.length > 0 ) {
+				rowsHowMany = rowsHowMany / rows[0].data.length;
+				rowsHowMany = Math.ceil( rowsHowMany );
+			}
+			this.writeDataAction( refObj, toSend, rows, rowsHowMany, '' ).then( resolve ).catch( reject );
 		} );
 	};
 	private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: string ) => {
-		// console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
+		// console.log( rows );
+		console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
 		return new Promise(( resolve, reject ) => {
 			toSend.dataGrid.rows = rows.splice( 0, howMany );
 			this.initiateRest( refObj ).
