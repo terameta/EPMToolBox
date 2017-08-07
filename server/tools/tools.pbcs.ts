@@ -435,7 +435,7 @@ export class PBCSTools {
 				} );
 				rows.push( toPopulate );
 			} );
-			let rowsHowMany: number; rowsHowMany = 1000;
+			let rowsHowMany: number; rowsHowMany = 100;
 			if ( rows.length > 0 ) {
 				rowsHowMany = rowsHowMany / rows[0].data.length;
 				rowsHowMany = Math.ceil( rowsHowMany );
@@ -466,6 +466,7 @@ export class PBCSTools {
 						} else {
 							this.tools.parseJsonString( body ).
 								then(( result: any ) => {
+									console.log( '>>>', body );
 									if ( rows.length > 0 ) {
 										toLog += '>>>>>>>>>>>>>>>>>>>\n';
 										toLog += JSON.stringify( body );
@@ -478,6 +479,7 @@ export class PBCSTools {
 									}
 								} ).
 								catch(( issue ) => {
+									console.log( '???', issue );
 									toLog += '>>>>>>>>>>>>>>>>>>>\n';
 									toLog += JSON.stringify( issue );
 									toLog += '>>>>>>>>>>>>>>>>>>>\n';
