@@ -82,6 +82,7 @@ export class DimeEnvironmentService {
 		this.authHttp.post( this.baseUrl, {}, { headers: this.headers } )
 			.map( response => response.json() ).subscribe( data => {
 				this.dataStore.items.push( data );
+				this.dataStore.items.sort( SortByName );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				this.router.navigate( ['/dime/environments/environment-detail', data.id] );
 				this.toastr.info( 'New item is created, navigating to the details', this.serviceName );

@@ -452,18 +452,12 @@ export class PBCSTools {
 	};
 	private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: string ) => {
 		// console.log( rows );
-		console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
+		// console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
 		return new Promise(( resolve, reject ) => {
 			toSend.dataGrid.rows = rows.splice( 0, howMany );
 			this.initiateRest( refObj ).
 				then(( innerObj: DimeEnvironmentPBCS ) => {
 					const procedureURL = innerObj.resturl + '/applications/' + innerObj.database + '/plantypes/' + innerObj.table + '/importdataslice';
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( procedureURL );
-					console.log( JSON.stringify( toSend ) );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
 					request.post( {
 						url: procedureURL,
 						auth: {
