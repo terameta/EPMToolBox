@@ -1,3 +1,4 @@
+import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
@@ -72,6 +73,7 @@ export class DimeStreamService {
 				return response.json();
 			} ).
 			subscribe(( data ) => {
+				data.sort( SortByName );
 				this.dataStore.items = data;
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
