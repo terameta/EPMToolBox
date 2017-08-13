@@ -515,6 +515,7 @@ modificationList.push( {
 	isNullable: false
 } );
 // modificationList.push({ type: 'custom', tableName: 'processfilters', customQuery: 'ALTER TABLE `processfilters` CHANGE `filterto` `filterto` DATE NULL DEFAULT NULL' });
+modificationList.push( { type: 'custom', tableName: 'logs', customQuery: 'ALTER TABLE `logs` CHANGE `details` `details` LONGBLOB NULL DEFAULT NULL' } );
 
 function modifyTables() {
 	return new Promise(( resolve, reject ) => {
