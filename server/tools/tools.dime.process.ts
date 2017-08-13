@@ -1025,11 +1025,11 @@ export class ProcessTools {
 							cartesianFields.push( { name: curField.name, srctar: 'source' } );
 						}
 					} );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( cartesianFields );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
+					// console.log( '===========================================' );
+					// console.log( '===========================================' );
+					// console.log( cartesianFields );
+					// console.log( '===========================================' );
+					// console.log( '===========================================' );
 
 					Promise.all( promises ).then(( ctFields ) => {
 						let cartesianArray: any[]; cartesianArray = [];
