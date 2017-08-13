@@ -1085,6 +1085,7 @@ export class ProcessTools {
 			curItem.split( '-|-' ).forEach(( curWhere: any ) => {
 				updateWherers.push( curWhere );
 			} );
+			this.logTool.appendLog( refProcess.status, 'Step - Send Data: ' + updateQuery ).catch( issue => { console.log( issue ); } );
 			this.db.query( updateQuery, updateWherers, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
