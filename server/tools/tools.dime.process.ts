@@ -910,6 +910,7 @@ export class ProcessTools {
 								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'SRC_' + curField.name } );
 							}
 							inserterFields.push( 'SRC_' + curField.name );
+							createQuery += ', INDEX (SRC_' + curField.name + ')';
 						}
 					} );
 
@@ -931,6 +932,7 @@ export class ProcessTools {
 								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'TAR_' + curField.name } );
 							}
 							inserterFields.push( 'TAR_' + curField.name );
+							createQuery += ', INDEX (TAR_' + curField.name + ')';
 						}
 					} );
 					refProcess.sourceStreamFields.forEach(( curField ) => {
