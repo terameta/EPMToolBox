@@ -9,6 +9,7 @@ export interface DimeStreamField {
 	fDateFormat?: string,
 	fOrder?: number,
 	shouldIgnore?: boolean,
+	shouldIgnoreCrossTab?: boolean,
 	isDescribed?: boolean,
 	isFilter?: boolean,
 	isCrossTab?: boolean,

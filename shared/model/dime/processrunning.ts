@@ -22,6 +22,7 @@ export interface DimeProcessRunning {
 	isReady: { tableName: string, process: number, type: string, status: boolean }[],
 	curStep: number,
 	filters: any[],
+	filtersDataFile: any[],
 	wherers: string[],
 	wherersWithSrc: string[],
 	pullResult: any[],

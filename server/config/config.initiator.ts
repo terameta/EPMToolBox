@@ -193,6 +193,19 @@ tableList.push( {
 	primaryKey: 'id'
 } );
 tableList.push( {
+	name: 'processfiltersdatafile',
+	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'process BIGINT UNSIGNED',
+		'stream BIGINT UNSIGNED',
+		'field BIGINT UNSIGNED',
+		'filterfrom DATETIME',
+		'filterto DATETIME',
+		'filtertext varchar(1024)',
+		'filterbeq NUMERIC(38,10)',
+		'filterseq NUMERIC(38,10)'],
+	primaryKey: 'id'
+} );
+tableList.push( {
 	name: 'settings',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 		'name varchar(1024)',
@@ -447,6 +460,24 @@ modificationList.push( {
 	columnName: 'shouldIgnore',
 	columnType: 'TINYINT',
 	afterCol: 'fOrder',
+	isNullable: true,
+	defaultValue: 0
+} );
+modificationList.push( {
+	type: 'addNewColumn',
+	tableName: 'streamfields',
+	columnName: 'shouldIgnoreCrossTab',
+	columnType: 'TINYINT',
+	afterCol: 'shouldIgnore',
+	isNullable: true,
+	defaultValue: 0
+} );
+modificationList.push( {
+	type: 'addNewColumn',
+	tableName: 'streamfields',
+	columnName: 'isCrossTabFilter',
+	columnType: 'TINYINT',
+	afterCol: 'shouldIgnoreCrossTab',
 	isNullable: true,
 	defaultValue: 0
 } );

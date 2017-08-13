@@ -38,6 +38,7 @@ export class DimeProcessService {
 	curStepIsPBCS: boolean;
 	curItemDefaultTargets: any;
 	curItemFilters: any;
+	curItemFiltersDataFile: any;
 	currentLog: any;
 	stepTypes: DimeProcessStepType[];
 	private serviceName: string;
@@ -108,6 +109,7 @@ export class DimeProcessService {
 				this.stepGetAll( this.curItem.id );
 				this.fetchDefaultTargets( this.curItem.id );
 				this.fetchFilters( this.curItem.id );
+				this.fetchFiltersDataFile( this.curItem.id );
 			}, ( error ) => {
 				this.toastr.error( 'Failed to get the item.', this.serviceName );
 				console.log( error );
@@ -192,6 +194,7 @@ export class DimeProcessService {
 		this.curItemMissingMapRecepients = [];
 		this.curItemDefaultTargets = {};
 		this.curItemFilters = {};
+		this.curItemFiltersDataFile = {};
 		this.curStepIsPBCS = false;
 	};
 	private sortByName = ( e1, e2 ) => {
@@ -578,6 +581,51 @@ export class DimeProcessService {
 				console.error( error );
 			} );
 	};
+	public applyFiltersDataFile = () => {
+		let toSend: any; toSend = {};
+		toSend.process = this.curItem.id;
+		toSend.stream = this.curItemSourceStream.id;
+		toSend.filters = [];
+		Object.keys( this.curItemFiltersDataFile ).forEach(( curKey ) => {
+			let toPush: any; toPush = {};
+			this.curItemSourceFields.forEach(( curField ) => {
+
+				if ( curField.name === curKey ) {
+					toPush.field = curField.id;
+				} else {
+				}
+			} );
+			toPush.filterfrom = this.curItemFiltersDataFile[curKey].filterfrom;
+			toPush.filterto = this.curItemFiltersDataFile[curKey].filterto;
+			toPush.filtertext = this.curItemFiltersDataFile[curKey].filtertext;
+			toPush.filterbeq = this.curItemFiltersDataFile[curKey].filterbeq;
+			toPush.filterseq = this.curItemFiltersDataFile[curKey].filterseq;
+			toSend.filters.push( toPush );
+		} );
+		this.authHttp.put( this.baseUrl + '/filtersdatafile/' + this.curItem.id, toSend, { headers: this.headers } ).
+			map( response => response.json() ).
+			subscribe(( result ) => {
+				this.toastr.info( 'Successfully applied data file filters.', this.serviceName );
+			}, ( error ) => {
+				this.toastr.error( 'Failed to apply data file filters.', this.serviceName );
+				console.error( error );
+			} );
+	};
+	public fetchFiltersDataFile = ( id?: number ) => {
+		if ( !id ) { id = this.curItem.id; }
+		this.fetchFiltersDataFileFetch( id ).
+			subscribe(( result ) => {
+				this.prepareFiltersDataFile( result );
+			}, ( error ) => {
+				this.toastr.error( '', this.serviceName );
+				console.error( error );
+			} );
+	};
+	public fetchFiltersDataFileFetch = ( id: number ) => {
+		return this.authHttp.get( this.baseUrl + '/filtersdatafile/' + id ).
+			map( response => response.json() ).
+			catch( error => Observable.throw( error ) );
+	};
 	public fetchFilters = ( id?: number ) => {
 		if ( !id ) { id = this.curItem.id; }
 		this.fetchFiltersFetch( id ).
@@ -592,6 +640,35 @@ export class DimeProcessService {
 		return this.authHttp.get( this.baseUrl + '/filters/' + id ).
 			map( response => response.json() ).
 			catch( error => Observable.throw( error ) );
+	};
+	private prepareFiltersDataFile = ( filterArray: any[], numTry?: number ) => {
+		if ( numTry === undefined ) { numTry = 0; }
+		if ( this.curItemSourceFields.length > 0 ) {
+			this.curItemSourceFields.forEach(( curField ) => {
+				if ( curField.isCrossTabFilter ) {
+					this.curItemFiltersDataFile[curField.name] = {};
+				}
+			} );
+			filterArray.forEach(( curFilter ) => {
+				this.curItemSourceFields.forEach(( curField ) => {
+					if ( curField.id === curFilter.field ) { curFilter.fieldname = curField.name; }
+				} );
+				if ( curFilter.stream === this.curItemSourceStream.id && curFilter.field ) {
+					const theDate = new Date( curFilter.filterfrom );
+					if ( curFilter.filterfrom ) { this.curItemFiltersDataFile[curFilter.fieldname].filterfrom = curFilter.filterfrom; }
+					if ( curFilter.filterto ) { this.curItemFiltersDataFile[curFilter.fieldname].filterto = curFilter.filterto; }
+					if ( curFilter.filtertext ) { this.curItemFiltersDataFile[curFilter.fieldname].filtertext = curFilter.filtertext; }
+					if ( curFilter.filterbeq ) { this.curItemFiltersDataFile[curFilter.fieldname].filterbeq = curFilter.filterbeq; }
+					if ( curFilter.filterseq ) { this.curItemFiltersDataFile[curFilter.fieldname].filterseq = curFilter.filterseq; }
+				}
+			} );
+		} else if ( numTry < 100 ) {
+			setTimeout(() => {
+				this.prepareFiltersDataFile( filterArray, ++numTry );
+			}, 1000 );
+		} else {
+			this.toastr.error( 'Failed to prepare filters data file.', this.serviceName );
+		}
 	};
 	private prepareFilters = ( filterArray: any[], numTry?: number ) => {
 		if ( numTry === undefined ) { numTry = 0; }

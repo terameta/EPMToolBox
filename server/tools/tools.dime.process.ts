@@ -400,6 +400,60 @@ export class ProcessTools {
 			} );
 		} );
 	}
+	public applyFiltersDataFile = ( refObj: any ) => {
+		return new Promise(( resolve, reject ) => {
+			if ( !refObj ) {
+				reject( 'Object does not exist' );
+			} else if ( !refObj.process ) {
+				reject( 'Object does not provide process id.' );
+			} else if ( !refObj.stream ) {
+				reject( 'Object does not provide stream id.' );
+			} else if ( !refObj.filters ) {
+				reject( 'Object does not provide filter list.' );
+			} else if ( !Array.isArray( refObj.filters ) ) {
+				reject( 'Object filter list is malformed.' );
+			} else {
+				refObj.filters.forEach(( curFilter: any ) => {
+					curFilter.process = refObj.process;
+					curFilter.stream = refObj.stream;
+				} );
+				this.clearFiltersDataFile( refObj.process ).
+					then(() => {
+						let promises: any[]; promises = [];
+						refObj.filters.forEach(( curFilter: any ) => {
+							if ( curFilter.filterfrom || curFilter.filterto || curFilter.filtertext || curFilter.filterbeq || curFilter.filterseq ) {
+								promises.push( this.applyFilterDataFile( curFilter ) );
+							}
+						} );
+						return Promise.all( promises );
+					} ).
+					then( resolve ).
+					catch( reject );
+			}
+		} );
+	}
+	public applyFilterDataFile = ( curFilter: any ) => {
+		return new Promise(( resolve, reject ) => {
+			this.db.query( 'INSERT INTO processfiltersdatafile SET ?', curFilter, ( err, rows, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( 'OK' );
+				}
+			} );
+		} );
+	}
+	public clearFiltersDataFile = ( id: number ) => {
+		return new Promise(( resolve, reject ) => {
+			this.db.query( 'DELETE FROM processfiltersdatafile WHERE process = ?', id, ( err, rows, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( id );
+				}
+			} );
+		} );
+	}
 	public fetchFilters = ( id: number ) => {
 		return new Promise(( resolve, reject ) => {
 			let theQuery: string; theQuery = '';
@@ -407,6 +461,22 @@ export class ProcessTools {
 			theQuery += 'DATE_FORMAT(filterfrom, \'%Y-%m-%d\') AS filterfrom,';
 			theQuery += 'DATE_FORMAT(filterto, \'%Y-%m-%d\') AS filterto,';
 			theQuery += 'filtertext, filterbeq, filterseq FROM processfilters WHERE process = ?';
+			this.db.query( theQuery, id, ( err, rows, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( rows );
+				}
+			} );
+		} );
+	};
+	public fetchFiltersDataFile = ( id: number ) => {
+		return new Promise(( resolve, reject ) => {
+			let theQuery: string; theQuery = '';
+			theQuery += 'SELECT id, process, stream, field,';
+			theQuery += 'DATE_FORMAT(filterfrom, \'%Y-%m-%d\') AS filterfrom,';
+			theQuery += 'DATE_FORMAT(filterto, \'%Y-%m-%d\') AS filterto,';
+			theQuery += 'filtertext, filterbeq, filterseq FROM processfiltersdatafile WHERE process = ?';
 			this.db.query( theQuery, id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -481,6 +551,7 @@ export class ProcessTools {
 							isReady: [],
 							curStep: 0,
 							filters: [],
+							filtersDataFile: [],
 							wherers: [],
 							wherersWithSrc: [],
 							pullResult: [],
@@ -881,7 +952,7 @@ export class ProcessTools {
 					refProcess.CRSTBLDescribedFields = [];
 
 					refProcess.sourceStreamFields.forEach(( curField: any ) => {
-						if ( curField.isCrossTab === 0 && curField.isData === 0 && curField.shouldIgnore === 0 ) {
+						if ( !curField.isCrossTab && !curField.isData && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
 							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'string' ) {
 								createQuery += ', SRC_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -915,7 +986,7 @@ export class ProcessTools {
 					} );
 
 					refProcess.targetStreamFields.forEach(( curField ) => {
-						if ( !curField.isCrossTab && !curField.shouldIgnore ) {
+						if ( !curField.isCrossTab && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
 							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'string' ) {
 								createQuery += ', TAR_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -950,10 +1021,15 @@ export class ProcessTools {
 					let cartesianFields: any[]; cartesianFields = [];
 					refProcess.sourceStreamFields.forEach(( curField ) => {
 						if ( curField.isCrossTab ) {
-							promises.push( this.getDataTableDistinctFields( refProcess, curField, 'source', false, refStep ) );
+							promises.push( this.getDataTableDistinctFields( refProcess, curField, 'source', false, refStep, true ) );
 							cartesianFields.push( { name: curField.name, srctar: 'source' } );
 						}
 					} );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( cartesianFields );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
 
 					Promise.all( promises ).then(( ctFields ) => {
 						let cartesianArray: any[]; cartesianArray = [];
@@ -1087,7 +1163,7 @@ export class ProcessTools {
 			curItem.split( '-|-' ).forEach(( curWhere: any ) => {
 				updateWherers.push( curWhere );
 			} );
-			this.logTool.appendLog( refProcess.status, 'Step - Send Data: ' + updateQuery ).catch( issue => { console.log( issue ); } );
+			// this.logTool.appendLog( refProcess.status, 'Step - Send Data: ' + updateQuery ).catch( issue => { console.log( issue ); } );
 			this.db.query( updateQuery, updateWherers, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -1285,7 +1361,7 @@ export class ProcessTools {
 					stepDetails.variables.forEach(( curVariable: any ) => {
 						promises.push( new Promise(( iResolve, iReject ) => {
 							if ( curVariable.valuetype !== 'manualvalue' ) {
-								this.getDataTableDistinctFields( refProcess, { name: curVariable.dimension }, 'target', curVariable.valuetype === 'filteredvalues', refStep ).
+								this.getDataTableDistinctFields( refProcess, { name: curVariable.dimension }, 'target', curVariable.valuetype === 'filteredvalues', refStep, false ).
 									then(( currentDistinctList: any ) => {
 										currentDistinctList.name = curVariable.name;
 										iResolve( currentDistinctList );
@@ -1328,7 +1404,7 @@ export class ProcessTools {
 				catch( reject );
 		} );
 	};
-	private getDataTableDistinctFields = ( refProcess: DimeProcessRunning, curField: any, srctar: string, shouldFilter: boolean, refStep: DimeProcessStepRunning ) => {
+	private getDataTableDistinctFields = ( refProcess: DimeProcessRunning, curField: any, srctar: string, shouldFilter: boolean, refStep: DimeProcessStepRunning, isForDataFile: boolean ) => {
 		return new Promise(( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Run Target Procedure: Getting distinct values for field - ' + curField.name + '.' ).
 				then(() => {
@@ -1337,8 +1413,17 @@ export class ProcessTools {
 					if ( srctar === 'target' ) { selector = 'TAR_'; }
 					let wherers: string[]; wherers = [];
 					let wherePart: string; wherePart = '';
-					if ( shouldFilter ) {
-						refProcess.filters.forEach(( curFilter ) => {
+					if ( shouldFilter || isForDataFile ) {
+						let curFilterList: any[];
+						if ( isForDataFile ) {
+							curFilterList = refProcess.filtersDataFile;
+						} else {
+							curFilterList = refProcess.filters;
+						}
+						// console.log( '>>>>>>>>>>>>>>>>' );
+						// console.log( curFilterList );
+						// console.log( '>>>>>>>>>>>>>>>>' );
+						curFilterList.forEach(( curFilter ) => {
 							refProcess.sourceStreamFields.forEach(( theField: any ) => {
 								if ( theField.id === curFilter.field ) { curFilter.fieldName = theField.name; }
 							} );
@@ -1355,7 +1440,7 @@ export class ProcessTools {
 					selector += curField.name;
 					const selectQuery = 'SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
 					// console.log(curField);
-					// console.log(selectQuery);
+					// console.log( '>>>>', isForDataFile, '>>>>>', selectQuery );
 					this.db.query( selectQuery, ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
@@ -2162,6 +2247,11 @@ export class ProcessTools {
 					this.db.query( clearQuery, ( err, result, fields ) => {
 						if ( err ) {
 							reject( err );
+							console.log( '===========================================' );
+							console.log( '===========================================' );
+							console.log( clearQuery );
+							console.log( '===========================================' );
+							console.log( '===========================================' );
 						} else {
 							resolve( refProcess );
 						}
@@ -2189,6 +2279,20 @@ export class ProcessTools {
 					} );
 					refProcess.wherers.forEach(( curWherer ) => {
 						refProcess.wherersWithSrc.push( 'SRC_' + curWherer );
+					} );
+					return this.fetchFiltersDataFile( refProcess.id );
+				} ).
+				then(( filters: any[] ) => {
+					refProcess.filtersDataFile = filters;
+					refProcess.filtersDataFile.forEach(( curFilter ) => {
+						refProcess.sourceStreamFields.forEach(( curField ) => {
+							if ( curField.id === curFilter.field ) { curFilter.fieldName = curField.name; }
+						} );
+						// if ( curFilter.filterfrom ) { refProcess.wherers.push( curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
+						// if ( curFilter.filterto ) { refProcess.wherers.push( curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
+						// if ( curFilter.filtertext ) { refProcess.wherers.push( curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
+						// if ( curFilter.filterbeq ) { refProcess.wherers.push( curFilter.fieldName + '>=' + curFilter.filterbeq ); }
+						// if ( curFilter.filterseq ) { refProcess.wherers.push( curFilter.fieldName + '<=' + curFilter.filterseq ); }
 					} );
 					resolve( refProcess );
 				} ).
@@ -2299,7 +2403,7 @@ export class ProcessTools {
 				} else if ( curField.type === 'date' ) {
 					createQuery += ', SRC_' + curField.name + ' DATETIME';
 				}
-				if ( !curField.isCrossTab ) {
+				if ( !curField.isData ) {
 					createQuery += ', INDEX (SRC_' + curField.name + ')';
 				}
 			} );
@@ -2313,7 +2417,7 @@ export class ProcessTools {
 				} else if ( curField.type === 'date' ) {
 					createQuery += ', TAR_' + curField.name + ' DATETIME';
 				}
-				if ( !curField.isCrossTab ) {
+				if ( !curField.isData ) {
 					createQuery += ', INDEX (TAR_' + curField.name + ')';
 				}
 			} );
@@ -2370,6 +2474,7 @@ export class ProcessTools {
 		return new Promise(( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Checking if process is ready to be run.' );
 			const systemDBname = this.tools.config.mysql.db;
+			// tslint:disable-next-line:max-line-length
 			this.db.query( 'SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?', [systemDBname, 'PROCESS' + refProcess.id + '_%'], ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
