@@ -430,13 +430,13 @@ export class PBCSTools {
 						toPopulate.headers.push( curTuple[curSparseField] );
 					}
 				} );
-				denseFields.forEach(( curDenseField: string ) => {
-					if ( curTuple[curDenseField] ) {
-						toPopulate.data.push( curTuple[curDenseField] );
-					} else {
-						toPopulate.data.push( '#missing' );
-					}
-				} );
+				// denseFields.forEach(( curDenseField: string ) => {
+				// 	if ( curTuple[curDenseField] ) {
+				// 		toPopulate.data.push( curTuple[curDenseField] );
+				// 	} else {
+				// 		toPopulate.data.push( '#missing' );
+				// 	}
+				// } );
 				rows.push( toPopulate );
 			} );
 			let rowsHowMany: number; rowsHowMany = 5000;
