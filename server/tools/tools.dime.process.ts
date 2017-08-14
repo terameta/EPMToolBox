@@ -1724,6 +1724,9 @@ export class ProcessTools {
 						for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
 							sparseDims.push( refProcess.targetStreamFields[i].name );
 						}
+						finalData.forEach(( curTuple: any ) => {
+							console.log( curTuple );
+						} );
 						this.environmentTool.writeData( {
 							id: refProcess.targetStream.environment,
 							data: finalData,
