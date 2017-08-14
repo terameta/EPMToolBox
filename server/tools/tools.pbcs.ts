@@ -476,10 +476,10 @@ export class PBCSTools {
 									// console.log( '>>>', body );
 									console.log( '===========================================' );
 									console.log( '===========================================' );
-									console.log( toSend );
+									console.log( JSON.stringify( toSend ) );
 									console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 									console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-									console.log( body );
+									console.log( JSON.stringify( body ) );
 									console.log( '===========================================' );
 									console.log( '===========================================' );
 									if ( rows.length > 0 ) {
