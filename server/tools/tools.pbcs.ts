@@ -473,7 +473,12 @@ export class PBCSTools {
 						} else {
 							this.tools.parseJsonString( body ).
 								then(( result: any ) => {
-									console.log( '>>>', body );
+									// console.log( '>>>', body );
+									console.log( '===========================================' );
+									console.log( '===========================================' );
+									console.log( toSend );
+									console.log( '===========================================' );
+									console.log( '===========================================' );
 									if ( rows.length > 0 ) {
 										toLog += '>>>>>>>>>>>>>>>>>>>\n';
 										toLog += JSON.stringify( body );
