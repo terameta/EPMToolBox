@@ -1665,7 +1665,7 @@ export class ProcessTools {
 							let concaters: string[]; concaters = [];
 							rows.forEach(( curTuple: any ) => {
 								if ( curTuple[denseField] !== 'ignore' && curTuple[denseField] !== 'ignore:ignore' && curTuple[denseField] !== 'ignore::ignore' && curTuple[denseField] !== 'missing' ) {
-									concaters.push( 'GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE \'missing\' END)) AS \'' + curTuple[denseField] + '\'' );
+									concaters.push( 'IFNULL(GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)), \'missing\') AS \'' + curTuple[denseField] + '\'' );
 								}
 							} );
 							// console.log( selecters );
@@ -1684,16 +1684,24 @@ export class ProcessTools {
 								wherers.push( curField + ' <> \'missing\'' );
 								wherers.push( curField + ' <> \'ignore\'' );
 								wherers.push( curField + ' <> \'ignore:ignore\'' );
+								wherers.push( curField + ' IS NOT NULL' );
 							} );
 							wherers.push( 'SUMMARIZEDRESULT <> 0' );
 							wherers.push( 'SUMMARIZEDRESULT IS NOT NULL' );
 							sQuery += wherers.join( ' AND ' );
 							sQuery += ' GROUP BY ' + selecters.join( ', ' );
-							console.log( sQuery );
+							// console.log(sQuery);
 							this.db.query( sQuery, ( serr, srows, sfields ) => {
 								if ( serr ) {
 									reject( serr );
 								} else {
+									// srows.forEach((curRow: any) => {
+									// 	rows.forEach(( curDenseRow: any ) => {
+									// 		if ( !curRow[curDenseRow[denseField]] ) {
+
+									// 		}
+									// 	} );
+									// } );
 									resolve( srows );
 								}
 							} );
