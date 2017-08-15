@@ -1724,12 +1724,6 @@ export class ProcessTools {
 						for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
 							sparseDims.push( refProcess.targetStreamFields[i].name );
 						}
-						finalData = finalData.splice( 5 );
-						console.log( '===========================================' );
-						console.log( '===========================================' );
-						console.log( JSON.stringify( finalData, null, 2 ) );
-						console.log( '===========================================' );
-						console.log( '===========================================' );
 						this.environmentTool.writeData( {
 							id: refProcess.targetStream.environment,
 							data: finalData,

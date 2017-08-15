@@ -425,11 +425,6 @@ export class PBCSTools {
 				toPopulate = {};
 				toPopulate.headers = [];
 				toPopulate.data = [];
-				// Object.keys( curTuple ).forEach(( curSparseField: string, curKey: number ) => {
-				// 	if ( curKey < numberOfSparseDimensions ) {
-				// 		toPopulate.headers.push( curTuple[curSparseField] );
-				// 	}
-				// } );
 				refObj.sparseDims.forEach(( curSparseField: string ) => {
 					if ( curTuple[curSparseField] ) {
 						toPopulate.headers.push( curTuple[curSparseField] );
@@ -454,11 +449,6 @@ export class PBCSTools {
 			if ( rowsHowMany < 1 ) {
 				rowsHowMany = 1;
 			}
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( JSON.stringify( rows, null, 2 ) );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
 			this.writeDataAction( refObj, toSend, rows, rowsHowMany, '' ).then( resolve ).catch( reject );
 		} );
 	};
