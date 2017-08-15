@@ -493,7 +493,7 @@ export class PBCSTools {
 								catch(( issue ) => {
 									console.log( '???', issue );
 									toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
-									toLog.detail.push( JSON.stringify( issue );
+									toLog.detail.push( JSON.stringify( issue ) );
 									toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
 									toLog.detail.push( JSON.stringify( body ) );
 									toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
