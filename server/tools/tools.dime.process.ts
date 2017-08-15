@@ -1665,7 +1665,7 @@ export class ProcessTools {
 							let concaters: string[]; concaters = [];
 							rows.forEach(( curTuple: any ) => {
 								if ( curTuple[denseField] !== 'ignore' && curTuple[denseField] !== 'ignore:ignore' && curTuple[denseField] !== 'ignore::ignore' && curTuple[denseField] !== 'missing' ) {
-									concaters.push( 'IFNULL(GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)), \'#missing\') AS \'' + curTuple[denseField] + '\'' );
+									concaters.push( 'GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)) AS \'' + curTuple[denseField] + '\'' );
 								}
 							} );
 							// console.log( selecters );
