@@ -449,10 +449,10 @@ export class PBCSTools {
 			if ( rowsHowMany < 1 ) {
 				rowsHowMany = 1;
 			}
-			this.writeDataAction( refObj, toSend, rows, rowsHowMany, '' ).then( resolve ).catch( reject );
+			this.writeDataAction( refObj, toSend, rows, rowsHowMany, { numAcceptedCells: 0, numRejectedCells: 0, rejectedCells: [], detail: [] } ).then( resolve ).catch( reject );
 		} );
 	};
-	private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: string ) => {
+	private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: { numAcceptedCells: number, numRejectedCells: number, rejectedCells: any[], detail: any[] } ) => {
 		// console.log( rows );
 		// console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
 		return new Promise(( resolve, reject ) => {
@@ -477,23 +477,26 @@ export class PBCSTools {
 								then(( result: any ) => {
 									// console.log( '>>>', body );
 									if ( rows.length > 0 ) {
-										toLog += '>>>>>>>>>>>>>>>>>>>\n';
-										toLog += JSON.stringify( body );
+										if ( result.numAcceptedCells ) { toLog.numAcceptedCells += result.numAcceptedCells; }
+										if ( result.numRejectedCells ) { toLog.numRejectedCells += result.numRejectedCells; }
+										if ( result.rejectedCells ) { toLog.rejectedCells.push( result.rejectedCells ); }
+										if ( result.detail ) { toLog.detail.push( result.detail ); }
 										this.writeDataAction( refObj, toSend, rows, howMany, toLog ).then( resolve ).catch( reject );
 									} else {
-										toLog += '>>>>>>>>>>>>>>>>>>>\n';
-										toLog += JSON.stringify( body );
-										toLog += '>>>>>>>>>>>>>>>>>>>\n';
+										if ( result.numAcceptedCells ) { toLog.numAcceptedCells += result.numAcceptedCells; }
+										if ( result.numRejectedCells ) { toLog.numRejectedCells += result.numRejectedCells; }
+										if ( result.rejectedCells ) { toLog.rejectedCells.push( result.rejectedCells ); }
+										if ( result.detail ) { toLog.detail.push( result.detail ); }
 										resolve( toLog );
 									}
 								} ).
 								catch(( issue ) => {
 									console.log( '???', issue );
-									toLog += '>>>>>>>>>>>>>>>>>>>\n';
-									toLog += JSON.stringify( issue );
-									toLog += '>>>>>>>>>>>>>>>>>>>\n';
-									toLog += JSON.stringify( body );
-									toLog += '>>>>>>>>>>>>>>>>>>>\n';
+									toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
+									toLog.detail.push( JSON.stringify( issue );
+									toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
+									toLog.detail.push( JSON.stringify( body ) );
+									toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
 									reject( toLog );
 								} );
 						}
