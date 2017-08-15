@@ -425,9 +425,16 @@ export class PBCSTools {
 				toPopulate = {};
 				toPopulate.headers = [];
 				toPopulate.data = [];
-				Object.keys( curTuple ).forEach(( curSparseField: string, curKey: number ) => {
-					if ( curKey < numberOfSparseDimensions ) {
+				// Object.keys( curTuple ).forEach(( curSparseField: string, curKey: number ) => {
+				// 	if ( curKey < numberOfSparseDimensions ) {
+				// 		toPopulate.headers.push( curTuple[curSparseField] );
+				// 	}
+				// } );
+				refObj.sparseDims.forEach(( curSparseField: string ) => {
+					if ( curTuple[curSparseField] ) {
 						toPopulate.headers.push( curTuple[curSparseField] );
+					} else {
+						toPopulate.headers.push( 'missing' );
 					}
 				} );
 				denseFields.forEach(( curDenseField: string ) => {
