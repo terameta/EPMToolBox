@@ -430,13 +430,13 @@ export class PBCSTools {
 						toPopulate.headers.push( curTuple[curSparseField] );
 					}
 				} );
-				// denseFields.forEach(( curDenseField: string ) => {
-				// 	if ( curTuple[curDenseField] ) {
-				// 		toPopulate.data.push( curTuple[curDenseField] );
-				// 	} else {
-				// 		toPopulate.data.push( '#missing' );
-				// 	}
-				// } );
+				denseFields.forEach(( curDenseField: string ) => {
+					if ( curTuple[curDenseField] ) {
+						toPopulate.data.push( curTuple[curDenseField] );
+					} else {
+						toPopulate.data.push( '#missing' );
+					}
+				} );
 				rows.push( toPopulate );
 			} );
 			let rowsHowMany: number; rowsHowMany = 5000;
@@ -447,6 +447,11 @@ export class PBCSTools {
 			if ( rowsHowMany < 1 ) {
 				rowsHowMany = 1;
 			}
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( JSON.stringify( rows, null, 2 ) );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
 			this.writeDataAction( refObj, toSend, rows, rowsHowMany, '' ).then( resolve ).catch( reject );
 		} );
 	};
@@ -474,14 +479,6 @@ export class PBCSTools {
 							this.tools.parseJsonString( body ).
 								then(( result: any ) => {
 									// console.log( '>>>', body );
-									console.log( '===========================================' );
-									console.log( '===========================================' );
-									console.log( JSON.stringify( toSend ) );
-									console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-									console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-									console.log( JSON.stringify( body ) );
-									console.log( '===========================================' );
-									console.log( '===========================================' );
 									if ( rows.length > 0 ) {
 										toLog += '>>>>>>>>>>>>>>>>>>>\n';
 										toLog += JSON.stringify( body );
