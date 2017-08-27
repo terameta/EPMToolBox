@@ -17,16 +17,17 @@ export class MSSQLTools {
 				user: refObj.username || '',
 				password: refObj.password || '',
 				server: refObj.server || '',
-				connectionTimeout: 300000,
-				requestTimeout: 300000,
+				connectionTimeout: 60000,
+				requestTimeout: 60000,
 			};
 			if ( refObj.port ) { dbConfig.port = refObj.port };
 			if ( refObj.database ) { dbConfig.database = refObj.database };
 			if ( refObj.server ) {
 				if ( refObj.server.split( '\\' ).length === 2 ) {
 					dbConfig.server = refObj.server.split( '\\' )[0];
-					dbConfig.options = {};
-					dbConfig.options.instanceName = refObj.server.split( '\\' )[1];
+					dbConfig.dialectOptions = {};
+					dbConfig.dialect = 'mssql';
+					dbConfig.dialectOptions.instanceName = refObj.server.split( '\\' )[1];
 				}
 			}
 			console.log( '===========================================' );
