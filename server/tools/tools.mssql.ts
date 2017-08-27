@@ -17,8 +17,8 @@ export class MSSQLTools {
 				user: refObj.username || '',
 				password: refObj.password || '',
 				server: refObj.server || '',
-				connectionTimeout: 60000,
-				requestTimeout: 60000,
+				connectionTimeout: 300000,
+				requestTimeout: 300000,
 			};
 			if ( refObj.port ) { dbConfig.port = refObj.port };
 			if ( refObj.database ) { dbConfig.database = refObj.database };
