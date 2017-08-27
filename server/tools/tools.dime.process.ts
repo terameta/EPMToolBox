@@ -1113,14 +1113,6 @@ export class ProcessTools {
 	};
 	private sendDataPopulateDataColumnsAction = ( refProcess: DimeProcessRunning, refDefinitions: any ) => {
 		const curItem = refDefinitions.cartesianTemp.shift();
-		console.log( '===========================================' );
-		console.log( '===========================================' );
-		console.log( refDefinitions.cartesionTemp );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
-		console.log( curItem );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
 		return new Promise(( resolve, reject ) => {
 			let updateWherers: string[]; updateWherers = [];
 			let updateQuery: string; updateQuery = 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ';
