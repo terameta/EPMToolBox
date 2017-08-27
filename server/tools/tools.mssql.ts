@@ -30,11 +30,6 @@ export class MSSQLTools {
 					dbConfig.dialectOptions.instanceName = refObj.server.split( '\\' )[1];
 				}
 			}
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( dbConfig );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
 			refObj.connection = new mssql.ConnectionPool( dbConfig, ( err ) => {
 				if ( err ) {
 					reject( err );
