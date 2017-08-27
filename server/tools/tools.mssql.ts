@@ -22,6 +22,13 @@ export class MSSQLTools {
 			};
 			if ( refObj.port ) { dbConfig.port = refObj.port };
 			if ( refObj.database ) { dbConfig.database = refObj.database };
+			if ( refObj.server ) {
+				if ( refObj.server.split( '\\' ).length === 2 ) {
+					dbConfig.server = refObj.server.split( '\\' )[0];
+					dbConfig.options = {};
+					dbConfig.options.instanceName = refObj.server.split( '\\' )[1];
+				}
+			}
 			console.log( '===========================================' );
 			console.log( '===========================================' );
 			console.log( dbConfig );
