@@ -42,5 +42,6 @@
 	"html.format.endWithNewline": true,
 	"html.suggest.angular1": false,
 	"html.format.enable": false,
-	"editor.minimap.enabled": false
+	"editor.minimap.enabled": false,
+	"emmet.triggerExpansionOnTab": true
 }
