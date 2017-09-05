@@ -1,5 +1,5 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 import { AuthHttp } from 'angular2-jwt';
 import { Headers, Http } from '@angular/http';
 import { BehaviorSubject, Observable } from 'rxjs/Rx';

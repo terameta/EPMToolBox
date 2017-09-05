@@ -4,7 +4,7 @@ import { AuthService } from '../../welcome/auth.service';
 
 import { Component, OnInit } from '@angular/core';
 import { AuthHttp } from 'angular2-jwt';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component( {
 	selector: 'app-enduser-dime',

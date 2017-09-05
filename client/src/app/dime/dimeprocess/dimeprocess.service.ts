@@ -2,7 +2,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs/Rx';
 import 'rxjs/Rx';
 import { Observable } from 'rxjs/Observable';

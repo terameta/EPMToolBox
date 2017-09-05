@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/Rx';
 import { AuthHttp } from 'angular2-jwt';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
 import { DimeStream } from '../../../../../shared/model/dime/stream';

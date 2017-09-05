@@ -3,7 +3,7 @@ import { Http, Headers } from '@angular/http';
 import { Injectable } from '@angular/core';
 
 import { BehaviorSubject, Observable } from 'rxjs/Rx';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 import { AuthHttp } from 'angular2-jwt';
 
 import { DimeStreamService } from '../dimestream/dimestream.service';

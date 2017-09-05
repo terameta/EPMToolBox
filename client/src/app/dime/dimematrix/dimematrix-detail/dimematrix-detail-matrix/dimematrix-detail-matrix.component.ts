@@ -3,7 +3,7 @@ import { DimeMatrixService } from '../../dimematrix.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 import { HotTable } from 'ng2-handsontable';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component( {
 	selector: 'app-dimematrix-detail-matrix',

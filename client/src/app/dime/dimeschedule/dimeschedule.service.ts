@@ -4,7 +4,7 @@ import { Headers, Http, Response } from '@angular/http';
 
 import { AuthHttp } from 'angular2-jwt';
 import { BehaviorSubject, Observable } from 'rxjs/Rx';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 
 import { EnumToArray, SortByName } from '../../../../../shared/utilities/utilityFunctions';
 

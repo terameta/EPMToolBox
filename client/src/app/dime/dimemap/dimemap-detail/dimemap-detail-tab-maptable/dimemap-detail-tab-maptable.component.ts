@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import * as Handsontable from 'handsontable/dist/handsontable.full.js';
-import { ToastrService } from 'ngx-toastr/toastr/toastr-service';
+import { ToastrService } from 'ngx-toastr';
 
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMapService } from 'app/dime/dimemap/dimemap.service';
