@@ -581,6 +581,9 @@ export class MapTools {
 	}
 	public saveMapTuple = ( refObj: any ) => {
 		console.log( refObj );
+		Object.keys( refObj ).forEach( ( curKey ) => {
+			console.log( curKey );
+		} );
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE MAP' + refObj.mapid + '_MAPTBL SET ? WHERE id = ?', [refObj.tuple, refObj.tuple.id], ( err, result, fields ) => {
 				if ( err ) {
