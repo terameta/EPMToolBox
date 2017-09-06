@@ -581,7 +581,7 @@ export class MapTools {
 	}
 	public saveMapTuple = ( refObj: any ) => {
 		console.log( refObj );
-		Object.keys( refObj ).forEach( ( curKey ) => {
+		Object.keys( refObj.tuple ).forEach( ( curKey ) => {
 			console.log( curKey );
 		} );
 		return new Promise( ( resolve, reject ) => {
