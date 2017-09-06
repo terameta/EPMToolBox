@@ -28,7 +28,7 @@ export class MapTools {
 	}
 
 	public getAll = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM maps', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to get maps.' } );
@@ -39,7 +39,7 @@ export class MapTools {
 		} );
 	}
 	public getOne = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM maps WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to get map' } );
@@ -52,7 +52,7 @@ export class MapTools {
 		} );
 	}
 	public create = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let newMap: any = {};
 			newMap = { name: 'New Map' };
 			this.db.query( 'INSERT INTO maps SET ?', { name: 'New Map' }, ( err, rows, fields ) => {
@@ -66,7 +66,7 @@ export class MapTools {
 		} );
 	}
 	public update = ( dimeMap: DimeMap ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE maps SET ? WHERE id = ?', [dimeMap, dimeMap.id], ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the map.' } );
@@ -77,7 +77,7 @@ export class MapTools {
 		} );
 	}
 	public delete = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM maps WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to delete the map.' } );
@@ -88,7 +88,7 @@ export class MapTools {
 		} );
 	}
 	public getFields = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM mapfields WHERE map = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -99,7 +99,7 @@ export class MapTools {
 		} );
 	}
 	public setFields = ( refObj: { map: number, type: string, list: string[] } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'No information passed.' );
 			} else if ( !refObj.map ) {
@@ -119,7 +119,7 @@ export class MapTools {
 					} else {
 						let promises: any[];
 						promises = [];
-						refObj.list.forEach(( curField ) => {
+						refObj.list.forEach( ( curField ) => {
 							promises.push( this.setFieldsAction( refObj.map, curField, refObj.type ) );
 						} );
 						Promise.all( promises ).then( resolve ).catch( reject );
@@ -129,7 +129,7 @@ export class MapTools {
 		} );
 	}
 	private setFieldsAction = ( id: number, field: string, type: string ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO mapfields SET ?', { map: id, srctar: type, name: field }, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -140,15 +140,15 @@ export class MapTools {
 		} );
 	}
 	public prepare = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.prepareFields( id ).
-				then(( refObj: any ) => {
+				then( ( refObj: any ) => {
 					let createQueries: any;
 					createQueries = {};
 					createQueries.maptbl = 'CREATE TABLE MAP' + refObj.id + '_MAPTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 					createQueries.drops = [];
 					createQueries.drops.push( 'DROP TABLE IF EXISTS MAP' + refObj.id + '_MAPTBL' );
-					refObj.fields.forEach(( curField: any ) => {
+					refObj.fields.forEach( ( curField: any ) => {
 						let curPrefix = '';
 						let curFieldDef = '';
 						if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
@@ -207,12 +207,12 @@ export class MapTools {
 					refObj.queries = createQueries;
 					return refObj;
 				} ).
-				then(( refObj: any ) => {
-					return new Promise(( tResolve, tReject ) => {
+				then( ( refObj: any ) => {
+					return new Promise( ( tResolve, tReject ) => {
 						let promises: any[];
 						promises = [];
-						refObj.queries.drops.forEach(( curQuery: any ) => {
-							promises.push( new Promise(( iresolve, ireject ) => {
+						refObj.queries.drops.forEach( ( curQuery: any ) => {
+							promises.push( new Promise( ( iresolve, ireject ) => {
 								this.db.query( curQuery, function ( err, rows, fields ) {
 									if ( err ) {
 										ireject( err );
@@ -227,13 +227,13 @@ export class MapTools {
 						} ).catch( tReject );
 					} );
 				} ).
-				then(( refObj: any ) => {
-					return new Promise(( tResolve, tReject ) => {
+				then( ( refObj: any ) => {
+					return new Promise( ( tResolve, tReject ) => {
 						delete refObj.queries.drops;
 						let promises: any[];
 						promises = [];
-						Object.keys( refObj.queries ).forEach(( curQuery ) => {
-							promises.push( new Promise(( iresolve, ireject ) => {
+						Object.keys( refObj.queries ).forEach( ( curQuery ) => {
+							promises.push( new Promise( ( iresolve, ireject ) => {
 								this.db.query( refObj.queries[curQuery], function ( err, rows, fields ) {
 									if ( err ) {
 										ireject( err );
@@ -248,7 +248,7 @@ export class MapTools {
 						} ).catch( tReject );
 					} );
 				} ).
-				then(() => {
+				then( () => {
 					resolve( { result: 'OK' } );
 				} ).
 				catch( reject );
@@ -257,34 +257,34 @@ export class MapTools {
 	private prepareFields = ( id: number ) => {
 		let refObj: any;
 		refObj = {};
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.getOne( id ).
-				then(( curMap: DimeMap ) => {
+				then( ( curMap: DimeMap ) => {
 					refObj = curMap;
 					return this.streamTool.getOne( refObj.source );
 				} ).
-				then(( sourceStream: DimeStream ) => {
+				then( ( sourceStream: DimeStream ) => {
 					refObj.sourceDetails = sourceStream;
 					return this.streamTool.getOne( refObj.target );
 				} ).
-				then(( targetStream: DimeStream ) => {
+				then( ( targetStream: DimeStream ) => {
 					refObj.targetDetails = targetStream;
 					return this.streamTool.retrieveFields( refObj.source );
 				} ).
-				then(( sourceStreamFields ) => {
+				then( ( sourceStreamFields ) => {
 					refObj.sourceFields = sourceStreamFields;
 					return this.streamTool.retrieveFields( refObj.target );
 				} ).
-				then(( targetStreamFields ) => {
+				then( ( targetStreamFields ) => {
 					refObj.targetFields = targetStreamFields;
 					return this.getFields( refObj.id );
 				} ).
-				then(( mapFields ) => {
+				then( ( mapFields ) => {
 					refObj.mapFields = mapFields;
 					return this.streamTool.listTypes();
 				} ).
-				then(( streamTypes: any[] ) => {
-					streamTypes.forEach(( curType ) => {
+				then( ( streamTypes: any[] ) => {
+					streamTypes.forEach( ( curType ) => {
 						if ( curType.id === refObj.sourceDetails.type ) {
 							refObj.sourceDetails.typeName = curType.name;
 							refObj.sourceDetails.typeValue = curType.value;
@@ -296,23 +296,23 @@ export class MapTools {
 					} );
 					return refObj;
 				} ).
-				then(() => {
+				then( () => {
 					refObj.fields = [];
 					refObj.sourceFields.sort( this.fieldSort );
 					refObj.targetFields.sort( this.fieldSort );
-					refObj.sourceFields.forEach(( curField: any ) => {
+					refObj.sourceFields.forEach( ( curField: any ) => {
 						curField.srctar = 'source';
 						curField.environmentType = refObj.sourceDetails.typeValue;
 						refObj.fields.push( curField );
 					} );
-					refObj.targetFields.forEach(( curField: any ) => {
+					refObj.targetFields.forEach( ( curField: any ) => {
 						curField.srctar = 'target';
 						curField.environmentType = refObj.targetDetails.typeValue;
 						refObj.fields.push( curField );
 					} );
-					refObj.fields.forEach(( curField: any ) => {
+					refObj.fields.forEach( ( curField: any ) => {
 						curField.mappable = false;
-						refObj.mapFields.forEach(( curMapField: any ) => {
+						refObj.mapFields.forEach( ( curMapField: any ) => {
 							if ( curMapField.srctar === curField.srctar && curMapField.name === curField.name ) {
 								curField.mappable = true;
 							}
@@ -334,24 +334,24 @@ export class MapTools {
 		}
 	}
 	public isReady = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let maptblExists: boolean; maptblExists = false;
 			let descriptivetblExists: any; descriptivetblExists = {};
 			const systemDBName = this.tools.config.mysql.db;
 			this.prepareFields( id ).
-				then(( refObj: any ) => {
+				then( ( refObj: any ) => {
 					this.db.query( 'SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name LIKE ?', [systemDBName, 'MAP' + refObj.id + '_%'], ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
 						} else if ( rows.length === 0 ) {
 							resolve( { result: 'NO' } );
 						} else {
-							rows.forEach(( curTable: any ) => {
+							rows.forEach( ( curTable: any ) => {
 								if ( curTable.TABLE_NAME === 'MAP' + refObj.id + '_MAPTBL' ) { maptblExists = true; }
 							} );
 							let numSrcFields = 0;
 							let numTarFields = 0;
-							refObj.mapFields.forEach(( curField: any ) => {
+							refObj.mapFields.forEach( ( curField: any ) => {
 								if ( curField.srctar === 'source' ) { numSrcFields++; }
 								if ( curField.srctar === 'target' ) { numTarFields++; }
 							} )
@@ -367,9 +367,9 @@ export class MapTools {
 		} );
 	};
 	public rejectIfNotReady = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.isReady( id ).
-				then(( isReady: { result: string } ) => {
+				then( ( isReady: { result: string } ) => {
 					if ( isReady.result === 'YES' ) {
 						resolve( id );
 					} else {
@@ -384,16 +384,16 @@ export class MapTools {
 			then( this.retrieveMapDescriptions );
 	}
 	private retrieveMapDescriptions = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let promises: any[]; promises = [];
 			refObj.descriptions = {};
-			refObj.finalFields.forEach(( curField: any ) => {
+			refObj.finalFields.forEach( ( curField: any ) => {
 				if ( curField.type === 'description' && curField.srctar === 'target' ) {
 					promises.push( this.retrieveMapDescriptionsAction( refObj, curField ) );
 				}
 			} );
 			Promise.all( promises ).
-				then(() => {
+				then( () => {
 					// resolve( refObj );
 					resolve( refObj.map );
 				} ).
@@ -401,7 +401,7 @@ export class MapTools {
 		} );
 	};
 	private retrieveMapDescriptionsAction = ( refObj: any, curField: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM ' + curField.table + ' ORDER BY 1,2', ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -417,7 +417,7 @@ export class MapTools {
 	};
 	private retrieveMapDataAction = ( refObj: any ) => {
 		// console.log( refObj );
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let curMap: DimeMap; curMap = <DimeMap>{ id: 0, name: '' };
 			let mapFields: any[]; mapFields = [];
 			let finalFields: any[]; finalFields = [];
@@ -429,53 +429,53 @@ export class MapTools {
 			let targetEnvironment: DimeEnvironment; targetEnvironment = { id: 0 };
 
 			this.getOne( refObj.id ).
-				then(( theMap: DimeMap ) => {
+				then( ( theMap: DimeMap ) => {
 					curMap = theMap;
 					// console.log(new Date(), 'Received map');
 					return this.streamTool.retrieveFields( curMap.source || 0 );
 				} ).
-				then(( srcFields: DimeStreamField[] ) => {
+				then( ( srcFields: DimeStreamField[] ) => {
 					// console.log(new Date(), 'Received source fields');
 					sourceFields = srcFields;
 					return this.streamTool.retrieveFields( curMap.target || 0 );
 				} ).
-				then(( tarFields: DimeStreamField[] ) => {
+				then( ( tarFields: DimeStreamField[] ) => {
 					// console.log(new Date(), 'Received target fields');
 					targetFields = tarFields;
 					return this.streamTool.getOne( curMap.source || 0 );
 				} ).
-				then(( srcStream: DimeStream ) => {
+				then( ( srcStream: DimeStream ) => {
 					// console.log(new Date(), 'Received source stream');
 					sourceStream = srcStream;
 					return this.streamTool.getOne( curMap.target || 0 );
 				} ).
-				then(( tarStream: DimeStream ) => {
+				then( ( tarStream: DimeStream ) => {
 					// console.log(new Date(), 'Received target stream');
 					targetStream = tarStream;
 					return this.environmentTool.getEnvironmentDetails( { id: sourceStream.environment } ).then( this.environmentTool.getTypeDetails );
 				} ).
-				then(( srcEnvironment: DimeEnvironment ) => {
+				then( ( srcEnvironment: DimeEnvironment ) => {
 					// console.log(new Date(), 'Received source environment');
 					sourceEnvironment = srcEnvironment;
 					return this.environmentTool.getEnvironmentDetails( { id: targetStream.environment } ).then( this.environmentTool.getTypeDetails );
 				} ).
-				then(( tarEnvironment: DimeEnvironment ) => {
+				then( ( tarEnvironment: DimeEnvironment ) => {
 					// console.log(new Date(), 'Received target environment');
 					targetEnvironment = tarEnvironment;
 					return this.getFields( curMap.id );
 				} ).
-				then(( mapFieldList: any ) => {
+				then( ( mapFieldList: any ) => {
 					mapFields = mapFieldList;
 					return 'OK';
 				} ).
-				then(() => {
+				then( () => {
 					if ( sourceEnvironment.typedetails === undefined ) {
 						reject( 'Source environment details are not valid.' );
 					} else if ( !targetEnvironment.typedetails ) {
 						reject( 'Target environment details are not valid.' );
 					} else {
-						sourceFields.forEach(( curField ) => {
-							mapFields.forEach(( mapField ) => {
+						sourceFields.forEach( ( curField ) => {
+							mapFields.forEach( ( mapField ) => {
 								if ( sourceEnvironment.typedetails && mapField.srctar === 'source' && mapField.name === curField.name ) {
 									// console.log(curField.name, curField.isDescribed, sourceEnvironment.typedetails.value);
 									finalFields.push( {
@@ -487,8 +487,8 @@ export class MapTools {
 								}
 							} );
 						} );
-						targetFields.forEach(( curField ) => {
-							mapFields.forEach(( mapField ) => {
+						targetFields.forEach( ( curField ) => {
+							mapFields.forEach( ( mapField ) => {
 								if ( targetEnvironment.typedetails && mapField.srctar === 'target' && mapField.name === curField.name ) {
 									// console.log(curField.name, curField.isDescribed, targetEnvironment.typedetails.value);
 									finalFields.push( { id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL' } );
@@ -505,7 +505,7 @@ export class MapTools {
 						// });
 						let selectQuery: string; selectQuery = '';
 						selectQuery += 'SELECT MAP' + curMap.id + '_MAPTBL.id, ';
-						selectQuery += finalFields.map(( curField ) => {
+						selectQuery += finalFields.map( ( curField ) => {
 							let toReturn: string; toReturn = '\n\t';
 							if ( curField.type === 'main' ) {
 								toReturn += curField.table + '.';
@@ -521,7 +521,7 @@ export class MapTools {
 							return toReturn;
 						} ).join( ', ' );
 						selectQuery += '\n FROM MAP' + curMap.id + '_MAPTBL ';
-						finalFields.forEach(( curField ) => {
+						finalFields.forEach( ( curField ) => {
 							if ( curField.type === 'description' ) {
 								selectQuery += '\n\t' + 'LEFT JOIN ';
 								selectQuery += curField.table;
@@ -535,7 +535,7 @@ export class MapTools {
 						selectQuery = 'SELECT * FROM (' + selectQuery + ') FSQMAPDESCRIBED WHERE 1 = 1';
 						let wherers: string[]; wherers = [];
 						let wherevals: any[]; wherevals = [];
-						Object.keys( refObj.filters ).forEach(( curFilter ) => {
+						Object.keys( refObj.filters ).forEach( ( curFilter ) => {
 							let filterText: string; filterText = curFilter;
 							if ( refObj.filters[curFilter].type === 'Exact Match' ) {
 								filterText += ' = ?';
@@ -553,7 +553,7 @@ export class MapTools {
 							wherers.push( filterText );
 
 						} );
-						wherers.forEach(( curWhere: string ) => {
+						wherers.forEach( ( curWhere: string ) => {
 							selectQuery += '\n\tAND ';
 							selectQuery += curWhere;
 						} );
@@ -580,7 +580,8 @@ export class MapTools {
 		} );
 	}
 	public saveMapTuple = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		console.log( refObj );
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE MAP' + refObj.mapid + '_MAPTBL SET ? WHERE id = ?', [refObj.tuple, refObj.tuple.id], ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -630,7 +631,7 @@ export class MapTools {
 
 	};*/
 	public mapImport = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			// console.log( refObj );
 			if ( !refObj ) {
 				reject( 'No data is provided' );
@@ -652,11 +653,11 @@ export class MapTools {
 				let toInsert: any[];
 				workbook.xlsx.read( myReadableStreamBuffer ).
 					then( this.mapImportGetExcelData ).
-					then(( tuples: any[] ) => {
+					then( ( tuples: any[] ) => {
 						toInsert = tuples;
 						return this.clearMapTable( refObj.body.id );
 					} ).
-					then(() => {
+					then( () => {
 						return this.populateMapTable( refObj.body.id, toInsert );
 					} ).
 					then( resolve ).
@@ -665,7 +666,7 @@ export class MapTools {
 		} );
 	};
 	public mapImportGetExcelData = ( workbook: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const colHeaders: string[] = [];
 			const colTypes: number[] = [];
 			const tuples: any[] = [];
@@ -676,19 +677,19 @@ export class MapTools {
 			} else if ( workbook.worksheets[0].rowCount < 3 ) {
 				reject( 'System is expecting at least 3 rows in the excel sheet. Wrong number of rows are received.' );
 			} else {
-				workbook.eachSheet(( worksheet: any, sheetId: any ) => {
-					worksheet.eachRow(( row: any, rowNumber: number ) => {
+				workbook.eachSheet( ( worksheet: any, sheetId: any ) => {
+					worksheet.eachRow( ( row: any, rowNumber: number ) => {
 						curTuple = {};
 						if ( rowNumber === 1 ) {
-							row.eachCell(( cell: any, colNumber: number ) => {
+							row.eachCell( ( cell: any, colNumber: number ) => {
 								colHeaders.push( cell.value );
 							} );
 						} else if ( rowNumber === 2 ) {
-							row.eachCell(( cell: any, colNumber: number ) => {
+							row.eachCell( ( cell: any, colNumber: number ) => {
 								colTypes.push( cell.value );
 							} );
 						} else {
-							row.eachCell(( cell: any, colNumber: number ) => {
+							row.eachCell( ( cell: any, colNumber: number ) => {
 								curIndex = colNumber - 1;
 								if ( colTypes[curIndex] === 2 ) {
 									curTuple[colHeaders[curIndex]] = cell.value;
@@ -707,7 +708,7 @@ export class MapTools {
 		} );
 	};
 	public clearMapTable = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'TRUNCATE MAP' + id + '_MAPTBL', ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -718,12 +719,12 @@ export class MapTools {
 		} );
 	};
 	public populateMapTable = ( id: number, tuples: any[] ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const curKeys = Object.keys( tuples[0] );
 			let curArray: any[];
-			tuples.forEach(( curResult, curItem ) => {
+			tuples.forEach( ( curResult, curItem ) => {
 				curArray = [];
-				curKeys.forEach(( curKey ) => {
+				curKeys.forEach( ( curKey ) => {
 					curArray.push( curResult[curKey] );
 				} );
 				tuples[curItem] = curArray;
@@ -738,15 +739,15 @@ export class MapTools {
 		} );
 	};
 	public mapExport = ( refObj: { id: number, requser: any, res: any } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.getOne( refObj.id ).
-				then(( curMap: any ) => {
+				then( ( curMap: any ) => {
 					curMap.filters = {};
 					return curMap;
 				} ).
 				then( this.retrieveMapDataAction ).
 				then( this.mapExportConvertToExcel ).
-				then(( theStreamBuffer ) => {
+				then( ( theStreamBuffer ) => {
 					return this.mapExportSendToUser( theStreamBuffer, refObj.requser, refObj.res );
 				} ).
 				then( resolve ).
@@ -754,7 +755,7 @@ export class MapTools {
 		} );
 	};
 	private mapExportConvertToExcel = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 
 			let workbook: any; workbook = new excel.Workbook();
 			workbook.creator = 'EPM ToolBox';
@@ -774,7 +775,7 @@ export class MapTools {
 				let curSuffix = '';
 				let curColumn = '';
 				let curIdentifier = 0;
-				refObj.finalFields.forEach(( curField: any ) => {
+				refObj.finalFields.forEach( ( curField: any ) => {
 					curPrefix = '';
 					curSuffix = '';
 					curColumn = '';
@@ -799,7 +800,7 @@ export class MapTools {
 		} );
 	};
 	private mapExportSendToUser = ( refBook: any, refUser: any, response: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			// resolve( refBuffer.getContents() );
 			// response.setHeader( 'Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
 			// response.setHeader( 'Content-Type', 'application/vnd.ms-excel' );
@@ -816,7 +817,7 @@ export class MapTools {
 
 
 
-			refBook.xlsx.write( response ).then(( result: any ) => {
+			refBook.xlsx.write( response ).then( ( result: any ) => {
 				response.end();
 				resolve();
 			} ).catch( reject );
