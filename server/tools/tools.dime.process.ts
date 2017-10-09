@@ -2149,7 +2149,7 @@ export class ProcessTools {
 					async.eachOfSeries(
 						defaults,
 						( item, key, callback ) => {
-							console.log( '>>>>>>>>>>>>>>>>>>', item, key );
+							console.log( '>>>>>>>>>>>>>>>>>>', item, key, callback );
 							callback( '3932' );
 						}, ( thehede ) => {
 							console.log( thehede );
