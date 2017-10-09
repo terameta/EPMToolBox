@@ -2143,22 +2143,22 @@ export class ProcessTools {
 					return Promise.all( promises );*/
 					async.eachOfSeries(
 						defaults,
-						(item, key, callback) => {
-							console.log( item , key);
+						( item, key, callback ) => {
+							console.log( '>>>>>>>>>>>>>>>>>>', item, key );
 						}, ( thehede ) => {
 							console.log( thehede );
 						}
 					);
-					async.eachOfSeries(
-						defaults,
-						( item, key, callback ) => {
-							this.assignDefault( item ).then( callback );
-						},
-						() => {
-							console.log( 'This looks like all completed' );
-							resolve( refProcess );
-						}
-					);
+					// async.eachOfSeries(
+					// 	defaults,
+					// 	( item, key, callback ) => {
+					// 		this.assignDefault( item ).then( callback );
+					// 	},
+					// 	() => {
+					// 		console.log( 'This looks like all completed' );
+					// 		resolve( refProcess );
+					// 	}
+					// );
 				} ).
 				catch( reject );
 		} );
