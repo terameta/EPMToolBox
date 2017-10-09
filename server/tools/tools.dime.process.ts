@@ -2147,12 +2147,10 @@ export class ProcessTools {
 							this.assignDefault( item ).then( callback );
 						},
 						() => {
-							return Promise.resolve( '' );
+							console.log( 'This looks like all completed' );
+							resolve( refProcess );
 						}
 					);
-				} ).
-				then( () => {
-					resolve( refProcess );
 				} ).
 				catch( reject );
 		} );
