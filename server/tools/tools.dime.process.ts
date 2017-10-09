@@ -2136,16 +2136,6 @@ export class ProcessTools {
 					return this.fetchDefaults( refProcess.id );
 				} ).
 				then( ( defaults: DimeProcessDefaultTarget[] ) => {
-					/*let promises: any[]; promises = [];
-					defaults.forEach(( curDefault ) => {
-						promises.push( this.assignDefault( curDefault ) );
-					} );
-					return Promise.all( promises );*/
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( defaults );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
 					async.eachOfSeries(
 						defaults,
 						( item, key, callback ) => {
@@ -2155,7 +2145,6 @@ export class ProcessTools {
 							if ( err ) {
 								reject( err );
 							} else {
-								console.log( 'This looks like all completed' );
 								resolve( refProcess );
 							}
 						}
@@ -2166,13 +2155,10 @@ export class ProcessTools {
 	}
 	private assignDefault = ( curDefault: DimeProcessDefaultTarget ) => {
 		return new Promise( ( resolve, reject ) => {
-			console.log( 'Assigning default:', curDefault );
 			this.db.query( 'UPDATE PROCESS' + curDefault.process + '_DATATBL SET ?? = ?', ['TAR_' + curDefault.field, curDefault.value], ( err, result, fields ) => {
 				if ( err ) {
-					console.log( 'Assign default bad:', curDefault );
 					reject( err );
 				} else {
-					console.log( 'Assign default good:', curDefault );
 					resolve( 'OK' );
 				}
 			} );
