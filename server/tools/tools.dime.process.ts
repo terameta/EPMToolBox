@@ -2149,22 +2149,17 @@ export class ProcessTools {
 					async.eachOfSeries(
 						defaults,
 						( item, key, callback ) => {
-							console.log( '>>>>>>>>>>>>>>>>>>', item, key, callback );
-							callback();
-						}, ( thehede ) => {
-							console.log( thehede );
+							this.assignDefault( item ).then( () => { callback(); } ).catch( callback );
+						},
+						( err ) => {
+							if ( err ) {
+								reject( err );
+							} else {
+								console.log( 'This looks like all completed' );
+								resolve( refProcess );
+							}
 						}
 					);
-					// async.eachOfSeries(
-					// 	defaults,
-					// 	( item, key, callback ) => {
-					// 		this.assignDefault( item ).then( callback );
-					// 	},
-					// 	() => {
-					// 		console.log( 'This looks like all completed' );
-					// 		resolve( refProcess );
-					// 	}
-					// );
 				} ).
 				catch( reject );
 		} );
