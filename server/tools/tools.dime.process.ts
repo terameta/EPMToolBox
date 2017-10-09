@@ -1,34 +1,29 @@
 // import { ReadWriteStream } from 'NodeJS';
 // import { Stream, Writable, Readable, Duplex } from 'stream';
-import { IPool } from 'mysql';
 import * as async from 'async';
-const excel = require( 'exceljs' );
-const streamBuffers = require( 'stream-buffers' );
-import * as exceltypes from 'exceljs';
+import { IPool } from 'mysql';
 
-import { MainTools } from './tools.main';
-import { SettingsTool } from './tools.settings';
-import { MailTool } from './tools.mailer';
-
+import { DimeEnvironment } from '../../shared/model/dime/environment';
+import { DimeMap } from '../../shared/model/dime/map';
 import { DimeProcess } from '../../shared/model/dime/process';
+import { DimeProcessDefaultTarget } from '../../shared/model/dime/processdefaulttarget';
+import { DimeProcessManipulation } from '../../shared/model/dime/processmanipulation';
 import { DimeProcessRunning } from '../../shared/model/dime/processrunning';
 import { DimeProcessStep } from '../../shared/model/dime/processstep';
-import { DimeProcessManipulation } from '../../shared/model/dime/processmanipulation';
 import { DimeProcessStepRunning } from '../../shared/model/dime/processsteprunning';
-import { DimeEnvironment } from '../../shared/model/dime/environment';
-import { DimeEnvironmentType } from '../../shared/model/dime/environmenttype';
 import { DimeStream } from '../../shared/model/dime/stream';
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { DimeStreamType } from '../../shared/model/dime/streamtype';
-import { DimeProcessDefaultTarget } from '../../shared/model/dime/processdefaulttarget';
-import { DimeMap } from '../../shared/model/dime/map';
-
-import { MapTools } from './tools.dime.map';
-
 import { EnvironmentTools } from './tools.dime.environment';
+import { MapTools } from './tools.dime.map';
 import { StreamTools } from './tools.dime.stream';
 import { ATLogger } from './tools.log';
+import { MailTool } from './tools.mailer';
+import { MainTools } from './tools.main';
+import { SettingsTool } from './tools.settings';
 
+const excel = require( 'exceljs' );
+const streamBuffers = require( 'stream-buffers' );
 export class ProcessTools {
 	logTool: ATLogger;
 	streamTool: StreamTools;
@@ -49,7 +44,7 @@ export class ProcessTools {
 	}
 
 	public getAll = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM processes', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to get processes.' } );
@@ -60,7 +55,7 @@ export class ProcessTools {
 		} );
 	}
 	public getOne = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM processes WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to get process.' } );
@@ -73,7 +68,7 @@ export class ProcessTools {
 		} );
 	}
 	public update = ( dimeProcess: DimeProcess ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE processes SET ? WHERE id = ?', [dimeProcess, dimeProcess.id], ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the process.' } );
@@ -84,9 +79,9 @@ export class ProcessTools {
 		} );
 	}
 	public delete = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.stepClear( id ).
-				then(() => {
+				then( () => {
 					this.db.query( 'DELETE FROM processes WHERE id = ?', id, ( err, rows, fields ) => {
 						if ( err ) {
 							reject( { error: err, message: 'Failed to delete the process.' } );
@@ -99,7 +94,7 @@ export class ProcessTools {
 		} );
 	}
 	public create = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let newProcess: { id?: number, name: string };
 			newProcess = { name: 'New Process' };
 			this.db.query( 'INSERT INTO processes SET ?', newProcess, ( err, rows, fields ) => {
@@ -108,11 +103,11 @@ export class ProcessTools {
 				} else {
 					newProcess.id = rows.insertId;
 					this.stepCreate( { id: 0, type: 'srcprocedure', process: rows.insertId } ).
-						then(() => this.stepCreate( { id: 0, type: 'pulldata', process: rows.insertId } ) ).
-						then(() => this.stepCreate( { id: 0, type: 'mapdata', process: rows.insertId } ) ).
-						then(() => this.stepCreate( { id: 0, type: 'pushdata', process: rows.insertId } ) ).
-						then(() => this.stepCreate( { id: 0, type: 'tarprocedure', process: rows.insertId } ) ).
-						then(() => {
+						then( () => this.stepCreate( { id: 0, type: 'pulldata', process: rows.insertId } ) ).
+						then( () => this.stepCreate( { id: 0, type: 'mapdata', process: rows.insertId } ) ).
+						then( () => this.stepCreate( { id: 0, type: 'pushdata', process: rows.insertId } ) ).
+						then( () => this.stepCreate( { id: 0, type: 'tarprocedure', process: rows.insertId } ) ).
+						then( () => {
 							resolve( newProcess );
 						} ).
 						catch( reject );
@@ -121,9 +116,9 @@ export class ProcessTools {
 		} );
 	}
 	public stepCreate = ( step: DimeProcessStep ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.stepGetMaxOrder( step.process ).
-				then(( curMax ) => {
+				then( ( curMax ) => {
 					step.sOrder = ++curMax;
 					delete step.id;
 					this.db.query( 'INSERT INTO processsteps SET ?', step, ( err, rows, fields ) => {
@@ -137,14 +132,14 @@ export class ProcessTools {
 		} );
 	}
 	public stepGetOne = ( id: number ): Promise<DimeProcessStep> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM processsteps WHERE id = ?', id, function ( err, rows: DimeProcessStep[], fields ) {
 				if ( err ) {
 					reject( err );
 				} else if ( rows.length !== 1 ) {
 					reject( 'Step is not found' );
 				} else {
-					rows.map(( curStep ) => {
+					rows.map( ( curStep ) => {
 						if ( curStep.details ) { curStep.details = curStep.details.toString(); }
 						return curStep;
 					} );
@@ -154,12 +149,12 @@ export class ProcessTools {
 		} );
 	}
 	public stepGetAll = ( id: number ): Promise<DimeProcessStep[]> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM processsteps WHERE process = ? ORDER BY sOrder', id, ( err, rows: DimeProcessStep[], fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
-					rows.map(( curStep ) => {
+					rows.map( ( curStep ) => {
 						if ( curStep.details ) { curStep.details = curStep.details.toString(); }
 						return curStep;
 					} );
@@ -170,13 +165,13 @@ export class ProcessTools {
 	}
 	public stepPutAll = ( refObj: { processID: number, steps: any[] } ) => {
 		let promises: any[]; promises = [];
-		refObj.steps.forEach(( curStep ) => {
+		refObj.steps.forEach( ( curStep ) => {
 			promises.push( this.stepUpdate( curStep ) );
 		} );
 		return Promise.all( promises );
 	}
 	private stepGetMaxOrder = ( id?: number ): Promise<number> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !id ) {
 				reject( 'No process id is given' );
 			} else {
@@ -191,7 +186,7 @@ export class ProcessTools {
 		} );
 	}
 	private stepClear = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM processsteps WHERE process = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -202,7 +197,7 @@ export class ProcessTools {
 		} );
 	}
 	public stepGetTypes = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM processsteptypes ORDER BY tOrder', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -213,13 +208,13 @@ export class ProcessTools {
 		} );
 	}
 	public stepDelete = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let curStep: DimeProcessStep;
-			this.stepGetOne( id ).then(( sStep ) => { curStep = sStep; return this.stepRemoveAction( id ); } ).
-				then(() => { return this.stepGetAll( curStep.process ); } ).
-				then(( allSteps ) => {
+			this.stepGetOne( id ).then( ( sStep ) => { curStep = sStep; return this.stepRemoveAction( id ); } ).
+				then( () => { return this.stepGetAll( curStep.process ); } ).
+				then( ( allSteps ) => {
 					let promises: Promise<any>[]; promises = [];
-					allSteps.forEach(( sStep: DimeProcessStep, curKey: number ) => {
+					allSteps.forEach( ( sStep: DimeProcessStep, curKey: number ) => {
 						sStep.sOrder = curKey + 1;
 						promises.push( this.stepUpdate( sStep ) );
 					} );
@@ -231,7 +226,7 @@ export class ProcessTools {
 		} );
 	}
 	private stepRemoveAction = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM processsteps WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -242,7 +237,7 @@ export class ProcessTools {
 		} );
 	}
 	public stepUpdate = ( theStep: DimeProcessStep ): Promise<DimeProcessStep> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !theStep ) {
 				reject( 'Empty body is not accepted' );
 			} else {
@@ -260,19 +255,19 @@ export class ProcessTools {
 		} );
 	}
 	public isPrepared = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let isPrepared: boolean; isPrepared = true;
 			let issueArray: string[]; issueArray = [];
 			this.getOne( id ).
-				then(( innerObj: DimeProcess ) => {
+				then( ( innerObj: DimeProcess ) => {
 					if ( !innerObj.source ) { isPrepared = false; issueArray.push( 'Process does not have a source environment defined' ); }
 					if ( !innerObj.target ) { isPrepared = false; issueArray.push( 'Process does not have a target environment defined' ); }
 					return this.stepGetAll( id );
 				} ).
-				then(( stepList ) => {
+				then( ( stepList ) => {
 					let srcprocedureOrder = 0, pulldataOrder = 0, mapdataOrder = 0, pushdataOrder = 0;
 					let manipulateOrder = 0, tarprocedureOrder = 0, sendlogsOrder = 0, senddataOrder = 0, sendmissingOrder = 0;
-					stepList.forEach(( curStep ) => {
+					stepList.forEach( ( curStep ) => {
 						if ( curStep.type === 'srcprocedure' && curStep.sOrder ) { srcprocedureOrder = curStep.sOrder; }
 						if ( curStep.type === 'pulldata' && curStep.sOrder ) { pulldataOrder = curStep.sOrder; }
 						if ( curStep.type === 'mapdata' && curStep.sOrder ) { mapdataOrder = curStep.sOrder; }
@@ -294,7 +289,7 @@ export class ProcessTools {
 		} );
 	};
 	public fetchDefaults = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM processdefaulttargets WHERE process = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -305,12 +300,12 @@ export class ProcessTools {
 		} );
 	};
 	public applyDefaults = ( refObj: { processID: number, defaults: any } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.clearDefaults( refObj.processID ).
 				then( this.getOne ).
-				then(( innerObj: DimeProcess ) => {
+				then( ( innerObj: DimeProcess ) => {
 					let promises: any[]; promises = [];
-					Object.keys( refObj.defaults ).forEach(( curKey ) => {
+					Object.keys( refObj.defaults ).forEach( ( curKey ) => {
 						promises.push( this.applyDefault( { process: refObj.processID, field: curKey, value: refObj.defaults[curKey] } ) );
 					} );
 					return Promise.all( promises );
@@ -320,7 +315,7 @@ export class ProcessTools {
 		} );
 	}
 	public applyDefault = ( curDefault: { process: number, field: string, value: string } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( curDefault.value ) {
 				this.db.query( 'INSERT INTO processdefaulttargets SET ?', curDefault, ( err, rows, fields ) => {
 					if ( err ) {
@@ -336,7 +331,7 @@ export class ProcessTools {
 	};
 
 	public clearDefaults = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM processdefaulttargets WHERE process = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -347,7 +342,7 @@ export class ProcessTools {
 		} );
 	}
 	public applyFilters = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'Object does not exist' );
 			} else if ( !refObj.process ) {
@@ -359,14 +354,14 @@ export class ProcessTools {
 			} else if ( !Array.isArray( refObj.filters ) ) {
 				reject( 'Object filter list is malformed.' );
 			} else {
-				refObj.filters.forEach(( curFilter: any ) => {
+				refObj.filters.forEach( ( curFilter: any ) => {
 					curFilter.process = refObj.process;
 					curFilter.stream = refObj.stream;
 				} );
 				this.clearFilters( refObj.process ).
-					then(() => {
+					then( () => {
 						let promises: any[]; promises = [];
-						refObj.filters.forEach(( curFilter: any ) => {
+						refObj.filters.forEach( ( curFilter: any ) => {
 							if ( curFilter.filterfrom || curFilter.filterto || curFilter.filtertext || curFilter.filterbeq || curFilter.filterseq ) {
 								promises.push( this.applyFilter( curFilter ) );
 							}
@@ -379,7 +374,7 @@ export class ProcessTools {
 		} );
 	}
 	public applyFilter = ( curFilter: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO processfilters SET ?', curFilter, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -390,7 +385,7 @@ export class ProcessTools {
 		} );
 	}
 	public clearFilters = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM processfilters WHERE process = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -401,7 +396,7 @@ export class ProcessTools {
 		} );
 	}
 	public applyFiltersDataFile = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'Object does not exist' );
 			} else if ( !refObj.process ) {
@@ -413,14 +408,14 @@ export class ProcessTools {
 			} else if ( !Array.isArray( refObj.filters ) ) {
 				reject( 'Object filter list is malformed.' );
 			} else {
-				refObj.filters.forEach(( curFilter: any ) => {
+				refObj.filters.forEach( ( curFilter: any ) => {
 					curFilter.process = refObj.process;
 					curFilter.stream = refObj.stream;
 				} );
 				this.clearFiltersDataFile( refObj.process ).
-					then(() => {
+					then( () => {
 						let promises: any[]; promises = [];
-						refObj.filters.forEach(( curFilter: any ) => {
+						refObj.filters.forEach( ( curFilter: any ) => {
 							if ( curFilter.filterfrom || curFilter.filterto || curFilter.filtertext || curFilter.filterbeq || curFilter.filterseq ) {
 								promises.push( this.applyFilterDataFile( curFilter ) );
 							}
@@ -433,7 +428,7 @@ export class ProcessTools {
 		} );
 	}
 	public applyFilterDataFile = ( curFilter: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO processfiltersdatafile SET ?', curFilter, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -444,7 +439,7 @@ export class ProcessTools {
 		} );
 	}
 	public clearFiltersDataFile = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM processfiltersdatafile WHERE process = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -455,7 +450,7 @@ export class ProcessTools {
 		} );
 	}
 	public fetchFilters = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let theQuery: string; theQuery = '';
 			theQuery += 'SELECT id, process, stream, field,';
 			theQuery += 'DATE_FORMAT(filterfrom, \'%Y-%m-%d\') AS filterfrom,';
@@ -471,7 +466,7 @@ export class ProcessTools {
 		} );
 	};
 	public fetchFiltersDataFile = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let theQuery: string; theQuery = '';
 			theQuery += 'SELECT id, process, stream, field,';
 			theQuery += 'DATE_FORMAT(filterfrom, \'%Y-%m-%d\') AS filterfrom,';
@@ -487,7 +482,7 @@ export class ProcessTools {
 		} );
 	};
 	private setStatus = ( id: number, status: string ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE processes SET status = ? WHERE id = ?', [status, id], ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -501,9 +496,9 @@ export class ProcessTools {
 		return this.setStatus( id, 'ready' );
 	}
 	public runAndWait = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.run( id ).
-				then(( result: any ) => {
+				then( ( result: any ) => {
 					return this.runAndWaitWait( result.status );
 				} ).
 				then( resolve ).
@@ -511,11 +506,11 @@ export class ProcessTools {
 		} );
 	};
 	private runAndWaitWait = ( logid: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.checkLog( logid ).
-				then(( result: any ) => {
+				then( ( result: any ) => {
 					if ( result.start === result.end ) {
-						setTimeout(() => {
+						setTimeout( () => {
 							resolve( this.runAndWaitWait( logid ) );
 						}, 2000 );
 					} else {
@@ -526,10 +521,10 @@ export class ProcessTools {
 		} );
 	}
 	public run = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.getOne( id ).
 				then( this.setInitiated ).
-				then(( innerObj: DimeProcess ) => {
+				then( ( innerObj: DimeProcess ) => {
 					let curProcess: DimeProcessRunning;
 					if ( innerObj.id && innerObj.name && innerObj.source && innerObj.target && innerObj.status ) {
 						curProcess = {
@@ -569,7 +564,7 @@ export class ProcessTools {
 		} );
 	};
 	private runAction = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.identifySteps( refProcess ).
 				then( this.identifyStreams ).
 				then( this.identifyEnvironments ).
@@ -578,10 +573,10 @@ export class ProcessTools {
 				then( this.runSteps ).
 				then( this.setCompleted ).
 				then( resolve ).
-				catch(( issue ) => {
+				catch( ( issue ) => {
 					console.error( issue );
 					this.logTool.appendLog( refProcess.status, 'Failed: ' + issue ).
-						then(() => {
+						then( () => {
 							const toLogProcess = {
 								id: refProcess.id,
 								name: refProcess.name,
@@ -590,9 +585,9 @@ export class ProcessTools {
 							};
 							return this.sendLogFile( toLogProcess, true );
 						} ).
-						then(() => {
+						then( () => {
 							this.setCompleted( refProcess );
-						} ).catch(( fatalIssue ) => {
+						} ).catch( ( fatalIssue ) => {
 							console.log( 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' );
 							console.log( 'xxxxxx Fatal Issue xxxxxxxxxxxxxxxxxxxxxxxx' );
 							console.log( 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' );
@@ -609,14 +604,14 @@ export class ProcessTools {
 		return this.runStepsAction( refProcess );
 	}
 	private runStepsAction = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( refProcess.steps.length === 0 ) {
 				this.logTool.appendLog( refProcess.status, 'Warning: There are no steps to be run.' );
 				resolve( refProcess );
 			} else {
 				let isStepAssigned = false;
 				let curStep: DimeProcessStepRunning; curStep = { id: 0, process: 0, type: '', referedid: 0, details: '', sOrder: 0, isPending: true };
-				refProcess.steps.forEach(( fStep ) => {
+				refProcess.steps.forEach( ( fStep ) => {
 					if ( !isStepAssigned && fStep.isPending ) {
 						curStep = fStep;
 						refProcess.curStep = curStep.sOrder;
@@ -628,34 +623,34 @@ export class ProcessTools {
 					let logText = 'Running step: ' + curStep.sOrder + ', step type: ' + typeToWrite;
 					if ( curStep.referedid > 0 ) { logText += ', reference id: ' + curStep.referedid; }
 					this.logTool.appendLog( refProcess.status, logText ).
-						then(() => {
+						then( () => {
 							if ( curStep.type === 'srcprocedure' ) {
-								this.runSourceProcedure( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'pulldata' ) {
-								this.runPullData( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'mapdata' ) {
 								refProcess.mapList.push( curStep.referedid );
-								this.runMapData( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'manipulate' ) {
-								this.runManipulations( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runManipulations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'pushdata' ) {
-								this.runPushData( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'tarprocedure' ) {
-								this.runTargetProcedure( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'senddata' ) {
-								this.runSendData( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'sendmissing' ) {
-								this.runSendMissing( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runSendMissing( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'sendlogs' ) {
-								this.runSendLog( refProcess, curStep ).then(( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+								this.runSendLog( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else {
 								reject( 'This is not a known step type (' + curStep.type + ')' );
@@ -671,40 +666,40 @@ export class ProcessTools {
 	};
 	private runSendMissing = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		refProcess.recepients = refStep.details.split( ';' ).join( ',' );
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Send missing maps.' ).
-				then(() => { return this.sendMissingPrepareAll( refProcess, refStep ); } ).
-				then(( result ) => { return this.sendMissingCreateFile( result ) } ).
-				then(( result ) => { return this.sendMissingSendFile( refProcess, refStep, result ) } ).
+				then( () => { return this.sendMissingPrepareAll( refProcess, refStep ); } ).
+				then( ( result ) => { return this.sendMissingCreateFile( result ) } ).
+				then( ( result ) => { return this.sendMissingSendFile( refProcess, refStep, result ) } ).
 				then( resolve ).
 				catch( reject );
 		} );
 	};
 	private sendMissingPrepareAll = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		let promises: any[]; promises = [];
-		refProcess.mapList.forEach(( mapID ) => {
+		refProcess.mapList.forEach( ( mapID ) => {
 			promises.push( this.sendMissingPrepareOne( refProcess, refStep, mapID ) );
 		} );
 		return Promise.all( promises );
 	};
 	private sendMissingPrepareOne = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, mapID: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let masterMap: DimeMap;
 			this.mapTool.getOne( mapID ).
-				then(( curMap: DimeMap ) => { masterMap = curMap; return this.sendMissingPrepareQuery( refProcess, refStep, curMap ); } ).
-				then(( curQuery: string ) => { return this.sendMissingRunQuery( curQuery, masterMap ); } ).
+				then( ( curMap: DimeMap ) => { masterMap = curMap; return this.sendMissingPrepareQuery( refProcess, refStep, curMap ); } ).
+				then( ( curQuery: string ) => { return this.sendMissingRunQuery( curQuery, masterMap ); } ).
 				then( resolve ).
 				catch( reject );
 		} );
 	};
 	private sendMissingPrepareQuery = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refMap: DimeMap ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.mapTool.getFields( refMap.id ).
-				then(( mapFields: any[] ) => {
+				then( ( mapFields: any[] ) => {
 					let mapFieldList: any[]; mapFieldList = [];
-					mapFields.forEach(( curMapField ) => {
+					mapFields.forEach( ( curMapField ) => {
 						if ( curMapField.srctar === 'source' ) {
-							refProcess.sourceStreamFields.forEach(( curStreamField ) => {
+							refProcess.sourceStreamFields.forEach( ( curStreamField ) => {
 								if ( curStreamField.name === curMapField.name ) {
 									mapFieldList.push( { id: curStreamField.id, name: curStreamField.name, srctar: 'source', type: 'main', streamid: curStreamField.stream, order: curStreamField.fOrder } );
 									if ( curStreamField.isDescribed || refProcess.sourceStreamType === 'HPDB' ) {
@@ -721,7 +716,7 @@ export class ProcessTools {
 							} );
 						}
 						if ( curMapField.srctar === 'target' ) {
-							refProcess.targetStreamFields.forEach(( curStreamField ) => {
+							refProcess.targetStreamFields.forEach( ( curStreamField ) => {
 								if ( curStreamField.name === curMapField.name ) {
 									mapFieldList.push( {
 										id: curStreamField.id,
@@ -745,20 +740,20 @@ export class ProcessTools {
 							} );
 						}
 					} );
-					mapFieldList.forEach(( curField ) => {
+					mapFieldList.forEach( ( curField ) => {
 						curField.order = parseInt( curField.order, 10 ) * 100;
 						if ( curField.srctar === 'source' ) { curField.order += 1000000; }
 						if ( curField.srctar === 'target' ) { curField.order += 2000000; }
 						if ( curField.type === 'main' ) { curField.order += 1; }
 						if ( curField.type === 'description' ) { curField.order += 2; }
 					} )
-					mapFieldList.sort(( a: any, b: any ) => {
+					mapFieldList.sort( ( a: any, b: any ) => {
 						if ( a.order > b.order ) { return 1; }
 						if ( a.order < b.order ) { return -1; }
 						return 0;
 					} );
 					let selects: string[]; selects = [];
-					mapFieldList.forEach(( curField ) => {
+					mapFieldList.forEach( ( curField ) => {
 						if ( curField.srctar === 'source' ) { curField.name = 'SRC_' + curField.name; }
 						if ( curField.srctar === 'target' ) { curField.name = 'TAR_' + curField.name; }
 						if ( curField.type === 'description' ) { curField.onField = curField.name; }
@@ -777,13 +772,13 @@ export class ProcessTools {
 					selectQuery += 'SELECT '
 					selectQuery += selects.join( ', ' ) + ' \n';
 					selectQuery += 'FROM ' + mapTableName + ' ';
-					mapFieldList.forEach(( curField ) => {
+					mapFieldList.forEach( ( curField ) => {
 						if ( curField.type === 'description' ) {
 							selectQuery += '\n\tLEFT JOIN ' + curField.tableName + ' ON ' + curField.tableName + '.RefField = ' + mapTableName + '.' + curField.onField;
 						}
 					} );
 					let wherers: string[]; wherers = [];
-					mapFieldList.forEach(( curField ) => {
+					mapFieldList.forEach( ( curField ) => {
 						if ( curField.srctar === 'target' && curField.type === 'main' ) {
 							wherers.push( '\n\t' + curField.name + ' IS NULL' );
 							wherers.push( curField.name + ' = \'missing\'' );
@@ -801,7 +796,7 @@ export class ProcessTools {
 		} );
 	};
 	private sendMissingRunQuery = ( refQuery: string, refMap: DimeMap ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( refQuery, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -812,14 +807,14 @@ export class ProcessTools {
 		} );
 	};
 	private sendMissingCreateFile = ( mapsAndResults: any[] ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let workbook: any; workbook = new excel.Workbook();
 			workbook.creator = 'EPM ToolBox';
 			workbook.lastModifiedBy = 'EPM ToolBox';
 			workbook.created = new Date();
 			workbook.modified = new Date();
 
-			mapsAndResults.forEach(( curMapAndResult: any ) => {
+			mapsAndResults.forEach( ( curMapAndResult: any ) => {
 				const curMap = curMapAndResult.map;
 				const curResult = curMapAndResult.result;
 				console.log( curMapAndResult.map );
@@ -829,11 +824,11 @@ export class ProcessTools {
 					sheet.addRow( ['There is no data produced with the missing map mechanism. If in doubt, please contact system admin.'] );
 				} else {
 					let keys: any[]; keys = [];
-					Object.keys( curResult[0] ).forEach(( dfkey ) => {
+					Object.keys( curResult[0] ).forEach( ( dfkey ) => {
 						keys.push( dfkey );
 					} );
 					let curColumns: any[]; curColumns = [];
-					Object.keys( curResult[0] ).forEach(( dfkey ) => {
+					Object.keys( curResult[0] ).forEach( ( dfkey ) => {
 						curColumns.push( { header: dfkey, key: dfkey } );
 					} );
 					// sheet = workbook.addWorksheet('Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] });
@@ -846,15 +841,15 @@ export class ProcessTools {
 		} );
 	};
 	private sendMissingSendFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refBook: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let fromAddress: string; fromAddress = '';
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Missing Maps: Sending data file.' ).
-				then(() => { return this.settingsTool.getOne( 'systemadminemailaddress' ); } ).
-				then(( systemadminemailaddress: any ) => {
+				then( () => { return this.settingsTool.getOne( 'systemadminemailaddress' ); } ).
+				then( ( systemadminemailaddress: any ) => {
 					fromAddress = systemadminemailaddress.value;
 					return this.workbookToStreamBuffer( refBook );
 				} ).
-				then(( theStreamBuffer: any ) => {
+				then( ( theStreamBuffer: any ) => {
 					return this.mailTool.sendMail( {
 						from: fromAddress,
 						to: refProcess.recepients,
@@ -868,7 +863,7 @@ export class ProcessTools {
 						]
 					} );
 				} ).
-				then(( result ) => {
+				then( ( result ) => {
 					console.log( result );
 					return Promise.resolve( 'ok' );
 				} ).
@@ -886,14 +881,14 @@ export class ProcessTools {
 		return this.sendLogFile( toLogProcess, false );
 	};
 	private sendLogFile = ( refProcess: DimeProcess, iserror: boolean ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let fromAddress: string; fromAddress = '';
 			this.settingsTool.getOne( 'systemadminemailaddress' ).
-				then(( systemadminemailaddress: any ) => {
+				then( ( systemadminemailaddress: any ) => {
 					fromAddress = systemadminemailaddress.value;
 					return this.logTool.checkLog( parseInt( refProcess.status || '0', 10 ) );
 				} ).
-				then(( curLog: any ) => {
+				then( ( curLog: any ) => {
 					let curEmail: any; curEmail = {};
 					curEmail.to = refProcess.erroremail;
 					curEmail.from = fromAddress;
@@ -904,7 +899,7 @@ export class ProcessTools {
 					curEmail.html = '<pre>' + curLog.details + '</pre>';
 					if ( curEmail.to === '' || !curEmail.to ) { curEmail.to = fromAddress; }
 					this.mailTool.sendMail( curEmail ).
-						then(() => {
+						then( () => {
 							resolve( refProcess );
 						} ).
 						catch( reject );
@@ -913,24 +908,24 @@ export class ProcessTools {
 		} );
 	};
 	private runSendData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			refProcess.recepients = refStep.details.split( ';' ).join( ',' );
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Send data.' ).
-				then(() => { return this.sendDataDropCrossTable( refProcess, refStep ); } ).
-				then(() => { return this.sendDataCreateCrossTable( refProcess, refStep ); } ).
-				then(( result ) => { return this.sendDataInsertDistincts( refProcess, refStep, result ); } ).
-				then(( result ) => { return this.sendDataPopulateDataColumns( refProcess, refStep, result ); } ).
-				then(( result ) => { return this.sendDataPopulateDescriptionColumns( refProcess, refStep, result ); } ).
-				then(( result ) => { return this.sendDataCreateFile( refProcess, refStep, result ); } ).
-				then(( result ) => { return this.sendDataSendFile( refProcess, refStep, result ); } ).
+				then( () => { return this.sendDataDropCrossTable( refProcess, refStep ); } ).
+				then( () => { return this.sendDataCreateCrossTable( refProcess, refStep ); } ).
+				then( ( result ) => { return this.sendDataInsertDistincts( refProcess, refStep, result ); } ).
+				then( ( result ) => { return this.sendDataPopulateDataColumns( refProcess, refStep, result ); } ).
+				then( ( result ) => { return this.sendDataPopulateDescriptionColumns( refProcess, refStep, result ); } ).
+				then( ( result ) => { return this.sendDataCreateFile( refProcess, refStep, result ); } ).
+				then( ( result ) => { return this.sendDataSendFile( refProcess, refStep, result ); } ).
 				then( resolve ).
 				catch( reject );
 		} );
 	}
 	private sendDataDropCrossTable = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Dropping crosstab table.' ).
-				then(() => {
+				then( () => {
 					this.db.query( 'DROP TABLE IF EXISTS PROCESS' + refProcess.id + '_CRSTBL', ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
@@ -943,15 +938,15 @@ export class ProcessTools {
 		} );
 	};
 	private sendDataCreateCrossTable = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Creating crosstab table.' ).
-				then(() => {
+				then( () => {
 					let createQuery: string; createQuery = 'CREATE TABLE PROCESS' + refProcess.id + '_CRSTBL (\nid BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 					let dataFieldDefinition: any; dataFieldDefinition = {};
 					let inserterFields: any[]; inserterFields = [];
 					refProcess.CRSTBLDescribedFields = [];
 
-					refProcess.sourceStreamFields.forEach(( curField: any ) => {
+					refProcess.sourceStreamFields.forEach( ( curField: any ) => {
 						if ( !curField.isCrossTab && !curField.isData && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
 							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'string' ) {
@@ -985,7 +980,7 @@ export class ProcessTools {
 						}
 					} );
 
-					refProcess.targetStreamFields.forEach(( curField ) => {
+					refProcess.targetStreamFields.forEach( ( curField ) => {
 						if ( !curField.isCrossTab && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
 							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'string' ) {
@@ -1006,7 +1001,7 @@ export class ProcessTools {
 							createQuery += ', INDEX (TAR_' + curField.name + ')';
 						}
 					} );
-					refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.sourceStreamFields.forEach( ( curField ) => {
 						if ( curField.isData ) {
 							dataFieldDefinition.type = curField.type;
 							dataFieldDefinition.characters = curField.fCharacters;
@@ -1019,7 +1014,7 @@ export class ProcessTools {
 
 					let promises: any[]; promises = [];
 					let cartesianFields: any[]; cartesianFields = [];
-					refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.sourceStreamFields.forEach( ( curField ) => {
 						if ( curField.isCrossTab ) {
 							promises.push( this.getDataTableDistinctFields( refProcess, curField, 'source', false, refStep, true ) );
 							cartesianFields.push( { name: curField.name, srctar: 'source' } );
@@ -1031,17 +1026,17 @@ export class ProcessTools {
 					// console.log( '===========================================' );
 					// console.log( '===========================================' );
 
-					Promise.all( promises ).then(( ctFields ) => {
+					Promise.all( promises ).then( ( ctFields ) => {
 						let cartesianArray: any[]; cartesianArray = [];
-						ctFields.forEach(( curField ) => {
+						ctFields.forEach( ( curField ) => {
 							if ( cartesianArray.length === 0 ) {
-								curField.rows.forEach(( curDVALUE: any ) => {
+								curField.rows.forEach( ( curDVALUE: any ) => {
 									cartesianArray.push( curDVALUE.DVALUE );
 								} );
 							} else {
 								let tempCartesian: any[]; tempCartesian = [];
-								cartesianArray.forEach(( curCartesian ) => {
-									curField.rows.forEach(( curDVALUE: any ) => {
+								cartesianArray.forEach( ( curCartesian ) => {
+									curField.rows.forEach( ( curDVALUE: any ) => {
 										tempCartesian.push( curCartesian + '-|-' + curDVALUE.DVALUE );
 									} );
 								} );
@@ -1053,7 +1048,7 @@ export class ProcessTools {
 						toResolve.cartesianFields = cartesianFields;
 						toResolve.inserterFields = inserterFields;
 						toResolve.dataFieldDefinition = dataFieldDefinition;
-						toResolve.cartesianArray.forEach(( curField: any ) => {
+						toResolve.cartesianArray.forEach( ( curField: any ) => {
 							if ( dataFieldDefinition.type === 'string' ) {
 								createQuery += ', ' + curField.replace( '-|-', '_' ) + ' VARCHAR(' + dataFieldDefinition.characters + ')';
 							}
@@ -1079,9 +1074,9 @@ export class ProcessTools {
 		} );
 	};
 	private sendDataInsertDistincts = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Inserting distinct combinations.' ).
-				then(() => {
+				then( () => {
 					let insertQuery: string; insertQuery = 'INSERT INTO PROCESS' + refProcess.id + '_CRSTBL (';
 					insertQuery += refDefinitions.inserterFields.join( ', ' );
 					insertQuery += ')\n';
@@ -1098,11 +1093,11 @@ export class ProcessTools {
 		} );
 	};
 	private sendDataPopulateDataColumns = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating data columns.' ).
-				then(() => {
+				then( () => {
 					refDefinitions.cartesianTemp = [];
-					refDefinitions.cartesianArray.forEach(( curItem: any ) => {
+					refDefinitions.cartesianArray.forEach( ( curItem: any ) => {
 						refDefinitions.cartesianTemp.push( curItem );
 					} );
 					return this.sendDataPopulateDataColumnsAction( refProcess, refDefinitions );
@@ -1113,20 +1108,20 @@ export class ProcessTools {
 	};
 	private sendDataPopulateDataColumnsAction = ( refProcess: DimeProcessRunning, refDefinitions: any ) => {
 		const curItem = refDefinitions.cartesianTemp.shift();
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let updateWherers: string[]; updateWherers = [];
 			let updateQuery: string; updateQuery = 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ';
 
 			if ( refDefinitions.dataFieldDefinition.aggregateFunction ) {
 				let subQuery: string; subQuery = 'SELECT ';
 				subQuery += refDefinitions.inserterFields.join( ', ' );
-				refDefinitions.cartesianFields.forEach(( curField: any, curKey: number ) => { if ( curField.srctar === 'source' ) { subQuery += ', SRC_' + curField.name; } } );
+				refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => { if ( curField.srctar === 'source' ) { subQuery += ', SRC_' + curField.name; } } );
 				subQuery += ', ';
 				subQuery += refDefinitions.dataFieldDefinition.aggregateFunction + '(SRC_' + refDefinitions.dataFieldDefinition.name + ') AS SRC_' + refDefinitions.dataFieldDefinition.name;
 				subQuery += ' FROM PROCESS' + refProcess.id + '_DATATBL ';
 				let whereFields: string[]; whereFields = [];
 				let whereValues: string[]; whereValues = [];
-				refDefinitions.cartesianFields.forEach(( curField: any, curKey: number ) => {
+				refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => {
 					if ( curField.srctar === 'source' ) {
 						whereFields.push( 'SRC_' + curField.name + ' = ?' );
 						whereValues.push( curItem.split( '-|-' )[curKey] );
@@ -1138,7 +1133,7 @@ export class ProcessTools {
 				if ( whereFields.length > 0 ) { subQuery += ' WHERE ' + whereFields.join( ' AND ' ); }
 				subQuery += ' GROUP BY ';
 				subQuery += refDefinitions.inserterFields.join( ', ' );
-				refDefinitions.cartesianFields.forEach(( curField: any, curKey: number ) => { if ( curField.srctar === 'source' ) { subQuery += ', SRC_' + curField.name; } } );
+				refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => { if ( curField.srctar === 'source' ) { subQuery += ', SRC_' + curField.name; } } );
 				subQuery += ' HAVING ' + refDefinitions.dataFieldDefinition.aggregateFunction + '(SRC_' + refDefinitions.dataFieldDefinition.name + ') <> 0';
 				updateQuery += '(' + subQuery + ') DT ON ';
 			} else {
@@ -1146,11 +1141,11 @@ export class ProcessTools {
 			}
 
 			let onFields: string[]; onFields = [];
-			refDefinitions.inserterFields.forEach(( curField: any ) => {
+			refDefinitions.inserterFields.forEach( ( curField: any ) => {
 				onFields.push( 'CT.' + curField + ' = DT.' + curField );
 			} );
 
-			refDefinitions.cartesianFields.forEach(( curField: any, curKey: number ) => {
+			refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => {
 				let curPrefix: string; curPrefix = '';
 				if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
 				if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
@@ -1160,7 +1155,7 @@ export class ProcessTools {
 			updateQuery += onFields.join( ' AND ' );
 			updateQuery += ' SET CT.' + curItem.replace( '-|-', '_' ) + ' = DT.SRC_' + refDefinitions.dataFieldDefinition.name;
 
-			curItem.split( '-|-' ).forEach(( curWhere: any ) => {
+			curItem.split( '-|-' ).forEach( ( curWhere: any ) => {
 				updateWherers.push( curWhere );
 			} );
 			// this.logTool.appendLog( refProcess.status, 'Step - Send Data: ' + updateQuery ).catch( issue => { console.log( issue ); } );
@@ -1178,14 +1173,14 @@ export class ProcessTools {
 		} );
 	};
 	private sendDataPopulateDescriptionColumns = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns.' ).
-				then(() => {
+				then( () => {
 					async.eachOfSeries(
 						refProcess.CRSTBLDescribedFields,
 						( item, key, callback ) => {
 							this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns - checking table for ' + item.fieldname ).
-								then(() => {
+								then( () => {
 									let selectQuery: string; selectQuery = '';
 									selectQuery += 'SELECT TABLE_NAME FROM information_schema.tables ';
 									selectQuery += 'WHERE TABLE_SCHEMA = \'' + this.tools.config.mysql.db + '\' AND TABLE_NAME LIKE \'STREAM%_DESCTBL' + item.fieldid + '\'';
@@ -1195,18 +1190,18 @@ export class ProcessTools {
 												then( function () { callback(); } );
 										} else {
 											let selectedTable: string; selectedTable = '';
-											rows.forEach(( curTable: any ) => {
+											rows.forEach( ( curTable: any ) => {
 												selectedTable = curTable.TABLE_NAME;
 											} );
 
 											if ( selectedTable === '' ) {
 												const toLog = 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns - no table for ' + item.fieldname;
-												this.logTool.appendLog( refProcess.status, toLog ).then(() => { callback(); } );
+												this.logTool.appendLog( refProcess.status, toLog ).then( () => { callback(); } );
 											} else {
 												// const toLog = 'Step ' + refStep.sOrder + ' - Send Data: Populating description columns - Table for ' + item.fieldname + ' is ' + selectedTable
 												const toLog = 'Step ' + refStep.sOrder + ' - Send Data: Populating description column for ' + item.fieldname;
 												this.logTool.appendLog( refProcess.status, toLog ).
-													then(() => {
+													then( () => {
 														let updateQuery: string; updateQuery = '';
 														updateQuery += 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ' + selectedTable + ' ST';
 														updateQuery += ' ON CT.' + item.fieldname + ' = ST.RefField';
@@ -1216,11 +1211,11 @@ export class ProcessTools {
 															if ( uErr ) {
 																const toLogC = 'Step ' + refStep.sOrder + ' - Send Data: Population description columns - ' + item.fieldname + ' population has failed';
 																this.logTool.appendLog( refProcess.status, toLogC ).
-																	then(() => { callback(); } );
+																	then( () => { callback(); } );
 															} else {
 																const toLogC = 'Step ' + refStep.sOrder + ' - Send Data: Population description columns - ' + item.fieldname + ' population has completed';
 																this.logTool.appendLog( refProcess.status, toLogC ).
-																	then(() => { callback(); } );
+																	then( () => { callback(); } );
 															}
 														} );
 													} );
@@ -1237,12 +1232,12 @@ export class ProcessTools {
 		} );
 	};
 	private sendDataCreateFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Creating data file.' ).
-				then(() => {
+				then( () => {
 					let selectQuery: string; selectQuery = 'SELECT * FROM PROCESS' + refProcess.id + '_CRSTBL';
 					let wherers: string[]; wherers = [];
-					refDefinitions.cartesianArray.forEach(( curItem: any ) => {
+					refDefinitions.cartesianArray.forEach( ( curItem: any ) => {
 						wherers.push( curItem.replace( '-|-', '_' ) + ' <> 0' );
 					} );
 					if ( wherers.length > 0 ) {
@@ -1265,11 +1260,11 @@ export class ProcessTools {
 								sheet.addRow( ['There is no data produced with the data file mechanism. If in doubt, please contact system admin.'] );
 							} else {
 								let keys: any[]; keys = [];
-								Object.keys( rows[0] ).forEach(( dfkey ) => {
+								Object.keys( rows[0] ).forEach( ( dfkey ) => {
 									keys.push( dfkey );
 								} );
 								let curColumns: any[]; curColumns = [];
-								Object.keys( rows[0] ).forEach(( dfkey ) => {
+								Object.keys( rows[0] ).forEach( ( dfkey ) => {
 									curColumns.push( { header: dfkey, key: dfkey } );
 								} );
 								sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] } );
@@ -1284,25 +1279,25 @@ export class ProcessTools {
 		} );
 	};
 	private workbookToStreamBuffer = ( workbook: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
 			workbook.xlsx.write( myWritableStreamBuffer ).
-				then(() => {
+				then( () => {
 					resolve( myWritableStreamBuffer );
 				} ).
 				catch( reject );
 		} );
 	};
 	private sendDataSendFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefs: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let fromAddress: string; fromAddress = '';
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Sending data file.' ).
-				then(() => { return this.settingsTool.getOne( 'systemadminemailaddress' ); } ).
-				then(( systemadminemailaddress: any ) => {
+				then( () => { return this.settingsTool.getOne( 'systemadminemailaddress' ); } ).
+				then( ( systemadminemailaddress: any ) => {
 					fromAddress = systemadminemailaddress.value;
 					return this.workbookToStreamBuffer( refDefs.workbook );
 				} ).
-				then(( theStream: any ) => {
+				then( ( theStream: any ) => {
 					return this.mailTool.sendMail( {
 						from: fromAddress,
 						to: refProcess.recepients,
@@ -1317,7 +1312,7 @@ export class ProcessTools {
 						]
 					} );
 				} ).
-				then(( result ) => {
+				then( ( result ) => {
 					console.log( result );
 					return Promise.resolve( 'ok' );
 				} ).
@@ -1326,12 +1321,12 @@ export class ProcessTools {
 		} );
 	};
 	private runTargetProcedure = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Run target procedure.' ).
-				then(() => {
+				then( () => {
 					return this.runTargetProcedurePrepareCombinations( refProcess, refStep );
 				} ).
-				then(( result ) => {
+				then( ( result ) => {
 					return this.runTargetProcedureRunProcedures( refProcess, refStep, result );
 				} ).
 				then( resolve ).
@@ -1339,30 +1334,30 @@ export class ProcessTools {
 		} );
 	};
 	private runTargetProcedurePrepareCombinations = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Run Target Procedure: Preparing combinations.' ).
-				then(() => {
+				then( () => {
 					let stepDetails: any; stepDetails = JSON.parse( refStep.details );
 					/*
 						We should order the variables in the dimension order as defined in the stream definition.
 						This way users will be able to manipulate the order of the business rules running.
 					*/
-					stepDetails.variables.forEach(( curVariable: any ) => {
+					stepDetails.variables.forEach( ( curVariable: any ) => {
 						if ( curVariable.valuetype !== 'manualvalue' ) {
-							refProcess.targetStreamFields.forEach(( curField ) => {
+							refProcess.targetStreamFields.forEach( ( curField ) => {
 								if ( curField.name === curVariable.value ) { curVariable.vOrder = curField.fOrder; }
 							} );
 						} else {
 							curVariable.vOrder = 0;
 						}
 					} );
-					stepDetails.variables.sort(( a: any, b: any ) => { if ( a.vOrder > b.vOrder ) { return 1; } if ( a.vOrder < b.vOrder ) { return -1; } return 0; } );
+					stepDetails.variables.sort( ( a: any, b: any ) => { if ( a.vOrder > b.vOrder ) { return 1; } if ( a.vOrder < b.vOrder ) { return -1; } return 0; } );
 					let promises: any[]; promises = [];
-					stepDetails.variables.forEach(( curVariable: any ) => {
-						promises.push( new Promise(( iResolve, iReject ) => {
+					stepDetails.variables.forEach( ( curVariable: any ) => {
+						promises.push( new Promise( ( iResolve, iReject ) => {
 							if ( curVariable.valuetype !== 'manualvalue' ) {
 								this.getDataTableDistinctFields( refProcess, { name: curVariable.dimension }, 'target', curVariable.valuetype === 'filteredvalues', refStep, false ).
-									then(( currentDistinctList: any ) => {
+									then( ( currentDistinctList: any ) => {
 										currentDistinctList.name = curVariable.name;
 										iResolve( currentDistinctList );
 									} ).catch( iReject );
@@ -1373,19 +1368,19 @@ export class ProcessTools {
 					} );
 					Promise.all( promises ).then( function ( results ) {
 						let cartesianFields: string[]; cartesianFields = [];
-						results.forEach(( curResult ) => {
+						results.forEach( ( curResult ) => {
 							cartesianFields.push( curResult.name );
 						} );
 						let cartesianArray: any[]; cartesianArray = [];
-						results.forEach(( curField ) => {
+						results.forEach( ( curField ) => {
 							if ( cartesianArray.length === 0 ) {
-								curField.rows.forEach(( curDVALUE: any ) => {
+								curField.rows.forEach( ( curDVALUE: any ) => {
 									if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { cartesianArray.push( curDVALUE.DVALUE ); }
 								} );
 							} else {
 								let tempCartesian: any[]; tempCartesian = [];
-								cartesianArray.forEach(( curCartesian ) => {
-									curField.rows.forEach(( curDVALUE: any ) => {
+								cartesianArray.forEach( ( curCartesian ) => {
+									curField.rows.forEach( ( curDVALUE: any ) => {
 										if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { tempCartesian.push( curCartesian + '-|-' + curDVALUE.DVALUE ); }
 									} );
 								} );
@@ -1405,9 +1400,9 @@ export class ProcessTools {
 		} );
 	};
 	private getDataTableDistinctFields = ( refProcess: DimeProcessRunning, curField: any, srctar: string, shouldFilter: boolean, refStep: DimeProcessStepRunning, isForDataFile: boolean ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Run Target Procedure: Getting distinct values for field - ' + curField.name + '.' ).
-				then(() => {
+				then( () => {
 					let selector: string; selector = '';
 					if ( srctar === 'source' ) { selector = 'SRC_'; }
 					if ( srctar === 'target' ) { selector = 'TAR_'; }
@@ -1423,8 +1418,8 @@ export class ProcessTools {
 						// console.log( '>>>>>>>>>>>>>>>>' );
 						// console.log( curFilterList );
 						// console.log( '>>>>>>>>>>>>>>>>' );
-						curFilterList.forEach(( curFilter ) => {
-							refProcess.sourceStreamFields.forEach(( theField: any ) => {
+						curFilterList.forEach( ( curFilter ) => {
+							refProcess.sourceStreamFields.forEach( ( theField: any ) => {
 								if ( theField.id === curFilter.field ) { curFilter.fieldName = theField.name; }
 							} );
 							if ( curFilter.filterfrom ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
@@ -1446,11 +1441,11 @@ export class ProcessTools {
 							reject( err );
 						} else {
 							if ( curField.isMonth === 0 ) {
-								rows.forEach(( curRow: any, curKey: number ) => {
+								rows.forEach( ( curRow: any, curKey: number ) => {
 									rows[curKey].sorter = curRow.DVALUE;
 								} );
 							} else {
-								rows.forEach(( curRow: any, curKey: number ) => {
+								rows.forEach( ( curRow: any, curKey: number ) => {
 									if ( curRow.DVALUE === 'Jan' || curRow.DVALUE === 'January' ) {
 										rows[curKey].sorter = 1;
 									} else if ( curRow.DVALUE === 'Feb' || curRow.DVALUE === 'February' ) {
@@ -1501,9 +1496,9 @@ export class ProcessTools {
 		} );
 	}
 	private runTargetProcedureRunProcedures = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Run Target Procedure: Running procedures.' ).
-				then(() => {
+				then( () => {
 					async.eachOfSeries( refDefinitions.cartesianArray, ( item, key, callback ) => {
 						let currentProcedure: any; currentProcedure = {};
 						currentProcedure.stream = refProcess.targetStream;
@@ -1515,13 +1510,13 @@ export class ProcessTools {
 						};
 						currentProcedure.dbName = refProcess.targetStream.dbName;
 						currentProcedure.tableName = refProcess.targetStream.tableName;
-						item.toString().split( '-|-' ).forEach(( curVar: any, curKey: number ) => {
+						item.toString().split( '-|-' ).forEach( ( curVar: any, curKey: number ) => {
 							currentProcedure.procedure.variables.push( {
 								name: refDefinitions.cartesianFields[curKey],
 								value: curVar
 							} );
 						} );
-						this.runTargetProcedureRunProcedureAction( currentProcedure, refProcess.status ).then(( result ) => {
+						this.runTargetProcedureRunProcedureAction( currentProcedure, refProcess.status ).then( ( result ) => {
 							callback();
 						} ).catch( callback );
 					}, ( err ) => {
@@ -1536,48 +1531,48 @@ export class ProcessTools {
 		} );
 	};
 	private runTargetProcedureRunProcedureAction = ( currentProcedure: any, tracker: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let toLog: string; toLog = 'Step Run Target Procedure: Running procedure ' + currentProcedure.procedure.name + ' with values ';
-			currentProcedure.procedure.variables.forEach(( curVariable: any, curKey: number ) => {
+			currentProcedure.procedure.variables.forEach( ( curVariable: any, curKey: number ) => {
 				toLog += curVariable.name + '=' + curVariable.value;
 				if ( curKey < ( currentProcedure.procedure.variables.length - 1 ) ) { toLog += ', '; }
 			} );
 			this.logTool.appendLog( tracker, toLog ).
-				then(() => { return this.environmentTool.runProcedure( currentProcedure ); } ).
+				then( () => { return this.environmentTool.runProcedure( currentProcedure ); } ).
 				then( resolve ).
 				catch( reject );
 		} );
 	};
 	private runPushData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Push data is initiating.' ).
-				then(() => { return this.populateTargetStreamDescriptions( refProcess ); } ).
-				then(() => { return this.clearSummaryTable( refProcess, refStep ); } ).
-				then(() => { return this.summarizeData( refProcess, refStep ); } ).
-				then(() => { return this.fetchSummarizedData( refProcess, refStep ); } ).
-				then(( result: any[] ) => { return this.pushDataAction( refProcess, refStep, result ); } ).
-				then(( result: any ) => { return this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': ' + JSON.stringify( result ) ); } ).
-				then(( result: any ) => { return this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Push data is completed.' ); } ).
+				then( () => { return this.populateTargetStreamDescriptions( refProcess ); } ).
+				then( () => { return this.clearSummaryTable( refProcess, refStep ); } ).
+				then( () => { return this.summarizeData( refProcess, refStep ); } ).
+				then( () => { return this.fetchSummarizedData( refProcess, refStep ); } ).
+				then( ( result: any[] ) => { return this.pushDataAction( refProcess, refStep, result ); } ).
+				then( ( result: any ) => { return this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': ' + JSON.stringify( result ) ); } ).
+				then( ( result: any ) => { return this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Push data is completed.' ); } ).
 				then( resolve ).
 				catch( reject );
 		} );
 	};
 	private populateTargetStreamDescriptions = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Push Data: Populating field descriptions.' ).
-				then(() => {
+				then( () => {
 					return this.populateStreamDescriptions( refProcess.targetEnvironment, refProcess.targetStream, refProcess.targetStreamFields );
 				} ).
-				then(() => {
+				then( () => {
 					resolve( refProcess );
 				} ).
 				catch( reject );
 		} );
 	}
 	private clearSummaryTable = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Clearing Summary Table.' ).
-				then(() => {
+				then( () => {
 					this.db.query( 'DELETE FROM PROCESS' + refProcess.id + '_SUMTBL', ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
@@ -1590,20 +1585,20 @@ export class ProcessTools {
 		} );
 	};
 	private summarizeData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Populating summary table.' ).
-				then(() => {
+				then( () => {
 					let insertQuery: string; insertQuery = 'INSERT INTO PROCESS' + refProcess.id + '_SUMTBL (';
 					let insList: string[]; insList = [];
 					let selList: string[]; selList = [];
 					let grpList: string[]; grpList = [];
-					refProcess.targetStreamFields.forEach(( curField ) => {
+					refProcess.targetStreamFields.forEach( ( curField ) => {
 						insList.push( curField.name );
 						selList.push( 'TAR_' + curField.name );
 						grpList.push( 'TAR_' + curField.name );
 					} );
 					let shouldGroup = false;
-					refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.sourceStreamFields.forEach( ( curField ) => {
 						if ( curField.isData ) {
 							if ( curField.aggregateFunction ) {
 								shouldGroup = true;
@@ -1621,8 +1616,8 @@ export class ProcessTools {
 					insertQuery += ' FROM PROCESS' + refProcess.id + '_DATATBL';
 
 					let wherers: any[]; wherers = [];
-					refProcess.filters.forEach(( curFilter ) => {
-						refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.filters.forEach( ( curFilter ) => {
+						refProcess.sourceStreamFields.forEach( ( curField ) => {
 							if ( curField.id === curFilter.field ) { curFilter.fieldName = curField.name; }
 						} );
 						if ( curFilter.filterfrom ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
@@ -1649,9 +1644,9 @@ export class ProcessTools {
 		} );
 	};
 	private fetchSummarizedData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Fetching summary table.' ).
-				then(() => {
+				then( () => {
 					const denseField = refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name;
 					this.db.query( 'SELECT DISTINCT ' + denseField + ' FROM PROCESS' + refProcess.id + '_SUMTBL ORDER BY 1', ( err, rows, fields ) => {
 						if ( err ) {
@@ -1663,7 +1658,7 @@ export class ProcessTools {
 								selecters.push( refProcess.targetStreamFields[i].name );
 							}
 							let concaters: string[]; concaters = [];
-							rows.forEach(( curTuple: any ) => {
+							rows.forEach( ( curTuple: any ) => {
 								if ( curTuple[denseField] !== 'ignore' && curTuple[denseField] !== 'ignore:ignore' && curTuple[denseField] !== 'ignore::ignore' && curTuple[denseField] !== 'missing' ) {
 									concaters.push( 'GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)) AS \'' + curTuple[denseField] + '\'' );
 								}
@@ -1712,13 +1707,13 @@ export class ProcessTools {
 		} );
 	};
 	private pushDataAction = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, finalData: any[] ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: Pushing data to the target.' ).
-				then(() => {
+				then( () => {
 					if ( !finalData ) {
-						this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.' ).then(() => { resolve( 'There is no data to push' ); } );
+						this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
 					} else if ( finalData.length === 0 ) {
-						this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.' ).then(() => { resolve( 'There is no data to push' ); } );
+						this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
 					} else {
 						let sparseDims: string[]; sparseDims = [];
 						for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
@@ -1733,7 +1728,7 @@ export class ProcessTools {
 							denseDim: refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name
 						} ).
 							then( resolve ).
-							catch(( issue: any ) => {
+							catch( ( issue: any ) => {
 								reject( JSON.stringify( issue ) );
 							} );
 					}
@@ -1742,12 +1737,12 @@ export class ProcessTools {
 		} );
 	}
 	private runManipulations = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Transform data is initiating.' ).
-				then(() => {
+				then( () => {
 					let manipulations: DimeProcessManipulation[];
 					manipulations = JSON.parse( refStep.details );
-					manipulations = manipulations.sort(( a: any, b: any ) => {
+					manipulations = manipulations.sort( ( a: any, b: any ) => {
 						if ( a.mOrder > b.mOrder ) {
 							return 1;
 						} else if ( a.mOrder < b.mOrder ) {
@@ -1763,7 +1758,7 @@ export class ProcessTools {
 		} );
 	};
 	private runManipulationsAction = ( refProcess: DimeProcessRunning, refManipulations: DimeProcessManipulation[], refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let logText: string;
 			if ( refManipulations.length === 0 ) {
 				logText = 'Step ' + refStep.sOrder + ' - Transform data: Completed';
@@ -1771,7 +1766,7 @@ export class ProcessTools {
 				logText = 'Step ' + refStep.sOrder + ' - Transform data: Transformation ' + ( refManipulations[0].mOrder + 1 ) + ' is running.';
 			}
 			this.logTool.appendLog( refProcess.status, logText ).
-				then(() => {
+				then( () => {
 					if ( refManipulations.length === 0 ) {
 						resolve();
 					} else {
@@ -1797,14 +1792,14 @@ export class ProcessTools {
 							updateQuery += ' SET ';
 							if ( curManipulation.whichField === 'current' ) {
 								if ( curManipulation.when === 'SRC' ) {
-									refProcess.sourceStreamFields.forEach(( curField ) => {
+									refProcess.sourceStreamFields.forEach( ( curField ) => {
 										if ( curField.name === curManipulation.field ) {
 											curManipulation.fieldToManipulate = curField;
 											curManipulation.fieldToManipulate.qName = 'SRC_' + curField.name;
 										}
 									} );
 								} else {
-									refProcess.targetStreamFields.forEach(( curField ) => {
+									refProcess.targetStreamFields.forEach( ( curField ) => {
 										if ( curField.name === curManipulation.field ) {
 											curManipulation.fieldToManipulate = curField;
 											curManipulation.fieldToManipulate.qName = 'TAR_' + curField.name;
@@ -1812,7 +1807,7 @@ export class ProcessTools {
 									} );
 								}
 							} else {
-								refProcess.sourceStreamFields.forEach(( curField ) => {
+								refProcess.sourceStreamFields.forEach( ( curField ) => {
 									if ( curField.isData ) {
 										curManipulation.fieldToManipulate = curField;
 										curManipulation.fieldToManipulate.qName = 'SRC_' + curField.name;
@@ -1884,7 +1879,7 @@ export class ProcessTools {
 							valueArray.push( curManipulation.comparison );
 
 							let wherers: any[]; wherers = [];
-							refProcess.filters.forEach(( curFilter ) => {
+							refProcess.filters.forEach( ( curFilter ) => {
 								if ( curFilter.filterfrom ) { wherers.push( 'SRC_' + curFilter.fieldName + '>= \'' + curFilter.filterfrom + '\'' ); }
 								if ( curFilter.filterto ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
 								if ( curFilter.filtertext ) { wherers.push( 'SRC_' + curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
@@ -1918,28 +1913,28 @@ export class ProcessTools {
 		} );
 	}
 	private runMapData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Map Data is initiating.' ).
-				then(() => { return this.mapDataAction( refProcess, refStep ); } ).
-				then(() => { return this.mapDataAssignMissing( refProcess, refStep ); } ).
-				then(() => { return this.mapDataClearMap( refProcess, refStep ); } ).
-				then(() => { return this.mapDataRefreshMap( refProcess, refStep ); } ).
+				then( () => { return this.mapDataAction( refProcess, refStep ); } ).
+				then( () => { return this.mapDataAssignMissing( refProcess, refStep ); } ).
+				then( () => { return this.mapDataClearMap( refProcess, refStep ); } ).
+				then( () => { return this.mapDataRefreshMap( refProcess, refStep ); } ).
 				then( resolve ).
 				catch( reject );
 		} );
 	};
 	private mapDataAssignMissing = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Identifying missing maps.' ).
-				then(() => {
+				then( () => {
 					return this.mapTool.getFields( refStep.referedid );
 				} ).
-				then(( mapFields: any[] ) => {
+				then( ( mapFields: any[] ) => {
 					let curQuery: string; curQuery = '';
 					curQuery += 'UPDATE PROCESS' + refProcess.id + '_DATATBL SET ';
 					let setters: string[]; setters = [];
 					let wherers: string[]; wherers = [];
-					mapFields.forEach(( curField ) => {
+					mapFields.forEach( ( curField ) => {
 						if ( curField.srctar === 'target' ) {
 							setters.push( 'TAR_' + curField.name + '=\'missing\'' );
 							wherers.push( 'TAR_' + curField.name + ' IS NULL' );
@@ -1959,14 +1954,14 @@ export class ProcessTools {
 		} );
 	};
 	private mapDataClearMap = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Clearing map table from the missing map tuples.' ).
-				then(() => {
+				then( () => {
 					return this.mapTool.getFields( refStep.referedid );
 				} ).
-				then(( mapFields: any[] ) => {
+				then( ( mapFields: any[] ) => {
 					let wherers: string[]; wherers = [];
-					mapFields.forEach(( curField ) => {
+					mapFields.forEach( ( curField ) => {
 						if ( curField.srctar === 'target' ) {
 							wherers.push( 'TAR_' + curField.name + ' IS NULL' );
 							wherers.push( 'TAR_' + curField.name + ' = \'missing\'' );
@@ -1984,16 +1979,16 @@ export class ProcessTools {
 		} );
 	};
 	private mapDataRefreshMap = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Populating the map table with missing maps to be mapped.' ).
-				then(() => {
+				then( () => {
 					return this.mapTool.getFields( refStep.referedid );
 				} ).
-				then(( mapFields: any[] ) => {
+				then( ( mapFields: any[] ) => {
 					let wherers: string[]; wherers = [];
 					let selecters: string[]; selecters = [];
 					let insertQuery: string; insertQuery = '';
-					mapFields.forEach(( curField ) => {
+					mapFields.forEach( ( curField ) => {
 						if ( curField.srctar === 'source' ) { selecters.push( 'SRC_' + curField.name ); }
 						if ( curField.srctar === 'target' ) { selecters.push( 'TAR_' + curField.name ); }
 						if ( curField.srctar === 'target' ) {
@@ -2017,18 +2012,18 @@ export class ProcessTools {
 		} );
 	}
 	private mapDataAction = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let updateQuery: string; updateQuery = '';
 			updateQuery += 'UPDATE PROCESS' + refProcess.id + '_DATATBL DT LEFT JOIN MAP' + refStep.referedid + '_MAPTBL MT ON ';
 			let setFields: string[]; setFields = [];
 			let onFields: string[]; onFields = [];
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Mapping the data table.' ).
-				then(() => {
+				then( () => {
 					return this.mapTool.rejectIfNotReady( refStep.referedid );
 				} ).
 				then( this.mapTool.getFields ).
-				then(( mapFields: any[] ) => {
-					mapFields.forEach(( curField ) => {
+				then( ( mapFields: any[] ) => {
+					mapFields.forEach( ( curField ) => {
 						if ( curField.srctar === 'source' ) { onFields.push( 'DT.SRC_' + curField.name + ' = MT.SRC_' + curField.name ); }
 						if ( curField.srctar === 'target' ) { setFields.push( 'DT.TAR_' + curField.name + ' = MT.TAR_' + curField.name ); }
 					} );
@@ -2047,9 +2042,9 @@ export class ProcessTools {
 		} );
 	};
 	private runPullData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Pull Data is initiating.' ).
-				then(() => {
+				then( () => {
 					return this.fetchFiltersToRefProcess( refProcess );
 				} ).
 				then( this.clearStaging ).
@@ -2062,12 +2057,12 @@ export class ProcessTools {
 		} );
 	}
 	private populateSourceStreamDescriptions = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Populating field descriptions.' ).
-				then(() => {
+				then( () => {
 					return this.populateStreamDescriptions( refProcess.sourceEnvironment, refProcess.sourceStream, refProcess.sourceStreamFields );
 				} ).
-				then(() => {
+				then( () => {
 					resolve( refProcess );
 				} ).
 				catch( reject );
@@ -2075,7 +2070,7 @@ export class ProcessTools {
 	}
 	private populateStreamDescriptions = ( refEnvironment: DimeEnvironment, refStream: DimeStream, refFields: DimeStreamField[] ) => {
 		let promises: any[]; promises = [];
-		refFields.forEach(( curField ) => {
+		refFields.forEach( ( curField ) => {
 			let envType: any; envType = refEnvironment.typedetails;
 			if ( !envType ) { envType = { value: '---' }; }
 			if ( curField.isDescribed || envType.value === 'HP' || envType.value === 'PBCS' ) {
@@ -2085,12 +2080,12 @@ export class ProcessTools {
 		return Promise.all( promises );
 	};
 	private populateStreamDescriptionsAction = ( refEnvironment: DimeEnvironment, refStream: DimeStream, refField: DimeStreamField ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.clearStreamDescriptions( refField ).
-				then(() => {
+				then( () => {
 					return this.environmentTool.getDescriptions( refStream, refField );
 				} ).
-				then(( result: any[] ) => {
+				then( ( result: any[] ) => {
 					return this.setStreamDescriptions( result, refStream, refField );
 				} ).
 				then( resolve ).
@@ -2098,7 +2093,7 @@ export class ProcessTools {
 		} );
 	}
 	private clearStreamDescriptions = ( refField: DimeStreamField ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'TRUNCATE TABLE STREAM' + refField.stream + '_DESCTBL' + refField.id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -2109,15 +2104,15 @@ export class ProcessTools {
 		} );
 	}
 	private setStreamDescriptions = ( refObj: any[], refStream: DimeStream, refField: DimeStreamField ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( refObj.length > 0 ) {
 				const curKeys = Object.keys( refObj[0] );
 				let insertQuery: string; insertQuery = '';
 				insertQuery += 'INSERT INTO STREAM' + refStream.id + '_DESCTBL' + refField.id + '(' + curKeys.join( ', ' ) + ') VALUES ?'
 				let curArray: any[];
-				refObj.forEach(( curResult, curItem ) => {
+				refObj.forEach( ( curResult, curItem ) => {
 					curArray = [];
-					curKeys.forEach(( curKey ) => {
+					curKeys.forEach( ( curKey ) => {
 						curArray.push( curResult[curKey] );
 					} );
 					refObj[curItem] = curArray;
@@ -2135,26 +2130,32 @@ export class ProcessTools {
 		} );
 	}
 	private assignDefaults = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Assigning default targets to the staging table.' ).
-				then(() => {
+				then( () => {
 					return this.fetchDefaults( refProcess.id );
 				} ).
-				then(( defaults: DimeProcessDefaultTarget[] ) => {
-					let promises: any[]; promises = [];
+				then( ( defaults: DimeProcessDefaultTarget[] ) => {
+					/*let promises: any[]; promises = [];
 					defaults.forEach(( curDefault ) => {
 						promises.push( this.assignDefault( curDefault ) );
 					} );
-					return Promise.all( promises );
+					return Promise.all( promises );*/
+					async.eachOfSeries(
+						defaults,
+						this.assignDefault
+					);
+					return Promise.resolve( '' );
 				} ).
-				then(() => {
+				then( () => {
 					resolve( refProcess );
 				} ).
 				catch( reject );
 		} );
 	}
 	private assignDefault = ( curDefault: DimeProcessDefaultTarget ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
+			console.log( 'Assigning default:', curDefault );
 			this.db.query( 'UPDATE PROCESS' + curDefault.process + '_DATATBL SET ?? = ?', ['TAR_' + curDefault.field, curDefault.value], ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -2165,9 +2166,9 @@ export class ProcessTools {
 		} );
 	}
 	private insertToStaging = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Inserting data to the staging table.' ).
-				then(() => {
+				then( () => {
 					if ( refProcess.pullResult.length === 0 ) {
 						resolve( refProcess );
 					} else {
@@ -2175,9 +2176,9 @@ export class ProcessTools {
 						let insertQuery: string; insertQuery = '';
 						insertQuery += 'INSERT INTO PROCESS' + refProcess.id + '_DATATBL (' + curKeys.join( ', ' ) + ') VALUES ?';
 						let curArray: any[];
-						refProcess.pullResult.forEach(( curResult, curItem ) => {
+						refProcess.pullResult.forEach( ( curResult, curItem ) => {
 							curArray = [];
-							curKeys.forEach(( curKey ) => {
+							curKeys.forEach( ( curKey ) => {
 								curArray.push( curResult[curKey] );
 							} );
 							refProcess.pullResult[curItem] = curArray;
@@ -2195,13 +2196,13 @@ export class ProcessTools {
 		} );
 	};
 	private pullFromSource = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Pulling data from source stream with the given filters.' ).
-				then(() => {
+				then( () => {
 					let selectQuery: string; selectQuery = 'SELECT ';
 					let selectFields: string[]; selectFields = [];
 					let groupFields: string[]; groupFields = [];
-					refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.sourceStreamFields.forEach( ( curField ) => {
 						if ( curField.isData ) {
 							if ( curField.aggregateFunction ) {
 								selectFields.push( curField.aggregateFunction + '(' + curField.name + ') AS SRC_' + curField.name );
@@ -2236,7 +2237,7 @@ export class ProcessTools {
 					}
 					return this.environmentTool.runProcedure( { stream: refProcess.sourceStream, procedure: selectQuery } );
 				} ).
-				then(( result: any[] ) => {
+				then( ( result: any[] ) => {
 					refProcess.pullResult = result;
 					resolve( refProcess );
 				} ).
@@ -2244,9 +2245,9 @@ export class ProcessTools {
 		} );
 	};
 	private clearStaging = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Clearing staging table.' ).
-				then(() => {
+				then( () => {
 					let clearQuery: string;
 					clearQuery = 'DELETE FROM PROCESS' + refProcess.id + '_DATATBL';
 					if ( refProcess.wherers.length > 0 ) {
@@ -2268,15 +2269,15 @@ export class ProcessTools {
 		} );
 	};
 	private fetchFiltersToRefProcess = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Fetching filters.' ).
-				then(() => {
+				then( () => {
 					return this.fetchFilters( refProcess.id );
 				} ).
-				then(( filters: any[] ) => {
+				then( ( filters: any[] ) => {
 					refProcess.filters = filters;
-					refProcess.filters.forEach(( curFilter ) => {
-						refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.filters.forEach( ( curFilter ) => {
+						refProcess.sourceStreamFields.forEach( ( curField ) => {
 							if ( curField.id === curFilter.field ) { curFilter.fieldName = curField.name; }
 						} );
 						if ( curFilter.filterfrom ) { refProcess.wherers.push( curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
@@ -2285,15 +2286,15 @@ export class ProcessTools {
 						if ( curFilter.filterbeq ) { refProcess.wherers.push( curFilter.fieldName + '>=' + curFilter.filterbeq ); }
 						if ( curFilter.filterseq ) { refProcess.wherers.push( curFilter.fieldName + '<=' + curFilter.filterseq ); }
 					} );
-					refProcess.wherers.forEach(( curWherer ) => {
+					refProcess.wherers.forEach( ( curWherer ) => {
 						refProcess.wherersWithSrc.push( 'SRC_' + curWherer );
 					} );
 					return this.fetchFiltersDataFile( refProcess.id );
 				} ).
-				then(( filters: any[] ) => {
+				then( ( filters: any[] ) => {
 					refProcess.filtersDataFile = filters;
-					refProcess.filtersDataFile.forEach(( curFilter ) => {
-						refProcess.sourceStreamFields.forEach(( curField ) => {
+					refProcess.filtersDataFile.forEach( ( curFilter ) => {
+						refProcess.sourceStreamFields.forEach( ( curField ) => {
 							if ( curField.id === curFilter.field ) { curFilter.fieldName = curField.name; }
 						} );
 						// if ( curFilter.filterfrom ) { refProcess.wherers.push( curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
@@ -2308,9 +2309,9 @@ export class ProcessTools {
 		} );
 	};
 	private runSourceProcedure = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Source procedure is initiating.' ).
-				then(() => {
+				then( () => {
 					return this.environmentTool.runProcedure( { stream: refProcess.sourceStream, procedure: refStep.details } );
 				} ).
 				then( resolve ).
@@ -2318,9 +2319,9 @@ export class ProcessTools {
 		} );
 	};
 	private identifyEnvironments = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Identifying process environments.' ).
-				then(() => {
+				then( () => {
 					this.identifySourceEnvironment( refProcess ).
 						then( this.identifyTargetEnvironment ).
 						then( resolve ).
@@ -2330,30 +2331,30 @@ export class ProcessTools {
 		} );
 	};
 	private identifySourceEnvironment = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.environmentTool.getEnvironmentDetails( { id: refProcess.source }, true ).
 				then( this.environmentTool.getTypeDetails ).
-				then(( result: DimeEnvironment ) => {
+				then( ( result: DimeEnvironment ) => {
 					refProcess.sourceEnvironment = result;
 					resolve( refProcess );
 				} ).catch( reject );
 		} );
 	};
 	private identifyTargetEnvironment = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.environmentTool.getEnvironmentDetails( { id: refProcess.target }, true ).
 				then( this.environmentTool.getTypeDetails ).
-				then(( result: DimeEnvironment ) => {
+				then( ( result: DimeEnvironment ) => {
 					refProcess.targetEnvironment = result;
 					resolve( refProcess );
 				} ).catch( reject );
 		} );
 	};
 	private createTables = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Creating process tables if necessary.' );
 			let promises: any[]; promises = [];
-			refProcess.isReady.forEach(( curTable, curKey ) => {
+			refProcess.isReady.forEach( ( curTable, curKey ) => {
 				if ( curTable.type === 'datatable' && curTable.status === false ) {
 					promises.push( this.createDataTable( refProcess, curKey ) );
 				}
@@ -2362,18 +2363,18 @@ export class ProcessTools {
 				}
 			} );
 			Promise.all( promises ).
-				then(( result ) => {
+				then( ( result ) => {
 					resolve( refProcess );
 				} ).
 				catch( reject );
 		} );
 	};
 	private createSumTable = ( refProcess: DimeProcessRunning, refKey: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Process sum table was missing. Creating now.' );
 			let createQuery: string; createQuery = '';
 			createQuery += 'CREATE TABLE PROCESS' + refProcess.id + '_SUMTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
-			refProcess.targetStreamFields.forEach(( curField ) => {
+			refProcess.targetStreamFields.forEach( ( curField ) => {
 				if ( refProcess.targetStreamType === 'HPDB' ) {
 					createQuery += ', ' + curField.name + ' VARCHAR(80)';
 				} else if ( curField.type === 'string' ) {
@@ -2396,12 +2397,12 @@ export class ProcessTools {
 		} );
 	}
 	private createDataTable = ( refProcess: DimeProcessRunning, refKey: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			// console.log(refProcess.isReady[refKey]);
 			this.logTool.appendLog( refProcess.status, 'Process data table was missing. Creating now.' );
 			let createQuery: string; createQuery = '';
 			createQuery += 'CREATE TABLE PROCESS' + refProcess.id + '_DATATBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
-			refProcess.sourceStreamFields.forEach(( curField ) => {
+			refProcess.sourceStreamFields.forEach( ( curField ) => {
 				if ( refProcess.sourceStreamType === 'HPDB' ) {
 					createQuery += ', SRC_' + curField.name + ' VARCHAR(80)';
 				} else if ( curField.type === 'string' ) {
@@ -2415,7 +2416,7 @@ export class ProcessTools {
 					createQuery += ', INDEX (SRC_' + curField.name + ')';
 				}
 			} );
-			refProcess.targetStreamFields.forEach(( curField ) => {
+			refProcess.targetStreamFields.forEach( ( curField ) => {
 				if ( refProcess.targetStreamType === 'HPDB' ) {
 					createQuery += ', TAR_' + curField.name + ' VARCHAR(80)';
 				} else if ( curField.type === 'string' ) {
@@ -2440,7 +2441,7 @@ export class ProcessTools {
 		} );
 	}
 	private isReady = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.isReadyProcess( refProcess ).
 				then( this.isReadyStreams ).
 				then( resolve ).
@@ -2448,10 +2449,10 @@ export class ProcessTools {
 		} );
 	}
 	private isReadyStreams = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Checking if streams are ready for process run.' );
 			this.streamTool.isReady( refProcess.sourceStream.id ).
-				then(( result ) => {
+				then( ( result ) => {
 					if ( result === false ) {
 						this.logTool.appendLog( refProcess.status, 'Source stream (' + refProcess.sourceStream.name + ') is not ready for process run. Preparing.' );
 						return this.streamTool.prepareTables( refProcess.sourceStream.id );
@@ -2460,10 +2461,10 @@ export class ProcessTools {
 						return Promise.resolve( 'ok' );
 					}
 				} ).
-				then(( result ) => {
+				then( ( result ) => {
 					return this.streamTool.isReady( refProcess.targetStream.id );
 				} ).
-				then(( result ) => {
+				then( ( result ) => {
 					if ( result === false ) {
 						this.logTool.appendLog( refProcess.status, 'Target stream (' + refProcess.targetStream.name + ') is not ready for process run. Preparing.' );
 						return this.streamTool.prepareTables( refProcess.targetStream.id );
@@ -2472,14 +2473,14 @@ export class ProcessTools {
 						return Promise.resolve( 'ok' );
 					}
 				} ).
-				then(() => {
+				then( () => {
 					resolve( refProcess );
 				} ).
 				catch( reject );
 		} );
 	}
 	private isReadyProcess = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Checking if process is ready to be run.' );
 			const systemDBname = this.tools.config.mysql.db;
 			// tslint:disable-next-line:max-line-length
@@ -2489,7 +2490,7 @@ export class ProcessTools {
 				} else {
 					refProcess.isReady.push( { tableName: 'PROCESS' + refProcess.id + '_DATATBL', process: refProcess.id, type: 'datatable', status: false } );
 					refProcess.isReady.push( { tableName: 'PROCESS' + refProcess.id + '_SUMTBL', process: refProcess.id, type: 'sumtable', status: false } );
-					rows.forEach(( curTable: any ) => {
+					rows.forEach( ( curTable: any ) => {
 						if ( curTable.TABLE_NAME === 'PROCESS' + refProcess.id + '_DATATBL' ) {
 							this.runningProcessSetTableStatus( refProcess, curTable.TABLE_NAME, true );
 						}
@@ -2503,19 +2504,19 @@ export class ProcessTools {
 		} );
 	}
 	private runningProcessSetTableStatus = ( refProcess: DimeProcessRunning, table: string, status: boolean ) => {
-		refProcess.isReady.forEach(( curTable ) => {
+		refProcess.isReady.forEach( ( curTable ) => {
 			if ( curTable.tableName === table ) { curTable.status = status; }
 		} );
 	}
 	private identifyStreams = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Identifying process streams.' );
 			this.identifySourceStream( refProcess ).
 				then( this.identifyTargetStream ).
-				then(( innerObj: DimeProcessRunning ) => {
+				then( ( innerObj: DimeProcessRunning ) => {
 					this.streamTool.listTypes().
-						then(( types: DimeStreamType[] ) => {
-							types.forEach(( curType ) => {
+						then( ( types: DimeStreamType[] ) => {
+							types.forEach( ( curType ) => {
 								if ( curType.id === refProcess.sourceStream.type ) {
 									refProcess.sourceStreamType = curType.value;
 								}
@@ -2530,10 +2531,10 @@ export class ProcessTools {
 		} );
 	};
 	private identifySourceStream = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let ourStep: DimeProcessStep; ourStep = { id: 0, process: refProcess.id, referedid: 0 };
 			let stepFound: boolean; stepFound = false;
-			refProcess.steps.forEach(( curStep ) => {
+			refProcess.steps.forEach( ( curStep ) => {
 				if ( curStep.type === 'pulldata' ) {
 					ourStep = curStep;
 					stepFound = true;
@@ -2543,11 +2544,11 @@ export class ProcessTools {
 				reject( 'No source stream definition found' );
 			} else {
 				this.streamTool.getOne( ourStep.referedid || 0 ).
-					then(( curStream: DimeStream ) => {
+					then( ( curStream: DimeStream ) => {
 						refProcess.sourceStream = curStream;
 						return this.streamTool.retrieveFields( ourStep.referedid || 0 );
 					} ).
-					then(( fields: DimeStreamField[] ) => {
+					then( ( fields: DimeStreamField[] ) => {
 						if ( fields.length === 0 ) {
 							return Promise.reject( 'No stream fields are defined for source stream' );
 						} else {
@@ -2561,10 +2562,10 @@ export class ProcessTools {
 		} );
 	};
 	private identifyTargetStream = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let ourStep: DimeProcessStep; ourStep = { id: 0, process: refProcess.id, referedid: 0 };
 			let stepFound: boolean; stepFound = false;
-			refProcess.steps.forEach(( curStep ) => {
+			refProcess.steps.forEach( ( curStep ) => {
 				if ( curStep.type === 'pushdata' ) {
 					ourStep = curStep;
 					stepFound = true;
@@ -2574,11 +2575,11 @@ export class ProcessTools {
 				reject( 'No target stream definition found' );
 			} else {
 				this.streamTool.getOne( ourStep.referedid || 0 ).
-					then(( curStream: DimeStream ) => {
+					then( ( curStream: DimeStream ) => {
 						refProcess.targetStream = curStream;
 						return this.streamTool.retrieveFields( ourStep.referedid || 0 );
 					} ).
-					then(( fields: DimeStreamField[] ) => {
+					then( ( fields: DimeStreamField[] ) => {
 						if ( fields.length === 0 ) {
 							return Promise.reject( 'No stream fields are defined for target stream' );
 						} else {
@@ -2592,11 +2593,11 @@ export class ProcessTools {
 		} );
 	};
 	private identifySteps = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Identifying process steps.' );
 			this.stepGetAll( refProcess.id ).
-				then(( steps: DimeProcessStep[] ) => {
-					steps.forEach(( curStep, curKey ) => {
+				then( ( steps: DimeProcessStep[] ) => {
+					steps.forEach( ( curStep, curKey ) => {
 						refProcess.steps.push( {
 							id: curStep.id,
 							process: curStep.process,
@@ -2618,12 +2619,12 @@ export class ProcessTools {
 		} );
 	}
 	private setInitiated = ( refProcess: DimeProcess ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( refProcess.status !== 'ready' && refProcess.status !== null ) {
 				reject( 'Process is not ready' );
 			} else {
 				this.logTool.openLog( 'Starting Process Run', 0, 'process', refProcess.id ).
-					then(( tracker ) => {
+					then( ( tracker ) => {
 						refProcess.status = tracker.toString();
 						return refProcess;
 					} ).
@@ -2634,9 +2635,9 @@ export class ProcessTools {
 		} );
 	}
 	private setCompleted = ( refProcess: DimeProcessRunning ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.logTool.closeLog( refProcess.status ).
-				then(() => {
+				then( () => {
 					return this.setStatus( refProcess.id, 'ready' );
 				} ).
 				then( resolve ).
@@ -2649,38 +2650,38 @@ export class ProcessTools {
 	public sendDataFile = ( refObj: { id: number, requser: any } ) => {
 		const id = refObj.id;
 		const requser = refObj.requser;
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			resolve( { result: 'OK' } );
 			let logID: number;
 			let topProcess: DimeProcessRunning;
 			let topStep: DimeProcessStepRunning;
 			this.logTool.openLog( 'Sending Data File', 0, 'sendDataFile', id ).
-				then(( newlogid: number ) => {
+				then( ( newlogid: number ) => {
 					logID = newlogid;
 					return this.getOne( id );
 				} ).
-				then(( innerProcess: DimeProcessRunning ) => {
+				then( ( innerProcess: DimeProcessRunning ) => {
 					topProcess = innerProcess;
 					topProcess.status = logID;
 					topProcess.recepients = requser.email;
 					topStep = { id: 0, process: id, type: '', referedid: id, details: '', sOrder: 1, isPending: false };
 					return this.sendDataCreateFile( topProcess, topStep, { cartesianArray: [] } );
 				} ).
-				then(( result ) => {
+				then( ( result ) => {
 					topStep.sOrder = 2;
 					return this.sendDataSendFile( topProcess, topStep, result );
 				} ).
-				then(() => {
+				then( () => {
 					return this.logTool.appendLog( logID, 'Data file is successfully sent.' );
 				} ).
-				then(() => {
+				then( () => {
 					return this.logTool.closeLog( logID );
 				} ).
-				catch(( issue: any ) => {
+				catch( ( issue: any ) => {
 					this.logTool.appendLog( logID, 'Failed:' + JSON.stringify( issue ) ).
-						then(() => {
+						then( () => {
 							return this.logTool.closeLog( logID );
-						} ).catch(( logissue: any ) => {
+						} ).catch( ( logissue: any ) => {
 							console.log( 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' );
 							console.log( 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' );
 							console.log( 'Fatal issue:' );

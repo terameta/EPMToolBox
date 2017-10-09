@@ -31,8 +31,8 @@
 				"../node_modules/jquery/dist/jquery.slim.js",
 				"../node_modules/tether/dist/js/tether.js",
 				"../node_modules/bootstrap/dist/js/bootstrap.min.js",
-				"../node_modules/admin-lte/dist/js/app.min.js",
-				"../node_modules/admin-lte/plugins/slimScroll/jquery.slimscroll.min.js"
+				"../node_modules/admin-lte/dist/js/adminlte.min.js",
+				"../node_modules/jquery-slimscroll/jquery.slimscroll.min.js"
 			],
 			"environmentSource": "environments/environment.ts",
 			"environments": {
