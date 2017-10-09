@@ -2143,9 +2143,13 @@ export class ProcessTools {
 					return Promise.all( promises );*/
 					async.eachOfSeries(
 						defaults,
-						this.assignDefault
+						( item, key, callback ) => {
+							this.assignDefault( item ).then( callback );
+						},
+						() => {
+							return Promise.resolve( '' );
+						}
 					);
-					return Promise.resolve( '' );
 				} ).
 				then( () => {
 					resolve( refProcess );
