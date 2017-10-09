@@ -2141,10 +2141,16 @@ export class ProcessTools {
 						promises.push( this.assignDefault( curDefault ) );
 					} );
 					return Promise.all( promises );*/
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( defaults );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
 					async.eachOfSeries(
 						defaults,
 						( item, key, callback ) => {
 							console.log( '>>>>>>>>>>>>>>>>>>', item, key );
+							callback( '3932' );
 						}, ( thehede ) => {
 							console.log( thehede );
 						}
