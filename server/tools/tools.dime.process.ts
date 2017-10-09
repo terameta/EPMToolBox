@@ -2143,6 +2143,14 @@ export class ProcessTools {
 					return Promise.all( promises );*/
 					async.eachOfSeries(
 						defaults,
+						(item, key, callback) => {
+							console.log( item , key);
+						}, ( thehede ) => {
+							console.log( thehede );
+						}
+					);
+					async.eachOfSeries(
+						defaults,
 						( item, key, callback ) => {
 							this.assignDefault( item ).then( callback );
 						},
