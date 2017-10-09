@@ -2162,8 +2162,10 @@ export class ProcessTools {
 			console.log( 'Assigning default:', curDefault );
 			this.db.query( 'UPDATE PROCESS' + curDefault.process + '_DATATBL SET ?? = ?', ['TAR_' + curDefault.field, curDefault.value], ( err, result, fields ) => {
 				if ( err ) {
+					console.log( 'Assign default bad:', curDefault );
 					reject( err );
 				} else {
+					console.log( 'Assign default good:', curDefault );
 					resolve( 'OK' );
 				}
 			} );
