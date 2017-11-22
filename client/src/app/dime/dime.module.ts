@@ -15,6 +15,7 @@ import { DimeenvironmentsComponent } from './dimeenvironment/dimeenvironments/di
 import { DimestreamsComponent } from './dimestream/dimestreams/dimestreams.component';
 import { DimemapsComponent } from './dimemap/dimemaps/dimemaps.component';
 import { DimeMatricesComponent } from './dimematrix/dimematrices/dimematrices.component';
+import { DimeAsyncProcessesComponent } from './dimeasyncprocess/dimeasyncprocesses/dimeasyncprocesses.component';
 
 import { DimescheduleModule } from './dimeschedule/dimeschedule.module';
 import { DimeprocessModule } from './dimeprocess/dimeprocess.module';
@@ -22,8 +23,10 @@ import { DimeenvironmentModule } from './dimeenvironment/dimeenvironment.module'
 import { DimestreamModule } from './dimestream/dimestream.module';
 import { DimemapModule } from './dimemap/dimemap.module';
 import { DimematrixModule } from './dimematrix/dimematrix.module';
+import { DimeAsyncProcessModule } from 'app/dime/dimeasyncprocess/dimeasyncprocess.module';
 
 import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
+
 
 const dimeRoutes: Routes = [
 	{
@@ -34,7 +37,8 @@ const dimeRoutes: Routes = [
 			{ path: 'environments', component: DimeenvironmentsComponent, loadChildren: 'app/dime/dimeenvironment/dimeenvironment.module#DimeenvironmentModule' },
 			{ path: 'streams', component: DimestreamsComponent, loadChildren: 'app/dime/dimestream/dimestream.module#DimestreamModule' },
 			{ path: 'maps', component: DimemapsComponent, loadChildren: 'app/dime/dimemap/dimemap.module#DimemapModule' },
-			{ path: 'matrices', component: DimeMatricesComponent, loadChildren: 'app/dime/dimematrix/dimematrix.module#DimematrixModule' }
+			{ path: 'matrices', component: DimeMatricesComponent, loadChildren: 'app/dime/dimematrix/dimematrix.module#DimematrixModule' },
+			{ path: 'asyncprocesses', component: DimeAsyncProcessesComponent, loadChildren: 'app/dime/dimeasyncprocess/dimeasyncprocess.module#DimeAsyncProcessModule' }
 		]
 	}
 ];
@@ -49,6 +53,7 @@ const dimeRoutes: Routes = [
 		DimestreamModule,
 		DimemapModule,
 		DimematrixModule,
+		DimeAsyncProcessModule,
 		RouterModule.forChild( dimeRoutes ),
 		AuthModule
 	],

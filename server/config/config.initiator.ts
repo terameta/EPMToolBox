@@ -314,6 +314,23 @@ tableList.push( {
 	],
 	primaryKey: 'id'
 } );
+tableList.push( {
+	name: 'asyncprocesses',
+	fields: [
+		'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+		'name VARCHAR(2048) NULL',
+		'sourceenvironment BIGINT UNSIGNED NULL',
+		'sourceapplication VARCHAR(256) NULL',
+		'sourceplantype VARCHAR(256) NULL',
+		'sourcefixes VARCHAR(8192) NULL',
+		'targettype INT UNSIGNED NULL',
+		'targetenvironment BIGINT UNSIGNED NULL',
+		'targetapplication VARCHAR(256) NULL',
+		'targetplantype VARCHAR(256) NULL',
+		'processmap VARCHAR(8192) NULL'
+	],
+	primaryKey: 'id'
+} );
 
 export function initiateInitiator( refDB: IPool, refConf: any ) {
 	db = refDB;

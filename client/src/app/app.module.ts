@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { Routes, RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 import { ToastrModule } from 'ngx-toastr';
 
@@ -24,6 +26,7 @@ import { DimeMapService } from './dime/dimemap/dimemap.service';
 import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
 import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
 import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
+import { DimeAsyncProcessService } from 'app/dime/dimeasyncprocess/dimeasyncprocess.service';
 
 // Access Management Services
 import { AcmServerService } from './accessmanagement/acmserver/acmserver.service';
@@ -31,6 +34,8 @@ import { AcmUserService } from './accessmanagement/acmuser/acmuser.service';
 
 // End User Services
 import { EndUserService } from './enduser/enduser.service';
+import { reducers, appInitialState, RouteEffects } from 'app/ngstore/models';
+import { StoreRouterConnectingModule } from '@ngrx/router-store';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -52,7 +57,10 @@ const appRoutes: Routes = [
 		RouterModule.forRoot( appRoutes ),
 		ToastrModule.forRoot(),
 		BrowserAnimationsModule,
-		AuthModule
+		AuthModule,
+		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
+		EffectsModule.forRoot( [RouteEffects] ),
+		StoreRouterConnectingModule
 	],
 	providers: [
 		AuthGuard,
@@ -63,6 +71,7 @@ const appRoutes: Routes = [
 		DimeMatrixService,
 		DimeProcessService,
 		DimeScheduleService,
+		DimeAsyncProcessService,
 		AcmServerService,
 		AcmUserService,
 		EndUserService
