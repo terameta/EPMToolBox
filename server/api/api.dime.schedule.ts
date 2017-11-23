@@ -1,5 +1,5 @@
 import { Application, Router } from 'express';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { MainTools } from '../tools/tools.main';
 import { Rester } from '../tools/tools.rester';
@@ -11,7 +11,7 @@ export class ApiDimeSchedule {
 	private rester: Rester;
 	private scheduleTool: DimeScheduleTool;
 
-	constructor( public app: Application, public db: IPool, public tools: MainTools ) {
+	constructor( public app: Application, public db: Pool, public tools: MainTools ) {
 		this.apiRoutes = Router();
 		this.scheduleTool = new DimeScheduleTool( this.db, this.tools );
 		this.rester = new Rester( this.tools );

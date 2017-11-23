@@ -1,5 +1,5 @@
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { MainTools } from './tools.main';
 import { DimeStream } from '../../shared/model/dime/stream';
@@ -8,7 +8,7 @@ import { EnvironmentTools } from './tools.dime.environment';
 export class StreamTools {
 	environmentTool: EnvironmentTools;
 
-	constructor( public db: IPool, public tools: MainTools ) {
+	constructor( public db: Pool, public tools: MainTools ) {
 		this.environmentTool = new EnvironmentTools( this.db, this.tools );
 	}
 

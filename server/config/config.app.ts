@@ -7,7 +7,7 @@ import * as helmet from 'helmet';
 import * as logger from 'morgan';
 import * as jwt from 'express-jwt';
 
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { SystemConfig } from '../../shared/model/systemconfig';
 
@@ -15,7 +15,7 @@ import { Application } from 'express';
 import { initializeRestApi } from '../api/api';
 import { MainTools } from '../tools/tools.main';
 
-export function initiateApplicationWorker( refDB: IPool, refConfig: SystemConfig ) {
+export function initiateApplicationWorker( refDB: Pool, refConfig: SystemConfig ) {
 	const app: Application = express();
 	const mainTools = new MainTools( refConfig, refDB );
 

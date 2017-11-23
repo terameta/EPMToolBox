@@ -1,5 +1,5 @@
 import { Application } from 'express';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { MainTools } from '../tools/tools.main';
 
@@ -11,6 +11,7 @@ import { ApiDimeStream } from './api.dime.stream';
 import { ApiDimeMap } from './api.dime.map';
 import { ApiDimeMatrix } from './api.dime.matrix';
 import { ApiDimeProcess } from './api.dime.process';
+import { ApiDimeAsyncProcess } from './api.dime.asyncprocess';
 import { ApiDimeSchedule } from './api.dime.schedule';
 
 // Access Management Route APIs
@@ -23,7 +24,7 @@ import { ApiAuth } from './api.auth';
 
 import { ApiSettings } from './api.settings';
 
-export function initializeRestApi( app: Application, refDB: IPool, refTools: MainTools ) {
+export function initializeRestApi( app: Application, refDB: Pool, refTools: MainTools ) {
 	const apiLog = new ApiLog( app, refDB, refTools );
 
 	const apiDimeEnvironment = new ApiDimeEnvironment( app, refDB, refTools );
@@ -31,6 +32,7 @@ export function initializeRestApi( app: Application, refDB: IPool, refTools: Mai
 	const apiDimeMap = new ApiDimeMap( app, refDB, refTools );
 	const apiDimeMatrix = new ApiDimeMatrix( app, refDB, refTools );
 	const apiDimeProcess = new ApiDimeProcess( app, refDB, refTools );
+	const apiDimeAsyncProcess = new ApiDimeAsyncProcess( app, refDB, refTools );
 	const apiDimeSchedule = new ApiDimeSchedule( app, refDB, refTools );
 
 	const apiAcmServer = new ApiAcmServers( app, refDB, refTools );

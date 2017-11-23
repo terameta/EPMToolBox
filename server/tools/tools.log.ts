@@ -1,11 +1,11 @@
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { MainTools } from './tools.main';
 import { LogItem } from '../../shared/model/logitem';
 
 export class ATLogger {
 	constructor(
-		public db: IPool,
+		public db: Pool,
 		public tools: MainTools
 	) { }
 

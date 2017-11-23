@@ -1,7 +1,7 @@
 import { Application, Router } from 'express';
 import * as express from 'express';
 
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { Rester } from '../tools/tools.rester';
 import { MainTools } from '../tools/tools.main';
@@ -12,7 +12,7 @@ export class ApiDimeProcess {
 	apiRoutes: Router;
 	rester: Rester;
 
-	constructor( public app: Application, public db: IPool, public tools: MainTools ) {
+	constructor( public app: Application, public db: Pool, public tools: MainTools ) {
 		this.processTools = new ProcessTools( this.db, this.tools );
 		this.apiRoutes = Router();
 		this.rester = new Rester( this.tools );

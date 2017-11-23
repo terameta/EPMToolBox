@@ -1,4 +1,4 @@
-import { IPool, escape } from 'mysql';
+import { Pool, escape } from 'mysql';
 import * as bcrypt from 'bcrypt';
 import * as ldap from 'ldapjs';
 // import * as activedirectory from 'activedirectory';
@@ -23,7 +23,7 @@ export class AuthTools {
 	private acmServerTool: AcmServerTool;
 
 	constructor(
-		public db: IPool,
+		public db: Pool,
 		public tools: MainTools
 	) {
 		this.acmServerTool = new AcmServerTool( this.db, this.tools );

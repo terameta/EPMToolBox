@@ -1,3 +1,8 @@
+import {
+	DIME_ASYNC_PROCESS_ACTIONS,
+	DimeAsyncProcessAllLoadInitiateAction,
+	dimeAsyncProcessReducer,
+} from '../dime/dimeasyncprocess/dimeasyncprocess.ngrx';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { Actions, Effect } from '@ngrx/effects';
@@ -25,6 +30,7 @@ export function routeReducer( state: RouteState, action: RouterNavigationAction 
 }
 
 export const reducers = {
+	dimeAsynProcess: dimeAsyncProcessReducer,
 	router: routeReducer
 }
 
@@ -44,13 +50,6 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 			if ( r.payload.routerState ) {
 				if ( r.payload.routerState.root ) {
 					paramset = disectNavigation( r.payload.routerState.root, segments );
-					// if ( r.payload.routerState.root.firstChild ) {
-					// 	if ( r.payload.routerState.root.firstChild.routeConfig ) {
-					// 		if ( r.payload.routerState.root.firstChild.routeConfig.path ) {
-					// 			mainSegment = r.payload.routerState.root.firstChild.routeConfig.path;
-					// 		}
-					// 	}
-					// }
 				}
 			}
 		}
@@ -68,8 +67,8 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 				case 'asyncprocesses': {
 					switch ( segments[2] ) {
 						case 'asyncprocess-list': {
-							console.log( 'We are at async processes list' );
-							return { type: 'DONOTHING' };
+							console.log( 'DimeAsyncProcessAllLoadInitiateAction should be initiated' );
+							return new DimeAsyncProcessAllLoadInitiateAction();
 						}
 						default: {
 							console.log( 'We are at async processes default' );
@@ -87,27 +86,6 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 			return { type: 'DONOTHING' };
 		}
 	}
-
-	// if ( segments.length > 0 ) {
-	// 	switch ( segments[0] ) {
-	// 		case 'dime': {
-	// 			if ( segments[1] ) {
-	// 				switch ( segments[1] ) {
-	// 					case: 'secrets': {
-
-	// 					}
-	// 				}
-	// 			} else {
-	// 				return { type: 'DONOTHING' };
-	// 			}
-	// 		}
-	// 		default: {
-	// 			return { type: 'DONOTHING' };
-	// 		}
-	// 	}
-	// } else {
-	// 	return { type: 'DONOTHING' };
-	// }
 }
 
 function disectNavigation( r: ActivatedRouteSnapshot, segments: string[] ) {

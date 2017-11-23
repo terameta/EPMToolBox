@@ -1,5 +1,5 @@
 import { MainTools } from './tools.main';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 import * as async from 'async';
 import * as bcrypt from 'bcrypt';
 
@@ -7,7 +7,7 @@ import { AcmUser } from '../../shared/model/accessmanagement/user';
 
 export class AcmUserTool {
 
-	constructor( public db: IPool, public tools: MainTools ) {
+	constructor( public db: Pool, public tools: MainTools ) {
 
 	}
 

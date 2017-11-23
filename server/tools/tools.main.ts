@@ -1,4 +1,4 @@
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 import * as jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import * as crypto from 'crypto';
@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 export class MainTools {
 	// config: any;
 
-	constructor( public config: any, public db: IPool ) {
+	constructor( public config: any, public db: Pool ) {
 		// this.config = refConfig;
 	}
 

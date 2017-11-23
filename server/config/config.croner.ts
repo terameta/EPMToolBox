@@ -4,9 +4,9 @@ import { MainTools } from '../tools/tools.main';
 import { SystemConfig } from '../../shared/model/systemconfig';
 import { DimeScheduleTool } from '../tools/tools.dime.schedule';
 import * as Cron from 'cron';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
-// export function initiateCronWorker( refDB: IPool ) {
+// export function initiateCronWorker( refDB: Pool ) {
 // 	const jobPer10Sec = new Cron.CronJob(
 // 		'0 * * * * *',
 // 		function () {
@@ -26,7 +26,7 @@ export class InitiateCronWorker {
 	private scheduleTool: DimeScheduleTool;
 	private mainTools: MainTools;
 
-	constructor( private db: IPool, refConfig: SystemConfig ) {
+	constructor( private db: Pool, refConfig: SystemConfig ) {
 		this.mainTools = new MainTools( refConfig, db );
 		this.scheduleTool = new DimeScheduleTool( db, this.mainTools );
 		this.registeredCrons = [];

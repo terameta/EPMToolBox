@@ -1,4 +1,8 @@
+import { HttpClientModule } from '@angular/common/http';
+import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
+import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';
 import { AuthHttp, AuthConfig, AUTH_PROVIDERS, provideAuth } from 'angular2-jwt';
+import { JwtModule } from '@auth0/angular-jwt';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -50,6 +54,12 @@ const appRoutes: Routes = [
 		BrowserModule,
 		FormsModule,
 		HttpModule,
+		HttpClientModule,
+		JwtModule.forRoot( {
+			config: {
+				tokenGetter: () => localStorage.getItem( 'token' )
+			}
+		} ),
 		WelcomeModule,
 		DimeModule,
 		AccessManagementModule,
@@ -59,7 +69,7 @@ const appRoutes: Routes = [
 		BrowserAnimationsModule,
 		AuthModule,
 		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
-		EffectsModule.forRoot( [RouteEffects] ),
+		EffectsModule.forRoot( [DimeAsyncProcessEffects, RouteEffects] ),
 		StoreRouterConnectingModule
 	],
 	providers: [
@@ -74,7 +84,8 @@ const appRoutes: Routes = [
 		DimeAsyncProcessService,
 		AcmServerService,
 		AcmUserService,
-		EndUserService
+		EndUserService,
+		DimeAsyncProcessBackend
 	],
 	bootstrap: [AppComponent]
 } )

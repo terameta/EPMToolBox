@@ -1,13 +1,13 @@
 import * as async from 'async';
 import { MainTools } from './tools.main';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { DimeMatrix } from '../../shared/model/dime/matrix';
 import { DimeMatrixField } from '../../shared/model/dime/matrixfield';
 
 export class DimeMatrixTool {
 
-	constructor( public db: IPool, public tools: MainTools ) {
+	constructor( public db: Pool, public tools: MainTools ) {
 
 	}
 

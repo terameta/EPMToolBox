@@ -1,4 +1,4 @@
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
 import { Readable } from 'stream';
@@ -20,7 +20,7 @@ export class MapTools {
 	private environmentTool: EnvironmentTools;
 	private mailTool: MailTool;
 	constructor(
-		public db: IPool,
+		public db: Pool,
 		public tools: MainTools ) {
 		this.streamTool = new StreamTools( this.db, this.tools );
 		this.environmentTool = new EnvironmentTools( this.db, this.tools );

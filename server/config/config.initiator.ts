@@ -1,6 +1,6 @@
 import { ATStatusType } from '../../shared/enums/generic/statustypes';
 import * as bcrypt from 'bcrypt';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 interface TableDefiner {
 	name: string;
@@ -10,7 +10,7 @@ interface TableDefiner {
 	fieldsToCheck?: Array<string>;
 }
 
-let db: IPool;
+let db: Pool;
 let configuration: any;
 let tableList: Array<TableDefiner>; tableList = [];
 
@@ -332,7 +332,7 @@ tableList.push( {
 	primaryKey: 'id'
 } );
 
-export function initiateInitiator( refDB: IPool, refConf: any ) {
+export function initiateInitiator( refDB: Pool, refConf: any ) {
 	db = refDB;
 	configuration = refConf;
 	console.log( '===============================================' );

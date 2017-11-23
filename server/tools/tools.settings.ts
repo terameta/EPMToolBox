@@ -1,9 +1,9 @@
 import { MainTools } from './tools.main';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 export class SettingsTool {
 	constructor(
-		public db: IPool,
+		public db: Pool,
 		public tools: MainTools
 	) { }
 

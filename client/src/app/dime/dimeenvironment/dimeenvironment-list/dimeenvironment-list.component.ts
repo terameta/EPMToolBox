@@ -1,16 +1,16 @@
-import { Router } from "@angular/router";
-import { Component, OnInit } from "@angular/core";
+import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 
-import { Observable } from "rxjs/Rx";
-import { ToastrService } from "ngx-toastr";
+import { Observable } from 'rxjs/Rx';
+import { ToastrService } from 'ngx-toastr';
 
-import { DimeEnvironmentService } from "../dimeenvironment.service";
+import { DimeEnvironmentService } from '../dimeenvironment.service';
 // import { Environment } from "../../../../../../shared/model/environment";
 
 @Component( {
-	selector: "app-dimeenvironment-list",
-	templateUrl: "./dimeenvironment-list.component.html",
-	styleUrls: ["./dimeenvironment-list.component.css"]
+	selector: 'app-dimeenvironment-list',
+	templateUrl: './dimeenvironment-list.component.html',
+	styleUrls: ['./dimeenvironment-list.component.css']
 } )
 export class DimeenvironmentListComponent implements OnInit {
 

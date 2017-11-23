@@ -1,5 +1,5 @@
 import { Application, Router } from 'express';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { Rester } from '../tools/tools.rester';
 import { MainTools } from '../tools/tools.main';
@@ -11,7 +11,7 @@ export class ApiAuth {
 	apiRoutes: Router;
 	rester: Rester;
 
-	constructor( public app: Application, public db: IPool, public tools: MainTools ) {
+	constructor( public app: Application, public db: Pool, public tools: MainTools ) {
 		this.authTool = new AuthTools( this.db, this.tools );
 		this.apiRoutes = Router();
 		this.rester = new Rester( this.tools );
@@ -32,7 +32,7 @@ import * as bcrypt from 'bcrypt';
 
 import { MainTools } from '../tools/tools.main';
 
-export function apiAuth(app: Application, refDB: mysql.IPool, refTools: MainTools) {
+export function apiAuth(app: Application, refDB: mysql.Pool, refTools: MainTools) {
 	app.route('/api/auth/signin').post((req, res) => {
 
 

@@ -10,7 +10,7 @@ const numCPUs = cpus().length;
 
 const configuration = JSON.parse( fs.readFileSync( './system.conf', 'utf8' ) );
 
-const db: mysql.IPool = mysql.createPool( {
+const db: mysql.Pool = mysql.createPool( {
 	connectionLimit: 10,
 	queueLimit: 0,
 	host: configuration.mysql.host,

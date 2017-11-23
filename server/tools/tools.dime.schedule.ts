@@ -4,7 +4,7 @@ import { SortByPosition } from '../../shared/utilities/utilityFunctions';
 import { DimeScheduleStepType } from '../../shared/enums/dime/schedulesteptypes';
 import * as async from 'async';
 import { MainTools } from './tools.main';
-import { IPool } from 'mysql';
+import { Pool } from 'mysql';
 
 import { ATStatusType } from '../../shared/enums/generic/statustypes';
 
@@ -15,7 +15,7 @@ export class DimeScheduleTool {
 	logTool: ATLogger;
 	private processTool: ProcessTools;
 
-	constructor( public db: IPool, public tools: MainTools ) {
+	constructor( public db: Pool, public tools: MainTools ) {
 		this.logTool = new ATLogger( this.db, this.tools );
 		this.processTool = new ProcessTools( this.db, this.tools );
 	}
