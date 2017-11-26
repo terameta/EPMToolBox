@@ -1,3 +1,7 @@
+import { DimeStreamEffects } from './dime/dimestream/dimestream.ngrx';
+import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
+import { DimeEnvironmentBackend } from './dime/dimeenvironment/dimeenvironment.backend';
+import { DimeEnvironmentEffects } from './dime/dimeenvironment/dimeenvironment.ngrx';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
 import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';
@@ -46,6 +50,10 @@ const appRoutes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'welcome' }
 ];
 
+export function tokenGetter() {
+	return localStorage.getItem( 'token' );
+}
+
 @NgModule( {
 	declarations: [
 		AppComponent
@@ -57,7 +65,7 @@ const appRoutes: Routes = [
 		HttpClientModule,
 		JwtModule.forRoot( {
 			config: {
-				tokenGetter: () => localStorage.getItem( 'token' )
+				tokenGetter: tokenGetter
 			}
 		} ),
 		WelcomeModule,
@@ -69,7 +77,7 @@ const appRoutes: Routes = [
 		BrowserAnimationsModule,
 		AuthModule,
 		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
-		EffectsModule.forRoot( [DimeAsyncProcessEffects, RouteEffects] ),
+		EffectsModule.forRoot( [RouteEffects, DimeAsyncProcessEffects, DimeEnvironmentEffects, DimeStreamEffects] ),
 		StoreRouterConnectingModule
 	],
 	providers: [
@@ -85,7 +93,9 @@ const appRoutes: Routes = [
 		AcmServerService,
 		AcmUserService,
 		EndUserService,
-		DimeAsyncProcessBackend
+		DimeAsyncProcessBackend,
+		DimeEnvironmentBackend,
+		DimeStreamBackend
 	],
 	bootstrap: [AppComponent]
 } )

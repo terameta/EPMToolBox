@@ -15,4 +15,7 @@ export class DimeAsyncProcessBackend {
 	oneLoad = ( id: number ): Observable<DimeAsyncProcess> => {
 		return this.http.get<DimeAsyncProcess>( this.baseUrl + '/' + id );
 	}
+	oneCreate = ( refObj: DimeAsyncProcess ): Observable<DimeAsyncProcess> => {
+		return this.http.post<DimeAsyncProcess>( this.baseUrl, refObj );
+	}
 }

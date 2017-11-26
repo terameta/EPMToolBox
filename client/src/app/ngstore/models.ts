@@ -1,20 +1,31 @@
+import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
+import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
 import {
 	DIME_ASYNC_PROCESS_ACTIONS,
 	DimeAsyncProcessAllLoadInitiateAction,
 	dimeAsyncProcessReducer,
+	DimeAsyncProcessState,
 } from '../dime/dimeasyncprocess/dimeasyncprocess.ngrx';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
-import { State, Store } from '@ngrx/store';
+import { Action, State, Store } from '@ngrx/store';
 import { of } from 'rxjs/observable/of';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
-export interface AppState { router: RouteState }
+export interface AppState { router: RouteState, dimeAsyncProcess: DimeAsyncProcessState, dimeEnvironment: DimeEnvironmentState, dimeStream: DimeStreamState }
 
 export const appInitialState: AppState = {
-	router: <RouteState>{}
+	router: <RouteState>{},
+	dimeAsyncProcess: <DimeAsyncProcessState>{},
+	dimeEnvironment: <DimeEnvironmentState>{},
+	dimeStream: <DimeStreamState>{}
+}
+
+export class DoNothingAction implements Action {
+	readonly type = 'DONOTHINGATALL';
+	constructor() { }
 }
 
 export function routeReducer( state: RouteState, action: RouterNavigationAction ): RouteState {
@@ -30,8 +41,10 @@ export function routeReducer( state: RouteState, action: RouterNavigationAction 
 }
 
 export const reducers = {
-	dimeAsynProcess: dimeAsyncProcessReducer,
-	router: routeReducer
+	router: routeReducer,
+	dimeAsyncProcess: dimeAsyncProcessReducer,
+	dimeEnvironment: dimeEnvironmentReducer,
+	dimeStream: dimeStreamReducer
 }
 
 @Injectable()
@@ -56,34 +69,33 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 	}
 	switch ( segments[0] ) {
 		case 'welcome': {
-			return { type: 'DONOTHING' };
+			return new DoNothingAction();
 		}
 		case 'dime': {
 			switch ( segments[1] ) {
 				case 'processes': {
 					console.log( 'We are at processes' );
-					return { type: 'DONOTHING' };
+					return new DoNothingAction();
 				}
 				case 'asyncprocesses': {
 					switch ( segments[2] ) {
 						case 'asyncprocess-list': {
-							console.log( 'DimeAsyncProcessAllLoadInitiateAction should be initiated' );
 							return new DimeAsyncProcessAllLoadInitiateAction();
 						}
 						default: {
 							console.log( 'We are at async processes default' );
-							return { type: 'DONOTHING' };
+							return new DoNothingAction();
 						}
 					}
 				}
 				default: {
-					return { type: 'DONOTHING' };
+					return new DoNothingAction();
 				}
 			}
 		}
 		default: {
 			console.log( 'Falled back to default' );
-			return { type: 'DONOTHING' };
+			return new DoNothingAction();
 		}
 	}
 }

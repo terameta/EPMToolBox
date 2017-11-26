@@ -1,3 +1,5 @@
+import { DimeAsyncProcessOneCreateInitiateAction, DimeAsyncProcessState } from '../dimeasyncprocess.ngrx';
+import { Store } from '@ngrx/store';
 import { Component, OnInit } from '@angular/core';
 
 @Component( {
@@ -7,9 +9,13 @@ import { Component, OnInit } from '@angular/core';
 } )
 export class DimeAsyncProcessToolbarComponent implements OnInit {
 
-	constructor() { }
+	constructor( private store: Store<DimeAsyncProcessState> ) { }
 
 	ngOnInit() {
+	}
+
+	public create = () => {
+		this.store.dispatch( new DimeAsyncProcessOneCreateInitiateAction );
 	}
 
 }

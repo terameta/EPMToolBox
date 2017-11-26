@@ -4,30 +4,34 @@
 			<thead>
 				<tr>
 					<th>Name</th>
-					<th>Stream</th>
-					<th>Server</th>
-					<th>Port</th>
-					<th>isVerified?</th>
-					<th>Username</th>
+					<th>Source Environment</th>
+					<th>Source Application</th>
+					<th>Source Plan Type</th>
+					<th>Source Fixes</th>
+					<th>Target Type</th>
+					<th>Target Environment</th>
+					<th>Target Application</th>
+					<th>Target Plan Type</th>
+					<th>Process Map</th>
 					<th width="80">Actions</th>
 				</tr>
 			</thead>
-			<!-- <tbody>
-				<tr *ngFor="let environment of mainService.items | async">
-					<td>{{ environment.name }}</td>
-					<td>
+			<tbody>
+				<tr *ngFor="let curItem of items">
+					<td>{{ curItem.name }}</td>
+					<!-- <td>
 						<span *ngFor="let envType of mainService.typeList">
 							<span *ngIf="envType.id == environment.type">{{envType.name}}</span>
 						</span>
-					</td>
-					<td>{{ environment.server }}</td>
+					</td> -->
+					<!-- <td>{{ environment.server }}</td>
 					<td>{{ environment.port }}</td>
 					<td>
 						<i class="fa fa-fw fa-check-square-o" *ngIf="environment.verified" title="Environment is verified"></i>
 						<i class="fa fa-fw fa-square-o" *ngIf="!environment.verified" title="Environment is not verified"></i>
 					</td>
-					<td>{{ environment.username }}</td>
-					<td>
+					<td>{{ environment.username }}</td> -->
+					<!-- <td>
 						<div class="btn-toolbar" role="toolbar" aria-label="Environment Actions">
 							<div class="btn-group btn-group-xs" role="group">
 								<button class="btn btn-xs btn-default" [routerLink]="['../environment-detail', environment.id]" title="Details/Edit"><i class="fa fa-pencil fa-fw"></i></button>
@@ -36,9 +40,10 @@
 								<button type="button" class="btn btn-danger btn-xs" (click)="mainService.delete(environment.id, environment.name)" title="Delete"><i class="fa fa-trash fa-fw" aria-hidden="true"></i></button>
 							</div>
 						</div>
-					</td>
+					</td> -->
 				</tr>
-			</tbody> -->
+			</tbody>
 		</table>
+		<pre>{{ items | json }}</pre>
 	</div>
 </div>
