@@ -15,7 +15,7 @@ export class DimeAsyncProcessToolbarComponent implements OnInit {
 	}
 
 	public create = () => {
-		this.store.dispatch( new DimeAsyncProcessOneCreateInitiateAction );
+		this.store.dispatch( new DimeAsyncProcessOneCreateInitiateAction() );
 	}
 
 }

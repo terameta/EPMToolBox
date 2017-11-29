@@ -1,3 +1,4 @@
+import { DimeMatrixAllLoadInitiateAction, dimeMatrixReducer, DimeMatrixState } from '../dime/dimematrix/dimematrix.ngrx';
 import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
 import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
 import {
@@ -14,13 +15,20 @@ import { Action, State, Store } from '@ngrx/store';
 import { of } from 'rxjs/observable/of';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
-export interface AppState { router: RouteState, dimeAsyncProcess: DimeAsyncProcessState, dimeEnvironment: DimeEnvironmentState, dimeStream: DimeStreamState }
+export interface AppState {
+	router: RouteState,
+	dimeAsyncProcess: DimeAsyncProcessState,
+	dimeEnvironment: DimeEnvironmentState,
+	dimeStream: DimeStreamState,
+	dimeMatrix: DimeMatrixState
+}
 
 export const appInitialState: AppState = {
 	router: <RouteState>{},
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
 	dimeEnvironment: <DimeEnvironmentState>{},
-	dimeStream: <DimeStreamState>{}
+	dimeStream: <DimeStreamState>{},
+	dimeMatrix: <DimeMatrixState>{}
 }
 
 export class DoNothingAction implements Action {
@@ -44,7 +52,8 @@ export const reducers = {
 	router: routeReducer,
 	dimeAsyncProcess: dimeAsyncProcessReducer,
 	dimeEnvironment: dimeEnvironmentReducer,
-	dimeStream: dimeStreamReducer
+	dimeStream: dimeStreamReducer,
+	dimeMatrix: dimeMatrixReducer
 }
 
 @Injectable()
@@ -84,6 +93,17 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						}
 						default: {
 							console.log( 'We are at async processes default' );
+							return new DoNothingAction();
+						}
+					}
+				}
+				case 'matrices': {
+					switch ( segments[2] ) {
+						case 'matrix-list': {
+							return new DimeMatrixAllLoadInitiateAction();
+						}
+						default: {
+							console.log( 'We are at matrices default' );
 							return new DoNothingAction();
 						}
 					}

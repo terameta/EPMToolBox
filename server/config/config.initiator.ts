@@ -1,3 +1,5 @@
+import { Version0000check } from './initiators/version0000check';
+import { Version0000to0001 } from './initiators/version0000to0001';
 import { ATStatusType } from '../../shared/enums/generic/statustypes';
 import * as bcrypt from 'bcrypt';
 import { Pool } from 'mysql';
@@ -14,21 +16,6 @@ let db: Pool;
 let configuration: any;
 let tableList: Array<TableDefiner>; tableList = [];
 
-tableList.push( {
-	name: 'users',
-	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-		'username varchar(255) NOT NULL',
-		'password varchar(255) NOT NULL',
-		'role varchar(255)',
-		'type varchar(255)',
-		'ldapserver BIGINT UNSIGNED',
-		'email varchar(1024)',
-		'name varchar(255)',
-		'surname varchar(255)'],
-	primaryKey: 'id',
-	values: [{ username: 'admin', password: bcrypt.hashSync( 'interesting', 10 ), role: 'admin', type: 'local' }],
-	fieldsToCheck: ['username', 'role']
-} );
 tableList.push( {
 	name: 'environmenttypes',
 	fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT', 'name varchar(255) NOT NULL', 'value varchar(255) NOT NULL'],
@@ -336,12 +323,15 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 	db = refDB;
 	configuration = refConf;
 	console.log( '===============================================' );
-	console.log( '===============================================' );
 	console.log( '=== Initiator is now starting =================' );
-	checkTables( configuration ).
-		then( modifyTables ).
-		then( clearResidue );
+	console.log( '===============================================' );
+	new Version0000check( db, configuration ).checkVersion().
+		then( new Version0000to0001( db, configuration ).upgrade );
+	// checkTables( configuration ).
+	// 	then( modifyTables ).
+	// 	then( clearResidue );
 }
+
 function clearResidue() {
 	return new Promise(( resolve, reject ) => {
 		console.log( '===============================================' );

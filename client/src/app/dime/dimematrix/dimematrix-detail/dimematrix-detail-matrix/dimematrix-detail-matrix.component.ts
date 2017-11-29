@@ -199,7 +199,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 		} );
 		if ( isSaveable ) {
 			change.saveresult = '<center><i class="fa fa-circle-o-notch fa-spin"></i></center>';
-			this.mainService.saveMatrixTuple( change ).subscribe(( result ) => {
+			/*this.mainService.saveMatrixTuple( change ).subscribe(( result ) => {
 				// console.log( result );
 				if ( result.insertId ) {
 					change.id = result.insertId;
@@ -210,7 +210,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				change.saveresult = '<center><i class="fa fa-exclamation-circle" style="color:red;font-size:12px;"></i></center>';
 				this.hot.loadData( this.dataObject );
 				console.error( error );
-			} );
+			} );*/
 		}
 	}
 	private prepareDropdowns = () => {
@@ -324,7 +324,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 			} else {
 				currentFilter = {};
 			}
-			this.mainService.fetchMatrixTable( currentFilter ).subscribe(( data ) => {
+			/*this.mainService.fetchMatrixTable( currentFilter ).subscribe(( data ) => {
 				if ( this.dataObject ) {
 					this.dataObject = [this.dataObject[0], this.dataObject[1]];
 				} else {
@@ -336,7 +336,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				resolve();
 			}, ( error ) => {
 				reject( error );
-			} );
+			} );*/
 		} );
 	}
 	private defineHotItems = () => {

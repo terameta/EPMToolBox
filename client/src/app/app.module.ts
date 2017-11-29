@@ -1,3 +1,5 @@
+import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.ngrx';
+import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { DimeStreamEffects } from './dime/dimestream/dimestream.ngrx';
 import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
 import { DimeEnvironmentBackend } from './dime/dimeenvironment/dimeenvironment.backend';
@@ -77,7 +79,13 @@ export function tokenGetter() {
 		BrowserAnimationsModule,
 		AuthModule,
 		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
-		EffectsModule.forRoot( [RouteEffects, DimeAsyncProcessEffects, DimeEnvironmentEffects, DimeStreamEffects] ),
+		EffectsModule.forRoot( [
+			RouteEffects,
+			DimeAsyncProcessEffects,
+			DimeEnvironmentEffects,
+			DimeStreamEffects,
+			DimeMatrixEffects
+		] ),
 		StoreRouterConnectingModule
 	],
 	providers: [
@@ -95,7 +103,8 @@ export function tokenGetter() {
 		EndUserService,
 		DimeAsyncProcessBackend,
 		DimeEnvironmentBackend,
-		DimeStreamBackend
+		DimeStreamBackend,
+		DimeMatrixBackend
 	],
 	bootstrap: [AppComponent]
 } )
