@@ -46,6 +46,7 @@ import { AcmUserService } from './accessmanagement/acmuser/acmuser.service';
 import { EndUserService } from './enduser/enduser.service';
 import { reducers, appInitialState, RouteEffects } from 'app/ngstore/models';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -86,7 +87,10 @@ export function tokenGetter() {
 			DimeStreamEffects,
 			DimeMatrixEffects
 		] ),
-		StoreRouterConnectingModule
+		StoreRouterConnectingModule,
+		StoreDevtoolsModule.instrument( {
+			maxAge: 25
+		} )
 	],
 	providers: [
 		AuthGuard,

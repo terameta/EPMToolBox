@@ -4,16 +4,16 @@
 			<thead>
 				<tr>
 					<th>Name</th>
-					<th>Bound Map</th>
+					<th>Bound Stream</th>
 					<th width="80">Actions</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr *ngFor="let item of (mainService.items | async); let i = index;">
+				<tr *ngFor="let item of items; let i = index;">
 					<td>{{ item.name }}</td>
 					<td>
-						<span *ngFor="let map of mapService.items | async">
-							<span *ngIf="map.id == item.map">{{map.name}}</span>
+						<span *ngFor="let stream of streams">
+							<span *ngIf="stream.id == item.stream">{{stream.name}}</span>
 						</span>
 						<!--<pre>{{mapService.items | async | json}}</pre>-->
 					</td>

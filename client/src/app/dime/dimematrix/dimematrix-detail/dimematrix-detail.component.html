@@ -4,13 +4,18 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li><a href="#matrixtabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
-			<li><a href="#matrixtabfields" data-toggle="tab">Fields</a></li>
-			<li class="active"><a href="#matrixtabmatrix" data-toggle="tab">Validity Matrix</a></li>
+			<li routerLinkActive="active"><a routerLink="definitions" data-toggle="tab">Main Definitions</a></li>
+			<li routerLinkActive="active"><a routerLink="fields" data-toggle="tab">Fields</a></li>
+			<li routerLinkActive="active"><a routerLink="matrix" data-toggle="tab">Validity Matrix</a></li>
 		</ul>
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
+			<div class="tab-pane active">
+				<router-outlet></router-outlet>
+			</div>
+		</div>
+		<!-- <div class="tab-content">
 			<div class="tab-pane fade in" id="matrixtabmaindefinitions">
 				<app-dimematrix-detail-maindefinitions></app-dimematrix-detail-maindefinitions>
 			</div>
@@ -20,6 +25,6 @@
 			<div class="tab-pane fade in active" id="matrixtabmatrix">
 				<app-dimematrix-detail-matrix></app-dimematrix-detail-matrix>
 			</div>
-		</div>
+		</div> -->
 	</div>
 </div>

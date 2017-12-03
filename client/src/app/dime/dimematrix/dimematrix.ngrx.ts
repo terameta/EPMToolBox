@@ -1,15 +1,24 @@
+import { DimeStreamAllLoadInitiateIfEmptyAction } from '../dimestream/dimestream.ngrx';
+import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
+import { of } from 'rxjs/observable/of';
 import { DimeMatrixBackend } from './dimematrix.backend';
 import { AppState } from '../../ngstore/models';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
+import { Router } from '@angular/router';
 
 import * as _ from 'lodash';
 
 export interface DimeMatrixState {
 	items: { [key: number]: DimeMatrix }
-	curItem: number
+	curItem: DimeMatrixDetail
+}
+
+export const dimeMatrixInitialState: DimeMatrixState = {
+	items: [],
+	curItem: <DimeMatrixDetail>{}
 }
 
 export const DIME_MATRIX_ACTIONS = {
@@ -37,6 +46,9 @@ export function dimeMatrixReducer( state: DimeMatrixState, action: Action ): Dim
 		case DIME_MATRIX_ACTIONS.ALL.LOAD.COMPLETE: {
 			return handleAllLoadComplete( state, action );
 		}
+		case DIME_MATRIX_ACTIONS.ONE.LOAD.COMPLETE: {
+			return handleOneLoadComplete( state, action );
+		}
 		default: {
 			return state;
 		}
@@ -45,17 +57,45 @@ export function dimeMatrixReducer( state: DimeMatrixState, action: Action ): Dim
 
 @Injectable()
 export class DimeMatrixEffects {
-	@Effect() DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE$ = this.actions.ofType( DIME_MATRIX_ACTIONS.ALL.LOAD.INITIATE ).switchMap(( a: DimeMatrixAllLoadInitiateAction ) => {
+	@Effect() DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ALL.LOAD.INITIATE ).switchMap(( a: DimeMatrixAllLoadInitiateAction ) => {
 		return this.backend.allLoad().map( resp => ( new DimeMatrixAllLoadCompleteAction( resp ) ) );
 	} );
-	@Effect() DIME_MATRIX_ACTIONS_ONE_CREATE_INITIATE$ = this.actions.ofType( DIME_MATRIX_ACTIONS.ONE.CREATE.INITIATE ).switchMap(( a: DimeMatrixOneCreateInitiateAction ) => {
+
+	@Effect() DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
+		.ofType( DIME_MATRIX_ACTIONS.ALL.LOAD.INITIATEIFEMPTY )
+		.withLatestFrom( this.state$ )
+		.filter(( [action, state] ) => { return ( !state.dimeMatrix.items || Object.keys( state.dimeMatrix.items ).length === 0 ); } )
+		.map(( [action, state] ) => action )
+		.switchMap(( a: DimeMatrixAllLoadInitiateIfEmptyAction ) => of( new DimeMatrixAllLoadInitiateAction() ) );
+	// .switchMap(( a: DimeMatrixAllLoadInitiateIfEmptyAction ) => { return this.backend.allLoad().map( resp => ( new DimeEnvironmentAllLoadCompleteAction( resp ) ) ); } );
+
+	@Effect() DIME_MATRIX_ACTIONS_ONE_CREATE_INITIATE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ONE.CREATE.INITIATE ).switchMap(( a: DimeMatrixOneCreateInitiateAction ) => {
 		return this.backend.oneCreate( a.payload ).map( resp => ( new DimeMatrixOneCreateCompleteAction( resp ) ) );
-	} )
-	constructor( private actions: Actions, private state: Store<AppState>, private backend: DimeMatrixBackend ) { }
+	} );
+	@Effect() DIME_MATRIX_ACTIONS_ONE_CREATE_COMPLETE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ONE.CREATE.COMPLETE ).switchMap(( a: DimeMatrixOneCreateCompleteAction ) => {
+		console.log( a.payload );
+		this.router.navigateByUrl( 'dime/matrices/matrix-detail/' + a.payload.id );
+		return of( new DimeMatrixAllLoadInitiateAction() );
+	} );
+	@Effect() DIME_MATRIX_ACTIONS_ONE_LOAD_INITIATE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ONE.LOAD.INITIATE ).switchMap(( a: DimeMatrixOneLoadInitiateAction ) => {
+		return this.backend.oneLoad( a.payload ).mergeMap( resp => {
+			return [
+				new DimeMatrixOneLoadCompleteAction( resp ),
+				new DimeStreamAllLoadInitiateIfEmptyAction()
+			];
+		} );
+	} );
+
+	constructor( private actions$: Actions, private state$: Store<AppState>, private backend: DimeMatrixBackend, private router: Router ) { }
 }
 
 export class DimeMatrixAllLoadInitiateAction implements Action {
 	readonly type = DIME_MATRIX_ACTIONS.ALL.LOAD.INITIATE;
+	constructor() { }
+}
+
+export class DimeMatrixAllLoadInitiateIfEmptyAction implements Action {
+	readonly type = DIME_MATRIX_ACTIONS.ALL.LOAD.INITIATEIFEMPTY;
 	constructor() { }
 }
 
@@ -74,8 +114,24 @@ export class DimeMatrixOneCreateCompleteAction implements Action {
 	constructor( public payload?: DimeMatrix ) { }
 }
 
+export class DimeMatrixOneLoadInitiateAction implements Action {
+	readonly type = DIME_MATRIX_ACTIONS.ONE.LOAD.INITIATE;
+	constructor( public payload?: number ) { }
+}
+
+export class DimeMatrixOneLoadCompleteAction implements Action {
+	readonly type = DIME_MATRIX_ACTIONS.ONE.LOAD.COMPLETE;
+	constructor( public payload?: DimeMatrixDetail ) { }
+}
+
 const handleAllLoadComplete = ( state: DimeMatrixState, action: DimeMatrixAllLoadCompleteAction ): DimeMatrixState => {
 	const newState: DimeMatrixState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
+	return newState;
+}
+
+const handleOneLoadComplete = ( state: DimeMatrixState, action: DimeMatrixOneLoadCompleteAction ): DimeMatrixState => {
+	const newState: DimeMatrixState = Object.assign( {}, state );
+	newState.curItem = action.payload;
 	return newState;
 }

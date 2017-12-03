@@ -19,14 +19,22 @@ import { DimematrixDetailMatrixComponent } from './dimematrix-detail/dimematrix-
 const dimeMatrixRoutes: Routes = [
 	{ path: 'dime/matrices', pathMatch: 'prefix', redirectTo: 'dime/matrices/matrix-list' },
 	{ path: 'matrix-list', component: DimeMatrixListComponent },
-	{ path: 'matrix-detail/:id', component: DimeMatrixDetailComponent }
+	{
+		path: 'matrix-detail/:id', component: DimeMatrixDetailComponent, children: [
+			{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
+			{ path: 'definitions', component: DimematrixDetailMaindefinitionsComponent },
+			{ path: 'fields', component: DimematrixDetailFieldsComponent },
+			{ path: 'matrix', component: DimematrixDetailMatrixComponent }
+		]
+	},
+
 ]
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild(dimeMatrixRoutes),
+		RouterModule.forChild( dimeMatrixRoutes ),
 		AuthModule,
 		HotTableModule
 	],
@@ -43,5 +51,5 @@ const dimeMatrixRoutes: Routes = [
 		DimematrixDetailFieldsComponent,
 		DimematrixDetailMatrixComponent
 	]
-})
+} )
 export class DimematrixModule { }

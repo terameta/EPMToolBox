@@ -1,4 +1,4 @@
-import { ActivatedRoute, Params } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Subscription } from 'rxjs/Subscription';
@@ -17,8 +17,11 @@ export class DimeMatrixDetailComponent implements OnInit, OnDestroy {
 	constructor(
 		private route: ActivatedRoute,
 		public mainService: DimeMatrixService,
-		private mapService: DimeMapService
-	) { }
+		private mapService: DimeMapService,
+		private router: Router,
+		private activatedRoute: ActivatedRoute
+	) {
+	}
 
 	ngOnInit() {
 		this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
@@ -27,7 +30,7 @@ export class DimeMatrixDetailComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy() {
-		this.paramSubscription = undefined;
+		this.paramSubscription.unsubscribe();
 	}
 
 }

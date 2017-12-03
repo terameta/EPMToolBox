@@ -1,3 +1,4 @@
+import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
 import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
 import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
@@ -14,5 +15,9 @@ export class DimeMatrixBackend {
 
 	oneCreate = ( refObj: DimeMatrix ): Observable<DimeMatrix> => {
 		return this.http.post<DimeMatrix>( this.baseUrl, refObj );
+	}
+
+	oneLoad = ( id: number ): Observable<DimeMatrixDetail> => {
+		return this.http.get<DimeMatrixDetail>( this.baseUrl + '/' + id );
 	}
 }

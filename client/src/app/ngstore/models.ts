@@ -1,4 +1,10 @@
-import { DimeMatrixAllLoadInitiateAction, dimeMatrixReducer, DimeMatrixState } from '../dime/dimematrix/dimematrix.ngrx';
+import {
+	DimeMatrixAllLoadInitiateAction,
+	dimeMatrixInitialState,
+	DimeMatrixOneLoadInitiateAction,
+	dimeMatrixReducer,
+	DimeMatrixState,
+} from '../dime/dimematrix/dimematrix.ngrx';
 import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
 import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
 import {
@@ -28,7 +34,7 @@ export const appInitialState: AppState = {
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
 	dimeEnvironment: <DimeEnvironmentState>{},
 	dimeStream: <DimeStreamState>{},
-	dimeMatrix: <DimeMatrixState>{}
+	dimeMatrix: dimeMatrixInitialState
 }
 
 export class DoNothingAction implements Action {
@@ -102,6 +108,9 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						case 'matrix-list': {
 							return new DimeMatrixAllLoadInitiateAction();
 						}
+						case 'matrix-detail/:id': {
+							return new DimeMatrixOneLoadInitiateAction( paramset.params.id );
+						}
 						default: {
 							console.log( 'We are at matrices default' );
 							return new DoNothingAction();
@@ -122,11 +131,13 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 
 function disectNavigation( r: ActivatedRouteSnapshot, segments: string[] ) {
 	let route = r.root;
+	let params: any = {};
 	while ( route.firstChild ) {
 		if ( route.firstChild.routeConfig.path && route.firstChild.routeConfig.path !== '' ) {
 			segments.push( route.firstChild.routeConfig.path );
 		}
+		params = Object.assign( params, route.params );
 		route = route.firstChild;
 	}
-	return { params: route.params, qparams: route.queryParams };
+	return { params, qparams: route.queryParams };
 }

@@ -1,3 +1,4 @@
+import { Version0035to0036 } from './initiators/version0035to0036';
 import { Version0034to0035 } from './initiators/version0034to0035';
 import { Version0033to0034 } from './initiators/version0033to0034';
 import { Version0032to0033 } from './initiators/version0032to0033';
@@ -93,6 +94,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( new Version0032to0033( db, configuration ).upgrade ).
 		then( new Version0033to0034( db, configuration ).upgrade ).
 		then( new Version0034to0035( db, configuration ).upgrade ).
+		then( new Version0035to0036( db, configuration ).upgrade ).
 		then( finalVersion => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
