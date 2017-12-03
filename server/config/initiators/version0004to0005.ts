@@ -3,7 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { Pool } from 'mysql';
 import { InitiatorUtils } from './initiatorUtils';
 
-export class Version0000to0001 {
+export class Version0004to0005 {
 	utils: InitiatorUtils;
 
 	constructor( private db: Pool, private configuration: any ) {
@@ -12,27 +12,21 @@ export class Version0000to0001 {
 
 	public upgrade = ( currentVersion: number ) => {
 		return new Promise(( resolve, reject ) => {
-			const expectedCurrentVersion = 0;
+			const expectedCurrentVersion = 4;
 			const nextVersion = expectedCurrentVersion + 1;
 			if ( currentVersion > expectedCurrentVersion ) {
 				resolve( currentVersion );
 			} else {
 				const tableDef: TableDefiner = {
-					name: 'users',
+					name: 'streamtypes',
 					fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-						'username varchar(255) NOT NULL',
-						'password varchar(255) NOT NULL',
-						'role varchar(255)',
-						'type varchar(255)',
-						'ldapserver BIGINT UNSIGNED',
-						'email varchar(1024)',
-						'name varchar(255)',
-						'surname varchar(255)'],
+						'name varchar(255) NOT NULL',
+						'value varchar(255) NOT NULL'],
 					primaryKey: 'id',
-					values: [{ username: 'admin', password: bcrypt.hashSync( 'interesting', 10 ), role: 'admin', type: 'local' }],
-					fieldsToCheck: ['username', 'role']
+					values: [{ name: 'Planning Database', value: 'HPDB' },
+					{ name: 'Relational Database Table/View', value: 'RDBT' }],
+					fieldsToCheck: ['name', 'value']
 				};
-
 
 				resolve( this.utils.checkAndCreateTable( tableDef ).then(() => this.utils.updateToVersion( nextVersion ) ) );
 			}

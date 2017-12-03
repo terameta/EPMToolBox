@@ -21,7 +21,6 @@ export class InitiatorUtils {
 
 	public createTable = ( curTable: TableDefiner ) => {
 		return new Promise(( resolve, reject ) => {
-			console.log( '=== Creating Table:', curTable.name );
 
 			let createQuery = 'CREATE TABLE ' + curTable.name + '(' + curTable.fields.join( ',' );
 			if ( curTable.primaryKey ) { createQuery += ', PRIMARY KEY (' + curTable.primaryKey + ') '; }
@@ -31,7 +30,6 @@ export class InitiatorUtils {
 				if ( err ) {
 					reject( err );
 				} else {
-					console.log( '=== Created Table:', curTable.name );
 					resolve( curTable );
 				}
 			} );
@@ -50,35 +48,36 @@ export class InitiatorUtils {
 			let checker: any[] = [];
 			let wherer: any[] = [];
 			const promises: any[] = [];
-			curTable.values.forEach(( curTuple: any ) => {
-				promises.push( new Promise(( resolve, reject ) => {
-					query = 'SELECT COUNT(*) AS RESULT FROM ' + curTable.name + ' WHERE ';
-					checker = [];
-					wherer = [];
-					curTable.fieldsToCheck.forEach(( curField: any ) => {
-						checker.push( curField );
-						checker.push( curTuple[curField] );
-						wherer.push( '?? = ?' );
-					} );
-					query += wherer.join( ' AND ' );
-					this.db.query( query, checker, ( err, rows, fields ) => {
-						if ( err ) {
-							reject( err );
-						} else if ( rows[0].RESULT === 0 ) {
-							this.db.query( 'INSERT INTO ' + curTable.name + ' SET ?', curTuple, ( ierr, irows, ifields ) => {
-								if ( ierr ) {
-									reject( ierr );
-								} else {
-									console.log( '=== Inserted records for', curTable.name );
-									resolve( curTable );
-								}
-							} );
-						} else {
-							resolve( curTable );
-						}
-					} );
-				} ) );
-			} );
+			if ( curTable.values ) {
+				curTable.values.forEach(( curTuple: any ) => {
+					promises.push( new Promise(( resolve, reject ) => {
+						query = 'SELECT COUNT(*) AS RESULT FROM ' + curTable.name + ' WHERE ';
+						checker = [];
+						wherer = [];
+						curTable.fieldsToCheck.forEach(( curField: any ) => {
+							checker.push( curField );
+							checker.push( curTuple[curField] );
+							wherer.push( '?? = ?' );
+						} );
+						query += wherer.join( ' AND ' );
+						this.db.query( query, checker, ( err, rows, fields ) => {
+							if ( err ) {
+								reject( err );
+							} else if ( rows[0].RESULT === 0 ) {
+								this.db.query( 'INSERT INTO ' + curTable.name + ' SET ?', curTuple, ( ierr, irows, ifields ) => {
+									if ( ierr ) {
+										reject( ierr );
+									} else {
+										resolve( curTable );
+									}
+								} );
+							} else {
+								resolve( curTable );
+							}
+						} );
+					} ) );
+				} );
+			}
 
 			Promise.all( promises ).then(() => { tResolve( curTable ); } ).catch( tReject );
 		} );
@@ -90,6 +89,8 @@ export class InitiatorUtils {
 				if ( err ) {
 					reject( err );
 				} else {
+					const versionToLog = ( '0000' + newVersion ).substr( -4 );
+					console.log( '=== Database is upgraded to version ' + versionToLog + '    ===' );
 					resolve( newVersion );
 				}
 			} );

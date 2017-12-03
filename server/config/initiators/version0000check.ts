@@ -52,7 +52,7 @@ export class Version0000check {
 		} );
 	}
 
-	private findVersion = () => {
+	private findVersion = (): Promise<number> => {
 		return new Promise(( resolve, reject ) => {
 			const q = 'SELECT version FROM currentversion';
 			this.db.query( q, ( err, rows, fields ) => {

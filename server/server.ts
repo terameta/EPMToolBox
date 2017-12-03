@@ -27,12 +27,20 @@ if ( cluster.isMaster ) {
 	const croner_env: ApplicationEnvironmentProperties = { isCroner: true };
 	const worker_env: ApplicationEnvironmentProperties = { isCroner: false };
 
-	initiateInitiator( db, configuration );
-
-	for ( let i = 0; i < numCPUs; i++ ) {
-		cluster.fork( worker_env );
-	}
-	cronerpid = cluster.fork( croner_env ).process.pid;
+	initiateInitiator( db, configuration ).then(() => {
+		console.log( '===============================================' );
+		console.log( '=== Initiator is now complete               ===' );
+		console.log( '===============================================' );
+		for ( let i = 0; i < numCPUs; i++ ) {
+			cluster.fork( worker_env );
+		}
+		cronerpid = cluster.fork( croner_env ).process.pid;
+	} ).catch(( error ) => {
+		console.log( '???????????????????????????????????????????????' );
+		console.log( '??? Initiator has failed                    ???' );
+		console.error( error );
+		console.log( '???????????????????????????????????????????????' );
+	} );
 
 	cluster.on( 'exit', ( worker, code, signal ) => {
 		if ( worker.process.pid === cronerpid ) {
