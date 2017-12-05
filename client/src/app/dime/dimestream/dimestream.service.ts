@@ -1,7 +1,10 @@
+import { AppState } from '../../ngstore/models';
+import { Store } from '@ngrx/store';
 import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
+import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/Rx';
@@ -45,13 +48,17 @@ export class DimeStreamService {
 		'Version'
 	];
 
+	public itemList: DimeStream[];
+	public currentItem: DimeStream;
+
 	constructor(
 		private http: Http,
 		private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private router: Router,
 		private route: ActivatedRoute,
-		private environmentService: DimeEnvironmentService
+		private environmentService: DimeEnvironmentService,
+		private store: Store<AppState>,
 	) {
 		this.baseUrl = '/api/dime/stream';
 		this.serviceName = 'Streams';
@@ -64,15 +71,21 @@ export class DimeStreamService {
 		this.curItemEnvironmentType = '';
 		this.curItemAssignedFields = undefined;
 		this.curItemSourcedFields = undefined;
+
+		// Below is for transitioning to ngrx
+		this.store.select( 'dimeStream' ).subscribe( streamState => {
+			this.itemList = _.values( streamState.items ).sort( SortByName );
+			this.currentItem = streamState.curItem;
+		} );
 	}
 
 	getAll = ( isSilent?: boolean ) => {
 		if ( this.typeList.length === 0 ) { this.listTypes(); }
 		this.authHttp.get( this.baseUrl ).
-			map(( response ) => {
+			map( ( response ) => {
 				return response.json();
 			} ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				data.sort( SortByName );
 				this.dataStore.items = data;
 				this._items.next( Object.assign( {}, this.dataStore ).items );
@@ -95,10 +108,10 @@ export class DimeStreamService {
 		// this.authHttp.get(this.baseUrl + "/" + id).
 		// 	map(response => response.json()).
 		this.fetchOne( id ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				let notFound = true;
 
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) {
 						this.dataStore.items[index] = data;
 						notFound = false;
@@ -133,10 +146,10 @@ export class DimeStreamService {
 		if ( this.environmentService.typeList.length === 0 ) {
 			setTimeout( this.setCurItemEnvironmentType, 1000 );
 		} else {
-			this.environmentService.items.subscribe(( environments ) => {
-				environments.forEach(( curEnv ) => {
+			this.environmentService.items.subscribe( ( environments ) => {
+				environments.forEach( ( curEnv ) => {
 					if ( curEnv.id.toString() === this.curItem.environment.toString() ) {
-						this.environmentService.typeList.forEach(( curType ) => {
+						this.environmentService.typeList.forEach( ( curType ) => {
 							if ( parseInt( curEnv.type.toString(), 10 ) === parseInt( curType.id.toString(), 10 ) ) { this.curItemEnvironmentType = curType.value; }
 						} );
 					}
@@ -163,7 +176,7 @@ export class DimeStreamService {
 		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe( data => {
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) { this.dataStore.items[index] = data; }
 				} );
 
@@ -181,7 +194,7 @@ export class DimeStreamService {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
 			this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );
 
@@ -206,7 +219,7 @@ export class DimeStreamService {
 	}
 	private listTypes() {
 		return this.listTypesFetch().
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				this.typeList = data;
 			}, ( error ) => {
 				this.toastr.error( 'Listing types has failed', this.serviceName );
@@ -250,7 +263,7 @@ export class DimeStreamService {
 	public listFieldsFromSourceEnvironment = ( id: number ) => {
 		this.authHttp.get( this.baseUrl + '/listFields/' + id ).
 			map( response => response.json() ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				this.toastr.info( 'Successfully listed fields from the source environment.', this.serviceName );
 				this.curItemSourcedFields = data;
 				this.curItemSourcedFields.sort( this.fieldSortNumeric );
@@ -275,7 +288,7 @@ export class DimeStreamService {
 	public fieldMove = ( theFieldList: any[], theField, direction ) => {
 		const curOrder = theField.order || theField.fOrder || theField.pOrder;
 		const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );
-		theFieldList.forEach(( curField ) => {
+		theFieldList.forEach( ( curField ) => {
 			if ( parseInt( curField.order, 10 ) === nextOrder ) { curField.order = curOrder; }
 			if ( parseInt( curField.fOrder, 10 ) === nextOrder ) { curField.fOrder = curOrder; }
 			if ( parseInt( curField.pOrder, 10 ) === nextOrder ) { curField.pOrder = curOrder; }
@@ -293,7 +306,7 @@ export class DimeStreamService {
 		}
 		this.authHttp.post( this.baseUrl + '/assignFields/' + refObj.id, refObj.fieldList, { headers: this.headers } ).
 			map( response => response.json() ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				this.toastr.info( 'Stream fields are assigned.', this.serviceName );
 				this.toastr.info( 'Refreshing the assigned fields.', this.serviceName );
 				this.retrieveFields();
@@ -310,11 +323,11 @@ export class DimeStreamService {
 	}
 	public retrieveFields = () => {
 		this.retrieveFieldsFetch( this.curItem.id ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				this.toastr.info( 'Stream assigned fields are retrieved.', this.serviceName );
 				if ( data.length > 0 ) {
 					this.curItemAssignedFields = data;
-					this.curItemAssignedFields.forEach(( curField ) => {
+					this.curItemAssignedFields.forEach( ( curField ) => {
 						if ( curField.isDescribed && curField.descriptiveDB && curField.descriptiveTable ) {
 							if ( !this.descriptiveTables[curField.descriptiveDB] ) {
 								this.descriptiveTables[curField.descriptiveDB] = [];
@@ -348,7 +361,7 @@ export class DimeStreamService {
 		if ( confirm( 'Are you sure to delete all the assigned fields?' ) ) {
 			this.authHttp.get( this.baseUrl + '/clearFields/' + id ).
 				map( response => response.json ).
-				subscribe(( result ) => {
+				subscribe( ( result ) => {
 					this.toastr.info( 'Assigned filders are cleared.', this.serviceName );
 					this.curItemAssignedFields = undefined;
 					this.curItemSourcedFields = undefined;
@@ -366,7 +379,7 @@ export class DimeStreamService {
 		}
 		this.authHttp.post( this.baseUrl + '/saveFields', refObj, { headers: this.headers } ).
 			map( response => response.json() ).
-			subscribe(( result ) => {
+			subscribe( ( result ) => {
 				this.toastr.info( 'Fields are saved.', this.serviceName );
 				this.toastr.info( 'Refreshing field list.', this.serviceName );
 				this.retrieveFields();
@@ -390,7 +403,7 @@ export class DimeStreamService {
 	}
 	public fieldsRemoveFromPBCS = ( curIndex ) => {
 		this.curItemSourcedFields.splice( curIndex, 1 );
-		this.curItemSourcedFields.forEach(( curField, curKey ) => {
+		this.curItemSourcedFields.forEach( ( curField, curKey ) => {
 			curField.order = curKey + 1;
 		} );
 	}
@@ -413,7 +426,7 @@ export class DimeStreamService {
 		const bodyToSend = { environmentID: this.curItem.environment, field: field };
 		this.authHttp.post( this.baseUrl + '/listFieldsforField', bodyToSend, { headers: this.headers } ).
 			map( response => response.json() ).
-			subscribe(( result ) => {
+			subscribe( ( result ) => {
 				this.toastr.info( 'Descriptive fields are refreshed from the server for ' + field.name, this.serviceName );
 				if ( !this.descriptiveFields[field.descriptiveDB] ) {
 					this.descriptiveFields[field.descriptiveDB] = {};

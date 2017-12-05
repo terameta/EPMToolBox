@@ -1,58 +1,58 @@
-import { ActivatedRoute, Router } from '@angular/router';
-import { Http, Headers } from '@angular/http';
+import { DimeMatrixOneUpdateInitiateAction } from './dimematrix.ngrx';
+import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { BehaviorSubject, Observable } from 'rxjs/Rx';
 import { ToastrService } from 'ngx-toastr';
-import { AuthHttp } from 'angular2-jwt';
 
-import { DimeStreamService } from '../dimestream/dimestream.service';
-import { DimeMap } from '../../../../../shared/model/dime/map';
+import { AppState } from '../../ngstore/models';
+
 import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
-import { DimeMatrixField } from '../../../../../shared/model/dime/matrixfield';
-import { DimeStream } from '../../../../../shared/model/dime/stream';
-import { DimeStreamField } from '../../../../../shared/model/dime/streamfield';
+import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
+import { DimeMatrixBackend } from 'app/dime/dimematrix/dimematrix.backend';
+
 import { DimeMapService } from '../dimemap/dimemap.service';
+import { DimeStreamService } from '../dimestream/dimestream.service';
+
+import { Subscription } from 'rxjs/Subscription';
+
+import * as _ from 'lodash';
+import { Store } from '@ngrx/store';
+
+import { DimeMatrixOneDeleteInitiateAction } from 'app/dime/dimematrix/dimematrix.ngrx';
 
 @Injectable()
 export class DimeMatrixService {
-	private serviceName: string;
-	private baseUrl: string;
-	private headers = new Headers( { 'Content-Type': 'application/json' } );
+	private serviceName = 'Matrices';
+	private baseUrl = '/api/dime/matrix';
 
-	private dataStore: { items: DimeMatrix[] };
-	private _items: BehaviorSubject<DimeMatrix[]>;
-	items: Observable<DimeMatrix[]>;
-	itemCount: Observable<number>;
-	curItem: DimeMatrix;
-	curItemFields: DimeMatrixField[];
-	curItemAssignedFields: DimeMatrixField[];
-	curItemClean: boolean;
-	curItemMap: DimeMap;
-	curItemMapFields: any[];
-	curItemStream: DimeStream;
-	curItemStreamFields: DimeStreamField[];
-	curItemReady: boolean;
-	streamTypes: any[];
-	matrixTable: any[];
+	public itemList: DimeMatrix[];
+	public currentItem: DimeMatrixDetail;
+
 
 	constructor(
-		private http: Http,
-		private authHttp: AuthHttp,
+		private store: Store<AppState>,
+		private http: HttpClient,
 		private toastr: ToastrService,
-		private router: Router,
-		private route: ActivatedRoute,
 		public mapService: DimeMapService,
-		public streamService: DimeStreamService
+		public streamService: DimeStreamService,
+		public backend: DimeMatrixBackend
 	) {
-		this.baseUrl = '/api/dime/matrix';
-		this.dataStore = { items: [] };
-		this._items = <BehaviorSubject<DimeMatrix[]>>new BehaviorSubject( [] );
-		this.items = this._items.asObservable();
-		this.itemCount = this.items.count();
-		this.serviceName = 'Matrices';
-		// this.resetCurItem();
-		// this.getAll( true );
+		this.store.select( 'dimeMatrix' ).subscribe( matrixState => {
+			this.itemList = _.values( matrixState.items ).sort( SortByName );
+			this.currentItem = matrixState.curItem;
+		} );
+	}
+
+	public update = () => {
+		this.store.dispatch( new DimeMatrixOneUpdateInitiateAction( this.currentItem ) );
+	}
+
+	public delete = ( id: number, name?: string ) => {
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.store.dispatch( new DimeMatrixOneDeleteInitiateAction( id ) );
+		}
 	}
 	/*
 		private resetCurItem = () => {

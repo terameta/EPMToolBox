@@ -1,3 +1,4 @@
+import { of } from 'rxjs/observable/of';
 import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
 import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
 import { Observable } from 'rxjs/Observable';
@@ -9,15 +10,23 @@ export class DimeMatrixBackend {
 
 	constructor( private http: HttpClient ) { }
 
-	allLoad = (): Observable<DimeMatrix[]> => {
+	public allLoad = (): Observable<DimeMatrix[]> => {
 		return this.http.get<DimeMatrix[]>( this.baseUrl );
 	}
 
-	oneCreate = ( refObj: DimeMatrix ): Observable<DimeMatrix> => {
+	public oneCreate = ( refObj: DimeMatrix ): Observable<DimeMatrix> => {
 		return this.http.post<DimeMatrix>( this.baseUrl, refObj );
 	}
 
-	oneLoad = ( id: number ): Observable<DimeMatrixDetail> => {
+	public oneLoad = ( id: number ): Observable<DimeMatrixDetail> => {
 		return this.http.get<DimeMatrixDetail>( this.baseUrl + '/' + id );
+	}
+
+	public oneDelete = ( id: number ) => {
+		return this.http.delete( this.baseUrl + '/' + id );
+	}
+
+	public oneUpdate = ( refObj: DimeMatrixDetail ) => {
+		return this.http.put( this.baseUrl, refObj );
 	}
 }

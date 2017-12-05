@@ -1,3 +1,4 @@
+import { DimeMatrixService } from '../../dimematrix.service';
 import { SortByName } from '../../../../../../../shared/utilities/utilityFunctions';
 import { DimeStream } from '../../../../../../../shared/model/dime/stream';
 import { Subscription } from 'rxjs/Rx';
@@ -20,7 +21,8 @@ export class DimematrixDetailMaindefinitionsComponent implements OnInit, OnDestr
 	private streamSubscription: Subscription;
 
 	constructor(
-		private state: Store<AppState>
+		private state: Store<AppState>,
+		public mainService: DimeMatrixService
 	) {
 		this.subscription = this.state.select( 'dimeMatrix' ).subscribe( matrixState => {
 			this.curItem = matrixState.curItem;

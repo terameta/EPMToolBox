@@ -16,28 +16,13 @@ import { DimeMapService } from '../../dimemap/dimemap.service';
 	styleUrls: ['./dimematrix-list.component.css']
 } )
 export class DimeMatrixListComponent implements OnInit, OnDestroy {
-	public items: DimeMatrix[];
-	public streams: DimeStream[];
-	private subscription: Subscription;
-	private streamSubscription: Subscription;
 
-	constructor(
-		private state: Store<AppState>
-	) {
-		this.subscription = this.state.select( 'dimeMatrix' ).subscribe( matrixState => {
-			this.items = _.values( matrixState.items ).sort( SortByName );
-		} );
-		this.streamSubscription = this.state.select( 'dimeStream' ).subscribe( streamState => {
-			this.streams = _.values( streamState.items ).sort( SortByName );
-		} );
-	}
+	constructor( public mainService: DimeMatrixService ) { }
 
 	ngOnInit() {
 	}
 
 	ngOnDestroy() {
-		this.subscription.unsubscribe();
-		this.streamSubscription.unsubscribe();
 	}
 
 }

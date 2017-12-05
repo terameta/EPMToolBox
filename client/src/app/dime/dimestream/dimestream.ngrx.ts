@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 
 export interface DimeStreamState {
 	items: { [key: number]: DimeStream },
-	curItem: number
+	curItem: DimeStream
 }
 
 export const DIME_STREAM_ACTIONS = {
@@ -27,6 +27,14 @@ export const DIME_STREAM_ACTIONS = {
 		CREATE: {
 			INITIATE: 'DIME_STREAM_ACTIONS_ONE_CREATE_INITIATE',
 			COMPLETE: 'DIME_STREAM_ACTIONS_ONE_CREATE_COMPLETE'
+		},
+		UPDATE: {
+			INITIATE: 'DIME_STREAM_ACTIONS_ONE_UPDATE_INITIATE',
+			COMPLETE: 'DIME_STREAM_ACTIONS_ONE_UPDATE_COMPLETE'
+		},
+		DELETE: {
+			INITIATE: 'DIME_STREAM_ACTIONS_ONE_DELETE_INITIATE',
+			COMPLETE: 'DIME_STREAM_ACTIONS_ONE_DELETE_COMPLETE'
 		}
 	}
 }
@@ -44,16 +52,16 @@ export function dimeStreamReducer( state: DimeStreamState, action: Action ): Dim
 
 @Injectable()
 export class DimeStreamEffects {
-	@Effect() DIME_STREAM_ACTIONS_ALL_LOAD_INITIATE$ = this.actions.ofType( DIME_STREAM_ACTIONS.ALL.LOAD.INITIATE ).switchMap(( a: DimeStreamAllLoadInitiateAction ) => {
+	@Effect() DIME_STREAM_ACTIONS_ALL_LOAD_INITIATE$ = this.actions.ofType( DIME_STREAM_ACTIONS.ALL.LOAD.INITIATE ).switchMap( ( a: DimeStreamAllLoadInitiateAction ) => {
 		return this.backend.allLoad().map( resp => ( new DimeStreamAllLoadCompleteAction( resp ) ) );
 	} );
 
 	@Effect() DIME_STREAM_ACTIONS_ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions
 		.ofType( DIME_STREAM_ACTIONS.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.store$ )
-		.filter(( [action, store] ) => { return ( !store.dimeStream.items || Object.keys( store.dimeStream.items ).length === 0 ); } )
-		.map(( [action, store] ) => action )
-		.switchMap(( a: DimeStreamAllLoadInitiateIfEmptyAction ) => { return this.backend.allLoad().map( resp => ( new DimeStreamAllLoadCompleteAction( resp ) ) ); } );
+		.filter( ( [action, store] ) => { return ( !store.dimeStream.items || Object.keys( store.dimeStream.items ).length === 0 ); } )
+		.map( ( [action, store] ) => action )
+		.switchMap( ( a: DimeStreamAllLoadInitiateIfEmptyAction ) => { return this.backend.allLoad().map( resp => ( new DimeStreamAllLoadCompleteAction( resp ) ) ); } );
 
 	constructor( private actions: Actions, private store$: Store<AppState>, private backend: DimeStreamBackend ) { }
 }

@@ -1,5 +1,6 @@
 import {
 	DimeMatrixAllLoadInitiateAction,
+	DimeMatrixAllLoadInitiateIfEmptyAction,
 	dimeMatrixInitialState,
 	DimeMatrixOneLoadInitiateAction,
 	dimeMatrixReducer,
@@ -64,7 +65,7 @@ export const reducers = {
 
 @Injectable()
 export class RouteEffects {
-	@Effect() navigationHappened$ = this.actions$.ofType( ROUTER_NAVIGATION ).map(( r: RouterNavigationAction ) => routeHandleNavigation( r ) );
+	@Effect() navigationHappened$ = this.actions$.ofType( ROUTER_NAVIGATION ).map( ( r: RouterNavigationAction ) => routeHandleNavigation( r ) );
 
 	constructor( private actions$: Actions, private store: Store<State<AppState>> ) { }
 }
@@ -106,7 +107,7 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 				case 'matrices': {
 					switch ( segments[2] ) {
 						case 'matrix-list': {
-							return new DimeMatrixAllLoadInitiateAction();
+							return new DimeMatrixAllLoadInitiateIfEmptyAction();
 						}
 						case 'matrix-detail/:id': {
 							return new DimeMatrixOneLoadInitiateAction( paramset.params.id );
