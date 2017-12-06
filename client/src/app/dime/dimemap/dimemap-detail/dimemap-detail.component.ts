@@ -19,13 +19,13 @@ export class DimemapDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
-			this.mainService.getOne( params['id'] );
-		} );
+		// this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
+		// 	this.mainService.getOne( params['id'] );
+		// } );
 	}
 
 	ngOnDestroy() {
-		this.paramSubscription = undefined;
+		// this.paramSubscription = undefined;
 	}
 
 }

@@ -34,23 +34,23 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 				this.mainService.getOne( params['id'] );
 			}
 		);
-		this.dimeProcessService.getAll();
-		this.dimeProcessService.fetchAll().subscribe(() => {
-			this.assignedProcesses = [];
-			this.dimeProcessService.items.forEach(( curProcessList ) => {
-				curProcessList.forEach(( curProcess ) => {
-					console.log( curProcess );
-					let toPush: any; toPush = {};
-					toPush.id = curProcess.id;
-					toPush.name = curProcess.name;
-					toPush.isAssigned = false;
-					this.assignedProcesses.push( toPush );
-				} );
-			} );
-			this.populateAccessRights();
-		}, ( error ) => {
-			this.toastr.error( 'Failed to receive processes' );
-		} );
+		// this.dimeProcessService.getAll();
+		// this.dimeProcessService.fetchAll().subscribe(() => {
+		// 	this.assignedProcesses = [];
+		// 	this.dimeProcessService.items.forEach(( curProcessList ) => {
+		// 		curProcessList.forEach(( curProcess ) => {
+		// 			console.log( curProcess );
+		// 			let toPush: any; toPush = {};
+		// 			toPush.id = curProcess.id;
+		// 			toPush.name = curProcess.name;
+		// 			toPush.isAssigned = false;
+		// 			this.assignedProcesses.push( toPush );
+		// 		} );
+		// 	} );
+		// 	this.populateAccessRights();
+		// }, ( error ) => {
+		// 	this.toastr.error( 'Failed to receive processes' );
+		// } );
 	}
 
 	ngOnDestroy() {
@@ -66,8 +66,8 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 		if ( Object.keys( this.mainService.curItemAccessRights ).length === 0 ) {
 			setTimeout( this.populateAccessRights, 1000 );
 		} else {
-			this.mainService.curItemAccessRights.processes.forEach(( curProcess ) => {
-				this.assignedProcesses.forEach(( curAssignedProcess ) => {
+			this.mainService.curItemAccessRights.processes.forEach( ( curProcess ) => {
+				this.assignedProcesses.forEach( ( curAssignedProcess ) => {
 					curAssignedProcess.user = this.mainService.curItem.id;
 					console.log( curProcess.id, curProcess );
 					if ( curAssignedProcess.id === curProcess.process ) {
@@ -75,14 +75,14 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 					}
 				} );
 			} );
-			this.assignedProcesses.forEach(( curAssignedProcess ) => {
+			this.assignedProcesses.forEach( ( curAssignedProcess ) => {
 				curAssignedProcess.user = this.mainService.curItem.id;
 			} );
 		}
 	};
 	private processAccessRightChange = () => {
 		this.mainService.curItemAccessRights.processes = [];
-		this.assignedProcesses.forEach(( curAssignedProcess ) => {
+		this.assignedProcesses.forEach( ( curAssignedProcess ) => {
 			if ( curAssignedProcess.isAssigned ) {
 				this.mainService.curItemAccessRights.processes.push( { user: curAssignedProcess.user, process: curAssignedProcess.id } );
 			}

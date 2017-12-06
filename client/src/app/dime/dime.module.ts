@@ -17,24 +17,28 @@ import { DimemapsComponent } from './dimemap/dimemaps/dimemaps.component';
 import { DimeMatricesComponent } from './dimematrix/dimematrices/dimematrices.component';
 import { DimeAsyncProcessesComponent } from './dimeasyncprocess/dimeasyncprocesses/dimeasyncprocesses.component';
 
+import { DimeCredentialModule } from 'app/dime/dimecredential/dimecredential.module';
 import { DimescheduleModule } from './dimeschedule/dimeschedule.module';
 import { DimeprocessModule } from './dimeprocess/dimeprocess.module';
-import { DimeenvironmentModule } from './dimeenvironment/dimeenvironment.module';
+import { DimeEnvironmentModule } from './dimeenvironment/dimeenvironment.module';
 import { DimestreamModule } from './dimestream/dimestream.module';
 import { DimemapModule } from './dimemap/dimemap.module';
 import { DimematrixModule } from './dimematrix/dimematrix.module';
 import { DimeAsyncProcessModule } from 'app/dime/dimeasyncprocess/dimeasyncprocess.module';
 
 import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
+import { DimeCredentialsComponent } from 'app/dime/dimecredential/dimecredentials/dimecredentials.component';
+
 
 
 const dimeRoutes: Routes = [
 	{
 		path: 'dime', component: DimeComponent, children: [
 			{ path: '', component: DimedashboardComponent, canActivate: [AuthGuard] },
+			{ path: 'credentials', component: DimeCredentialsComponent, loadChildren: 'app/dime/dimecredential/dimecredential.module#DimeCredentialModule' },
 			{ path: 'schedules', component: DimeschedulesComponent, loadChildren: 'app/dime/dimeschedule/dimeschedule.module#DimescheduleModule' },
 			{ path: 'processes', component: DimeprocessesComponent, loadChildren: 'app/dime/dimeprocess/dimeprocess.module#DimeprocessModule' },
-			{ path: 'environments', component: DimeenvironmentsComponent, loadChildren: 'app/dime/dimeenvironment/dimeenvironment.module#DimeenvironmentModule' },
+			{ path: 'environments', component: DimeenvironmentsComponent, loadChildren: 'app/dime/dimeenvironment/dimeenvironment.module#DimeEnvironmentModule' },
 			{ path: 'streams', component: DimestreamsComponent, loadChildren: 'app/dime/dimestream/dimestream.module#DimestreamModule' },
 			{ path: 'maps', component: DimemapsComponent, loadChildren: 'app/dime/dimemap/dimemap.module#DimemapModule' },
 			{ path: 'matrices', component: DimeMatricesComponent, loadChildren: 'app/dime/dimematrix/dimematrix.module#DimematrixModule' },
@@ -47,9 +51,10 @@ const dimeRoutes: Routes = [
 	imports: [
 		CommonModule,
 		FormsModule,
+		DimeCredentialModule,
 		DimeprocessModule,
 		DimescheduleModule,
-		DimeenvironmentModule,
+		DimeEnvironmentModule,
 		DimestreamModule,
 		DimemapModule,
 		DimematrixModule,

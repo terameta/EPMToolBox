@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Rx';
 import {
 	DimeMatrixAllLoadInitiateAction,
 	DimeMatrixAllLoadInitiateIfEmptyAction,
@@ -6,8 +7,10 @@ import {
 	dimeMatrixReducer,
 	DimeMatrixState,
 } from '../dime/dimematrix/dimematrix.ngrx';
+import { dimeCredentialReducer, dimeCredentialInitialState, DimeCredentialState, DimeCredentialAllLoadInitiateIfEmptyAction } from 'app/dime/dimecredential/dimecredential.ngrx';
 import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
 import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
+
 import {
 	DIME_ASYNC_PROCESS_ACTIONS,
 	DimeAsyncProcessAllLoadInitiateAction,
@@ -24,6 +27,7 @@ import { of } from 'rxjs/observable/of';
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
+	dimeCredential: DimeCredentialState,
 	dimeAsyncProcess: DimeAsyncProcessState,
 	dimeEnvironment: DimeEnvironmentState,
 	dimeStream: DimeStreamState,
@@ -32,6 +36,7 @@ export interface AppState {
 
 export const appInitialState: AppState = {
 	router: <RouteState>{},
+	dimeCredential: dimeCredentialInitialState,
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
 	dimeEnvironment: <DimeEnvironmentState>{},
 	dimeStream: <DimeStreamState>{},
@@ -41,6 +46,17 @@ export const appInitialState: AppState = {
 export class DoNothingAction implements Action {
 	readonly type = 'DONOTHINGATALL';
 	constructor() { }
+}
+
+export class WarnUserAction implements Action {
+	readonly type = 'WARN_USER';
+	constructor( public payload?: string ) { }
+}
+
+export function dimeHandleApiError( error: Response | any ) {
+	const body = error.json();
+	console.error( body );
+	return Observable.throw( body );
 }
 
 export function routeReducer( state: RouteState, action: RouterNavigationAction ): RouteState {
@@ -57,6 +73,7 @@ export function routeReducer( state: RouteState, action: RouterNavigationAction 
 
 export const reducers = {
 	router: routeReducer,
+	dimeCredential: dimeCredentialReducer,
 	dimeAsyncProcess: dimeAsyncProcessReducer,
 	dimeEnvironment: dimeEnvironmentReducer,
 	dimeStream: dimeStreamReducer,
@@ -89,6 +106,17 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 		}
 		case 'dime': {
 			switch ( segments[1] ) {
+				case 'credentials': {
+					switch ( segments[2] ) {
+						case 'credential-list': {
+							return new DimeCredentialAllLoadInitiateIfEmptyAction();
+						}
+						default: {
+							console.log( 'We are at credentials default' );
+							return new DoNothingAction();
+						}
+					}
+				}
 				case 'processes': {
 					console.log( 'We are at processes' );
 					return new DoNothingAction();

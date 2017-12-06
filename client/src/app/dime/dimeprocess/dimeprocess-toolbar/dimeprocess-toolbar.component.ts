@@ -12,7 +12,7 @@ export class DimeprocessToolbarComponent implements OnInit {
 	constructor( public mainService: DimeProcessService ) { }
 
 	ngOnInit() {
-		this.mainService.getAll();
+		// this.mainService.getAll();
 	}
 
 }

@@ -23,9 +23,9 @@ export class DimeprocessStepDetailComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
-			this.mainService.stepGetOne( params['id'] );
-		} )
+		// this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
+		// this.mainService.stepGetOne( params['id'] );
+		// } )
 	}
 
 }

@@ -24,14 +24,14 @@ export class DimestreamDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.paramsSubscription = this.route.params.subscribe(
-			( params: Params ) => {
-				this.mainService.getOne( params['id'] );
-			}
-		);
+		// this.paramsSubscription = this.route.params.subscribe(
+		// 	( params: Params ) => {
+		// 		this.mainService.getOne( params['id'] );
+		// 	}
+		// );
 	}
 
 	ngOnDestroy() {
-		this.paramsSubscription.unsubscribe();
+		// this.paramsSubscription.unsubscribe();
 	}
 }

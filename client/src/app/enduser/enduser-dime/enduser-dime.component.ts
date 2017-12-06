@@ -25,15 +25,16 @@ export class EnduserDimeComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.currentUser = this.authService.getCurrentUser();
-		this.userService.fetchUserRights( this.currentUser.id ).
-			subscribe(( data ) => {
-				this.userProcesses = data.processes;
-				this.prepareProcesses();
-			}, ( error ) => {
-				console.error( error );
-			} );
+		// this.currentUser = this.authService.getCurrentUser();
+		// this.userService.fetchUserRights( this.currentUser.id ).
+		// 	subscribe(( data ) => {
+		// 		this.userProcesses = data.processes;
+		// 		this.prepareProcesses();
+		// 	}, ( error ) => {
+		// 		console.error( error );
+		// 	} );
 	}
+	/*
 	private prepareProcesses = () => {
 		this.userProcessDetails = [];
 		this.userProcesses.forEach(( curProcess ) => {
@@ -92,5 +93,5 @@ export class EnduserDimeComponent implements OnInit {
 				curUserProcess.status = logID;
 			}
 		} );
-	}
+	}*/
 }

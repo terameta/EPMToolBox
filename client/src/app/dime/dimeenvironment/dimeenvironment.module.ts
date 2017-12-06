@@ -17,11 +17,11 @@ const dimeEnvironmentRoutes: Routes = [
 	{ path: 'environment-detail/:id', component: DimeenvironmentDetailComponent }
 ]
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild(dimeEnvironmentRoutes),
+		RouterModule.forChild( dimeEnvironmentRoutes ),
 		AuthModule
 	],
 	exports: [
@@ -37,5 +37,5 @@ const dimeEnvironmentRoutes: Routes = [
 		DimeenvironmentsComponent,
 		DimeenvironmentToolbarComponent
 	]
-})
-export class DimeenvironmentModule { }
+} )
+export class DimeEnvironmentModule { }

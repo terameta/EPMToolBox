@@ -45,7 +45,7 @@
 		"@angular/compiler-cli": "^4.4.6",
 		"@types/jasmine": "^2.8.2",
 		"@types/jquery": "^3.2.16",
-		"@types/node": "^8.0.54",
+		"@types/node": "^8.0.55",
 		"@types/tether": "^1.4.3",
 		"codelyzer": "^3.2.2",
 		"jasmine-core": "^2.8.0",

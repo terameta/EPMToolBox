@@ -1,18 +1,18 @@
-import { ActivatedRoute, Router, Params } from "@angular/router";
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { NgForm } from "@angular/forms";
+import { ActivatedRoute, Router, Params } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { NgForm } from '@angular/forms';
 
-import { Subscription } from "rxjs/Subscription";
-import { Observable } from "rxjs/Rx";
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Rx';
 
-import { DimeEnvironmentService } from "../dimeenvironment.service";
+import { DimeEnvironmentService } from '../dimeenvironment.service';
 
 // import { DimeEnvironment } from "../../../../../../shared/model/dime/environment";
 
 @Component( {
-	selector: "app-dimeenvironment-detail",
-	templateUrl: "./dimeenvironment-detail.component.html",
-	styleUrls: ["./dimeenvironment-detail.component.css"]
+	selector: 'app-dimeenvironment-detail',
+	templateUrl: './dimeenvironment-detail.component.html',
+	styleUrls: ['./dimeenvironment-detail.component.css']
 } )
 export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	// curItem: Environment;
@@ -27,15 +27,15 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		// this.curItem = { id: 0 };
-		this.paramsSubscription = this.route.params.subscribe(
-			( params: Params ) => {
-				this.mainService.getOne( params["id"] );
-			}
-		);
+		// This was already commented this.curItem = { id: 0 };
+		// this.paramsSubscription = this.route.params.subscribe(
+		// 	( params: Params ) => {
+		// 		this.mainService.getOne( params["id"] );
+		// 	}
+		// );
 	}
 
 	ngOnDestroy() {
-		this.mainService.curItem = { id: 0 };
+		// this.mainService.curItem = { id: 0 };
 	}
 }

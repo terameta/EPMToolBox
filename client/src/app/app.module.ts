@@ -2,7 +2,6 @@ import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.ngrx';
 import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { DimeStreamEffects } from './dime/dimestream/dimestream.ngrx';
 import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
-import { DimeEnvironmentBackend } from './dime/dimeenvironment/dimeenvironment.backend';
 import { DimeEnvironmentEffects } from './dime/dimeenvironment/dimeenvironment.ngrx';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
@@ -29,8 +28,11 @@ import { AuthModule } from './welcome/auth.module';
 import { AccessManagementModule } from './accessmanagement/accessmanagement.module';
 import { EndUserModule } from './enduser/enduser.module';
 
-// Dime Services
+// Dime Services & Backends
+import { DimeCredentialService } from './dime/dimecredential/dimecredential.service';
+import { DimeCredentialBackend } from './dime/dimecredential/dimecredential.backend';
 import { DimeEnvironmentService } from './dime/dimeenvironment/dimeenvironment.service';
+import { DimeEnvironmentBackend } from './dime/dimeenvironment/dimeenvironment.backend';
 import { DimeStreamService } from './dime/dimestream/dimestream.service';
 import { DimeMapService } from './dime/dimemap/dimemap.service';
 import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
@@ -47,6 +49,7 @@ import { EndUserService } from './enduser/enduser.service';
 import { reducers, appInitialState, RouteEffects } from 'app/ngstore/models';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { DimeCredentialEffects } from 'app/dime/dimecredential/dimecredential.ngrx';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -82,6 +85,7 @@ export function tokenGetter() {
 		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
 		EffectsModule.forRoot( [
 			RouteEffects,
+			DimeCredentialEffects,
 			DimeAsyncProcessEffects,
 			DimeEnvironmentEffects,
 			DimeStreamEffects,
@@ -95,6 +99,8 @@ export function tokenGetter() {
 	providers: [
 		AuthGuard,
 		AuthService,
+		DimeCredentialBackend,
+		DimeCredentialService,
 		DimeEnvironmentService,
 		DimeStreamService,
 		DimeMapService,

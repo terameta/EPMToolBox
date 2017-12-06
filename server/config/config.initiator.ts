@@ -1,3 +1,4 @@
+import { Version0036to0037 } from './initiators/version0036to0037';
 import { Version0035to0036 } from './initiators/version0035to0036';
 import { Version0034to0035 } from './initiators/version0034to0035';
 import { Version0033to0034 } from './initiators/version0033to0034';
@@ -95,6 +96,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( new Version0033to0034( db, configuration ).upgrade ).
 		then( new Version0034to0035( db, configuration ).upgrade ).
 		then( new Version0035to0036( db, configuration ).upgrade ).
+		then( new Version0036to0037( db, configuration ).upgrade ).
 		then( finalVersion => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -105,7 +107,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 }
 
 function clearResidue() {
-	return new Promise(( resolve, reject ) => {
+	return new Promise( ( resolve, reject ) => {
 		console.log( '===============================================' );
 		console.log( '=== Clearing Residue                        ===' );
 		db.query( 'UPDATE schedules SET status = ?', ATStatusType.Ready, ( err, result, fields ) => {

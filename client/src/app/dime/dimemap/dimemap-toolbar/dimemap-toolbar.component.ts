@@ -13,6 +13,6 @@ export class DimemapToolbarComponent implements OnInit {
 	constructor( public mainService: DimeMapService ) { }
 
 	ngOnInit() {
-		this.mainService.getAll();
+		// this.mainService.getAll();
 	}
 }
