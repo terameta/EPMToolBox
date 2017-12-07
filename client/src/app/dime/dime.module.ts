@@ -28,6 +28,8 @@ import { DimeAsyncProcessModule } from 'app/dime/dimeasyncprocess/dimeasyncproce
 
 import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
 import { DimeCredentialsComponent } from 'app/dime/dimecredential/dimecredentials/dimecredentials.component';
+import { DimeTagsComponent } from 'app/dime/dimetag/dimetags/dimetags.component';
+import { DimeTagModule } from 'app/dime/dimetag/dimetag.module';
 
 
 
@@ -35,6 +37,7 @@ const dimeRoutes: Routes = [
 	{
 		path: 'dime', component: DimeComponent, children: [
 			{ path: '', component: DimedashboardComponent, canActivate: [AuthGuard] },
+			{ path: 'tags', component: DimeTagsComponent, loadChildren: 'app/dime/dimetag/dimetag.module#DimeTagModule' },
 			{ path: 'credentials', component: DimeCredentialsComponent, loadChildren: 'app/dime/dimecredential/dimecredential.module#DimeCredentialModule' },
 			{ path: 'schedules', component: DimeschedulesComponent, loadChildren: 'app/dime/dimeschedule/dimeschedule.module#DimescheduleModule' },
 			{ path: 'processes', component: DimeprocessesComponent, loadChildren: 'app/dime/dimeprocess/dimeprocess.module#DimeprocessModule' },
@@ -51,6 +54,7 @@ const dimeRoutes: Routes = [
 	imports: [
 		CommonModule,
 		FormsModule,
+		DimeTagModule,
 		DimeCredentialModule,
 		DimeprocessModule,
 		DimescheduleModule,

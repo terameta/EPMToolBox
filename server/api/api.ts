@@ -6,6 +6,7 @@ import { MainTools } from '../tools/tools.main';
 import { ApiLog } from './api.log';
 
 // DIME Route APIs
+import { ApiDimeTag } from './api.dime.tag';
 import { ApiDimeCredential } from './api.dime.credential';
 import { ApiDimeEnvironment } from './api.dime.environment';
 import { ApiDimeStream } from './api.dime.stream';
@@ -25,9 +26,11 @@ import { ApiAuth } from './api.auth';
 
 import { ApiSettings } from './api.settings';
 
+
 export function initializeRestApi( app: Application, refDB: Pool, refTools: MainTools ) {
 	const apiLog = new ApiLog( app, refDB, refTools );
 
+	const apiDimeTag = new ApiDimeTag( app, refDB, refTools );
 	const apiDimeCredential = new ApiDimeCredential( app, refDB, refTools );
 	const apiDimeEnvironment = new ApiDimeEnvironment( app, refDB, refTools );
 	const apiDimeStream = new ApiDimeStream( app, refDB, refTools );

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DimeCredentialService } from 'app/dime/dimecredential/dimecredential.service';
 
 @Component( {
 	selector: 'app-dimecredential-list',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 } )
 export class DimeCredentialListComponent implements OnInit {
 
-	constructor() { }
+	constructor( public mainService: DimeCredentialService ) { }
 
 	ngOnInit() {
 	}

@@ -13,6 +13,9 @@ import { DimeCredential } from '../../../../../shared/model/dime/credential';
 import { DimeCredentialDetail } from '../../../../../shared/model/dime/credentialDetail';
 
 import { DimeCredentialBackend } from './dimecredential.backend';
+import { HttpErrorResponse } from '@angular/common/http';
+import { DIME_STATUS_ACTIONS, DimeStatusErrorAction } from 'app/ngstore/applicationstatus';
+import { DimeCredentialService } from 'app/dime/dimecredential/dimecredential.service';
 
 export interface DimeCredentialState {
 	items: { [key: number]: DimeCredential },
@@ -23,6 +26,8 @@ export const dimeCredentialInitialState: DimeCredentialState = {
 	items: [],
 	curItem: <DimeCredentialDetail>{}
 }
+
+const serviceName = 'Credentials';
 
 export const DIME_CREDENTIAL_ACTIONS = {
 	ALL: {
@@ -46,8 +51,8 @@ export const DIME_CREDENTIAL_ACTIONS = {
 			COMPLETE: 'DIME_CREDENTIAL_ACTIONS_ONE_UPDATE_COMPLETE'
 		},
 		DELETE: {
-			INITIATE: 'DIME_CREDENTIAL_ACTIONS_ONE_DELETETE_INITIATE',
-			COMPLETE: 'DIME_CREDENTIAL_ACTIONS_ONE_DELETETE_COMPLETE'
+			INITIATE: 'DIME_CREDENTIAL_ACTIONS_ONE_DELETE_INITIATE',
+			COMPLETE: 'DIME_CREDENTIAL_ACTIONS_ONE_DELETE_COMPLETE'
 		}
 	}
 }
@@ -56,6 +61,9 @@ export function dimeCredentialReducer( state: DimeCredentialState, action: Actio
 	switch ( action.type ) {
 		case DIME_CREDENTIAL_ACTIONS.ALL.LOAD.COMPLETE: {
 			return handleAllLoadComplete( state, action );
+		}
+		case DIME_CREDENTIAL_ACTIONS.ONE.LOAD.COMPLETE: {
+			return handleOneLoadComplete( state, action );
 		}
 		default: {
 			return state;
@@ -76,19 +84,34 @@ export class DimeCredentialEffects {
 		.map( ( [action, store] ) => action )
 		.switchMap( ( a: DimeCredentialAllLoadInitiateIfEmptyAction ) => { return this.backend.allLoad().map( resp => ( new DimeCredentialAllLoadCompleteAction( resp ) ) ); } );
 
-	@Effect() DIME_CREDENTIAL_ACTIONS_ONE_CREATE_INITIATE$ = this.actions$.ofType( DIME_CREDENTIAL_ACTIONS.ONE.CREATE.INITIATE ).switchMap( ( a: DimeCredentialOneCreateInitiateAction ) => {
-		return this.backend.oneCreate( a.payload )
-			.map( resp => {
-				console.log( a );
-				return new DimeCredentialOneCreateCompleteAction( resp );
-			} );
-	} );
+	@Effect() DIME_CREDENTIAL_ACTIONS_ONE_CREATE_INITIATE$ = this.actions$
+		.ofType( DIME_CREDENTIAL_ACTIONS.ONE.CREATE.INITIATE )
+		.switchMap( ( action: DimeCredentialOneCreateInitiateAction ) => {
+			return this.backend.oneCreate( action.payload )
+				.map( resp => {
+					console.log( action );
+					return new DimeCredentialOneCreateCompleteAction( resp );
+				} )
+				.catch( ( response: HttpErrorResponse ) => {
+					return of( new DimeStatusErrorAction( { error: response.error, caller: serviceName } ) );
+				} );
+		} );
 
-	@Effect() DIME_CREDENTIAL_ACTIONS_ONE_CREATE_COMPLETE$ = this.actions$.ofType( DIME_CREDENTIAL_ACTIONS.ONE.CREATE.COMPLETE ).switchMap( ( a: DimeCredentialOneCreateCompleteAction ) => {
-		this.router.navigateByUrl( 'dime/credentials/credential-detail/' + a.payload.id );
-		console.log( a );
-		return of( new DimeCredentialAllLoadInitiateAction() );
-	} );
+	@Effect() DIME_CREDENTIAL_ACTIONS_ONE_CREATE_COMPLETE$ = this.actions$
+		.ofType( DIME_CREDENTIAL_ACTIONS.ONE.CREATE.COMPLETE )
+		.switchMap( ( a: DimeCredentialOneCreateCompleteAction ) => {
+			this.router.navigateByUrl( 'dime/credentials/credential-detail/' + a.payload.id );
+			return of( new DimeCredentialAllLoadInitiateAction() );
+		} );
+
+	@Effect() DIME_CREDENTIAL_ACTIONS_ONE_LOAD_INITIATE$ = this.actions$
+		.ofType( DIME_CREDENTIAL_ACTIONS.ONE.LOAD.INITIATE )
+		.switchMap( ( action: DimeCredentialOneLoadInitiateAction ) => {
+			return this.backend.oneLoad( action.payload )
+				.map( resp => new DimeCredentialOneLoadCompleteAction( resp ) )
+				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) )
+				.finally( () => { this.store$.dispatch( new DimeCredentialAllLoadInitiateIfEmptyAction() ) } );
+		} );
 
 	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeCredentialBackend, private router: Router ) { }
 }
@@ -96,6 +119,12 @@ export class DimeCredentialEffects {
 const handleAllLoadComplete = ( state: DimeCredentialState, action: DimeCredentialAllLoadCompleteAction ): DimeCredentialState => {
 	const newState: DimeCredentialState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
+	return newState;
+}
+
+const handleOneLoadComplete = ( state: DimeCredentialState, action: DimeCredentialOneLoadCompleteAction ): DimeCredentialState => {
+	const newState: DimeCredentialState = Object.assign( {}, state );
+	newState.curItem = action.payload;
 	return newState;
 }
 
@@ -121,5 +150,15 @@ export class DimeCredentialOneCreateInitiateAction implements Action {
 
 export class DimeCredentialOneCreateCompleteAction implements Action {
 	readonly type = DIME_CREDENTIAL_ACTIONS.ONE.CREATE.COMPLETE;
+	constructor( public payload?: DimeCredentialDetail ) { }
+}
+
+export class DimeCredentialOneLoadInitiateAction implements Action {
+	readonly type = DIME_CREDENTIAL_ACTIONS.ONE.LOAD.INITIATE;
+	constructor( public payload?: number ) { }
+}
+
+export class DimeCredentialOneLoadCompleteAction implements Action {
+	readonly type = DIME_CREDENTIAL_ACTIONS.ONE.LOAD.COMPLETE;
 	constructor( public payload?: DimeCredentialDetail ) { }
 }

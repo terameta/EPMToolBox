@@ -7,7 +7,7 @@ import {
 	dimeMatrixReducer,
 	DimeMatrixState,
 } from '../dime/dimematrix/dimematrix.ngrx';
-import { dimeCredentialReducer, dimeCredentialInitialState, DimeCredentialState, DimeCredentialAllLoadInitiateIfEmptyAction } from 'app/dime/dimecredential/dimecredential.ngrx';
+import { dimeCredentialReducer, dimeCredentialInitialState, DimeCredentialState, DimeCredentialAllLoadInitiateIfEmptyAction, DimeCredentialOneLoadInitiateAction } from 'app/dime/dimecredential/dimecredential.ngrx';
 import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
 import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
 
@@ -23,10 +23,14 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { Action, State, Store } from '@ngrx/store';
 import { of } from 'rxjs/observable/of';
+import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from 'app/ngstore/applicationstatus';
+import { DimeTagState, dimeTagInitialState, dimeTagReducer, DimeTagAllLoadInitiateIfEmptyAction, DimeTagOneLoadInitiateAction } from 'app/dime/dimetag/dimetag.ngrx';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
+	dimeStatus: DimeStatusState,
+	dimeTag: DimeTagState,
 	dimeCredential: DimeCredentialState,
 	dimeAsyncProcess: DimeAsyncProcessState,
 	dimeEnvironment: DimeEnvironmentState,
@@ -36,6 +40,8 @@ export interface AppState {
 
 export const appInitialState: AppState = {
 	router: <RouteState>{},
+	dimeStatus: dimeStatusInitialState,
+	dimeTag: dimeTagInitialState,
 	dimeCredential: dimeCredentialInitialState,
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
 	dimeEnvironment: <DimeEnvironmentState>{},
@@ -60,19 +66,33 @@ export function dimeHandleApiError( error: Response | any ) {
 }
 
 export function routeReducer( state: RouteState, action: RouterNavigationAction ): RouteState {
-	if ( action.type === ROUTER_NAVIGATION ) {
-		if ( action.payload ) {
-			return { currentRoute: Object.assign( {}, action.payload.routerState.root ) };
-		} else {
+	switch ( action.type ) {
+		case ROUTER_NAVIGATION: {
+			if ( action.payload ) {
+				return { currentRoute: Object.assign( {}, action.payload.routerState.root ) };
+			} else {
+				return state;
+			}
+		}
+		default: {
 			return state;
 		}
-	} else {
-		return state;
 	}
+	// if ( action.type === ROUTER_NAVIGATION ) {
+	// 	if ( action.payload ) {
+	// 		return { currentRoute: Object.assign( {}, action.payload.routerState.root ) };
+	// 	} else {
+	// 		return state;
+	// 	}
+	// } else {
+	// 	return state;
+	// }
 }
 
 export const reducers = {
 	router: routeReducer,
+	dimeTag: dimeTagReducer,
+	dimeStatus: dimeStatusReducer,
 	dimeCredential: dimeCredentialReducer,
 	dimeAsyncProcess: dimeAsyncProcessReducer,
 	dimeEnvironment: dimeEnvironmentReducer,
@@ -106,10 +126,27 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 		}
 		case 'dime': {
 			switch ( segments[1] ) {
+				case 'tags': {
+					switch ( segments[2] ) {
+						case 'tag-list': {
+							return new DimeTagAllLoadInitiateIfEmptyAction();
+						}
+						case 'tag-detail/:id': {
+							return new DimeTagOneLoadInitiateAction( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at tags default' );
+							return new DoNothingAction();
+						}
+					}
+				}
 				case 'credentials': {
 					switch ( segments[2] ) {
 						case 'credential-list': {
 							return new DimeCredentialAllLoadInitiateIfEmptyAction();
+						}
+						case 'credential-detail/:id': {
+							return new DimeCredentialOneLoadInitiateAction( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at credentials default' );
@@ -165,7 +202,7 @@ function disectNavigation( r: ActivatedRouteSnapshot, segments: string[] ) {
 		if ( route.firstChild.routeConfig.path && route.firstChild.routeConfig.path !== '' ) {
 			segments.push( route.firstChild.routeConfig.path );
 		}
-		params = Object.assign( params, route.params );
+		params = Object.assign( params, route.firstChild.params );
 		route = route.firstChild;
 	}
 	return { params, qparams: route.queryParams };

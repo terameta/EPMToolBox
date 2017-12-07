@@ -11,7 +11,7 @@ export class CredentialTools {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM credentials', ( err, rows, fields ) => {
 				if ( err ) {
-					reject( err );
+					reject( err.code );
 				} else {
 					rows.forEach( ( curRow: DimeCredential ) => {
 						curRow.password = '|||---protected---|||';
@@ -30,7 +30,7 @@ export class CredentialTools {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM credentials WHERE id = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
-					reject( err );
+					reject( err.code );
 				} else if ( rows.length !== 1 ) {
 					reject( new Error( 'Wrong number of records for credential received from the server, 1 expected' ) );
 				} else {
@@ -46,13 +46,15 @@ export class CredentialTools {
 	};
 
 	public create = ( refItem: DimeCredential ) => {
-		const newEnv = { name: 'New Creden (Please change name)', type: 0, server: '', port: '', username: '', password: '' };
+		const newCredential: DimeCredential = <DimeCredential>{ name: 'New Credential' };
+		if ( refItem.name ) { newCredential.name = refItem.name; }
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO credentials SET ?', newEnv, function ( err, result, fields ) {
+			this.db.query( 'INSERT INTO credentials SET ?', newCredential, ( err, result, fields ) => {
 				if ( err ) {
-					reject( err );
+					reject( err.code );
 				} else {
-					resolve( { id: result.insertId } );
+					refItem.id = result.insertId;
+					resolve( this.update( refItem ) );
 				}
 			} );
 		} );
@@ -65,9 +67,9 @@ export class CredentialTools {
 			} else if ( refItem.password ) {
 				refItem.password = this.tools.encryptText( refItem.password );
 			}
-			this.db.query( 'UPDATE credentials SET ? WHERE id = ' + refItem.id, refItem, function ( err, result, fields ) {
+			this.db.query( 'UPDATE credentialsFIXTHISONETHISISANINTENTIONALERROR SET ? WHERE id = ' + refItem.id, refItem, ( err, result, fields ) => {
 				if ( err ) {
-					reject( err );
+					reject( err.code );
 				} else {
 					refItem.password = '|||---protected---|||';
 					resolve( refItem );
@@ -78,7 +80,7 @@ export class CredentialTools {
 
 	public delete = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'DELETE FROM credentials WHERE id = ?', id, ( err, result, fields ) => {
+			this.db.query( 'DELETE FROM credentialsFIXTHISONETHISISANINTENTIONALERROR WHERE id = ?', id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
@@ -87,7 +89,4 @@ export class CredentialTools {
 			} );
 		} );
 	}
-
 }
-
-

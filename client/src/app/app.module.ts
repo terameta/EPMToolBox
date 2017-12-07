@@ -50,6 +50,10 @@ import { reducers, appInitialState, RouteEffects } from 'app/ngstore/models';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { DimeCredentialEffects } from 'app/dime/dimecredential/dimecredential.ngrx';
+import { DimeStatusEffects } from 'app/ngstore/applicationstatus';
+import { DimeTagEffects } from 'app/dime/dimetag/dimetag.ngrx';
+import { DimeTagBackend } from 'app/dime/dimetag/dimetag.backend';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -85,6 +89,8 @@ export function tokenGetter() {
 		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
 		EffectsModule.forRoot( [
 			RouteEffects,
+			DimeStatusEffects,
+			DimeTagEffects,
 			DimeCredentialEffects,
 			DimeAsyncProcessEffects,
 			DimeEnvironmentEffects,
@@ -99,6 +105,8 @@ export function tokenGetter() {
 	providers: [
 		AuthGuard,
 		AuthService,
+		DimeTagBackend,
+		DimeTagService,
 		DimeCredentialBackend,
 		DimeCredentialService,
 		DimeEnvironmentService,

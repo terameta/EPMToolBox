@@ -14,7 +14,7 @@ import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
 
 @Injectable()
 export class DimeCredentialService {
-	private serviceName = 'Credentials';
+	public serviceName = 'Credentials';
 
 	public itemList: DimeCredential[];
 	public currentItem: DimeCredentialDetail;
