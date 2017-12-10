@@ -4,7 +4,10 @@ import * as _ from 'lodash';
 
 import { AppState } from 'app/ngstore/models';
 import { DimeTag } from '../../../../../shared/model/dime/tag';
+import { DimeTagGroup } from '../../../../../shared/model/dime/taggroup';
 import { DimeTagBackend } from 'app/dime/dimetag/dimetag.backend';
+import { DimeTagGroupBackend } from 'app/dime/dimetag/dimetaggroup.backend';
+
 import { Injectable } from '@angular/core';
 
 import { of } from 'rxjs/observable/of';
@@ -15,12 +18,16 @@ const serviceName = 'Tags';
 
 export interface DimeTagState {
 	items: { [key: number]: DimeTag },
-	curItem: DimeTag
+	curItem: DimeTag,
+	groups: { [key: number]: DimeTagGroup },
+	curGroup: DimeTagGroup
 }
 
 export const dimeTagInitialState: DimeTagState = {
 	items: [],
-	curItem: <DimeTag>{ id: 0 }
+	curItem: <DimeTag>{ id: 0 },
+	groups: [],
+	curGroup: <DimeTagGroup>{ id: 0 }
 }
 
 export const DIME_TAG_ACTIONS = {
@@ -51,6 +58,34 @@ export const DIME_TAG_ACTIONS = {
 	}
 }
 
+export const DIME_TAGGROUP_ACTIONS = {
+	ALL: {
+		LOAD: {
+			INITIATE: 'DIME_TAGGROUP_ACTIONS_ALL_LOAD_INITIATE',
+			INITIATEIFEMPTY: 'DIME_TAGGROUP_ACTIONS_ALL_LOAD_INITIATE_IF_EMPTY',
+			COMPLETE: 'DIME_TAGGROUP_ACTIONS_ALL_LOAD_COMPLETE'
+		}
+	},
+	ONE: {
+		LOAD: {
+			INITIATE: 'DIME_TAGGROUP_ACTIONS_ONE_LOAD_INITIATE',
+			COMPLETE: 'DIME_TAGGROUP_ACTIONS_ONE_LOAD_COMPLETE'
+		},
+		CREATE: {
+			INITIATE: 'DIME_TAGGROUP_ACTIONS_ONE_CREATE_INITIATE',
+			COMPLETE: 'DIME_TAGGROUP_ACTIONS_ONE_CREATE_COMPLETE'
+		},
+		UPDATE: {
+			INITIATE: 'DIME_TAGGROUP_ACTIONS_ONE_UPDATE_INITIATE',
+			COMPLETE: 'DIME_TAGGROUP_ACTIONS_ONE_UPDATE_COMPLETE'
+		},
+		DELETE: {
+			INITIATE: 'DIME_TAGGROUP_ACTIONS_ONE_DELETE_INITIATE',
+			COMPLETE: 'DIME_TAGGROUP_ACTIONS_ONE_DELETE_COMPLETE'
+		}
+	}
+}
+
 export function dimeTagReducer( state: DimeTagState, action: Action ): DimeTagState {
 	switch ( action.type ) {
 		case DIME_TAG_ACTIONS.ALL.LOAD.COMPLETE: {
@@ -58,6 +93,9 @@ export function dimeTagReducer( state: DimeTagState, action: Action ): DimeTagSt
 		}
 		case DIME_TAG_ACTIONS.ONE.LOAD.COMPLETE: {
 			return handleOneLoadComplete( state, action );
+		}
+		case DIME_TAGGROUP_ACTIONS.ALL.LOAD.COMPLETE: {
+			return handleGroupAllLoadComplete( state, action );
 		}
 		default: {
 			return state;
@@ -83,6 +121,10 @@ export class DimeTagEffects {
 		.map( ( [action, store] ) => action )
 		.switchMap( ( action: DimeTagAllLoadInitiateIfEmptyAction ) => of( new DimeTagAllLoadInitiateAction() ) );
 
+	@Effect() DIME_TAG_ACTIONS_ALL_LOAD_COMPLETE$ = this.actions$
+		.ofType( DIME_TAG_ACTIONS.ALL.LOAD.COMPLETE )
+		.map( () => ( new DimeTagGroupAllLoadInitiateAction() ) );
+
 	@Effect() DIME_TAG_ACTIONS_ONE_CREATE_INITIATE$ = this.actions$
 		.ofType( DIME_TAG_ACTIONS.ONE.CREATE.INITIATE )
 		.switchMap( ( action: DimeTagOneCreateInitiateAction ) => {
@@ -107,7 +149,15 @@ export class DimeTagEffects {
 				.finally( () => { this.store$.dispatch( new DimeTagAllLoadInitiateIfEmptyAction() ) } );
 		} );
 
-	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeTagBackend, private router: Router ) { }
+	@Effect() DIME_TAGGROUP_ACTIONS_ALL_LOAD_INITIATE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ALL.LOAD.INITIATE )
+		.switchMap( action => {
+			return this.groupBackend.allLoad()
+				.map( resp => ( new DimeTagGroupAllLoadCompleteAction( resp ) ) )
+				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) );
+		} );
+
+	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeTagBackend, private groupBackend: DimeTagGroupBackend, private router: Router ) { }
 }
 
 export class DimeTagAllLoadInitiateAction implements Action {
@@ -165,8 +215,17 @@ export class DimeTagOneDeleteCompleteAction implements Action {
 	constructor( public payload?: Response ) { }
 }
 
+export class DimeTagGroupAllLoadInitiateAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ALL.LOAD.INITIATE;
+	constructor() { }
+}
+
+export class DimeTagGroupAllLoadCompleteAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ALL.LOAD.COMPLETE;
+	constructor( public payload?: DimeTagGroup[] ) { }
+}
+
 const handleAllLoadComplete = ( state: DimeTagState, action: DimeTagAllLoadCompleteAction ): DimeTagState => {
-	console.log( 'We are also here' );
 	const newState: DimeTagState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
 	return newState;
@@ -175,5 +234,11 @@ const handleAllLoadComplete = ( state: DimeTagState, action: DimeTagAllLoadCompl
 const handleOneLoadComplete = ( state: DimeTagState, action: DimeTagOneLoadCompleteAction ): DimeTagState => {
 	const newState: DimeTagState = Object.assign( {}, state );
 	newState.curItem = action.payload;
+	return newState;
+}
+
+const handleGroupAllLoadComplete = ( state: DimeTagState, action: DimeTagGroupAllLoadCompleteAction ): DimeTagState => {
+	const newState: DimeTagState = Object.assign( {}, state );
+	newState.groups = _.keyBy( action.payload, 'id' );
 	return newState;
 }

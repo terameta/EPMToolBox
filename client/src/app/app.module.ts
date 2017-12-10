@@ -53,6 +53,7 @@ import { DimeCredentialEffects } from 'app/dime/dimecredential/dimecredential.ng
 import { DimeStatusEffects } from 'app/ngstore/applicationstatus';
 import { DimeTagEffects } from 'app/dime/dimetag/dimetag.ngrx';
 import { DimeTagBackend } from 'app/dime/dimetag/dimetag.backend';
+import { DimeTagGroupBackend } from 'app/dime/dimetag/dimetaggroup.backend';
 import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
 
 const appRoutes: Routes = [
@@ -106,6 +107,7 @@ export function tokenGetter() {
 		AuthGuard,
 		AuthService,
 		DimeTagBackend,
+		DimeTagGroupBackend,
 		DimeTagService,
 		DimeCredentialBackend,
 		DimeCredentialService,
