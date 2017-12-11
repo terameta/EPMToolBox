@@ -1,4 +1,5 @@
 export interface DimeTagGroup {
 	id: number,
-	name: string
+	name: string,
+	position: number
 }

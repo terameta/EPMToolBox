@@ -19,10 +19,11 @@ export class Version0038to0039 {
 				const tableDef: TableDefiner = {
 					name: 'taggroups',
 					fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-						'name varchar(1024) NOT NULL DEFAULT \'New Tag Group\''
+						'name varchar(1024) NOT NULL DEFAULT \'New Tag Group\'',
+						'position INT UNSIGNED NOT NULL'
 					],
 					primaryKey: 'id',
-					values: [{ name: 'First Tag Group' }],
+					values: [{ name: 'First Tag Group', position: 0 }],
 					fieldsToCheck: ['name']
 				};
 

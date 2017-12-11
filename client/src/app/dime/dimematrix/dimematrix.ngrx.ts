@@ -94,13 +94,17 @@ export class DimeMatrixEffects {
 		} );
 	} );
 
-	@Effect() DIME_MATRIX_ACTIONS_ONE_DELETE_INITIATE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ONE.DELETE.INITIATE ).switchMap( ( a: DimeMatrixOneDeleteInitiateAction ) => {
-		return this.backend.oneDelete( a.payload ).map( resp => ( new DimeMatrixOneDeleteCompleteAction() ) );
-	} );
+	@Effect() DIME_MATRIX_ACTIONS_ONE_DELETE_INITIATE$ = this.actions$
+		.ofType( DIME_MATRIX_ACTIONS.ONE.DELETE.INITIATE )
+		.switchMap( ( a: DimeMatrixOneDeleteInitiateAction ) => {
+			return this.backend.oneDelete( a.payload ).map( resp => ( new DimeMatrixOneDeleteCompleteAction() ) );
+		} );
 
-	@Effect() DIME_MATRIX_ACTIONS_ONE_DELETE_COMPLETE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ONE.DELETE.COMPLETE ).map( ( a: DimeMatrixOneDeleteCompleteAction ) => {
-		return ( new DimeMatrixAllLoadInitiateAction() );
-	} );
+	@Effect() DIME_MATRIX_ACTIONS_ONE_DELETE_COMPLETE$ = this.actions$
+		.ofType( DIME_MATRIX_ACTIONS.ONE.DELETE.COMPLETE )
+		.map( ( a: DimeMatrixOneDeleteCompleteAction ) => {
+			return ( new DimeMatrixAllLoadInitiateAction() );
+		} );
 
 	@Effect() DIME_MATRIX_ACTIONS_ONE_UPDATE_INITIATE$ = this.actions$.ofType( DIME_MATRIX_ACTIONS.ONE.UPDATE.INITIATE ).switchMap( ( a: DimeMatrixOneUpdateInitiateAction ) => {
 		return this.backend.oneUpdate( a.payload ).mergeMap( resp => {

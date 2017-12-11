@@ -8,10 +8,16 @@ export class TagGroupTools {
 
 	public getAll = (): Promise<DimeTagGroup[]> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM taggroups', {}, ( err, rows, fields ) => {
+			this.db.query( 'SELECT * FROM taggroups ORDER BY position', {}, ( err, rows: DimeTagGroup[], fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else {
+					rows.forEach( ( curTuple, curKey ) => {
+						if ( curTuple.position !== curKey ) {
+							curTuple.position = curKey;
+							this.update( curTuple );
+						}
+					} );
 					resolve( rows );
 				}
 			} );
@@ -36,12 +42,19 @@ export class TagGroupTools {
 		const newTagGroup: DimeTagGroup = <DimeTagGroup>{ name: 'New Tag Group' };
 		if ( refItem.name ) { newTagGroup.name = refItem.name; }
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO taggroups SET ?', newTagGroup, ( err, result, fields ) => {
+			this.db.query( 'SELECT MAX(position) AS maxpos FROM taggroups', {}, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else {
-					newTagGroup.id = result.insertId;
-					resolve( newTagGroup );
+					newTagGroup.position = parseInt( rows[0].maxpos, 10 ) + 1;
+					this.db.query( 'INSERT INTO taggroups SET ?', newTagGroup, ( ierr, result, ifields ) => {
+						if ( ierr ) {
+							reject( ierr.code );
+						} else {
+							newTagGroup.id = result.insertId;
+							resolve( newTagGroup );
+						}
+					} );
 				}
 			} );
 		} );

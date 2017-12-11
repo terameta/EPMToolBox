@@ -8,10 +8,18 @@ import { DimeTagComponent } from './dimetag/dimetag.component';
 import { FormsModule } from '@angular/forms';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthModule } from 'app/welcome/auth.module';
+import { DimeTagGroupListComponent } from './dimetaggroup-list/dimetaggroup-list.component';
+import { DimeTagsinGroupComponent } from './dimetagsingroup/dimetagsingroup.component';
 
 const dimeTagRoutes: Routes = [
 	{ path: 'dime/tags', pathMatch: 'prefix', redirectTo: 'dime/tags/tag-list' },
-	{ path: 'tag-list', component: DimeTagListComponent },
+	{
+		path: 'tag-list', component: DimeTagListComponent, children: [
+			{ path: '', pathMatch: 'prefix', redirectTo: 'group-list' },
+			{ path: 'group-list', component: DimeTagGroupListComponent },
+			{ path: ':id', component: DimeTagsinGroupComponent }
+		]
+	},
 	{ path: 'tag-detail/:id', component: DimeTagDetailComponent }
 ]
 
@@ -30,7 +38,9 @@ const dimeTagRoutes: Routes = [
 		DimeTagToolbarComponent,
 		DimeTagListComponent,
 		DimeTagDetailComponent,
-		DimeTagComponent
+		DimeTagComponent,
+		DimeTagGroupListComponent,
+		DimeTagsinGroupComponent
 	]
 } )
 export class DimeTagModule { }

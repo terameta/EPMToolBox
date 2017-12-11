@@ -82,7 +82,8 @@ export const DIME_TAGGROUP_ACTIONS = {
 		DELETE: {
 			INITIATE: 'DIME_TAGGROUP_ACTIONS_ONE_DELETE_INITIATE',
 			COMPLETE: 'DIME_TAGGROUP_ACTIONS_ONE_DELETE_COMPLETE'
-		}
+		},
+		REORDER: 'DIME_TAGGROUP_ACTIONS_ONE_REORDER'
 	}
 }
 
@@ -108,7 +109,6 @@ export class DimeTagEffects {
 	@Effect() DIME_TAG_ACTIONS_ALL_LOAD_INITIATE$ = this.actions$
 		.ofType( DIME_TAG_ACTIONS.ALL.LOAD.INITIATE )
 		.switchMap( ( action: DimeTagAllLoadInitiateAction ) => {
-			console.log( 'We have hit here' );
 			return this.backend.allLoad()
 				.map( resp => ( new DimeTagAllLoadCompleteAction( resp ) ) )
 				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) );
@@ -157,6 +157,61 @@ export class DimeTagEffects {
 				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) );
 		} );
 
+	@Effect() DIME_TAGGROUP_ACTIONS_ONE_CREATE_INITIATE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ONE.CREATE.INITIATE )
+		.switchMap( ( action: DimeTagGroupOneCreateInitiateAction ) => {
+			return this.groupBackend.oneCreate( action.payload )
+				.map( resp => ( new DimeTagGroupOneCreateCompleteAction( resp ) ) )
+				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) );
+		} );
+
+	@Effect() DIME_TAGGROUP_ACTIONS_ONE_CREATE_COMPLETE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ONE.CREATE.COMPLETE )
+		.switchMap( ( action: DimeTagOneCreateCompleteAction ) => {
+			// this.router.navigateByUrl( 'dime/tags/tag-list/' + action.payload.id );
+			this.router.navigateByUrl( 'dime/tags' );
+			return of( new DimeTagGroupAllLoadInitiateAction() );
+		} );
+
+	@Effect() DIME_TAGGROUP_ACTIONS_ONE_UPDATE_INITIATE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ONE.UPDATE.INITIATE )
+		.switchMap( ( action: DimeTagGroupOneUpdateInitiateAction ) => {
+			return this.groupBackend.oneUpdate( action.payload )
+				.map( resp => ( new DimeTagGroupOneUpdateCompleteAction( resp ) ) )
+				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) );
+		} );
+
+	@Effect() DIME_TAGGROUP_ACTIONS_ONE_UPDATE_COMPLETE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ONE.UPDATE.COMPLETE )
+		.map( () => ( new DimeTagGroupAllLoadInitiateAction() ) );
+
+	@Effect() DIME_TAGGROUP_ACTIONS_ONE_DELETE_INITIATE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ONE.DELETE.INITIATE )
+		.switchMap( ( action: DimeTagGroupOneDeleteInitiateAction ) => {
+			return this.groupBackend.oneDelete( action.payload )
+				.map( resp => ( new DimeTagGroupOneDeleteCompleteAction() ) )
+				.catch( resp => of( new DimeStatusErrorAction( { error: resp.error, caller: serviceName } ) ) );
+		} );
+
+	@Effect() DIME_TAGGROUP_ACTIONS_ONE_DELETE_COMPLETE$ = this.actions$
+		.ofType( DIME_TAGGROUP_ACTIONS.ONE.DELETE.COMPLETE )
+		.map( ( action: DimeTagGroupOneDeleteCompleteAction ) => ( new DimeTagGroupAllLoadInitiateAction() ) );
+
+
+	/*
+	Bu aşağıdakini bir incelemek lazım
+
+	@Injectable()
+	export class BookActions {
+	static SEARCH = '[Book] Search';
+	search(query: string): Action {
+		return {
+			type: BookActions.SEARCH,
+			payload: query
+		};
+	}
+	https://stackoverflow.com/questions/38245108/ngrx-store-dispatch-from-an-action-is-it-good-how-to
+	 */
 	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeTagBackend, private groupBackend: DimeTagGroupBackend, private router: Router ) { }
 }
 
@@ -223,6 +278,41 @@ export class DimeTagGroupAllLoadInitiateAction implements Action {
 export class DimeTagGroupAllLoadCompleteAction implements Action {
 	readonly type = DIME_TAGGROUP_ACTIONS.ALL.LOAD.COMPLETE;
 	constructor( public payload?: DimeTagGroup[] ) { }
+}
+
+export class DimeTagGroupOneCreateInitiateAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.CREATE.INITIATE;
+	constructor( public payload?: DimeTagGroup ) { }
+}
+
+export class DimeTagGroupOneCreateCompleteAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.CREATE.COMPLETE;
+	constructor( public payload?: DimeTagGroup ) { }
+}
+
+export class DimeTagGroupOneUpdateInitiateAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.UPDATE.INITIATE;
+	constructor( public payload?: DimeTagGroup ) { }
+}
+
+export class DimeTagGroupOneUpdateCompleteAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.UPDATE.COMPLETE;
+	constructor( public payload?: DimeTagGroup ) { }
+}
+
+export class DimeTagGroupOneDeleteInitiateAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.DELETE.INITIATE;
+	constructor( public payload?: number ) { }
+}
+
+export class DimeTagGroupOneDeleteCompleteAction implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.DELETE.COMPLETE;
+	constructor( public payload?: Response ) { }
+}
+
+export class DimeTagGroupOneReorder implements Action {
+	readonly type = DIME_TAGGROUP_ACTIONS.ONE.REORDER;
+	constructor( public payload?: { id: number, direction: 'UP' | 'DOWN' } ) { }
 }
 
 const handleAllLoadComplete = ( state: DimeTagState, action: DimeTagAllLoadCompleteAction ): DimeTagState => {
