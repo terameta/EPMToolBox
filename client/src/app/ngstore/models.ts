@@ -24,7 +24,10 @@ import { Injectable } from '@angular/core';
 import { Action, State, Store } from '@ngrx/store';
 import { of } from 'rxjs/observable/of';
 import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from 'app/ngstore/applicationstatus';
-import { DimeTagState, dimeTagInitialState, dimeTagReducer, DimeTagAllLoadInitiateIfEmptyAction, DimeTagOneLoadInitiateAction } from 'app/dime/dimetag/dimetag.ngrx';
+import { DimeTagState, dimeTagInitialState } from 'app/dime/dimetag/dimetag.state';
+import { dimeTagReducer } from 'app/dime/dimetag/dimetag.reducer';
+import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
+import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
@@ -129,10 +132,10 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 				case 'tags': {
 					switch ( segments[2] ) {
 						case 'tag-list': {
-							return new DimeTagAllLoadInitiateIfEmptyAction();
+							return DimeTagGroupActions.ONE.selected( paramset.params.id );
 						}
 						case 'tag-detail/:id': {
-							return new DimeTagOneLoadInitiateAction( paramset.params.id );
+							return DimeTagActions.ONE.LOAD.initiate( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at tags default' );

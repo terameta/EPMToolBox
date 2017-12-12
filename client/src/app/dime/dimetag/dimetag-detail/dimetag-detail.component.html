@@ -1,3 +1,38 @@
-<p>
-  dimetag-detail works!
-</p>
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">Edit Tab Details</h3>
+	</div>
+	<div class="box-body">
+		<form class="form-horizontal" (ngSubmit)="mainService.update()">
+			<div class="form-group">
+				<label for="itemName" class="col-xs-2 control-label">Name:</label>
+				<div class="col-xs-10">
+					<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.currentItem.name">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="itemDescription" class="col-xs-2 control-label">Description:</label>
+				<div class="col-xs-10">
+					<input type="text" class="form-control" id="itemDescription" name="itemDescription" [(ngModel)]="mainService.currentItem.description">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="itemGroup" class="col-xs-2 control-label">Group:</label>
+				<div class="col-xs-10">
+					<select name="itemGroup" id="itemGroup" class="form-control" [(ngModel)]="mainService.currentItem.taggroup">
+						<option value="0">Please select a tag group</option>
+						<option *ngFor="let group of mainService.groupList" [value]="group.id">{{group.name}}</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-xs-10 col-xs-offset-2">
+					<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+					<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/tags"><i class="fa fa-ban fa-fw"></i> Cancel</button>
+					<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.currentItem.id, mainService.currentItem.name)"><i class="fa fa-trash fa-fw"></i> Delete</button>
+				</div>
+			</div>
+		</form>
+		<pre>{{mainService.currentItem|json}}</pre>
+	</div>
+</div>

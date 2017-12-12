@@ -4,15 +4,37 @@ import { Pool } from 'mysql';
 export class InitiatorUtils {
 	constructor( private db: Pool, private configuration: any ) { }
 
+	public tableAddColumn = ( tableName: string, columnDefinition: string ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.db.query( 'ALTER TABLE ' + tableName + ' ADD COLUMN ' + columnDefinition, ( err, results, fields ) => {
+				if ( err ) {
+					if ( err.code === 'ER_DUP_FIELDNAME' ) {
+						this.db.query( 'ALTER TABLE ' + tableName + ' MODIFY ' + columnDefinition, ( ierr, iresults, ifields ) => {
+							if ( ierr ) {
+								reject( ierr );
+							} else {
+								resolve();
+							}
+						} );
+					} else {
+						reject( err );
+					}
+				} else {
+					resolve();
+				}
+			} );
+		} );
+	}
+
 	public doWeHaveTable = ( tableName: string ): Promise<number> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const q = 'SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = "' + this.configuration.mysql.db + '" AND TABLE_NAME = "' + tableName + '"';
 			this.db.query( q, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
 					let doWe = 0;
-					rows.filter(( curTuple: any ) => curTuple.TABLE_NAME === tableName ).map(() => doWe++ );
+					rows.filter( ( curTuple: any ) => curTuple.TABLE_NAME === tableName ).map( () => doWe++ );
 					resolve( doWe );
 				}
 			} );
@@ -20,7 +42,7 @@ export class InitiatorUtils {
 	}
 
 	public createTable = ( curTable: TableDefiner ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 
 			let createQuery = 'CREATE TABLE ' + curTable.name + '(' + curTable.fields.join( ',' );
 			if ( curTable.primaryKey ) { createQuery += ', PRIMARY KEY (' + curTable.primaryKey + ') '; }
@@ -43,18 +65,18 @@ export class InitiatorUtils {
 	}
 
 	public populateTable = ( curTable: any ) => {
-		return new Promise(( tResolve, tReject ) => {
+		return new Promise( ( tResolve, tReject ) => {
 			let query = '';
 			let checker: any[] = [];
 			let wherer: any[] = [];
 			const promises: any[] = [];
 			if ( curTable.values ) {
-				curTable.values.forEach(( curTuple: any ) => {
-					promises.push( new Promise(( resolve, reject ) => {
+				curTable.values.forEach( ( curTuple: any ) => {
+					promises.push( new Promise( ( resolve, reject ) => {
 						query = 'SELECT COUNT(*) AS RESULT FROM ' + curTable.name + ' WHERE ';
 						checker = [];
 						wherer = [];
-						curTable.fieldsToCheck.forEach(( curField: any ) => {
+						curTable.fieldsToCheck.forEach( ( curField: any ) => {
 							checker.push( curField );
 							checker.push( curTuple[curField] );
 							wherer.push( '?? = ?' );
@@ -79,12 +101,12 @@ export class InitiatorUtils {
 				} );
 			}
 
-			Promise.all( promises ).then(() => { tResolve( curTable ); } ).catch( tReject );
+			Promise.all( promises ).then( () => { tResolve( curTable ); } ).catch( tReject );
 		} );
 	}
 
 	public updateToVersion = ( newVersion: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE currentversion SET version = ?', newVersion, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );

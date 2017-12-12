@@ -1,5 +1,6 @@
 export interface DimeTagGroup {
 	id: number,
 	name: string,
-	position: number
+	position: number,
+	isReordered: boolean
 }

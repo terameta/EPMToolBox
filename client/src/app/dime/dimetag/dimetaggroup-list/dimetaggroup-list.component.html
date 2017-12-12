@@ -2,14 +2,12 @@
 	<thead>
 		<tr>
 			<th>Name</th>
-			<th>Position</th>
 			<th width="180">Actions</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr *ngFor="let group of mainService.groupList">
 			<td>{{ group.name }}</td>
-			<td>{{ group.position }}</td>
 			<td>
 				<div class="btn-toolbar" role="toolbar" aria-label="Tag Group Actions">
 					<div class="btn-group btn-group-xs" role="group">
@@ -28,4 +26,3 @@
 		</tr>
 	</tbody>
 </table>
-<pre>{{mainService.groupList | json}}</pre>

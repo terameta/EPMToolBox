@@ -2,6 +2,7 @@
 	<div class="box-header">
 		<ul class="nav nav-tabs">
 			<li routerLinkActive="active"><a routerLink="group-list" data-toggle="tab">Tag Groups</a></li>
+			<li routerLinkActive="active"><a routerLink="-1" data-toggle="tab" *ngIf="mainService.doWeHaveGroupless">Groupless Tags</a></li>
 			<li routerLinkActive="active" *ngFor="let group of mainService.groupList"><a routerLink="{{group.id}}" data-toggle="tab">{{group.name}}</a></li>
 		</ul>
 	</div>

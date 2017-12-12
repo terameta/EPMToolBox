@@ -61,6 +61,7 @@ export class TagGroupTools {
 	}
 
 	public update = ( refItem: DimeTagGroup ): Promise<DimeTagGroup> => {
+		delete refItem.isReordered;
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE taggroups SET ? WHERE id = ' + refItem.id, refItem, ( err, rows, fields ) => {
 				if ( err ) {

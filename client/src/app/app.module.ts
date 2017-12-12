@@ -51,10 +51,10 @@ import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { DimeCredentialEffects } from 'app/dime/dimecredential/dimecredential.ngrx';
 import { DimeStatusEffects } from 'app/ngstore/applicationstatus';
-import { DimeTagEffects } from 'app/dime/dimetag/dimetag.ngrx';
 import { DimeTagBackend } from 'app/dime/dimetag/dimetag.backend';
 import { DimeTagGroupBackend } from 'app/dime/dimetag/dimetaggroup.backend';
 import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { DimeTagEffects } from 'app/dime/dimetag/dimetag.effects';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },

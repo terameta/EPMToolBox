@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
 
 @Component( {
 	selector: 'app-dimetagsingroup',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 } )
 export class DimeTagsinGroupComponent implements OnInit {
 
-	constructor() { }
+	constructor( public mainService: DimeTagService ) { }
 
 	ngOnInit() {
 	}

@@ -1,6 +1,6 @@
 export interface DimeTag {
 	id: number,
 	name: string,
-	group: number,
-	description: string
+	description: string,
+	taggroup: number
 }

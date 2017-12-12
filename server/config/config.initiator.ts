@@ -41,6 +41,7 @@ import { Version0000check } from './initiators/version0000check';
 import { ATStatusType } from '../../shared/enums/generic/statustypes';
 import * as bcrypt from 'bcrypt';
 import { Pool } from 'mysql';
+import { InitiatorUtils } from './initiators/initiatorUtils';
 
 interface TableDefiner {
 	name: string;
@@ -53,10 +54,12 @@ interface TableDefiner {
 let db: Pool;
 let configuration: any;
 let tableList: Array<TableDefiner>; tableList = [];
+let utils: InitiatorUtils;
 
 export function initiateInitiator( refDB: Pool, refConf: any ) {
 	db = refDB;
 	configuration = refConf;
+	utils = new InitiatorUtils( db, configuration );
 	console.log( '===============================================' );
 	console.log( '=== Initiator is now starting               ===' );
 	console.log( '===============================================' );
@@ -101,6 +104,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( new Version0036to0037( db, configuration ).upgrade ).
 		then( new Version0037to0038( db, configuration ).upgrade ).
 		then( new Version0038to0039( db, configuration ).upgrade ).
+		then( version0039to0040 ).
 		then( finalVersion => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -129,4 +133,20 @@ function clearResidue() {
 			}
 		} );
 	} );
-};
+}
+
+const version0039to0040 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 39;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'credentials', 'tags VARCHAR(4096) NULL AFTER password' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} )
+				.catch( reject );
+		}
+	} );
+}

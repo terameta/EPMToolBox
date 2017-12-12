@@ -20,7 +20,8 @@ export class Version0037to0038 {
 					name: 'tags',
 					fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
 						'name varchar(1024) NOT NULL DEFAULT \'New Tag\'',
-						'description varchar(4096) NOT NULL DEFAULT \'\''
+						'description varchar(4096) NOT NULL DEFAULT \'\'',
+						'taggroup BIGINT UNSIGNED NULL'
 					],
 					primaryKey: 'id'
 				};
