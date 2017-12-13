@@ -7,7 +7,6 @@ import {
 	dimeMatrixReducer,
 	DimeMatrixState,
 } from '../dime/dimematrix/dimematrix.ngrx';
-import { dimeCredentialReducer, dimeCredentialInitialState, DimeCredentialState, DimeCredentialAllLoadInitiateIfEmptyAction, DimeCredentialOneLoadInitiateAction } from 'app/dime/dimecredential/dimecredential.ngrx';
 import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
 import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
 
@@ -24,14 +23,23 @@ import { Injectable } from '@angular/core';
 import { Action, State, Store } from '@ngrx/store';
 import { of } from 'rxjs/observable/of';
 import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from 'app/ngstore/applicationstatus';
+
+import { dimeUIReducer } from 'app/ngstore/uistate.reducer';
+import { DimeUIState, dimeUIInitialState } from 'app/ngstore/uistate.state';
+
 import { DimeTagState, dimeTagInitialState } from 'app/dime/dimetag/dimetag.state';
 import { dimeTagReducer } from 'app/dime/dimetag/dimetag.reducer';
 import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
 import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
 
+import { DimeCredentialState, dimeCredentialInitialState } from 'app/dime/dimecredential/dimecredential.state';
+import { dimeCredentialReducer } from 'app/dime/dimecredential/dimecredential.reducer';
+import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
+	dimeUI: DimeUIState,
 	dimeStatus: DimeStatusState,
 	dimeTag: DimeTagState,
 	dimeCredential: DimeCredentialState,
@@ -43,6 +51,7 @@ export interface AppState {
 
 export const appInitialState: AppState = {
 	router: <RouteState>{},
+	dimeUI: dimeUIInitialState,
 	dimeStatus: dimeStatusInitialState,
 	dimeTag: dimeTagInitialState,
 	dimeCredential: dimeCredentialInitialState,
@@ -94,8 +103,9 @@ export function routeReducer( state: RouteState, action: RouterNavigationAction 
 
 export const reducers = {
 	router: routeReducer,
-	dimeTag: dimeTagReducer,
+	dimeUI: dimeUIReducer,
 	dimeStatus: dimeStatusReducer,
+	dimeTag: dimeTagReducer,
 	dimeCredential: dimeCredentialReducer,
 	dimeAsyncProcess: dimeAsyncProcessReducer,
 	dimeEnvironment: dimeEnvironmentReducer,
@@ -146,10 +156,10 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 				case 'credentials': {
 					switch ( segments[2] ) {
 						case 'credential-list': {
-							return new DimeCredentialAllLoadInitiateIfEmptyAction();
+							return DimeCredentialActions.ALL.LOAD.initiateifempty();
 						}
 						case 'credential-detail/:id': {
-							return new DimeCredentialOneLoadInitiateAction( paramset.params.id );
+							return DimeCredentialActions.ONE.LOAD.initiate( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at credentials default' );

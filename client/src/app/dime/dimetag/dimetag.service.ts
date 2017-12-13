@@ -9,6 +9,7 @@ import { DimeTag } from '../../../../../shared/model/dime/tag';
 import { DimeTagGroup } from '../../../../../shared/model/dime/taggroup';
 import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
 import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
+import { DimeUIService } from 'app/ngstore/uistate.service';
 
 @Injectable()
 export class DimeTagService {
@@ -22,7 +23,7 @@ export class DimeTagService {
 	public currentGroupID = 0;
 	public doWeHaveGroupless: boolean;
 
-	constructor( private toastr: ToastrService, private store: Store<AppState>, private router: Router ) {
+	constructor( private toastr: ToastrService, private store: Store<AppState>, private router: Router, private uiService: DimeUIService ) {
 		this.store.select( 'dimeTag' ).subscribe( tagState => {
 			this.itemList = _.values( tagState.items ).sort( SortByName );
 			this.currentItem = tagState.curItem;
@@ -50,6 +51,9 @@ export class DimeTagService {
 					}
 					this.doWeHaveGroupless = true;
 				}
+			} );
+			this.groupList.forEach( ( curGroup ) => {
+				if ( !this.uiService.uiState.selectedTags[curGroup.id] ) { this.uiService.uiState.selectedTags[curGroup.id] = '0'; }
 			} );
 		} );
 	}

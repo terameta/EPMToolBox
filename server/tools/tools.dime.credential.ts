@@ -15,6 +15,11 @@ export class CredentialTools {
 				} else {
 					rows.forEach( ( curRow: DimeCredential ) => {
 						curRow.password = '|||---protected---|||';
+						if ( curRow.tags ) {
+							curRow.tags = JSON.parse( curRow.tags );
+						} else {
+							curRow.tags = {};
+						}
 					} );
 					resolve( rows );
 				}
@@ -28,7 +33,7 @@ export class CredentialTools {
 
 	public getCredentialDetails = ( refObj: DimeCredential, shouldShowPassword?: boolean ): Promise<DimeCredential> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM credentials WHERE id = ?', refObj.id, ( err, rows, fields ) => {
+			this.db.query( 'SELECT * FROM credentials WHERE id = ?', refObj.id, ( err, rows: DimeCredentialDetail[], fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else if ( rows.length !== 1 ) {
@@ -38,6 +43,12 @@ export class CredentialTools {
 						rows[0].password = this.tools.decryptText( rows[0].password );
 					} else {
 						rows[0].password = '|||---protected---|||';
+					}
+
+					if ( rows[0].tags ) {
+						rows[0].tags = JSON.parse( rows[0].tags );
+					} else {
+						rows[0].tags = {};
 					}
 					resolve( rows[0] );
 				}
@@ -54,7 +65,7 @@ export class CredentialTools {
 					reject( err.code );
 				} else {
 					refItem.id = result.insertId;
-					resolve( this.update( refItem ) );
+					resolve( this.update( <DimeCredentialDetail>refItem ) );
 				}
 			} );
 		} );
@@ -67,7 +78,8 @@ export class CredentialTools {
 			} else if ( refItem.password ) {
 				refItem.password = this.tools.encryptText( refItem.password );
 			}
-			this.db.query( 'UPDATE credentialsFIXTHISONETHISISANINTENTIONALERROR SET ? WHERE id = ' + refItem.id, refItem, ( err, result, fields ) => {
+			refItem.tags = JSON.stringify( refItem.tags );
+			this.db.query( 'UPDATE credentials SET ? WHERE id = ' + refItem.id, refItem, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else {
@@ -80,9 +92,9 @@ export class CredentialTools {
 
 	public delete = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'DELETE FROM credentialsFIXTHISONETHISISANINTENTIONALERROR WHERE id = ?', id, ( err, result, fields ) => {
+			this.db.query( 'DELETE FROM credentials WHERE id = ?', id, ( err, result, fields ) => {
 				if ( err ) {
-					reject( err );
+					reject( err.code );
 				} else {
 					resolve( { id: id } );
 				}

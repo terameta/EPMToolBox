@@ -39,7 +39,7 @@ export class MainTools {
 	}
 
 	public parseJsonString( toParse: string ) {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			try {
 				const toReturn = JSON.parse( toParse );
 				resolve( toReturn );
