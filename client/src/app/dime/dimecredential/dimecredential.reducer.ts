@@ -16,6 +16,9 @@ export function dimeCredentialReducer( state: DimeCredentialState, action: Actio
 		case DimeCredentialActions.ONE.LOAD.COMPLETE: {
 			return handleOneLoadComplete( state, action );
 		}
+		case DimeCredentialActions.ONE.REVEAL.COMPLETE: {
+			return handleOneRevealComplete( state, action );
+		}
 		default: {
 			return state;
 		}
@@ -31,5 +34,13 @@ const handleAllLoadComplete = ( state: DimeCredentialState, action: Action ): Di
 const handleOneLoadComplete = ( state: DimeCredentialState, action: Action ): DimeCredentialState => {
 	const newState: DimeCredentialState = Object.assign( {}, state );
 	newState.curItem = action.payload;
+	return newState;
+}
+
+const handleOneRevealComplete = ( state: DimeCredentialState, action: Action ): DimeCredentialState => {
+	const newState: DimeCredentialState = Object.assign( {}, state );
+	if ( newState.curItem ) {
+		newState.curItem.clearPassword = action.payload.password;
+	}
 	return newState;
 }

@@ -5,9 +5,12 @@ import * as crypto from 'crypto';
 
 export class MainTools {
 	// config: any;
+	private encryptionAlgorithm = 'AES-256-CBC';
+	private iv_length = 16;
+	private encryptionKey: string;
 
 	constructor( public config: any, public db: Pool ) {
-		// this.config = refConfig;
+		this.encryptionKey = this.config.hash.substr( 0, 32 );
 	}
 
 	generateLongString( sentLength?: number ): string {
@@ -53,7 +56,26 @@ export class MainTools {
 		return Object.keys( refObj ).length === 0;
 	}
 
-	public encryptText = ( plaintext: string ) => {
+	public encryptText = ( plaintext: string ): string => {
+		const iv = crypto.randomBytes( this.iv_length );
+		const cipher = crypto.createCipheriv( this.encryptionAlgorithm, new Buffer( this.encryptionKey ), iv );
+		let encrypted = cipher.update( new Buffer( plaintext, 'utf-8' ) );
+		encrypted = Buffer.concat( [encrypted, cipher.final()] );
+
+		return iv.toString( 'hex' ) + ':' + encrypted.toString( 'hex' );
+	}
+
+	public decryptText = ( ciphertext: string ): string => {
+		const textParts = ciphertext.split( ':' );
+		const iv = new Buffer( textParts.shift() || '', 'hex' );
+		const encryptedText = new Buffer( textParts.join( ':' ), 'hex' );
+		const decipher = crypto.createDecipheriv( this.encryptionAlgorithm, new Buffer( this.encryptionKey ), iv );
+		let decrypted = decipher.update( encryptedText );
+		decrypted = Buffer.concat( [decrypted, decipher.final()] );
+		return decrypted.toString( 'utf-8' );
+	}
+
+	public encryptTextOLDDONOTUSE = ( plaintext: string ) => {
 		// console.log('-------- Encrypt Start ----------------');
 		// console.log('Hash:', this.config.hash);
 		// console.log('PlTx:', plaintext);
@@ -65,7 +87,7 @@ export class MainTools {
 		return crypted;
 	};
 
-	public decryptText = ( crypted: string ) => {
+	public decryptTextOLDDONOTUSE = ( crypted: string ) => {
 		// console.log('-------- Decrypt Start ----------------');
 		// console.log('Hash:', this.config.hash);
 		// console.log('CrTx:', crypted);
@@ -75,6 +97,10 @@ export class MainTools {
 		// console.log('PlTx:', plaintext);
 		// console.log('-------- Decrypt End ----------------');
 		return plaintext;
+	}
+
+	signaToken( toSign: any ): string {
+		return jwt.sign( toSign, this.config.hash, { expiresIn: 60 * 60 * 24 * 30 } );
 	}
 
 	signToken( toSign: any ): string {

@@ -31,6 +31,14 @@ export class CredentialTools {
 		return this.getCredentialDetails( <DimeCredential>{ id: id } );
 	}
 
+	public reveal = ( id: number ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.getCredentialDetails( <DimeCredential>{ id: id }, true ).then( ( currentItem ) => {
+				resolve( { password: currentItem.password } );
+			} ).catch( reject );
+		} );
+	}
+
 	public getCredentialDetails = ( refObj: DimeCredential, shouldShowPassword?: boolean ): Promise<DimeCredential> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM credentials WHERE id = ?', refObj.id, ( err, rows: DimeCredentialDetail[], fields ) => {

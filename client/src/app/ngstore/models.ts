@@ -8,7 +8,6 @@ import {
 	DimeMatrixState,
 } from '../dime/dimematrix/dimematrix.ngrx';
 import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
-import { dimeEnvironmentReducer, DimeEnvironmentState } from '../dime/dimeenvironment/dimeenvironment.ngrx';
 
 import {
 	DIME_ASYNC_PROCESS_ACTIONS,
@@ -36,6 +35,10 @@ import { DimeCredentialState, dimeCredentialInitialState } from 'app/dime/dimecr
 import { dimeCredentialReducer } from 'app/dime/dimecredential/dimecredential.reducer';
 import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
 
+import { DimeEnvironmentState, dimeEnvironmentInitialState } from 'app/dime/dimeenvironment/dimeenvironment.state';
+import { dimeEnvironmentReducer } from 'app/dime/dimeenvironment/dimeenvironment.reducer';
+import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
@@ -56,7 +59,7 @@ export const appInitialState: AppState = {
 	dimeTag: dimeTagInitialState,
 	dimeCredential: dimeCredentialInitialState,
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
-	dimeEnvironment: <DimeEnvironmentState>{},
+	dimeEnvironment: dimeEnvironmentInitialState,
 	dimeStream: <DimeStreamState>{},
 	dimeMatrix: dimeMatrixInitialState
 }
@@ -90,15 +93,6 @@ export function routeReducer( state: RouteState, action: RouterNavigationAction 
 			return state;
 		}
 	}
-	// if ( action.type === ROUTER_NAVIGATION ) {
-	// 	if ( action.payload ) {
-	// 		return { currentRoute: Object.assign( {}, action.payload.routerState.root ) };
-	// 	} else {
-	// 		return state;
-	// 	}
-	// } else {
-	// 	return state;
-	// }
 }
 
 export const reducers = {
@@ -163,6 +157,20 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						}
 						default: {
 							console.log( 'We are at credentials default' );
+							return new DoNothingAction();
+						}
+					}
+				}
+				case 'environments': {
+					switch ( segments[2] ) {
+						case 'environment-list': {
+							return DimeEnvironmentActions.ALL.LOAD.initiateifempty();
+						}
+						case 'environment-detail/:id': {
+							return DimeEnvironmentActions.ONE.LOAD.initiate( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at environments default' );
 							return new DoNothingAction();
 						}
 					}

@@ -30,4 +30,8 @@ export class DimeCredentialBackend {
 	public oneDelete = ( id: number ) => {
 		return this.http.delete( this.baseUrl + '/' + id );
 	}
+
+	public oneReveal = ( id: number ): Observable<string> => {
+		return this.http.get<string>( this.baseUrl + '/reveal/' + id );
+	}
 }

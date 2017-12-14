@@ -1,21 +1,19 @@
-import { AppState } from '../../ngstore/models';
-import { Store } from '@ngrx/store';
-import { OnInit } from '@angular/core';
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers } from '@angular/http';
-import { Router, ActivatedRoute, Params } from '@angular/router';
-import * as _ from 'lodash';
+import { Router } from '@angular/router';
 
-import { BehaviorSubject, Observable } from 'rxjs/Rx';
-import { AuthHttp } from 'angular2-jwt';
+import { AppState } from '../../ngstore/models';
+
+import { Store } from '@ngrx/store';
+
 import { ToastrService } from 'ngx-toastr';
+
+import * as _ from 'lodash';
 
 import { DimeEnvironment } from '../../../../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../../../../shared/model/dime/environmentDetail';
-import { DimeEnvironmentType } from '../../../../../shared/model/dime/environmenttype';
-import { DimeStream } from '../../../../../shared/model/dime/stream';
 
 import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
 @Injectable()
 export class DimeEnvironmentService {
@@ -27,34 +25,28 @@ export class DimeEnvironmentService {
 	// private dataStore: {
 	// 	items: DimeEnvironment[]
 	// };
-	// private headers = new Headers( { 'Content-Type': 'application/json' } );
 	private serviceName = 'Environments';
 
 	public itemList: DimeEnvironment[];
+	public itemObject: { [key: number]: DimeEnvironment };
 	public currentItem: DimeEnvironmentDetail;
 
 	constructor(
 		// private http: Http,
 		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
-		// private router: Router,
-		// private route: ActivatedRoute,
-		private store: Store<AppState>
+		private store: Store<AppState>,
+		private router: Router
 	) {
-		// this.baseUrl = '/api/dime/environment';
-		// this.serviceName = 'Environments';
-		// this.dataStore = { items: [] };
-		// this._items = <BehaviorSubject<DimeEnvironment[]>>new BehaviorSubject( [] );
-		// this.items = this._items.asObservable();
-		// this.curItem = { id: 0 };
-		// this.typeList = [];
-		// this.getAll( true );
-
-		// Below is for transitioning to ngrx
 		this.store.select( 'dimeEnvironment' ).subscribe( environmentState => {
 			this.itemList = _.values( environmentState.items ).sort( SortByName );
+			this.itemObject = environmentState.items;
 			this.currentItem = environmentState.curItem;
 		} );
+	}
+
+	public create = () => {
+		this.store.dispatch( DimeEnvironmentActions.ONE.CREATE.initiate( <DimeEnvironmentDetail>{} ) );
 	}
 	/*
 		getAll = ( isSilent?: boolean ) => {
@@ -98,19 +90,7 @@ export class DimeEnvironmentService {
 					console.log( error );
 				} );
 		}
-		create = () => {
-			this.authHttp.post( this.baseUrl, {}, { headers: this.headers } )
-				.map( response => response.json() ).subscribe( data => {
-					this.dataStore.items.push( data );
-					this.dataStore.items.sort( SortByName );
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.router.navigate( ['/dime/environments/environment-detail', data.id] );
-					this.toastr.info( 'New item is created, navigating to the details', this.serviceName );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to create new item.', this.serviceName );
-					console.log( error );
-				} );
-		}
+
 		update = ( curItem?: DimeEnvironment ) => {
 			if ( !curItem ) { curItem = this.curItem };
 			this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).

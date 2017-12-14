@@ -22,6 +22,7 @@ export class DimeCredentialService {
 	public itemList: DimeCredential[];
 	public itemObject: { [key: number]: DimeCredential };
 	public currentItem: DimeCredentialDetail;
+	public currentItemClearPassword: string;
 
 	constructor( private toastr: ToastrService, private store: Store<AppState>, private router: Router ) {
 		this.store.select( 'dimeCredential' ).subscribe( credentialState => {
@@ -36,6 +37,7 @@ export class DimeCredentialService {
 	}
 
 	public update = () => {
+		delete this.currentItem.clearPassword;
 		this.store.dispatch( DimeCredentialActions.ONE.UPDATE.initiate( this.currentItem ) );
 	}
 
@@ -48,6 +50,10 @@ export class DimeCredentialService {
 
 	public navigateTo = ( refered ) => {
 		this.router.navigateByUrl( 'dime/credentials/credential-detail/' + refered );
+	}
+
+	public reveal = () => {
+		this.store.dispatch( DimeCredentialActions.ONE.REVEAL.initiate( this.currentItem.id ) );
 	}
 
 }

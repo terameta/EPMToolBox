@@ -29,10 +29,6 @@ export class DimeCredentialEffects {
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
 		} );
 
-	@Effect() ALL_LOAD_COMPLETE$ = this.actions$
-		.ofType( DimeCredentialActions.ALL.LOAD.COMPLETE )
-		.map( () => DimeTagActions.ALL.LOAD.initiateifempty() );
-
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeCredentialActions.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.store$ )
@@ -43,6 +39,10 @@ export class DimeCredentialEffects {
 				.map( resp => DimeCredentialActions.ALL.LOAD.complete( resp ) )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
 		} );
+
+	@Effect() ALL_LOAD_COMPLETE$ = this.actions$
+		.ofType( DimeCredentialActions.ALL.LOAD.COMPLETE )
+		.map( () => DimeTagActions.ALL.LOAD.initiateifempty() );
 
 	@Effect() ONE_CREATE_INITIATE$ = this.actions$
 		.ofType( DimeCredentialActions.ONE.CREATE.INITIATE )
@@ -93,6 +93,14 @@ export class DimeCredentialEffects {
 		.switchMap( ( action: Action ) => {
 			this.router.navigateByUrl( 'dime/credentials/credential-list' );
 			return of( DimeCredentialActions.ALL.LOAD.initiate() );
+		} );
+
+	@Effect() ONE_REVEAL_INITIATE$ = this.actions$
+		.ofType( DimeCredentialActions.ONE.REVEAL.INITIATE )
+		.switchMap( ( action: Action ) => {
+			return this.backend.oneReveal( action.payload )
+				.map( resp => DimeCredentialActions.ONE.REVEAL.complete( resp ) )
+				.catch( resp => { console.log( resp ); return of( DimeStatusActions.error( resp.error, this.serviceName ) ) } );
 		} );
 
 	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeCredentialBackend, private router: Router ) { }

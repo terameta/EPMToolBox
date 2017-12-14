@@ -2,7 +2,7 @@ import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.ngrx';
 import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { DimeStreamEffects } from './dime/dimestream/dimestream.ngrx';
 import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
-import { DimeEnvironmentEffects } from './dime/dimeenvironment/dimeenvironment.ngrx';
+import { DimeEnvironmentEffects } from './dime/dimeenvironment/dimeenvironment.effects';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
 import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';

@@ -41,6 +41,12 @@ export const DimeCredentialActions = {
 			initiate: ( payload: number ): Action => { return { type: DimeCredentialActions.ONE.DELETE.INITIATE, payload: payload } },
 			COMPLETE: 'DIME_CREDENTIAL_ACTIONS_ONE_DELETE_COMPLETE',
 			complete: (): Action => { return { type: DimeCredentialActions.ONE.DELETE.COMPLETE } }
+		},
+		REVEAL: {
+			INITIATE: 'DIME_CREDENTIAL_ACTIONS_ONE_REVEAL_INITIATE',
+			initiate: ( payload: number ): Action => { return { type: DimeCredentialActions.ONE.REVEAL.INITIATE, payload: payload } },
+			COMPLETE: 'DIME_CREDENTIAL_ACTIONS_ONE_REVEAL_COMPLETE',
+			complete: ( payload: string ): Action => { return { type: DimeCredentialActions.ONE.REVEAL.COMPLETE, payload: payload } }
 		}
 	}
 }
