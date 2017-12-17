@@ -12,7 +12,8 @@ import * as _ from 'lodash';
 import { DimeEnvironment } from '../../../../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../../../../shared/model/dime/environmentDetail';
 
-import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName, EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
+import { DimeEnvironmentType, dimeGetEnvironmentType } from '../../../../../shared/enums/dime/environmenttypes';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
 @Injectable()
@@ -30,6 +31,8 @@ export class DimeEnvironmentService {
 	public itemList: DimeEnvironment[];
 	public itemObject: { [key: number]: DimeEnvironment };
 	public currentItem: DimeEnvironmentDetail;
+	public typeList = EnumToArray( DimeEnvironmentType );
+	public getEnvironmentTypeDescription = dimeGetEnvironmentType;
 
 	constructor(
 		// private http: Http,
@@ -47,6 +50,23 @@ export class DimeEnvironmentService {
 
 	public create = () => {
 		this.store.dispatch( DimeEnvironmentActions.ONE.CREATE.initiate( <DimeEnvironmentDetail>{} ) );
+	}
+
+	public isPBCS() {
+		// console.log( this.currentItem );
+		// console.log( this.environmentTypeObject );
+		console.log( DimeEnvironmentType[this.currentItem.type], this.currentItem.type, DimeEnvironmentType.PBCS, this.currentItem.type === DimeEnvironmentType.PBCS );
+		// const toReturn = false;
+		// if ( this.curItem.type ) {
+		// 	this.typeList.forEach( ( curType ) => {
+		// 		if ( this.curItem.type === curType.id && curType.value === 'PBCS' ) {
+		// 			toReturn = true;
+		// 		}
+		// 	} );
+		// }
+		// return toReturn;
+		console.log( this.typeList );
+		return this.currentItem.type === DimeEnvironmentType.PBCS;
 	}
 	/*
 		getAll = ( isSilent?: boolean ) => {
@@ -136,17 +156,7 @@ export class DimeEnvironmentService {
 					this.toastr.error( 'Listing types has failed', this.serviceName );
 				} );
 		}
-		public isPBCS() {
-			let toReturn = false;
-			if ( this.curItem.type ) {
-				this.typeList.forEach( ( curType ) => {
-					if ( this.curItem.type === curType.id && curType.value === 'PBCS' ) {
-						toReturn = true;
-					}
-				} );
-			}
-			return toReturn;
-		}
+
 		public verify = ( itemID?: number ) => {
 			if ( !itemID ) { itemID = this.curItem.id; }
 			this.authHttp.get( this.baseUrl + '/verify/' + itemID ).

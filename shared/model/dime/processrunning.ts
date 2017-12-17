@@ -2,6 +2,7 @@ import { DimeEnvironment } from './environment';
 import { DimeStream } from './stream';
 import { DimeStreamField } from './streamfield';
 import { DimeProcessStepRunning } from './processsteprunning';
+import { DimeEnvironmentDetail } from './environmentDetail';
 
 export interface DimeProcessRunning {
 	id: number,
@@ -11,11 +12,11 @@ export interface DimeProcessRunning {
 	status: number,
 	erroremail: string,
 	steps: DimeProcessStepRunning[],
-	sourceEnvironment: DimeEnvironment,
+	sourceEnvironment: DimeEnvironmentDetail,
 	sourceStream: DimeStream,
 	sourceStreamFields: DimeStreamField[],
 	sourceStreamType: string,
-	targetEnvironment: DimeEnvironment,
+	targetEnvironment: DimeEnvironmentDetail,
 	targetStream: DimeStream,
 	targetStreamFields: DimeStreamField[],
 	targetStreamType: string,

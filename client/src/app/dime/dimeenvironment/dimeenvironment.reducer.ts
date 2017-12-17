@@ -12,6 +12,9 @@ export function dimeEnvironmentReducer( state: DimeEnvironmentState, action: Act
 		case DimeEnvironmentActions.ALL.LOAD.COMPLETE: {
 			return handleAllLoadComplete( state, action );
 		}
+		case DimeEnvironmentActions.ONE.LOAD.COMPLETE: {
+			return handleOneComplete( state, action );
+		}
 		default: {
 			return state;
 		}

@@ -5,7 +5,6 @@ import { Observable } from 'rxjs/Rx';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment.service';
-// import { Environment } from "../../../../../../shared/model/environment";
 
 @Component( {
 	selector: 'app-dimeenvironment-list',

@@ -4,6 +4,7 @@ import { Pool } from 'mysql';
 import { MainTools } from './tools.main';
 import { DimeStream } from '../../shared/model/dime/stream';
 import { EnvironmentTools } from './tools.dime.environment';
+import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -13,7 +14,7 @@ export class StreamTools {
 	}
 
 	public getAll = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streams', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving stream list has failed' } );
@@ -25,7 +26,7 @@ export class StreamTools {
 	}
 	public create = () => {
 		const newStream = { name: 'New Stream (Please change name)', type: 0, environment: 0 };
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO streams SET ?', newStream, function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to create a new stream.' } );
@@ -36,7 +37,7 @@ export class StreamTools {
 		} );
 	};
 	public getOne = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streams WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving stream with id ' + id + ' has failed' } );
@@ -49,7 +50,7 @@ export class StreamTools {
 		} );
 	}
 	public listTypes = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streamtypes', function ( err, rows, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving stream type list has failed' } );
@@ -60,7 +61,7 @@ export class StreamTools {
 		} );
 	};
 	public update = ( theStream: DimeStream ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const theID: number = theStream.id;
 			this.db.query( 'UPDATE streams SET ? WHERE id = ' + theID, theStream, function ( err, result, fields ) {
 				if ( err ) {
@@ -72,7 +73,7 @@ export class StreamTools {
 		} );
 	}
 	public delete = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM streams WHERE id = ?', id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to delete the stream' } );
@@ -83,14 +84,14 @@ export class StreamTools {
 		} );
 	}
 	public listFields = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.getOne( id ).
 				then( this.buildQuery ).
-				then(( innerObj: DimeStream ) => {
-					return this.environmentTool.listFields( { id: innerObj.environment, query: innerObj.finalQuery, database: innerObj.dbName, table: innerObj.tableName } );
+				then( ( innerObj: DimeStream ) => {
+					return this.environmentTool.listFields( <DimeEnvironmentDetail>{ id: innerObj.environment, query: innerObj.finalQuery, database: innerObj.dbName, table: innerObj.tableName } );
 				} ).
-				then(( result: any ) => {
-					result.forEach(( curField: any, curKey: any ) => {
+				then( ( result: any ) => {
+					result.forEach( ( curField: any, curKey: any ) => {
 						if ( !curField.order ) { curField.order = curKey + 1; }
 					} );
 					resolve( result );
@@ -99,17 +100,17 @@ export class StreamTools {
 		} );
 	}
 	public listFieldsforField = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const toBuild: any = {
 				tableName: refObj.field.descriptiveTable,
 				customQuery: refObj.field.descriptiveQuery
 			};
 			this.buildQuery( toBuild ).
-				then(( innerObj: any ) => {
-					return this.environmentTool.listFields( { id: refObj.environmentID, query: innerObj.finalQuery, database: refObj.field.descriptiveDB, table: refObj.field.descriptiveTable } );
+				then( ( innerObj: any ) => {
+					return this.environmentTool.listFields( <DimeEnvironmentDetail>{ id: refObj.environmentID, query: innerObj.finalQuery, database: refObj.field.descriptiveDB, table: refObj.field.descriptiveTable } );
 				} ).
-				then(( result: any ) => {
-					result.forEach(( curField: any, curKey: any ) => {
+				then( ( result: any ) => {
+					result.forEach( ( curField: any, curKey: any ) => {
 						if ( !curField.order ) { curField.order = curKey + 1; }
 					} );
 					resolve( result );
@@ -118,7 +119,7 @@ export class StreamTools {
 		} );
 	}
 	private buildQuery = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( refObj.tableName === 'Custom Query' ) {
 				refObj.finalQuery = refObj.customQuery;
 				if ( !refObj.finalQuery ) {
@@ -134,7 +135,7 @@ export class StreamTools {
 		} );
 	}
 	public assignFields = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'No data is provided' );
 			} else if ( !refObj.id ) {
@@ -145,10 +146,10 @@ export class StreamTools {
 				reject( 'Field list is not valid' );
 			} else {
 				this.clearFields( refObj ).
-					then(( innerObj: any ) => {
+					then( ( innerObj: any ) => {
 						let toInsert: any;
 						let promises: any[]; promises = [];
-						innerObj.fields.forEach(( curField: any ) => {
+						innerObj.fields.forEach( ( curField: any ) => {
 							toInsert = {};
 							toInsert.stream = innerObj.id;
 							toInsert.name = curField.name;
@@ -176,7 +177,7 @@ export class StreamTools {
 						} );
 						return Promise.all( promises );
 					} ).
-					then(( result ) => {
+					then( ( result ) => {
 						resolve( { result: 'OK' } );
 					} ).
 					catch( reject );
@@ -184,7 +185,7 @@ export class StreamTools {
 		} );
 	}
 	private assignField = ( fieldDefinition: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO streamfields SET ?', fieldDefinition, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -195,7 +196,7 @@ export class StreamTools {
 		} );
 	}
 	public clearFields = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM streamfields WHERE stream = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -206,7 +207,7 @@ export class StreamTools {
 		} );
 	}
 	public retrieveFields = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streamfields WHERE stream = ? ORDER BY fOrder', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -217,7 +218,7 @@ export class StreamTools {
 		} );
 	}
 	public retrieveField = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streamfields WHERE id = ? ORDER BY fOrder', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -230,7 +231,7 @@ export class StreamTools {
 		} );
 	}
 	public saveFields = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'No data is provided' );
 			} else if ( !refObj.id ) {
@@ -241,11 +242,11 @@ export class StreamTools {
 				reject( 'Field list is not valid' );
 			} else {
 				let promises: any[]; promises = [];
-				refObj.fields.forEach(( curField: any ) => {
+				refObj.fields.forEach( ( curField: any ) => {
 					promises.push( this.saveField( curField ) );
 				} );
 				Promise.all( promises ).
-					then(( result ) => {
+					then( ( result ) => {
 						resolve( { result: 'OK' } );
 					} ).
 					catch( reject );
@@ -253,7 +254,7 @@ export class StreamTools {
 		} );
 	}
 	private saveField = ( fieldDefinition: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE streamfields SET ? WHERE id = ' + fieldDefinition.id, fieldDefinition, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -264,11 +265,11 @@ export class StreamTools {
 		} );
 	};
 	public isReady = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.checkTables( id ).
-				then(( tableList: any[] ) => {
+				then( ( tableList: any[] ) => {
 					let toReturn = true;
-					tableList.forEach(( curTable ) => {
+					tableList.forEach( ( curTable ) => {
 						if ( curTable.status === false ) { toReturn = false; }
 					} );
 					resolve( toReturn );
@@ -279,26 +280,26 @@ export class StreamTools {
 	private checkTables = ( id: number ) => {
 		let topStream: any;
 		let tablesReady: { tableName: string, stream: number, streamType: string, field: number, status: boolean }[]; tablesReady = [];
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.getOne( id ).
-				then(( curStream: DimeStream ) => {
+				then( ( curStream: DimeStream ) => {
 					topStream = curStream;
 					return this.listTypes();
 				} ).
-				then(( typeList: any[] ) => {
-					typeList.forEach(( curType ) => {
+				then( ( typeList: any[] ) => {
+					typeList.forEach( ( curType ) => {
 						if ( curType.id === topStream.type ) {
 							topStream.typeName = curType.value;
 						}
 					} );
 					return this.retrieveFields( id );
 				} ).
-				then(( fields: DimeStreamField[] ) => {
+				then( ( fields: DimeStreamField[] ) => {
 					if ( fields.length === 0 ) {
 						reject( 'No fields are defined for stream' );
 					} else {
 						if ( topStream.typeName === 'HPDB' ) {
-							fields.forEach(( curField ) => {
+							fields.forEach( ( curField ) => {
 								curField.isDescribed = true;
 							} );
 						}
@@ -308,13 +309,13 @@ export class StreamTools {
 							if ( err ) {
 								reject( err );
 							} else {
-								fields.forEach(( curField ) => {
+								fields.forEach( ( curField ) => {
 									if ( curField.isDescribed ) {
 										const curTableName = 'STREAM' + topStream.id + '_DESCTBL' + curField.id;
 										tablesReady.push( { tableName: curTableName, stream: id, streamType: topStream.typeName, field: curField.id, status: false } );
-										rows.forEach(( curTable: any ) => {
+										rows.forEach( ( curTable: any ) => {
 											if ( curTable.TABLE_NAME === curTableName ) {
-												tablesReady.forEach(( ct ) => {
+												tablesReady.forEach( ( ct ) => {
 													if ( ct.tableName === curTableName ) { ct.status = true; }
 												} );
 											}
@@ -330,11 +331,11 @@ export class StreamTools {
 		} );
 	};
 	public prepareTables = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.checkTables( id ).
-				then(( tableList: { tableName: string, stream: number, streamType: string, field: number, status: boolean }[] ) => {
+				then( ( tableList: { tableName: string, stream: number, streamType: string, field: number, status: boolean }[] ) => {
 					let promises: any[]; promises = [];
-					tableList.forEach(( curTable ) => {
+					tableList.forEach( ( curTable ) => {
 						promises.push( this.prepareTable( curTable ) );
 					} );
 					return Promise.all( promises );
@@ -344,12 +345,12 @@ export class StreamTools {
 		} );
 	};
 	private prepareTable = ( tableStatus: { tableName: string, stream: number, streamType: string, field: number, status: boolean } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( tableStatus.status ) {
 				resolve( 'OK' );
 			} else {
 				this.retrieveField( tableStatus.field ).
-					then(( field: DimeStreamField ) => {
+					then( ( field: DimeStreamField ) => {
 						let curQuery: string; curQuery = '';
 						curQuery += 'CREATE TABLE ' + tableStatus.tableName + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 						if ( tableStatus.streamType !== 'HPDB' ) { curQuery += ', RefField '; }
@@ -384,7 +385,7 @@ export class StreamTools {
 		} );
 	};
 	public getFieldDescriptions = ( refObj: { stream: number, field: number } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT RefField, Description FROM STREAM' + refObj.stream + '_DESCTBL' + refObj.field + ' ORDER BY 1, 2', {}, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );

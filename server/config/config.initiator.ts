@@ -1,4 +1,3 @@
-import { Version0038to0039 } from './initiators/version0038to0039';
 import { Version0037to0038 } from './initiators/version0037to0038';
 import { Version0036to0037 } from './initiators/version0036to0037';
 import { Version0035to0036 } from './initiators/version0035to0036';
@@ -39,9 +38,13 @@ import { Version0001to0002 } from './initiators/version0001to0002';
 import { Version0000to0001 } from './initiators/version0000to0001';
 import { Version0000check } from './initiators/version0000check';
 import { ATStatusType } from '../../shared/enums/generic/statustypes';
+import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import * as bcrypt from 'bcrypt';
+import * as _ from 'lodash';
 import { Pool } from 'mysql';
 import { InitiatorUtils } from './initiators/initiatorUtils';
+import { EnumToArray, SortByName } from '../../shared/utilities/utilityFunctions';
+import { DimeEnvironment } from '../../shared/model/dime/environment';
 
 interface TableDefiner {
 	name: string;
@@ -103,8 +106,11 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( new Version0035to0036( db, configuration ).upgrade ).
 		then( new Version0036to0037( db, configuration ).upgrade ).
 		then( new Version0037to0038( db, configuration ).upgrade ).
-		then( new Version0038to0039( db, configuration ).upgrade ).
+		then( version0038to0039 ).
 		then( version0039to0040 ).
+		then( version0040to0041 ).
+		then( version0041to0042 ).
+		then( version0042to0043 ).
 		then( finalVersion => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -135,6 +141,85 @@ function clearResidue() {
 	} );
 }
 
+const version0042to0043 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 42;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE environments DROP isconverted', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+}
+
+
+const version0041to0042 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 41;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			const environmentTypeObject = _.keyBy( EnumToArray( DimeEnvironmentType ), 'label' );
+			const promises: any[] = [];
+
+			db.query( 'SELECT * FROM environments WHERE isconverted = 0', ( err1, environmentList: DimeEnvironment[], environmentFields ) => {
+				if ( err1 ) {
+					reject( err1 );
+				} else {
+					db.query( 'SELECT * FROM environmenttypes', ( err2, typeList, typeFields ) => {
+						if ( err2 ) {
+							reject( err2 );
+						} else {
+							const typesObject = _.keyBy( typeList, 'id' );
+							environmentList.forEach( ( curEnvironment: any ) => {
+
+								curEnvironment.type = parseInt( environmentTypeObject[typesObject[curEnvironment.type].value].value, 10 );
+								curEnvironment.isconverted = 1;
+
+								promises.push( new Promise( ( iResolve, iReject ) => {
+									db.query( 'UPDATE environments SET ? WHERE id = ?', [curEnvironment, curEnvironment.id], ( iErr, iResult ) => {
+										if ( iErr ) {
+											iReject( iErr );
+										} else {
+											iResolve();
+										}
+									} );
+								} ) );
+							} );
+							Promise.all( promises ).then( () => {
+								resolve( utils.updateToVersion( nextVersion ) );
+							} ).catch( reject );
+						}
+					} );
+				}
+			} );
+		}
+	} );
+}
+
+const version0040to0041 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 40;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'environments', 'isconverted TINYINT NOT NULL DEFAULT 0 AFTER password' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+}
+
 const version0039to0040 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 39;
@@ -147,6 +232,30 @@ const version0039to0040 = ( currentVersion: number ) => {
 					resolve( utils.updateToVersion( nextVersion ) );
 				} )
 				.catch( reject );
+		}
+	} );
+}
+
+const version0038to0039 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 38;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			const tableDef: TableDefiner = {
+				name: 'taggroups',
+				fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+					'name varchar(1024) NOT NULL DEFAULT \'New Tag Group\'',
+					'position INT UNSIGNED NOT NULL'
+				],
+				primaryKey: 'id',
+				values: [{ name: 'First Tag Group', position: 0 }],
+				fieldsToCheck: ['name']
+			};
+
+
+			resolve( this.utils.checkAndCreateTable( tableDef ).then( () => this.utils.updateToVersion( nextVersion ) ) );
 		}
 	} );
 }

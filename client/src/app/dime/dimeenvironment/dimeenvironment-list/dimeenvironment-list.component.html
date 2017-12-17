@@ -13,7 +13,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr *ngFor="let environment of mainService.items | async">
+				<tr *ngFor="let environment of mainService.itemList">
 					<td>{{ environment.name }}</td>
 					<td>
 						<span *ngFor="let envType of mainService.typeList">

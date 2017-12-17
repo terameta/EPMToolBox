@@ -16,7 +16,7 @@ import { DimeEnvironmentService } from '../dimeenvironment.service';
 } )
 export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 	// curItem: Environment;
-	paramsSubscription: Subscription;
+	// paramsSubscription: Subscription;
 
 	// curEnvironmentID: number;
 	// curEnvironment: any = {};

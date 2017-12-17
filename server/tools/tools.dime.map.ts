@@ -14,6 +14,7 @@ import { DimeStream } from '../../shared/model/dime/stream';
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
+import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 
 export class MapTools {
 	private streamTool: StreamTools;
@@ -425,8 +426,8 @@ export class MapTools {
 			let targetFields: DimeStreamField[]; targetFields = [];
 			let sourceStream: DimeStream; sourceStream = <DimeStream>{ id: 0, name: '', type: 0, environment: 0 };
 			let targetStream: DimeStream; targetStream = <DimeStream>{ id: 0, name: '', type: 0, environment: 0 };
-			let sourceEnvironment: DimeEnvironment; sourceEnvironment = { id: 0 };
-			let targetEnvironment: DimeEnvironment; targetEnvironment = { id: 0 };
+			let sourceEnvironment: DimeEnvironmentDetail; sourceEnvironment = <DimeEnvironmentDetail>{ id: 0 };
+			let targetEnvironment: DimeEnvironmentDetail; targetEnvironment = <DimeEnvironmentDetail>{ id: 0 };
 
 			this.getOne( refObj.id ).
 				then( ( theMap: DimeMap ) => {
@@ -452,14 +453,14 @@ export class MapTools {
 				then( ( tarStream: DimeStream ) => {
 					// console.log(new Date(), 'Received target stream');
 					targetStream = tarStream;
-					return this.environmentTool.getEnvironmentDetails( { id: sourceStream.environment } ).then( this.environmentTool.getTypeDetails );
+					return this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: sourceStream.environment } ).then( this.environmentTool.getTypeDetails );
 				} ).
-				then( ( srcEnvironment: DimeEnvironment ) => {
+				then( ( srcEnvironment: DimeEnvironmentDetail ) => {
 					// console.log(new Date(), 'Received source environment');
 					sourceEnvironment = srcEnvironment;
-					return this.environmentTool.getEnvironmentDetails( { id: targetStream.environment } ).then( this.environmentTool.getTypeDetails );
+					return this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: targetStream.environment } ).then( this.environmentTool.getTypeDetails );
 				} ).
-				then( ( tarEnvironment: DimeEnvironment ) => {
+				then( ( tarEnvironment: DimeEnvironmentDetail ) => {
 					// console.log(new Date(), 'Received target environment');
 					targetEnvironment = tarEnvironment;
 					return this.getFields( curMap.id );
