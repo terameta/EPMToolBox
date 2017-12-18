@@ -5,18 +5,26 @@ export enum DimeEnvironmentType {
 	'ORADB' = 4
 }
 
-export function dimeGetEnvironmentType( typecode: number | string ) {
+export function dimeGetEnvironmentTypeDescription( typecode: number | string ) {
 	switch ( typecode ) {
-		case ( 1 || '1' || 'HP' ): {
+		case 1:
+		case '1':
+		case 'HP': {
 			return 'Hyperion Planning On-Premises';
 		}
-		case ( 2 || '2' || 'MSSQL' ): {
+		case 2:
+		case '2':
+		case 'MSSQL': {
 			return 'Microsoft SQL Server';
 		}
-		case ( 3 || '3' || 'PBCS' ): {
+		case 3:
+		case '3':
+		case 'PBCS': {
 			return 'Hyperion Planning PBCS';
 		}
-		case ( 4 || '4' || 'ORADB' ): {
+		case 4:
+		case '4':
+		case 'ORADB': {
 			return 'Oracle Database Server';
 		}
 	}

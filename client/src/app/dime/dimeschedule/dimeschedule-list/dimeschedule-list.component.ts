@@ -22,8 +22,8 @@ export class DimescheduleListComponent implements OnInit {
 
 	private findStatus = ( n ) => {
 		let toReturn: string; toReturn = 'Unknown status';
-		this.statusTypeArray.forEach(( curStatus ) => {
-			if ( parseInt( curStatus.value, 10 ) === parseInt( n, 10 ) ) {
+		this.statusTypeArray.forEach( ( curStatus ) => {
+			if ( curStatus.value === parseInt( n, 10 ) ) {
 				toReturn = curStatus.label;
 			}
 		} );

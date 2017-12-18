@@ -1,4 +1,4 @@
-import { TableDefiner } from '../../../shared/model/mysql/mysql.table.def';
+import { TableDefiner } from '../../shared/model/mysql/mysql.table.def';
 import { Pool } from 'mysql';
 
 export class InitiatorUtils {
@@ -105,7 +105,7 @@ export class InitiatorUtils {
 		} );
 	}
 
-	public updateToVersion = ( newVersion: number ) => {
+	public updateToVersion = ( newVersion: number ): Promise<number> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE currentversion SET version = ?', newVersion, ( err, rows, fields ) => {
 				if ( err ) {

@@ -7,6 +7,7 @@ export interface DimeEnvironment {
 	server: string,
 	port: string,
 	verified: number,
-	username: string,
-	password: string
+	identitydomain: string,
+	credential: number,
+	tags: any
 }

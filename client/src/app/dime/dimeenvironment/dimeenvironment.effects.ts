@@ -91,5 +91,17 @@ export class DimeEnvironmentEffects {
 			return of( DimeEnvironmentActions.ALL.LOAD.initiate() );
 		} );
 
+	@Effect() ONE_VERIFY_INITIATE$ = this.actions$
+		.ofType( DimeEnvironmentActions.ONE.VERIFY.INITIATE )
+		.switchMap( ( action: Action ) => {
+			return this.backend.oneVerify( action.payload )
+				.mergeMap( resp => [
+					DimeEnvironmentActions.ONE.VERIFY.complete(),
+					DimeEnvironmentActions.ONE.LOAD.initiate( action.payload ),
+					DimeEnvironmentActions.ALL.LOAD.initiate()
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+		} );
+
 	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeEnvironmentBackend, private router: Router ) { }
 }

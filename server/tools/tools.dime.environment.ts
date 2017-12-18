@@ -3,6 +3,7 @@ import { Pool } from 'mysql';
 import { MainTools } from './tools.main';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
+import { DimeEnvironmentDetailWithCredentials } from '../../shared/model/dime/environmentDetailWithCredentials';
 import { DimeStream } from '../../shared/model/dime/stream';
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { MSSQLTools } from './tools.mssql';
@@ -10,26 +11,36 @@ import { HPTools } from './tools.hp';
 import { PBCSTools } from './tools.pbcs';
 import { DimeEnvironmentHP } from '../../shared/model/dime/environmentHP';
 import { DimeEnvironmentPBCS } from '../../shared/model/dime/environmentPBCS';
+import { CredentialTools } from './tools.dime.credential';
+import { DimeCredential } from '../../shared/model/dime/credential';
+import { EnumToArray } from '../../shared/utilities/utilityFunctions';
+import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../shared/enums/dime/environmenttypes';
 
 export class EnvironmentTools {
 	mssqlTool: MSSQLTools;
 	hpTool: HPTools;
 	pbcsTool: PBCSTools;
+	credentialTool: CredentialTools;
 
 	constructor( public db: Pool, public tools: MainTools ) {
-		this.mssqlTool = new MSSQLTools( tools );
-		this.hpTool = new HPTools( tools );
-		this.pbcsTool = new PBCSTools( tools );
+		this.mssqlTool = new MSSQLTools( this.tools );
+		this.hpTool = new HPTools( this.tools );
+		this.pbcsTool = new PBCSTools( this.tools );
+		this.credentialTool = new CredentialTools( this.db, this.tools );
 	}
 
 	public getAll = () => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM environments', function ( err, rows, fields ) {
 				if ( err ) {
-					reject( { error: err, message: 'Retrieving environment list has failed' } );
+					reject( err.code );
 				} else {
 					rows.forEach( ( curRow: DimeEnvironment ) => {
-						curRow.password = '|||---protected---|||';
+						if ( curRow.tags ) {
+							curRow.tags = JSON.parse( curRow.tags );
+						} else {
+							curRow.tags = {};
+						}
 					} );
 					resolve( rows );
 				}
@@ -41,49 +52,62 @@ export class EnvironmentTools {
 		return this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: id } );
 	}
 
-	public getEnvironmentDetails = ( refObj: DimeEnvironmentDetail, shouldShowPassword?: boolean ): Promise<DimeEnvironmentDetail> => {
+	public getEnvironmentDetails = ( refObj: DimeEnvironmentDetail, shouldShowPassword?: boolean ): Promise<DimeEnvironmentDetail | DimeEnvironmentDetailWithCredentials> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM environments WHERE id = ?', refObj.id, ( err, rows, fields ) => {
+			this.db.query( 'SELECT * FROM environments WHERE id = ?', refObj.id, ( err, rows: DimeEnvironmentDetail[], fields ) => {
 				if ( err ) {
-					reject( { error: err, message: 'Retrieving environment with id ' + refObj.id + ' has failed' } );
+					reject( err.code );
 				} else if ( rows.length !== 1 ) {
-					reject( { error: 'Wrong number of records', message: 'Wrong number of records for environment received from the server, 1 expected' } );
+					reject( 'Wrong number of records' );
 				} else {
-					if ( shouldShowPassword ) {
-						rows[0].password = this.tools.decryptText( rows[0].password );
+					if ( rows[0].tags ) {
+						rows[0].tags = JSON.parse( rows[0].tags );
 					} else {
-						rows[0].password = '|||---protected---|||';
+						rows[0].tags = {};
 					}
-					resolve( rows[0] );
+					if ( shouldShowPassword ) {
+						this.credentialTool.getCredentialDetails( <DimeCredential>{ id: rows[0].credential }, true )
+							.then( ( curCredential ) => {
+								const environmentToReturn: DimeEnvironmentDetailWithCredentials = Object.assign( <DimeEnvironmentDetailWithCredentials>{}, rows[0] );
+								environmentToReturn.username = curCredential.username;
+								environmentToReturn.password = curCredential.password;
+								resolve( environmentToReturn );
+							} )
+							.catch( reject );
+					} else {
+						resolve( rows[0] );
+					}
 				}
 			} );
 		} );
 	};
 
-	public listTypes = () => {
-		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM environmenttypes', function ( err, rows, fields ) {
-				if ( err ) {
-					reject( { error: err, message: 'Retrieving environment type list has failed' } );
-				} else {
-					resolve( rows );
-				}
-			} );
-		} );
-	};
+	// public listTypes = () => {
+	// 	return new Promise( ( resolve, reject ) => {
+	// 		this.db.query( 'SELECT * FROM environmenttypes', function ( err, rows, fields ) {
+	// 			if ( err ) {
+	// 				reject( { error: err, message: 'Retrieving environment type list has failed' } );
+	// 			} else {
+	// 				resolve( rows );
+	// 			}
+	// 		} );
+	// 	} );
+	// };
 
 	public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
-				if ( err ) {
-					reject( err );
-				} else if ( results.length > 0 ) {
-					refObj.typedetails = results[0];
-					resolve( refObj );
-				} else {
-					resolve( refObj );
-				}
-			} );
+			refObj.typedetails = EnumToArray( DimeEnvironmentType )[refObj.type];
+			EnumToArray( DimeEnvironmentType );
+			// this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
+			// 	if ( err ) {
+			// 		reject( err );
+			// 	} else if ( results.length > 0 ) {
+			// 		refObj.typedetails = results[0];
+			// 		resolve( refObj );
+			// 	} else {
+			// 		resolve( refObj );
+			// 	}
+			// } );
 		} );
 	};
 
@@ -100,20 +124,14 @@ export class EnvironmentTools {
 		} );
 	};
 
-	public update = ( theEnvironment: DimeEnvironment ) => {
+	public update = ( refItem: DimeEnvironment ) => {
 		return new Promise( ( resolve, reject ) => {
-			if ( theEnvironment.password === '|||---protected---|||' ) {
-				delete theEnvironment.password;
-			} else if ( theEnvironment.password ) {
-				theEnvironment.password = this.tools.encryptText( theEnvironment.password );
-			}
-			const theID: number = theEnvironment.id;
-			this.db.query( 'UPDATE environments SET ? WHERE id = ' + theID, theEnvironment, function ( err, result, fields ) {
+			refItem.tags = JSON.stringify( refItem.tags );
+			this.db.query( 'UPDATE environments SET ? WHERE id = ?', [refItem, refItem.id], function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the environment' } );
 				} else {
-					theEnvironment.password = '|||---protected---|||';
-					resolve( { theEnvironment } );
+					resolve( refItem );
 				}
 			} );
 		} );
@@ -157,7 +175,7 @@ export class EnvironmentTools {
 					// console.log(result);
 					resolve( { result: 'OK' } );
 				} ).catch( ( issue ) => {
-					reject( { error: issue, message: 'Failed to verify the environment' } );
+					reject( issue );
 				} );
 		} );
 	}

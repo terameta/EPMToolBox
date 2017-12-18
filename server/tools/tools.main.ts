@@ -104,7 +104,7 @@ export class MainTools {
 	}
 
 	signToken( toSign: any ): string {
-		return jwt.sign( toSign, this.config.hash, { expiresIn: 60 * 60 * 24 * 30 } );
+		return jwt.sign( Object.assign( {}, toSign ), this.config.hash, { expiresIn: 60 * 60 * 24 * 30 } );
 	}
 
 	// checkToken(req: Request, res: Response, next: Function) {

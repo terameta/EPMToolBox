@@ -5,6 +5,8 @@ import { Observable } from 'rxjs/Rx';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment.service';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { DimeUIService } from 'app/ngstore/uistate.service';
 
 @Component( {
 	selector: 'app-dimeenvironment-list',
@@ -13,8 +15,20 @@ import { DimeEnvironmentService } from '../dimeenvironment.service';
 } )
 export class DimeenvironmentListComponent implements OnInit {
 
-	constructor( public mainService: DimeEnvironmentService ) { }
+	constructor( public mainService: DimeEnvironmentService, public tagService: DimeTagService, public uiService: DimeUIService ) { }
 
 	ngOnInit() {
+	}
+
+	public shouldListItem = ( itemID: number ) => {
+		let shouldShow = true;
+		this.tagService.groupList.forEach( ( curGroup ) => {
+			if ( parseInt( this.uiService.uiState.selectedTags[curGroup.id], 10 ) > 0 ) {
+				if ( !this.mainService.itemObject[itemID].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
+					shouldShow = false;
+				}
+			}
+		} );
+		return shouldShow;
 	}
 }

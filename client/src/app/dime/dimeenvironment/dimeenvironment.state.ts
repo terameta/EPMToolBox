@@ -8,5 +8,5 @@ export interface DimeEnvironmentState {
 
 export const dimeEnvironmentInitialState: DimeEnvironmentState = {
 	items: [],
-	curItem: <DimeEnvironmentDetail>{ id: 0 }
+	curItem: <DimeEnvironmentDetail>{ id: 0, tags: {} }
 }

@@ -30,4 +30,8 @@ export class DimeEnvironmentBackend {
 	public oneDelete = ( id: number ) => {
 		return this.http.delete( this.baseUrl + '/' + id );
 	}
+
+	public oneVerify = ( id: number ) => {
+		return this.http.get( this.baseUrl + '/verify/' + id );
+	}
 }

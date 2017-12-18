@@ -6,6 +6,10 @@ import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Rx';
 
 import { DimeEnvironmentService } from '../dimeenvironment.service';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { Store } from '@ngrx/store';
+import { AppState } from 'app/ngstore/models';
+import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
 // import { DimeEnvironment } from "../../../../../../shared/model/dime/environment";
 
@@ -23,19 +27,24 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private route: ActivatedRoute,
-		public mainService: DimeEnvironmentService
+		public mainService: DimeEnvironmentService,
+		public tagService: DimeTagService,
+		private store: Store<AppState>
 	) { }
 
 	ngOnInit() {
-		// This was already commented this.curItem = { id: 0 };
-		// this.paramsSubscription = this.route.params.subscribe(
-		// 	( params: Params ) => {
-		// 		this.mainService.getOne( params["id"] );
-		// 	}
-		// );
 	}
 
 	ngOnDestroy() {
-		// this.mainService.curItem = { id: 0 };
+		this.store.dispatch( DimeEnvironmentActions.ONE.unload() );
+	}
+
+	public decideColWidth = ( numCols: number ) => {
+		let colWidth = 12;
+		if ( numCols > 0 ) {
+			colWidth = Math.floor( colWidth / numCols );
+		}
+		if ( colWidth < 1 ) { colWidth = 1; }
+		return colWidth;
 	}
 }

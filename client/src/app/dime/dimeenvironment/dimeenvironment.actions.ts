@@ -24,6 +24,8 @@ export const DimeEnvironmentActions = {
 			COMPLETE: 'DIME_ENVIRONMENT_ACTIONS_ONE_LOAD_COMPLETE',
 			complete: ( payload: DimeEnvironmentDetail ): Action => { return { type: DimeEnvironmentActions.ONE.LOAD.COMPLETE, payload: payload } }
 		},
+		UNLOAD: 'DIME_ENVIRONMENT_ACTIONS_ONE_UNLOAD',
+		unload: (): Action => { return { type: DimeEnvironmentActions.ONE.UNLOAD }; },
 		CREATE: {
 			INITIATE: 'DIME_ENVIRONMENT_ACTIONS_ONE_CREATE_INITIATE',
 			initiate: ( payload: DimeEnvironmentDetail ): Action => { return { type: DimeEnvironmentActions.ONE.CREATE.INITIATE, payload: payload } },
@@ -37,10 +39,16 @@ export const DimeEnvironmentActions = {
 			complete: ( payload: DimeEnvironmentDetail ): Action => { return { type: DimeEnvironmentActions.ONE.UPDATE.COMPLETE, payload: payload } }
 		},
 		DELETE: {
-			INITIATE: 'DIME_ENVIRONMENT_ACTIONS_ONE_DELETETE_INITIATE',
+			INITIATE: 'DIME_ENVIRONMENT_ACTIONS_ONE_DELETE_INITIATE',
 			initiate: ( payload: number ): Action => { return { type: DimeEnvironmentActions.ONE.DELETE.INITIATE, payload: payload } },
-			COMPLETE: 'DIME_ENVIRONMENT_ACTIONS_ONE_DELETETE_COMPLETE',
+			COMPLETE: 'DIME_ENVIRONMENT_ACTIONS_ONE_DELETE_COMPLETE',
 			complete: (): Action => { return { type: DimeEnvironmentActions.ONE.DELETE.COMPLETE } }
+		},
+		VERIFY: {
+			INITIATE: 'DIME_ENVIRONMENT_ACTIONS_ONE_VERIFAY_INITIATE',
+			initiate: ( payload: number ): Action => { return { type: DimeEnvironmentActions.ONE.VERIFY.INITIATE, payload: payload }; },
+			COMPLETE: 'DIME_ENVIRONMENT_ACTIONS_ONE_VERIFAY_COMPLETE',
+			complete: (): Action => { return { type: DimeEnvironmentActions.ONE.VERIFY.COMPLETE }; }
 		}
 	}
 }

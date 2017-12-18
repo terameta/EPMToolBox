@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Action as NgRXAction } from '@ngrx/store';
-import { DimeEnvironmentState } from 'app/dime/dimeenvironment/dimeenvironment.state';
+import { DimeEnvironmentState, dimeEnvironmentInitialState } from 'app/dime/dimeenvironment/dimeenvironment.state';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
 export interface Action extends NgRXAction {
@@ -13,7 +13,10 @@ export function dimeEnvironmentReducer( state: DimeEnvironmentState, action: Act
 			return handleAllLoadComplete( state, action );
 		}
 		case DimeEnvironmentActions.ONE.LOAD.COMPLETE: {
-			return handleOneComplete( state, action );
+			return handleOneLoadComplete( state, action );
+		}
+		case DimeEnvironmentActions.ONE.UNLOAD: {
+			return handleOneUnload( state, action );
 		}
 		default: {
 			return state;
@@ -27,8 +30,14 @@ const handleAllLoadComplete = ( state: DimeEnvironmentState, action: Action ): D
 	return newState;
 }
 
-const handleOneComplete = ( state: DimeEnvironmentState, action: Action ): DimeEnvironmentState => {
+const handleOneLoadComplete = ( state: DimeEnvironmentState, action: Action ): DimeEnvironmentState => {
 	const newState: DimeEnvironmentState = Object.assign( {}, state );
 	newState.curItem = action.payload;
+	return newState;
+}
+
+const handleOneUnload = ( state: DimeEnvironmentState, action: Action ): DimeEnvironmentState => {
+	const newState: DimeEnvironmentState = Object.assign( {}, state );
+	newState.curItem = dimeEnvironmentInitialState.curItem;
 	return newState;
 }
