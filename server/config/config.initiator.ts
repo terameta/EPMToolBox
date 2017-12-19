@@ -42,7 +42,8 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0030to0031 ).then( version0031to0032 ).then( version0032to0033 ).then( version0033to0034 ).then( version0034to0035 ).
 		then( version0035to0036 ).then( version0036to0037 ).then( version0037to0038 ).then( version0038to0039 ).then( version0039to0040 ).
 		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).
-		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then(version0048to0049).then(version0049to0050).
+		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then( version0048to0049 ).then( version0049to0050 ).
+		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -52,8 +53,59 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( clearResidue );
 }
 
-const version0049to0050 = (currentVersion: number) => {
-	return new Promise((resolve, reject) => {
+const version0052to0053 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 52;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE credentials CHANGE tags tags TEXT NULL DEFAULT NULL', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} )
+		}
+	} );
+}
+
+const version0051to0052 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 51;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE environments CHANGE tags tags TEXT NULL DEFAULT NULL', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} )
+		}
+	} );
+}
+
+const version0050to0051 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 50;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'streams', 'tags TEXT NULL AFTER customQuery' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+}
+
+const version0049to0050 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 49;
 		const nextVersion = expectedCurrentVersion + 1;
 		if ( currentVersion > expectedCurrentVersion ) {
@@ -67,11 +119,11 @@ const version0049to0050 = (currentVersion: number) => {
 				}
 			} );
 		}
-	});
+	} );
 }
 
-const version0048to0049 = (currentVersion: number) => {
-	return new Promise((resolve, reject) => {
+const version0048to0049 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 48;
 		const nextVersion = expectedCurrentVersion + 1;
 		if ( currentVersion > expectedCurrentVersion ) {
@@ -85,7 +137,7 @@ const version0048to0049 = (currentVersion: number) => {
 				}
 			} );
 		}
-	});
+	} );
 }
 
 const version0047to0048 = ( currentVersion: number ) => {

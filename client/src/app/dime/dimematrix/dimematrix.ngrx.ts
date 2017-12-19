@@ -1,4 +1,3 @@
-import { DimeStreamAllLoadInitiateIfEmptyAction } from '../dimestream/dimestream.ngrx';
 import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
 import { of } from 'rxjs/observable/of';
 import { DimeMatrixBackend } from './dimematrix.backend';
@@ -10,6 +9,7 @@ import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
 import { Router } from '@angular/router';
 
 import * as _ from 'lodash';
+import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
 
 export interface DimeMatrixState {
 	items: { [key: number]: DimeMatrix }
@@ -89,7 +89,7 @@ export class DimeMatrixEffects {
 		return this.backend.oneLoad( a.payload ).mergeMap( resp => {
 			return [
 				new DimeMatrixOneLoadCompleteAction( resp ),
-				new DimeStreamAllLoadInitiateIfEmptyAction()
+				DimeStreamActions.ALL.LOAD.initiateifempty()
 			];
 		} );
 	} );

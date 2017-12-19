@@ -15,6 +15,8 @@ import { DimeEnvironmentDetail } from '../../../../../shared/model/dime/environm
 import { SortByName, EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
 import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../../../../shared/enums/dime/environmenttypes';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeEnvironmentBackend } from 'app/dime/dimeenvironment/dimeenvironment.backend';
+import { DimeStatusActions } from 'app/ngstore/applicationstatus';
 
 @Injectable()
 export class DimeEnvironmentService {
@@ -32,14 +34,14 @@ export class DimeEnvironmentService {
 	public itemObject: { [key: number]: DimeEnvironment };
 	public currentItem: DimeEnvironmentDetail;
 	public typeList = EnumToArray( DimeEnvironmentType );
+	public typeObject = _.keyBy( this.typeList, 'value' );
 	public getEnvironmentTypeDescription = dimeGetEnvironmentTypeDescription;
 
 	constructor(
-		// private http: Http,
-		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private store: Store<AppState>,
-		private router: Router
+		private router: Router,
+		private backend: DimeEnvironmentBackend
 	) {
 		this.store.select( 'dimeEnvironment' ).subscribe( environmentState => {
 			this.itemList = _.values( environmentState.items ).sort( SortByName );
@@ -75,29 +77,27 @@ export class DimeEnvironmentService {
 		this.store.dispatch( DimeEnvironmentActions.ONE.VERIFY.initiate( id ) );
 	}
 
+	public listDatabases = ( id: number ) => {
+		return this.backend.listDatabases( id )
+			.catch( resp => {
+				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+				return resp;
+			} );
+	}
+
+	public listTables = ( id: number, db: string ) => {
+		return this.backend.listTables( id, db )
+			.catch( resp => {
+				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+				return resp;
+			} );
+	}
+
 	/*
 
 
-		public listDatabases = ( environmentID: number ) => {
-			return this.authHttp.get( this.baseUrl + '/listDatabases/' + environmentID ).
-				map( ( response: Response ) => {
-					return response.json();
-				} ).
-				catch( ( error: Response ) => {
-					console.log( error );
-					return Observable.throw( 'Listing environment databases has failed' );
-				} );
-		}
-		public listTables = ( environmentID: number, dbName: string ) => {
-			return this.authHttp.get( this.baseUrl + '/listTables/' + environmentID + '/' + dbName ).
-				map( ( response: Response ) => {
-					return response.json();
-				} ).
-				catch( ( error: Response ) => {
-					console.log( error );
-					return Observable.throw( 'Listing environment tables has failed' );
-				} );
-		}
+
+
 		public listProcedures = ( environmentID: number, curStream: DimeStream ) => {
 			return this.authHttp.post( this.baseUrl + '/listProcedures/' + environmentID, curStream, { headers: this.headers } ).
 				map( ( response: Response ) => {

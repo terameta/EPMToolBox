@@ -5,15 +5,15 @@ import { ToastrService } from 'ngx-toastr';
 import { DimeStreamService } from '../dimestream.service';
 
 
-@Component({
+@Component( {
 	selector: 'app-dimestreams',
 	templateUrl: './dimestreams.component.html',
 	styleUrls: ['./dimestreams.component.css']
-})
-export class DimestreamsComponent implements OnInit {
+} )
+export class DimeStreamsComponent implements OnInit {
 
 	constructor(
-		private DimeStreamService: DimeStreamService,
+		private dimeStreamService: DimeStreamService,
 		private toastrService: ToastrService
 	) { }
 

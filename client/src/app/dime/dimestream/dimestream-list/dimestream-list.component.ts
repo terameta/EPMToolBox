@@ -11,7 +11,7 @@ import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.se
 	templateUrl: './dimestream-list.component.html',
 	styleUrls: ['./dimestream-list.component.css']
 } )
-export class DimestreamListComponent implements OnInit {
+export class DimeStreamListComponent implements OnInit {
 
 	// streamList: any[];
 	// streamTypeList: any[];

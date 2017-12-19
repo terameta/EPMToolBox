@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { ToastrService } from 'ngx-toastr';
-
 import { DimeStreamService } from '../dimestream.service';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { DimeUIService } from 'app/ngstore/uistate.service';
 
 
 @Component( {
@@ -11,13 +11,12 @@ import { DimeStreamService } from '../dimestream.service';
 	templateUrl: './dimestream-toolbar.component.html',
 	styleUrls: ['./dimestream-toolbar.component.css']
 } )
-export class DimestreamToolbarComponent implements OnInit {
-	// streamList: any[];
+export class DimeStreamToolbarComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeStreamService,
-		private toastr: ToastrService,
-		private router: Router
+		public tagService: DimeTagService,
+		public uiService: DimeUIService
 	) { }
 
 	ngOnInit() {

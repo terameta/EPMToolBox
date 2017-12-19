@@ -10,6 +10,8 @@ import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
 import { Store } from '@ngrx/store';
 import { AppState } from 'app/ngstore/models';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeCredentialService } from 'app/dime/dimecredential/dimecredential.service';
+import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
 
 // import { DimeEnvironment } from "../../../../../../shared/model/dime/environment";
 
@@ -29,10 +31,12 @@ export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
 		private route: ActivatedRoute,
 		public mainService: DimeEnvironmentService,
 		public tagService: DimeTagService,
+		public credentialService: DimeCredentialService,
 		private store: Store<AppState>
 	) { }
 
 	ngOnInit() {
+		this.store.dispatch( DimeCredentialActions.ALL.LOAD.initiateifempty() );
 	}
 
 	ngOnDestroy() {

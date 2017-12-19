@@ -94,25 +94,27 @@ export class EnvironmentTools {
 	// 	} );
 	// };
 
-	public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
-		return new Promise( ( resolve, reject ) => {
-			refObj.typedetails = EnumToArray( DimeEnvironmentType )[refObj.type];
-			EnumToArray( DimeEnvironmentType );
-			// this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
-			// 	if ( err ) {
-			// 		reject( err );
-			// 	} else if ( results.length > 0 ) {
-			// 		refObj.typedetails = results[0];
-			// 		resolve( refObj );
-			// 	} else {
-			// 		resolve( refObj );
-			// 	}
-			// } );
-		} );
-	};
+	// public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
+	// 	return new Promise( ( resolve, reject ) => {
+	// 		refObj.typedetails = EnumToArray( DimeEnvironmentType )[refObj.type];
+	// 		console.log( EnumToArray( DimeEnvironmentType ) );
+	// 		console.log( refObj.typedetails );
+	// 		resolve( refObj );
+	// 		// this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
+	// 		// 	if ( err ) {
+	// 		// 		reject( err );
+	// 		// 	} else if ( results.length > 0 ) {
+	// 		// 		refObj.typedetails = results[0];
+	// 		// 		resolve( refObj );
+	// 		// 	} else {
+	// 		// 		resolve( refObj );
+	// 		// 	}
+	// 		// } );
+	// 	} );
+	// };
 
 	public create = () => {
-		const newEnv = { name: 'New Environment (Please change name)', type: 0, server: '', port: '', username: '', password: '' };
+		const newEnv = { name: 'New Environment', type: 0, server: '', port: '' };
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO environments SET ?', newEnv, function ( err, result, fields ) {
 				if ( err ) {
@@ -154,17 +156,13 @@ export class EnvironmentTools {
 		return new Promise( ( resolve, reject ) => {
 			environmentObject = <DimeEnvironmentDetail>{ id: envID };
 			this.getEnvironmentDetails( environmentObject, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( curObj ) => {
-					if ( !curObj.typedetails ) {
-						return Promise.reject( 'No type definition on the environment object' );
-					} else if ( !curObj.typedetails.value ) {
-						return Promise.reject( 'No type value definition on the environment object' );
-					} else if ( curObj.typedetails.value === 'MSSQL' ) {
+					if ( curObj.type === DimeEnvironmentType.MSSQL ) {
 						return this.mssqlTool.verify( curObj );
-					} else if ( curObj.typedetails.value === 'HP' ) {
+					} else if ( curObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.verify( <DimeEnvironmentHP>curObj );
-					} else if ( curObj.typedetails.value === 'PBCS' ) {
+					} else if ( curObj.type === DimeEnvironmentType.PBCS ) {
 						return this.pbcsTool.verify( <DimeEnvironmentPBCS>curObj );
 					} else {
 						return Promise.reject( 'Undefined Environment Type' );
@@ -197,17 +195,13 @@ export class EnvironmentTools {
 		// console.log('Environment list databases');
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( curObj ) => {
-					if ( !curObj.typedetails ) {
-						return Promise.reject( 'No type definition on the environment object' );
-					} else if ( !curObj.typedetails.value ) {
-						return Promise.reject( 'No type value definition on the environment object' );
-					} else if ( curObj.typedetails.value === 'MSSQL' ) {
+					if ( curObj.type === DimeEnvironmentType.MSSQL ) {
 						return this.mssqlTool.listDatabases( curObj );
-					} else if ( curObj.typedetails.value === 'HP' ) {
+					} else if ( curObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.listApplications( <DimeEnvironmentHP>curObj );
-					} else if ( curObj.typedetails.value === 'PBCS' ) {
+					} else if ( curObj.type === DimeEnvironmentType.PBCS ) {
 						return this.pbcsTool.listApplications( <DimeEnvironmentPBCS>curObj );
 					} else {
 						return Promise.reject( 'Undefined Environment Type' );
@@ -223,19 +217,14 @@ export class EnvironmentTools {
 		// console.log("Environment list tables", refObj);
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( curObj ) => {
 					curObj.database = refObj.database;
-					if ( !curObj.typedetails ) {
-						return Promise.reject( 'No type definition on the environment object' );
-					} else if ( !curObj.typedetails.value ) {
-						return Promise.reject( 'No type value definition on the environment object' );
-					} else if ( curObj.typedetails.value === 'MSSQL' ) {
-						// console.log(curObj);
+					if ( curObj.type === DimeEnvironmentType.MSSQL ) {
 						return this.mssqlTool.listTables( curObj );
-					} else if ( curObj.typedetails.value === 'HP' ) {
+					} else if ( curObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.listCubes( <DimeEnvironmentHP>curObj );
-					} else if ( curObj.typedetails.value === 'PBCS' ) {
+					} else if ( curObj.type === DimeEnvironmentType.PBCS ) {
 						return this.pbcsTool.listCubes( <DimeEnvironmentPBCS>curObj );
 					} else {
 						return Promise.reject( 'Undefined Environment Type' );
@@ -251,18 +240,14 @@ export class EnvironmentTools {
 	public listFields = ( refObj: DimeEnvironmentDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( innerObj ) => {
 					innerObj.database = refObj.database;
 					innerObj.query = refObj.query;
 					innerObj.table = refObj.table;
-					if ( !innerObj.typedetails ) {
-						return Promise.reject( 'No type definition on the environment object' );
-					} else if ( !innerObj.typedetails.value ) {
-						return Promise.reject( 'No type value definition on the environment object' );
-					} else if ( innerObj.typedetails.value === 'MSSQL' ) {
+					if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
 						return this.mssqlTool.listFields( innerObj );
-					} else if ( innerObj.typedetails.value === 'HP' ) {
+					} else if ( innerObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.listDimensions( <DimeEnvironmentHP>innerObj );
 					} else {
 						return Promise.reject( 'Undefined Environment Type' );
@@ -277,18 +262,14 @@ export class EnvironmentTools {
 		return new Promise( ( resolve, reject ) => {
 			// console.log(curStream);
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: curStream.environment }, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( innerObj ) => {
 					// console.log(innerObj);
 					if ( curStream.dbName ) { innerObj.database = curStream.dbName; }
 					if ( curStream.tableName ) { innerObj.table = curStream.tableName; }
-					if ( !innerObj.typedetails ) {
-						return Promise.reject( 'No type definition on the environment object' );
-					} else if ( !innerObj.typedetails.value ) {
-						return Promise.reject( 'No type value definition on the environment object' );
-					} else if ( innerObj.typedetails.value === 'HP' ) {
+					if ( innerObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.listRules( <DimeEnvironmentHP>innerObj );
-					} else if ( innerObj.typedetails.value === 'PBCS' ) {
+					} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
 						return this.pbcsTool.listRules( <DimeEnvironmentPBCS>innerObj );
 					} else {
 						return Promise.reject( 'Undefined Environment Type' );
@@ -302,19 +283,15 @@ export class EnvironmentTools {
 	public listProcedureDetails = ( refObj: { stream: DimeStream, procedure: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.stream.environment }, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( innerObj: any ) => {
 					// console.log(innerObj);
 					innerObj.database = refObj.stream.dbName;
 					innerObj.table = refObj.stream.tableName;
 					innerObj.procedure = refObj.procedure;
-					if ( !innerObj.typedetails ) {
-						return Promise.reject( 'No type definition on the environment object' );
-					} else if ( !innerObj.typedetails.value ) {
-						return Promise.reject( 'No type value definition on the environment object' );
-					} else if ( innerObj.typedetails.value === 'HP' ) {
+					if ( innerObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.listRuleDetails( innerObj );
-					} else if ( innerObj.typedetails.value === 'PBCS' ) {
+					} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
 						return this.pbcsTool.listRuleDetails( innerObj );
 					} else {
 						return Promise.reject( 'Undefined Environment Type' );
@@ -336,20 +313,16 @@ export class EnvironmentTools {
 				reject( 'Procedure definition is missing' );
 			} else {
 				this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.stream.environment }, true ).
-					then( this.getTypeDetails ).
+					// then( this.getTypeDetails ).
 					then( ( innerObj: any ) => {
 						innerObj.database = refObj.stream.dbName;
 						innerObj.table = refObj.stream.tableName;
 						innerObj.procedure = refObj.procedure;
-						if ( !innerObj.typedetails ) {
-							return Promise.reject( 'No type deinition on the environment.' );
-						} else if ( !innerObj.typedetails.value ) {
-							return Promise.reject( 'No type value definition on the environment object.' );
-						} else if ( innerObj.typedetails.value === 'HP' ) {
+						if ( innerObj.type === DimeEnvironmentType.HP ) {
 							return this.hpTool.runProcedure( innerObj );
-						} else if ( innerObj.typedetails.value === 'PBCS' ) {
+						} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
 							return this.pbcsTool.runProcedure( innerObj );
-						} else if ( innerObj.typedetails.value === 'MSSQL' ) {
+						} else if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
 							return this.mssqlTool.runProcedure( innerObj, innerObj.procedure );
 						} else {
 							return Promise.reject( 'Undefined Environment type.' );
@@ -366,20 +339,16 @@ export class EnvironmentTools {
 				reject( 'Malformed stream object' );
 			} else {
 				this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refStream.environment }, true ).
-					then( this.getTypeDetails ).
+					// then( this.getTypeDetails ).
 					then( ( innerObj: any ) => {
 						innerObj.database = refStream.dbName;
 						innerObj.table = refStream.tableName;
 						innerObj.field = refField;
-						if ( !innerObj.typedetails ) {
-							return Promise.reject( 'No type definition on the environment' );
-						} else if ( !innerObj.typedetails.value ) {
-							return Promise.reject( 'No type value definition on the environment object.' );
-						} else if ( innerObj.typedetails.value === 'HP' ) {
+						if ( innerObj.type === DimeEnvironmentType.HP ) {
 							return this.hpTool.getDescriptions( innerObj );
-						} else if ( innerObj.typedetails.value === 'PBCS' ) {
+						} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
 							return this.pbcsTool.getDescriptions( innerObj );
-						} else if ( innerObj.typedetails.value === 'MSSQL' ) {
+						} else if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
 							return this.mssqlTool.getDescriptions( innerObj );
 						} else {
 							return Promise.reject( 'Undefined Environment type.' );
@@ -393,22 +362,18 @@ export class EnvironmentTools {
 	public writeData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.id }, true ).
-				then( this.getTypeDetails ).
+				// then( this.getTypeDetails ).
 				then( ( innerObj: any ) => {
 					innerObj.database = refObj.db;
 					innerObj.table = refObj.table;
 					innerObj.data = refObj.data;
 					innerObj.sparseDims = refObj.sparseDims;
 					innerObj.denseDim = refObj.denseDim;
-					if ( !innerObj.typedetails ) {
-						return Promise.reject( 'No type definiton on the environment.' );
-					} else if ( !innerObj.typedetails.value ) {
-						return Promise.reject( 'no type value definition on the environment object.' );
-					} else if ( innerObj.typedetails.value === 'HP' ) {
+					if ( innerObj.type === DimeEnvironmentType.HP ) {
 						return this.hpTool.writeData( innerObj );
-					} else if ( innerObj.typedetails.value === 'PBCS' ) {
+					} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
 						return this.pbcsTool.writeData( innerObj );
-					} else if ( innerObj.typedetails.value === 'MSSQL' ) {
+					} else if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
 						return this.mssqlTool.writeData( innerObj );
 					} else {
 						return Promise.reject( 'Undefined Environment type.' );

@@ -1,6 +1,6 @@
 import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.ngrx';
 import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
-import { DimeStreamEffects } from './dime/dimestream/dimestream.ngrx';
+import { DimeStreamEffects } from './dime/dimestream/dimestream.effects';
 import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
 import { DimeEnvironmentEffects } from './dime/dimeenvironment/dimeenvironment.effects';
 import { HttpClientModule } from '@angular/common/http';
@@ -117,7 +117,9 @@ export function tokenGetter() {
 		DimeTagService,
 		DimeCredentialBackend,
 		DimeCredentialService,
+		DimeEnvironmentBackend,
 		DimeEnvironmentService,
+		DimeStreamBackend,
 		DimeStreamService,
 		DimeMapService,
 		DimeMatrixService,
@@ -128,8 +130,6 @@ export function tokenGetter() {
 		AcmUserService,
 		EndUserService,
 		DimeAsyncProcessBackend,
-		DimeEnvironmentBackend,
-		DimeStreamBackend,
 		DimeMatrixBackend
 	],
 	bootstrap: [AppComponent]

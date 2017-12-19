@@ -1,6 +1,7 @@
 import { AppState } from '../../ngstore/models';
 import { Store } from '@ngrx/store';
-import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName, EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
+import { DimeStreamType, dimeGetStreamTypeDescription } from '../../../../../shared/enums/dime/streamtypes';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
@@ -12,95 +13,135 @@ import { AuthHttp } from 'angular2-jwt';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
-import { DimeStream } from '../../../../../shared/model/dime/stream';
-import { DimeStreamType } from '../../../../../shared/model/dime/streamtype';
+import { DimeStream, DimeStreamDetail } from '../../../../../shared/model/dime/stream';
+import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
 
 @Injectable()
 export class DimeStreamService {
-	items: Observable<DimeStream[]>;
-	typeList: DimeStreamType[];
-	private _items: BehaviorSubject<DimeStream[]>;
-	private baseUrl: string;
-	private dataStore: { items: DimeStream[] };
-	private headers = new Headers( { 'Content-Type': 'application/json' } );
-	private serviceName: string;
+	// items: Observable<DimeStream[]>;	// typeList: DimeStreamType[];	// private _items: BehaviorSubject<DimeStream[]>;	// private baseUrl: string;	// private dataStore: { items: DimeStream[] };
+	// private headers = new Headers( { 'Content-Type': 'application/json' } );// private serviceName: string;	// // CurItem Related Information all together	// curItem: DimeStream;	// curItemEnvironmentType: string;
+	// curItemSourcedFields: any[];// curItemAssignedFields: any[];	// curItemClean = true;	// curItemDatabaseList = [];	// curItemTableList = [];
+	// // Field detail related information all together	// descriptiveTables: any = {};	// descriptiveFields: any = {};
+	// pbcsFieldTypes = [	// 	'Accounts',	// 	'Entity',	// 	'Generic',	// 	'Scenario',	// 	'Time',	// 	'Year',	// 	'Version'	// ];
 
-	// CurItem Related Information all together
-	curItem: DimeStream;
-	curItemEnvironmentType: string;
-	curItemSourcedFields: any[];
-	curItemAssignedFields: any[];
-	curItemClean = true;
-	curItemDatabaseList = [];
-	curItemTableList = [];
 
-	// Field detail related information all together
-	descriptiveTables: any = {};
-	descriptiveFields: any = {};
 
-	pbcsFieldTypes = [
-		'Accounts',
-		'Entity',
-		'Generic',
-		'Scenario',
-		'Time',
-		'Year',
-		'Version'
-	];
+
+	private serviceName = 'Streams';
 
 	public itemList: DimeStream[];
-	public currentItem: DimeStream;
+	public itemObject: { [key: number]: DimeStream }
+	public currentItem: DimeStreamDetail;
+	public currentItemClean: boolean;
+	public typeList = EnumToArray( DimeStreamType );
+	public typeObject = _.keyBy( this.typeList, 'value' );
+	public getStreamTypeDescription = dimeGetStreamTypeDescription;
 
 	constructor(
-		private http: Http,
-		private authHttp: AuthHttp,
 		private toastr: ToastrService,
-		private router: Router,
-		private route: ActivatedRoute,
-		private environmentService: DimeEnvironmentService,
 		private store: Store<AppState>,
+		private router: Router,
+		private environmentService: DimeEnvironmentService
 	) {
-		/*this.baseUrl = '/api/dime/stream';
-		this.serviceName = 'Streams';
-		this.dataStore = { items: [] };
-		this._items = <BehaviorSubject<DimeStream[]>>new BehaviorSubject( [] );
-		this.items = this._items.asObservable();
-		this.curItem = { id: 0, name: '-', type: 0, environment: 0 };
-		this.typeList = [];
-		this.getAll( true );
-		this.curItemEnvironmentType = '';
-		this.curItemAssignedFields = undefined;
-		this.curItemSourcedFields = undefined;
-
-		// Below is for transitioning to ngrx
 		this.store.select( 'dimeStream' ).subscribe( streamState => {
 			this.itemList = _.values( streamState.items ).sort( SortByName );
+			this.itemObject = streamState.items;
 			this.currentItem = streamState.curItem;
+			this.currentItemClean = streamState.curItemClean;
 		} );
-		*/
 	}
+
+	public create = () => {
+		this.store.dispatch( DimeStreamActions.ONE.CREATE.initiate( <DimeStreamDetail>{} ) );
+	}
+
+	public update = () => {
+		this.store.dispatch( DimeStreamActions.ONE.UPDATE.initiate( this.currentItem ) );
+	}
+
+	public delete = ( id: number, name?: string ) => {
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.store.dispatch( DimeStreamActions.ONE.DELETE.initiate( id ) );
+		}
+	}
+
+	public navigateTo = ( id: number ) => {
+		this.router.navigateByUrl( '/dime/streams/stream-detail/' + id );
+	}
+
+	public markDirty = () => {
+		this.store.dispatch( DimeStreamActions.ONE.MARK.dirty() );
+	}
+
+	public refreshDatabases = () => {
+		if ( !this.currentItemClean ) {
+			this.toastr.error( 'Please save your changes before refreshing database list' );
+			return false;
+		}
+		this.environmentService.listDatabases( this.currentItem.environment ).subscribe(
+			( result: { name: string }[] ) => {
+				this.toastr.info( 'Database list is updated', this.serviceName );
+				this.store.dispatch( DimeStreamActions.ONE.DATABASELIST.set( result ) );
+			}, ( error ) => {
+				this.toastr.error( 'Failed to refresh databases.', this.serviceName );
+				console.error( error );
+			}
+		);
+	}
+
+	public refreshTables = () => {
+		if ( !this.currentItemClean ) {
+			this.toastr.error( 'Please save your changes before refreshing the table list' );
+			return false;
+		}
+		this.environmentService.listTables( this.currentItem.environment, this.currentItem.dbName ).subscribe(
+			( result: { name: string, type: string }[] ) => {
+				this.toastr.info( 'Table list is updated.', this.serviceName );
+				this.store.dispatch( DimeStreamActions.ONE.TABLELIST.set( result ) );
+			}, ( error ) => {
+				this.toastr.error( 'Failed to refresh databases.', this.serviceName );
+				console.error( error );
+			}
+		);
+	}
+
+	public assignCustomQuery = () => {
+		this.currentItem.tableName = 'Custom Query';
+		this.markDirty();
+		this.update();
+	}
+
+	// constructor(
+	// 	private http: Http,
+	// 	private authHttp: AuthHttp,
+	// 	private toastr: ToastrService,
+	// 	private router: Router,
+	// 	private route: ActivatedRoute,
+	// 	private environmentService: DimeEnvironmentService,
+	// 	private store: Store<AppState>,
+	// ) {
+	// 	/*this.baseUrl = '/api/dime/stream';
+	// 	this.serviceName = 'Streams';
+	// 	this.dataStore = { items: [] };
+	// 	this._items = <BehaviorSubject<DimeStream[]>>new BehaviorSubject( [] );
+	// 	this.items = this._items.asObservable();
+	// 	this.curItem = { id: 0, name: '-', type: 0, environment: 0 };
+	// 	this.typeList = [];
+	// 	this.getAll( true );
+	// 	this.curItemEnvironmentType = '';
+	// 	this.curItemAssignedFields = undefined;
+	// 	this.curItemSourcedFields = undefined;
+
+	// 	// Below is for transitioning to ngrx
+	// 	this.store.select( 'dimeStream' ).subscribe( streamState => {
+	// 		this.itemList = _.values( streamState.items ).sort( SortByName );
+	// 		this.currentItem = streamState.curItem;
+	// 	} );
+	// 	*/
+	// }
 	/*
-		getAll = ( isSilent?: boolean ) => {
-			if ( this.typeList.length === 0 ) { this.listTypes(); }
-			this.authHttp.get( this.baseUrl ).
-				map( ( response ) => {
-					return response.json();
-				} ).
-				subscribe( ( data ) => {
-					data.sort( SortByName );
-					this.dataStore.items = data;
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
-				}, ( error ) => {
-					this.toastr.error( 'Failed to load items.', this.serviceName );
-					console.log( error );
-				} );
-		}
-		fetchOne = ( id: number ) => {
-			return this.authHttp.get( this.baseUrl + '/' + id ).
-				map( response => response.json() ).
-				catch( error => Observable.throw( error ) );
-		}
+
 		/ **Reason to have fetchOne/getOne Couple
 		 * Whenever there is a use of the service from another service, and the other service is requesting items, decoupling the fetching mechanism is beneficial.
 		 * Please check dimemap.service.ts for the usage of fetchOne function * /
@@ -143,124 +184,7 @@ export class DimeStreamService {
 					console.log( error );
 				} );
 		}
-		public setCurItemEnvironmentType = () => {
-			if ( this.environmentService.typeList.length === 0 ) {
-				setTimeout( this.setCurItemEnvironmentType, 1000 );
-			} else {
-				this.environmentService.items.subscribe( ( environments ) => {
-					environments.forEach( ( curEnv ) => {
-						if ( curEnv.id.toString() === this.curItem.environment.toString() ) {
-							this.environmentService.typeList.forEach( ( curType ) => {
-								if ( parseInt( curEnv.type.toString(), 10 ) === parseInt( curType.id.toString(), 10 ) ) { this.curItemEnvironmentType = curType.value; }
-							} );
-						}
-					} );
-				} );
-			}
-		}
-		create = () => {
-			this.authHttp.post( this.baseUrl, {}, { headers: this.headers } )
-				.map( response => response.json() ).subscribe( data => {
-					this.dataStore.items.push( data );
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.resetCurItem();
-					this.router.navigate( ['/dime/streams/stream-detail', data.id] );
-					this.toastr.info( 'New item is created, navigating to the details', this.serviceName );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to create new item.', this.serviceName );
-					console.log( error );
-				} );
-		}
-		update = ( curItem?: DimeStream ) => {
-			let shouldUpdate = false;
-			if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; };
-			this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe( data => {
-					this.dataStore.items.forEach( ( item, index ) => {
-						if ( item.id === data.id ) { this.dataStore.items[index] = data; }
-					} );
 
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.toastr.info( 'Item is successfully saved.', this.serviceName );
-					// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
-					// This shouldn't change the state of the current item.
-					if ( shouldUpdate ) { this.curItemClean = true; }
-				}, error => {
-					this.toastr.error( 'Failed to save the item.', this.serviceName );
-					console.log( error );
-				} );
-		}
-		delete( id: number, name?: string ) {
-			const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
-			if ( confirm( verificationQuestion ) ) {
-				this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
-					this.dataStore.items.forEach( ( item, index ) => {
-						if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
-					} );
-
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.toastr.info( 'Item is deleted.', this.serviceName );
-					this.router.navigate( ['/dime/streams/stream-list'] );
-					this.resetCurItem();
-				}, ( error ) => {
-					this.toastr.error( 'Failed to delete item.', this.serviceName );
-					console.log( error );
-				} );
-			} else {
-				this.toastr.info( 'Item deletion is cancelled.', this.serviceName );
-			}
-		}
-		private resetCurItem = () => {
-			this.curItem = { id: 0, name: '-', type: 0, environment: 0 };
-			this.curItemAssignedFields = undefined;
-			this.curItemSourcedFields = undefined;
-			this.curItemDatabaseList = [];
-			this.curItemTableList = [];
-		}
-		private listTypes() {
-			return this.listTypesFetch().
-				subscribe( ( data ) => {
-					this.typeList = data;
-				}, ( error ) => {
-					this.toastr.error( 'Listing types has failed', this.serviceName );
-				} );
-		}
-		public listTypesFetch = () => {
-			return this.authHttp.get( this.baseUrl + '/listTypes' ).
-				map( response => response.json() ).
-				catch( error => Observable.throw( error ) );
-		}
-		public refreshDatabases() {
-			if ( !this.curItemClean ) {
-				this.toastr.error( 'Please save your changes before refreshing database list' );
-				return false;
-			}
-			this.environmentService.listDatabases( this.curItem.environment ).subscribe(
-				( result ) => {
-					this.toastr.info( 'Database list is updated', this.serviceName );
-					this.curItemDatabaseList = result;
-				}, ( error ) => {
-					this.toastr.error( 'Failed to refresh databases.', this.serviceName );
-					console.log( error );
-				}
-			);
-		}
-		public refreshTables() {
-			if ( !this.curItemClean ) {
-				this.toastr.error( 'Please save your changes before refreshing the table list' );
-				return false;
-			}
-			this.environmentService.listTables( this.curItem.environment, this.curItem.dbName ).subscribe(
-				( result ) => {
-					this.toastr.info( 'Table list is updated.', this.serviceName );
-					this.curItemTableList = result;
-				}, ( error ) => {
-					this.toastr.error( 'Failed to refresh databases.', this.serviceName );
-					console.log( error );
-				}
-			);
-		}
 		public listFieldsFromSourceEnvironment = ( id: number ) => {
 			this.authHttp.get( this.baseUrl + '/listFields/' + id ).
 				map( response => response.json() ).

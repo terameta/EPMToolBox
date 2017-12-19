@@ -2,7 +2,7 @@ import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { Pool } from 'mysql';
 
 import { MainTools } from './tools.main';
-import { DimeStream } from '../../shared/model/dime/stream';
+import { DimeStream, DimeStreamDetail } from '../../shared/model/dime/stream';
 import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 
@@ -44,6 +44,17 @@ export class StreamTools {
 				} else if ( rows.length !== 1 ) {
 					reject( { error: 'Wrong number of records', message: 'Wrong number of records for stream received from the server, 1 expected' } );
 				} else {
+					if ( rows[0].tags ) {
+						rows[0].tags = JSON.parse( rows[0].tags );
+					} else {
+						rows[0].tags = {};
+					}
+					if ( rows[0].dbName ) {
+						rows[0].databaseList = [{ name: rows[0].dbName }];
+					}
+					if ( rows[0].tableName ) {
+						rows[0].tableList = [{ name: rows[0].tableName }];
+					}
 					resolve( rows[0] );
 				}
 			} );
@@ -60,14 +71,17 @@ export class StreamTools {
 			} );
 		} );
 	};
-	public update = ( theStream: DimeStream ) => {
+	public update = ( refItem: DimeStreamDetail ) => {
 		return new Promise( ( resolve, reject ) => {
-			const theID: number = theStream.id;
-			this.db.query( 'UPDATE streams SET ? WHERE id = ' + theID, theStream, function ( err, result, fields ) {
+			delete refItem.databaseList;
+			delete refItem.tableList;
+			refItem.tags = JSON.stringify( refItem.tags );
+			this.db.query( 'UPDATE streams SET ? WHERE id = ?', [refItem, refItem.id], function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the stream' } );
 				} else {
-					resolve( theStream );
+					refItem.tags = JSON.parse( refItem.tags );
+					resolve( refItem );
 				}
 			} );
 		} );

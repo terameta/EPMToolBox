@@ -7,7 +7,6 @@ import {
 	dimeMatrixReducer,
 	DimeMatrixState,
 } from '../dime/dimematrix/dimematrix.ngrx';
-import { dimeStreamReducer, DimeStreamState } from '../dime/dimestream/dimestream.ngrx';
 
 import {
 	DIME_ASYNC_PROCESS_ACTIONS,
@@ -39,6 +38,10 @@ import { DimeEnvironmentState, dimeEnvironmentInitialState } from 'app/dime/dime
 import { dimeEnvironmentReducer } from 'app/dime/dimeenvironment/dimeenvironment.reducer';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
+import { DimeStreamState, dimeStreamInitialState } from 'app/dime/dimestream/dimestream.state';
+import { dimeStreamReducer } from 'app/dime/dimestream/dimestream.reducer';
+import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
@@ -60,7 +63,7 @@ export const appInitialState: AppState = {
 	dimeCredential: dimeCredentialInitialState,
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
 	dimeEnvironment: dimeEnvironmentInitialState,
-	dimeStream: <DimeStreamState>{},
+	dimeStream: dimeStreamInitialState,
 	dimeMatrix: dimeMatrixInitialState
 }
 
@@ -171,6 +174,20 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						}
 						default: {
 							console.log( 'We are at environments default' );
+							return new DoNothingAction();
+						}
+					}
+				}
+				case 'streams': {
+					switch ( segments[2] ) {
+						case 'stream-list': {
+							return DimeStreamActions.ALL.LOAD.initiateifempty();
+						}
+						case 'stream-detail/:id': {
+							return DimeStreamActions.ONE.LOAD.initiate( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at streams default' );
 							return new DoNothingAction();
 						}
 					}

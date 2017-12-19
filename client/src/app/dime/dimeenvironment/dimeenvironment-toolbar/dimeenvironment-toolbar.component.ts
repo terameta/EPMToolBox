@@ -13,7 +13,11 @@ import { DimeUIService } from 'app/ngstore/uistate.service';
 } )
 export class DimeenvironmentToolbarComponent implements OnInit {
 
-	constructor( public mainService: DimeEnvironmentService, public tagService: DimeTagService, public uiService: DimeUIService ) { }
+	constructor(
+		public mainService: DimeEnvironmentService,
+		public tagService: DimeTagService,
+		public uiService: DimeUIService
+	) { }
 
 	ngOnInit() {
 	}

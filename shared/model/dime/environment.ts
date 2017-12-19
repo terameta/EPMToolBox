@@ -1,5 +1,3 @@
-import { DimeEnvironmentType } from './environmenttype';
-
 export interface DimeEnvironment {
 	id: number,
 	name: string,

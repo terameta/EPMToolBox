@@ -103,5 +103,10 @@ export class DimeEnvironmentEffects {
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
 		} );
 
-	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeEnvironmentBackend, private router: Router ) { }
+	constructor(
+		private actions$: Actions,
+		private store$: Store<AppState>,
+		private backend: DimeEnvironmentBackend,
+		private router: Router
+	) { }
 }

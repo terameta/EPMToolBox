@@ -1,10 +1,11 @@
-import { DimeStreamAllLoadInitiateIfEmptyAction } from '../dimestream/dimestream.ngrx';
 import { DimeAsyncProcessBackend } from './dimeasyncprocess.backend';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { DimeAsyncProcess } from '../../../../../shared/model/dime/asyncprocess';
 import { Action } from '@ngrx/store';
+
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
 
 import * as _ from 'lodash';
 
@@ -56,7 +57,7 @@ export class DimeAsyncProcessEffects {
 			return [
 				new DimeAsyncProcessAllLoadCompleteAction( resp ),
 				DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
-				new DimeStreamAllLoadInitiateIfEmptyAction()
+				DimeStreamActions.ALL.LOAD.initiateifempty()
 			];
 		} );
 	} );
