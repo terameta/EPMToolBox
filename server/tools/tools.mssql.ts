@@ -3,6 +3,8 @@ import * as mssql from 'mssql';
 import { MainTools } from './tools.main';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
+import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { SortByName } from '../../shared/utilities/utilityFunctions';
 
 export class MSSQLTools {
 
@@ -83,15 +85,6 @@ export class MSSQLTools {
 				catch( reject );
 		} );
 	}
-	private sortByName = ( e1: any, e2: any ) => {
-		if ( e1.name > e2.name ) {
-			return 1;
-		} else if ( e1.name < e2.name ) {
-			return -1;
-		} else {
-			return 0;
-		}
-	}
 	public listFields = ( refObj: DimeEnvironmentDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.connect( refObj ).
@@ -103,46 +96,33 @@ export class MSSQLTools {
 						} else if ( result.recordset.length === 0 ) {
 							reject( 'No records received, can\'t process the fields' );
 						} else {
-							let fieldArray: any[];
-							fieldArray = Object.keys( result.recordset[0] );
-
-							fieldArray.forEach( ( curField, curKey ) => {
-								fieldArray[curKey] = { name: curField, isString: 0, isNumber: 0, isDate: 0 };
+							const fieldArray: DimeStreamField[] = [];
+							Object.keys( result.recordset[0] ).forEach( ( curField, curKey ) => {
+								fieldArray.push( <DimeStreamField>{ name: curField, position: ( curKey + 1 ) } );
 							} );
-							result.recordset.forEach( ( curTuple: any ) => {
-								fieldArray.forEach( ( curField, curKey ) => {
+
+							fieldArray.forEach( ( curField ) => {
+								let isString = 0;
+								let isNumber = 0;
+								let isDate = 0;
+								let curChecker = new Date();
+								result.recordset.forEach( ( curTuple: any ) => {
 									if ( typeof curTuple[curField.name] === 'string' ) {
-										fieldArray[curKey].isString++;
+										isString++;
 									} else if ( typeof curTuple[curField.name] === 'number' ) {
-										fieldArray[curKey].isNumber++;
+										isNumber++;
 									} else {
-										const curChecker = new Date( curTuple[curField.name] );
-										if ( curChecker instanceof Date && !isNaN( curChecker.valueOf() ) ) { fieldArray[curKey].isDate++; }
+										curChecker = new Date( curTuple[curField.name] );
+										if ( curChecker instanceof Date && !isNaN( curChecker.valueOf() ) ) { isDate++; }
 									}
-								} )
+								} );
+								curField.type = 'undefined';
+								let typemax = 0;
+								if ( isString > typemax ) { curField.type = 'string'; typemax = isString; }
+								if ( isNumber > typemax ) { curField.type = 'number'; typemax = isNumber; }
+								if ( isDate > typemax ) { curField.type = 'date'; }
 							} );
 
-							fieldArray.sort( this.sortByName );
-							fieldArray.forEach( function ( curField, curKey ) {
-								fieldArray[curKey].type = 'undefined';
-								let typemax = 0;
-								if ( parseInt( fieldArray[curKey].isString, 10 ) > typemax ) {
-									fieldArray[curKey].type = 'string';
-									typemax = parseInt( fieldArray[curKey].isString, 10 );
-								}
-								if ( parseInt( fieldArray[curKey].isNumber, 10 ) > typemax ) {
-									fieldArray[curKey].type = 'number';
-									typemax = parseInt( fieldArray[curKey].isNumber, 10 );
-								}
-								if ( parseInt( fieldArray[curKey].isDate, 10 ) > typemax ) {
-									fieldArray[curKey].type = 'date';
-									typemax = parseInt( fieldArray[curKey].isDate, 10 );
-								}
-								delete fieldArray[curKey].isString;
-								delete fieldArray[curKey].isNumber;
-								delete fieldArray[curKey].isDate;
-								fieldArray[curKey].order = curKey + 1;
-							} );
 							resolve( fieldArray );
 						}
 					} );

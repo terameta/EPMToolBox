@@ -6,5 +6,6 @@ export interface DimeEnvironmentDetail extends DimeEnvironment {
 	connection: any,
 	query: string,
 	username: string,
-	password: string
+	password: string,
+	ssotoken: string
 }

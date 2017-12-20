@@ -214,30 +214,29 @@ export class EnvironmentTools {
 		} );
 	}
 	public listTables = ( refObj: DimeEnvironmentDetail ) => {
-		// console.log("Environment list tables", refObj);
 		return new Promise( ( resolve, reject ) => {
-			this.getEnvironmentDetails( refObj, true ).
-				// then( this.getTypeDetails ).
-				then( ( curObj ) => {
+			this.getEnvironmentDetails( refObj, true )
+				.then( ( curObj ) => {
 					curObj.database = refObj.database;
-					if ( curObj.type === DimeEnvironmentType.MSSQL ) {
-						return this.mssqlTool.listTables( curObj );
-					} else if ( curObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.listCubes( <DimeEnvironmentHP>curObj );
-					} else if ( curObj.type === DimeEnvironmentType.PBCS ) {
-						return this.pbcsTool.listCubes( <DimeEnvironmentPBCS>curObj );
-					} else {
-						return Promise.reject( 'Undefined Environment Type' );
+					switch ( curObj.type ) {
+						case DimeEnvironmentType.MSSQL: { return this.mssqlTool.listTables( curObj ); }
+						case DimeEnvironmentType.HP: { return this.hpTool.listCubes( <DimeEnvironmentHP>curObj ); }
+						case DimeEnvironmentType.PBCS: { return this.pbcsTool.listCubes( <DimeEnvironmentPBCS>curObj ); }
+						default: { return Promise.reject( 'Undefined Environment Type' ); }
 					}
-				} ).
-				then( resolve ).
-				catch( ( issue ) => {
-					reject( { error: issue, message: 'Failed to list the tables' } );
-				} );
+				} )
+				.then( resolve )
+				.catch( reject );
 		} );
 	}
 
 	public listFields = ( refObj: DimeEnvironmentDetail ) => {
+		// console.log( '===========================================' );
+		// console.log( '===========================================' );
+		// console.log( 'We are here' );
+		// console.log( refObj );
+		// console.log( '===========================================' );
+		// console.log( '===========================================' );
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).
 				// then( this.getTypeDetails ).

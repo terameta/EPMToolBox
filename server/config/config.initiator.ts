@@ -43,7 +43,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0035to0036 ).then( version0036to0037 ).then( version0037to0038 ).then( version0038to0039 ).then( version0039to0040 ).
 		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).
 		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then( version0048to0049 ).then( version0049to0050 ).
-		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).
+		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -51,6 +51,39 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 			console.log( '===============================================' );
 		} ).
 		then( clearResidue );
+}
+
+const version0054to0055 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 54;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'environments', 'ssotoken TEXT NULL AFTER credential' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+}
+
+const version0053to0054 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 53;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE streamfields CHANGE fOrder position INT( 10 ) UNSIGNED NULL DEFAULT NULL AFTER type', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} )
+		}
+	} );
 }
 
 const version0052to0053 = ( currentVersion: number ) => {

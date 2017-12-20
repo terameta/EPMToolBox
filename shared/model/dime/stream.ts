@@ -1,3 +1,5 @@
+import { DimeStreamFieldDetail } from "./streamfield";
+
 export interface DimeStream {
 	id: number,
 	name: string,
@@ -12,5 +14,6 @@ export interface DimeStream {
 
 export interface DimeStreamDetail extends DimeStream {
 	databaseList: { name: string }[],
-	tableList: { name: string }[]
+	tableList: { name: string }[],
+	fieldList: DimeStreamFieldDetail[]
 }

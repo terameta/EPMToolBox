@@ -3,14 +3,17 @@ export interface DimeStreamField {
 	stream: number,
 	name: string,
 	type: string,
-	fCharacters?: number,
-	fPrecision?: number,
-	fDecimals?: number,
-	fDateFormat?: string,
-	fOrder?: number,
+	position: number,
+	isDescribed: boolean
+}
+
+export interface DimeStreamFieldDetail extends DimeStreamField {
+	fCharacters: number,
+	fPrecision: number,
+	fDecimals: number,
+	fDateFormat: string,
 	shouldIgnore?: boolean,
 	shouldIgnoreCrossTab?: boolean,
-	isDescribed?: boolean,
 	isFilter?: boolean,
 	isCrossTab?: boolean,
 	isMonth?: boolean,

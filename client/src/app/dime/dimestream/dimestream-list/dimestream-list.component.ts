@@ -5,6 +5,11 @@ import { ToastrService } from 'ngx-toastr';
 
 import { DimeStreamService } from '../dimestream.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
+import { DimeUIService } from 'app/ngstore/uistate.service';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { Store } from '@ngrx/store';
+import { AppState } from 'app/ngstore/models';
+import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
 @Component( {
 	selector: 'app-dimestream-list',
@@ -21,6 +26,9 @@ export class DimeStreamListComponent implements OnInit {
 		public mainService: DimeStreamService,
 		private environmentService: DimeEnvironmentService,
 		private toastr: ToastrService,
+		public uiService: DimeUIService,
+		public tagService: DimeTagService,
+		public store: Store<AppState>
 		// private router: Router
 	) { }
 
@@ -42,6 +50,19 @@ export class DimeStreamListComponent implements OnInit {
 				this.toastr.error(error);
 			}
 		);*/
+		this.store.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() );
+	}
+
+	public shouldListItem = ( itemid: number ) => {
+		let shouldShow = true;
+		this.tagService.groupList.forEach( ( curGroup ) => {
+			if ( parseInt( this.uiService.uiState.selectedTags[curGroup.id], 10 ) > 0 ) {
+				if ( !this.mainService.itemObject[itemid].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
+					shouldShow = false;
+				}
+			}
+		} );
+		return shouldShow;
 	}
 	/*
 

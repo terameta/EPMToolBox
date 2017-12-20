@@ -1,6 +1,6 @@
 import { AppState } from '../../ngstore/models';
 import { Store } from '@ngrx/store';
-import { SortByName, EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName, EnumToArray, SortByPosition } from '../../../../../shared/utilities/utilityFunctions';
 import { DimeStreamType, dimeGetStreamTypeDescription } from '../../../../../shared/enums/dime/streamtypes';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Headers, Http, Response } from '@angular/http';
@@ -112,6 +112,27 @@ export class DimeStreamService {
 		this.update();
 	}
 
+	public fieldsListFromSourceEnvironment = ( id: number ) => {
+		this.store.dispatch( DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.initiate( id ) );
+	};
+
+	public fieldsStartOver = ( id?: number ) => {
+		if ( !id ) { id = this.currentItem.id };
+		if ( confirm( 'Are you sure to delete all the assigned fields?' ) ) {
+			this.store.dispatch( DimeStreamActions.ONE.FIELDS.STARTOVER.initiate( id ) );
+		}
+	}
+
+	public fieldMove = ( theFieldList: any[], theField, direction ) => {
+		const curOrder = theField.position;
+		const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );
+		theFieldList.forEach( ( curField ) => {
+			if ( parseInt( curField.position, 10 ) === nextOrder ) { curField.position = curOrder; }
+		} );
+		theField.position = nextOrder;
+		theFieldList.sort( SortByPosition );
+	}
+
 	// constructor(
 	// 	private http: Http,
 	// 	private authHttp: AuthHttp,
@@ -185,18 +206,7 @@ export class DimeStreamService {
 				} );
 		}
 
-		public listFieldsFromSourceEnvironment = ( id: number ) => {
-			this.authHttp.get( this.baseUrl + '/listFields/' + id ).
-				map( response => response.json() ).
-				subscribe( ( data ) => {
-					this.toastr.info( 'Successfully listed fields from the source environment.', this.serviceName );
-					this.curItemSourcedFields = data;
-					this.curItemSourcedFields.sort( this.fieldSortNumeric );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to list fields from the source environment.', this.serviceName );
-					console.log( error );
-				} );
-		};
+
 		private fieldSortNumeric = ( f1, f2 ): number => {
 			let fItem: string;
 			if ( f1.order ) { fItem = 'order' };
@@ -210,19 +220,7 @@ export class DimeStreamService {
 				return 0;
 			}
 		}
-		public fieldMove = ( theFieldList: any[], theField, direction ) => {
-			const curOrder = theField.order || theField.fOrder || theField.pOrder;
-			const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );
-			theFieldList.forEach( ( curField ) => {
-				if ( parseInt( curField.order, 10 ) === nextOrder ) { curField.order = curOrder; }
-				if ( parseInt( curField.fOrder, 10 ) === nextOrder ) { curField.fOrder = curOrder; }
-				if ( parseInt( curField.pOrder, 10 ) === nextOrder ) { curField.pOrder = curOrder; }
-			} );
-			if ( theField.order ) { theField.order = nextOrder; }
-			if ( theField.fOrder ) { theField.fOrder = nextOrder; }
-			if ( theField.pOrder ) { theField.pOrder = nextOrder; }
-			theFieldList.sort( this.fieldSortNumeric );
-		}
+
 		public assignFields = ( refObj: { id: number, fieldList: any[] } ) => {
 			if ( !refObj ) {
 				refObj = { id: 0, fieldList: [] };
@@ -281,21 +279,7 @@ export class DimeStreamService {
 					console.log( error );
 				} );
 		}
-		public fieldsStartOver = ( id?: number ) => {
-			if ( !id ) { id = this.curItem.id };
-			if ( confirm( 'Are you sure to delete all the assigned fields?' ) ) {
-				this.authHttp.get( this.baseUrl + '/clearFields/' + id ).
-					map( response => response.json ).
-					subscribe( ( result ) => {
-						this.toastr.info( 'Assigned filders are cleared.', this.serviceName );
-						this.curItemAssignedFields = undefined;
-						this.curItemSourcedFields = undefined;
-					}, ( error ) => {
-						this.toastr.error( 'Failed to delete the assigned fields.', this.serviceName );
-						console.log( error );
-					} );
-			}
-		}
+
 		public fieldsSave = ( refObj: { id: number, fields: any[] } ) => {
 			if ( !refObj ) {
 				refObj = { id: 0, fields: [] };

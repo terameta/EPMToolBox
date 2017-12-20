@@ -1,5 +1,6 @@
 import { Action as NgRXAction } from '@ngrx/store';
 import { DimeStream, DimeStreamDetail } from '../../../../../shared/model/dime/stream';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../../../../shared/model/dime/streamfield';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -60,6 +61,20 @@ export const DimeStreamActions = {
 			set: ( payload: { name: string, type: string }[] ): Action => { return { type: DimeStreamActions.ONE.TABLELIST.SET, payload: payload }; },
 			CLEAN: 'DIME_STREAM_ACTIONS_ONE_TABLELIST_CLEAN',
 			clean: (): Action => { return { type: DimeStreamActions.ONE.TABLELIST.CLEAN }; }
+		},
+		FIELDS: {
+			LIST: {
+				FROMSOURCEENVIRONMENT: {
+					INITIATE: 'DIME_STREAM_ACTIONS_ONE_FIELDS_LIST_FROMSOURCEENVIRONMENT_INITIATE',
+					initiate: ( payload: number ): Action => { return { type: DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.INITIATE, payload: payload }; },
+					COMPLETE: 'DIME_STREAM_ACTIONS_ONE_FIELDS_LIST_FROMSOURCEENVIRONMENT_COMPLETE',
+					complete: ( payload: DimeStreamField[] ): Action => { return { type: DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.COMPLETE, payload: payload }; }
+				}
+			},
+			STARTOVER: {
+				INITIATE: 'DIME_STREAM_ACTIONS_ONE_FIELDS_STARTOVER_INITIATE',
+				initiate: ( payload: number ): Action => { return { type: DimeStreamActions.ONE.FIELDS.STARTOVER.INITIATE, payload: payload }; }
+			}
 		}
 	}
 }

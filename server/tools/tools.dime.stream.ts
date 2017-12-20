@@ -1,4 +1,4 @@
-import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { Pool } from 'mysql';
 
 import { MainTools } from './tools.main';
@@ -19,6 +19,13 @@ export class StreamTools {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving stream list has failed' } );
 				} else {
+					rows.forEach( ( curItem: DimeStream ) => {
+						if ( curItem.tags ) {
+							curItem.tags = JSON.parse( curItem.tags );
+						} else {
+							curItem.tags = {};
+						}
+					} );
 					resolve( rows );
 				}
 			} );
@@ -27,7 +34,7 @@ export class StreamTools {
 	public create = () => {
 		const newStream = { name: 'New Stream (Please change name)', type: 0, environment: 0 };
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO streams SET ?', newStream, function ( err, result, fields ) {
+			this.db.query( 'INSERT INTO streams SET ?', newStream, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to create a new stream.' } );
 				} else {
@@ -44,25 +51,31 @@ export class StreamTools {
 				} else if ( rows.length !== 1 ) {
 					reject( { error: 'Wrong number of records', message: 'Wrong number of records for stream received from the server, 1 expected' } );
 				} else {
-					if ( rows[0].tags ) {
-						rows[0].tags = JSON.parse( rows[0].tags );
+					const streamToReturn: DimeStreamDetail = Object.assign( <DimeStreamDetail>{}, rows[0] );
+					if ( streamToReturn.tags ) {
+						streamToReturn.tags = JSON.parse( streamToReturn.tags );
 					} else {
-						rows[0].tags = {};
+						streamToReturn.tags = {};
 					}
-					if ( rows[0].dbName ) {
-						rows[0].databaseList = [{ name: rows[0].dbName }];
+					if ( streamToReturn.dbName ) {
+						streamToReturn.databaseList = [{ name: streamToReturn.dbName }];
 					}
-					if ( rows[0].tableName ) {
-						rows[0].tableList = [{ name: rows[0].tableName }];
+					if ( streamToReturn.tableName ) {
+						streamToReturn.tableList = [{ name: streamToReturn.tableName }];
 					}
-					resolve( rows[0] );
+					this.retrieveFields( streamToReturn.id ).then( ( fieldList: DimeStreamFieldDetail[] ) => {
+						if ( fieldList.length > 0 ) {
+							streamToReturn.fieldList = fieldList;
+						}
+						resolve( streamToReturn );
+					} ).catch( reject );
 				}
 			} );
 		} );
 	}
 	public listTypes = () => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM streamtypes', function ( err, rows, fields ) {
+			this.db.query( 'SELECT * FROM streamtypes', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving stream type list has failed' } );
 				} else {
@@ -75,13 +88,20 @@ export class StreamTools {
 		return new Promise( ( resolve, reject ) => {
 			delete refItem.databaseList;
 			delete refItem.tableList;
+			const fieldList = refItem.fieldList;
+			delete refItem.fieldList;
 			refItem.tags = JSON.stringify( refItem.tags );
-			this.db.query( 'UPDATE streams SET ? WHERE id = ?', [refItem, refItem.id], function ( err, result, fields ) {
+			this.db.query( 'UPDATE streams SET ? WHERE id = ?', [refItem, refItem.id], ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the stream' } );
 				} else {
 					refItem.tags = JSON.parse( refItem.tags );
-					resolve( refItem );
+					if ( fieldList && fieldList.length > 0 ) {
+						refItem.fieldList = fieldList;
+						resolve( this.assignFields( refItem ) );
+					} else {
+						resolve( refItem );
+					}
 				}
 			} );
 		} );
@@ -97,16 +117,16 @@ export class StreamTools {
 			} );
 		} );
 	}
-	public listFields = ( id: number ) => {
+	public fieldsListFromSourceEnvironment = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getOne( id ).
 				then( this.buildQuery ).
 				then( ( innerObj: DimeStream ) => {
 					return this.environmentTool.listFields( <DimeEnvironmentDetail>{ id: innerObj.environment, query: innerObj.finalQuery, database: innerObj.dbName, table: innerObj.tableName } );
 				} ).
-				then( ( result: any ) => {
-					result.forEach( ( curField: any, curKey: any ) => {
-						if ( !curField.order ) { curField.order = curKey + 1; }
+				then( ( result: DimeStreamField[] ) => {
+					result.forEach( ( curField, curKey ) => {
+						if ( !curField.position ) { curField.position = curKey + 1; }
 					} );
 					resolve( result );
 				} ).
@@ -148,51 +168,39 @@ export class StreamTools {
 			}
 		} );
 	}
-	public assignFields = ( refObj: any ) => {
+	public assignFields = ( refObj: DimeStreamDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'No data is provided' );
 			} else if ( !refObj.id ) {
 				reject( 'No stream id is provided' );
-			} else if ( !refObj.fields ) {
+			} else if ( !refObj.fieldList ) {
 				reject( 'No field list is provided' );
-			} else if ( !Array.isArray( refObj.fields ) ) {
+			} else if ( !Array.isArray( refObj.fieldList ) ) {
 				reject( 'Field list is not valid' );
 			} else {
-				this.clearFields( refObj ).
-					then( ( innerObj: any ) => {
-						let toInsert: any;
+				this.fieldsStartOver( refObj ).
+					then( ( innerObj: DimeStreamDetail ) => {
 						let promises: any[]; promises = [];
-						innerObj.fields.forEach( ( curField: any ) => {
-							toInsert = {};
-							toInsert.stream = innerObj.id;
-							toInsert.name = curField.name;
-							toInsert.type = curField.type;
-							toInsert.fOrder = curField.order;
-							toInsert.shouldIgnore = curField.shouldIgnore;
-							if ( toInsert.shouldIgnore === undefined ) { toInsert.shouldIgnore = 0; }
-							if ( curField.precision !== undefined ) { toInsert.fPrecision = parseInt( curField.precision, 10 ); }
-							if ( curField.decimals !== undefined ) { toInsert.fDecimals = parseInt( curField.decimals, 10 ); }
-							if ( curField.characters !== undefined ) { toInsert.fCharacters = parseInt( curField.characters, 10 ); }
-							if ( curField.dateFormat !== undefined ) { toInsert.fDateFormat = curField.dateFormat; }
+						innerObj.fieldList.forEach( ( curField: DimeStreamFieldDetail ) => {
+							curField.stream = innerObj.id;
+							curField.name = curField.name;
+							curField.type = curField.type;
+							curField.position = curField.position;
+							curField.shouldIgnore = curField.shouldIgnore;
 
-							if ( toInsert.type === 'string' && toInsert.fCharacters === undefined ) { toInsert.fCharacters = 1024; }
-							if ( toInsert.type === 'number' && toInsert.fPrecision === undefined ) { toInsert.fPrecision = 28; }
-							if ( toInsert.type === 'number' && toInsert.fDecimals === undefined ) { toInsert.fDecimals = 8; }
-							if ( toInsert.type === 'number' && toInsert.fPrecision <= toInsert.fDecimals ) { toInsert.fDecimals = toInsert.fPrecision - 1; }
-							if ( toInsert.type === 'number' && toInsert.fDecimals < 0 ) { toInsert.fDecimals = 0; }
-							if ( toInsert.type === 'date' && toInsert.fDateFormat === undefined ) { toInsert.fDateFormat = 'YYYY-MM-DD'; }
-							promises.push( this.assignField( toInsert ) );
-
-							// console.log("====================");
-							// console.log(curField);
-							// console.log(toInsert);
-							// console.log("====================");
+							if ( curField.type === 'string' && curField.fCharacters === undefined ) { curField.fCharacters = 1024; }
+							if ( curField.type === 'number' && curField.fPrecision === undefined ) { curField.fPrecision = 28; }
+							if ( curField.type === 'number' && curField.fDecimals === undefined ) { curField.fDecimals = 8; }
+							if ( curField.type === 'number' && curField.fDecimals < 0 ) { curField.fDecimals = 0; }
+							if ( curField.type === 'number' && ( curField.fPrecision <= curField.fDecimals ) ) { curField.fDecimals = curField.fPrecision - 1; }
+							if ( curField.type === 'date' && curField.fDateFormat === undefined ) { curField.fDateFormat = 'YYYY-MM-DD'; }
+							promises.push( this.assignField( curField ) );
 						} );
 						return Promise.all( promises );
 					} ).
 					then( ( result ) => {
-						resolve( { result: 'OK' } );
+						resolve( refObj );
 					} ).
 					catch( reject );
 			}
@@ -209,7 +217,7 @@ export class StreamTools {
 			} )
 		} );
 	}
-	public clearFields = ( refObj: any ) => {
+	public fieldsStartOver = ( refObj: DimeStreamDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM streamfields WHERE stream = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
@@ -222,7 +230,7 @@ export class StreamTools {
 	}
 	public retrieveFields = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM streamfields WHERE stream = ? ORDER BY fOrder', id, ( err, rows, fields ) => {
+			this.db.query( 'SELECT * FROM streamfields WHERE stream = ? ORDER BY position', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
@@ -233,7 +241,7 @@ export class StreamTools {
 	}
 	public retrieveField = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM streamfields WHERE id = ? ORDER BY fOrder', id, ( err, rows, fields ) => {
+			this.db.query( 'SELECT * FROM streamfields WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else if ( rows.length !== 1 ) {
@@ -308,7 +316,7 @@ export class StreamTools {
 					} );
 					return this.retrieveFields( id );
 				} ).
-				then( ( fields: DimeStreamField[] ) => {
+				then( ( fields: DimeStreamFieldDetail[] ) => {
 					if ( fields.length === 0 ) {
 						reject( 'No fields are defined for stream' );
 					} else {
@@ -364,7 +372,7 @@ export class StreamTools {
 				resolve( 'OK' );
 			} else {
 				this.retrieveField( tableStatus.field ).
-					then( ( field: DimeStreamField ) => {
+					then( ( field: DimeStreamFieldDetail ) => {
 						let curQuery: string; curQuery = '';
 						curQuery += 'CREATE TABLE ' + tableStatus.tableName + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 						if ( tableStatus.streamType !== 'HPDB' ) { curQuery += ', RefField '; }

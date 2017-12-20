@@ -37,6 +37,9 @@ export function dimeStreamReducer( state: DimeStreamState, action: Action ): Dim
 		case DimeStreamActions.ONE.TABLELIST.CLEAN: {
 			return handleOneTableListClean( state, action );
 		}
+		case DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.COMPLETE: {
+			return handleOneFieldsListFromSourceEnvironmentComplete( state, action );
+		}
 		default: {
 			return state;
 		}
@@ -95,5 +98,11 @@ const handleOneTableListSet = ( state: DimeStreamState, action: Action ): DimeSt
 const handleOneTableListClean = ( state: DimeStreamState, action: Action ): DimeStreamState => {
 	const newState: DimeStreamState = Object.assign( {}, state );
 	newState.curItem.tableList = [];
+	return newState;
+}
+
+const handleOneFieldsListFromSourceEnvironmentComplete = ( state: DimeStreamState, action: Action ): DimeStreamState => {
+	const newState: DimeStreamState = Object.assign( {}, state );
+	newState.curItem.fieldList = action.payload;
 	return newState;
 }

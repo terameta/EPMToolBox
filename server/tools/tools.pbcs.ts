@@ -1,6 +1,7 @@
 import * as request from 'request';
 import * as xml2js from 'xml2js';
 import * as async from 'async';
+import * as url from 'url';
 const cheerio = require( 'cheerio' );
 
 import { DimeEnvironmentPBCS } from '../../shared/model/dime/environmentPBCS';
@@ -11,6 +12,279 @@ export class PBCSTools {
 
 	constructor( public tools: MainTools ) {
 		this.xmlParser = xml2js.parseString;
+	}
+
+	public getSSOToken = ( refObj: DimeEnvironmentPBCS ) => {
+		return new Promise( ( resolve, reject ) => {
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( refObj );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			if ( refObj.ssotoken ) {
+				console.log( 'We will validate ssotoken and if necessary create the sso token' );
+			} else {
+				console.log( 'We should create the sso token' );
+				this.ssoTokenCreatorStep01( refObj )
+					.then( this.ssoTokenCreatorStep02 )
+					.then( this.ssoTokenCreatorStep03 )
+					.then( this.ssoTokenCreatorStep04 )
+					.then( this.ssoTokenCreatorStep05 )
+					.then( this.ssoTokenCreatorStep06 )
+					.then( this.ssoTokenCreatorStep07 )
+					.then( this.ssoTokenCreatorStep08 )
+					.then( this.ssoTokenCreatorStep09 )
+					.then( resolve )
+					.catch( reject );
+			}
+		} );
+	}
+
+	private getCookieString = ( sourceCookie: string | any, existingCookie?: string ) => {
+		let targetCookie = '';
+		if ( sourceCookie ) {
+			if ( Array.isArray( sourceCookie ) ) {
+				targetCookie = sourceCookie.join( '; ' );
+			} else {
+				targetCookie = sourceCookie;
+			}
+		}
+		if ( existingCookie ) { targetCookie += existingCookie + '; ' + targetCookie; }
+		return targetCookie;
+	}
+
+	private getRequestContext = ( source: any ) => {
+		let toReturn = '';
+		if ( Array.isArray( source ) ) {
+			if ( source ) {
+				source.forEach( ( curSource: string ) => {
+					if ( curSource.trim().substr( 0, 17 ) === 'OAMRequestContext' ) {
+						toReturn = curSource.trim();
+					}
+				} );
+			}
+		}
+		return toReturn;
+	}
+
+	private ssoTokenCreatorStep01 = ( refObj: DimeEnvironmentPBCS ) => {
+		return new Promise( ( resolve, reject ) => {
+			const refDetails: any = {};
+			refDetails.originalCookie = 'EPM_Remote_User=; ORA_EPMWS_User=' + encodeURIComponent( refObj.username ) + '; ORA_EPMWS_Locale=en_US; ORA_EPMWS_AccessibilityMode=false; ORA_EPMWS_ThemeSelection=Skyros';
+
+			request.post( {
+				url: refObj.server + ':' + refObj.port + '/workspace/SmartViewProviders',
+				// tslint:disable-next-line:max-line-length
+				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
+				headers: {
+					'Content-Type': 'application/xml',
+					cookie: refDetails.originalCookie
+				},
+				followRedirect: false
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					refDetails.redirectTarget = response.headers.location;
+					refDetails.requestContext = this.getRequestContext( response.headers['set-cookie'] );
+					if ( refDetails.requestContext === '' ) {
+						reject( 'no request context retrieved.' );
+					} else {
+						resolve( { refObj, refDetails } );
+					}
+				}
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep02 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+
+			refInfo.refDetails.oamPrefsCookie = 'OAM_PREFS=dGVuYW50TmFtZT1rZXJ6bmVyfnJlbWVtYmVyVGVuYW50PXRydWV+cmVtZW1iZXJNZT1mYWxzZQ==';
+
+			request.get( {
+				url: refInfo.refDetails.redirectTarget,
+				headers: {
+					cookie: refInfo.refDetails.oamPrefsCookie
+				},
+				followRedirect: false
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( refInfo );
+				}
+			} )
+		} );
+	}
+
+	private ssoTokenCreatorStep03 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.get( {
+				url: refInfo.refObj.server + ':' + refInfo.refObj.port + '/workspace/SmartViewProviders',
+				headers: {
+					cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext
+				},
+				followRedirect: false
+			}, ( err, response, body ) => {
+				refInfo.refDetails.redirectTarget = response.headers.location;
+				if ( this.getRequestContext( response.headers['set-cookie'] ) ) {
+					refInfo.refDetails.requestContext += '; ' + this.getRequestContext( response.headers['set-cookie'] );
+				}
+				if ( refInfo.refDetails.requestContext === '' ) {
+					reject( 'no request context retrieved.' );
+				} else {
+					refInfo.refDetails.encquery = url.parse( refInfo.refDetails.redirectTarget ).search;
+					resolve( refInfo );
+				}
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep04 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.get( {
+				url: refInfo.refDetails.redirectTarget,
+				headers: {
+					cookie: refInfo.refDetails.oamPrefsCookie
+				},
+				followRedirect: false
+			}, ( err, response, body ) => {
+				const $ = cheerio.load( response.body );
+				refInfo.refDetails.formFields = {};
+				$( 'input' ).each( ( i: any, elem: any ) => {
+					if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
+						refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
+					}
+				} );
+
+				$( 'form' ).each( ( i: any, elem: any ) => {
+					if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
+						refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+					}
+				} );
+
+				// refInfo.refDetails.formFields.username = refObj.username;
+				refInfo.refDetails.formFields.username = 'aliriza.dikici@kerzner.com';
+				refInfo.refDetails.formFields.password = refInfo.refObj.password;
+				// refInfo.refDetails.formFields.userid = refInfo.refObj.username;
+				refInfo.refDetails.formFields.userid = 'aliriza.dikici@kerzner.com';
+				refInfo.refDetails.formFields.tenantDisplayName = refInfo.refObj.identitydomain;
+				refInfo.refDetails.formFields.tenantName = refInfo.refObj.identitydomain;
+
+				refInfo.refDetails.formCookie = this.getCookieString( response.headers['set-cookie'] );
+				if ( refInfo.refDetails.formAction ) {
+					resolve( refInfo );
+				} else {
+					reject( 'Form action is not set' );
+				}
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep05 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.post( {
+				url: refInfo.refDetails.formAction,
+				headers: {
+					referer: refInfo.refDetails.redirectTarget,
+					cookie: refInfo.refDetails.oamPrefsCookie + '; ' + refInfo.refDetails.formCookie,
+				},
+				form: refInfo.refDetails.formFields,
+				followRedirect: false
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					refInfo.refDetails.formResponseCookie = this.getCookieString( response.headers['set-cookie'] );
+					refInfo.refDetails.redirectTarget = response.headers.location;
+					refInfo.refDetails.referer = refInfo.refDetails.formAction + refInfo.refDetails.encquery;
+					resolve( refInfo );
+				}
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep06 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.get( {
+				url: refInfo.refDetails.redirectTarget,
+				headers: {
+					cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext,
+					referer: refInfo.refDetails.referer
+				},
+				followRedirect: false
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					refInfo.refDetails.currentCookie = refInfo.refDetails.originalCookie + '; ' + this.getCookieString( response.headers['set-cookie'] );
+					refInfo.refDetails.redirectTarget = refInfo.refObj.server + response.headers.location;
+					resolve( refInfo );
+				}
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep07 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.get( {
+				url: refInfo.refDetails.redirectTarget,
+				headers: {
+					cookie: refInfo.refDetails.currentCookie,
+					referer: refInfo.refDetails.referer
+				},
+				followRedirect: false
+			}, ( err, response, body ) => {
+				refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.getCookieString( response.headers['set-cookie'] );
+				resolve( refInfo );
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep08 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.post( {
+				url: refInfo.refDetails.redirectTarget,
+				headers: {
+					'Content-Type': 'application/xml',
+					cookie: refInfo.refDetails.currentCookie
+				},
+				// tslint:disable-next-line:max-line-length
+				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
+				followRedirect: false
+			}, ( err, response, body ) => {
+				resolve( refInfo );
+			} );
+		} );
+	}
+
+	private ssoTokenCreatorStep09 = ( refInfo: { refObj: DimeEnvironmentPBCS, refDetails: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.post( {
+				url: refInfo.refDetails.redirectTarget,
+				headers: {
+					'Content-Type': 'application/xml',
+					cookie: refInfo.refDetails.currentCookie
+				},
+				body: '<req_GetProvisionedDataSources><usr></usr><pwd></pwd><filters></filters></req_GetProvisionedDataSources>',
+				followRedirect: false
+			}, ( err, response, body ) => {
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				console.log( body );
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				const xmlParser = xml2js.parseString;
+				xmlParser( body, ( parseError, result ) => {
+					if ( parseError ) {
+						reject( parseError );
+					} else {
+						console.log( result.res_GetProvisionedDataSources );
+					}
+				} );
+			} );
+		} );
 	}
 
 	public verify = ( refObj: DimeEnvironmentPBCS ) => {
@@ -129,13 +403,14 @@ export class PBCSTools {
 		} );
 	}
 	public listCubes = ( refObj: DimeEnvironmentPBCS ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.pbcsGetCubes( refObj ).
-				then( ( innerObj: DimeEnvironmentPBCS ) => {
-					reject( 'Not yet' );
-				} ).
-				catch( reject );
-		} );
+		return this.getSSOToken( refObj );
+		// return new Promise( ( resolve, reject ) => {
+		// 	this.pbcsGetCubes( refObj ).
+		// 		then( ( innerObj: DimeEnvironmentPBCS ) => {
+		// 			reject( 'Not yet' );
+		// 		} ).
+		// 		catch( reject );
+		// } );
 	}
 	private pbcsGetCubes = ( refObj: DimeEnvironmentPBCS ) => {
 		return new Promise( ( resolve, reject ) => {

@@ -4,6 +4,7 @@ import { DimeEnvironmentService } from 'app/dime/dimeenvironment/dimeenvironment
 import { Store } from '@ngrx/store';
 import { AppState } from 'app/ngstore/models';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
 
 @Component( {
 	selector: 'app-dime-stream-detail-main-definitions',
@@ -15,7 +16,8 @@ export class DimeStreamDetailMainDefinitionsComponent implements OnInit {
 	constructor(
 		public mainService: DimeStreamService,
 		public environmentService: DimeEnvironmentService,
-		private store: Store<AppState>
+		private store: Store<AppState>,
+		public tagService: DimeTagService
 	) {
 		this.store.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() );
 	}
@@ -50,5 +52,14 @@ export class DimeStreamDetailMainDefinitionsComponent implements OnInit {
 
 	public isClean = () => {
 		return this.mainService.currentItemClean;
+	}
+
+	public decideColWidth = ( numCols: number ) => {
+		let colWidth = 12;
+		if ( numCols > 0 ) {
+			colWidth = Math.floor( colWidth / numCols );
+		}
+		if ( colWidth < 1 ) { colWidth = 1; }
+		return colWidth;
 	}
 }

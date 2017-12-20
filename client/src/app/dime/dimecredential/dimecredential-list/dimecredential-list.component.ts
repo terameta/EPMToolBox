@@ -15,11 +15,11 @@ export class DimeCredentialListComponent implements OnInit {
 	ngOnInit() {
 	}
 
-	public shouldListItem = ( credentialID: number ) => {
+	public shouldListItem = ( itemid: number ) => {
 		let shouldShow = true;
 		this.tagService.groupList.forEach( ( curGroup ) => {
 			if ( parseInt( this.uiService.uiState.selectedTags[curGroup.id], 10 ) > 0 ) {
-				if ( !this.mainService.itemObject[credentialID].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
+				if ( !this.mainService.itemObject[itemid].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
 					shouldShow = false;
 				}
 			}
