@@ -15,6 +15,7 @@ import { DimeStreamField } from '../../shared/model/dime/streamfield';
 import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
+import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 
 export class MapTools {
 	private streamTool: StreamTools;
@@ -453,12 +454,12 @@ export class MapTools {
 				then( ( tarStream: DimeStream ) => {
 					// console.log(new Date(), 'Received target stream');
 					targetStream = tarStream;
-					return this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: sourceStream.environment } ).then( this.environmentTool.getTypeDetails );
+					return this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: sourceStream.environment } );
 				} ).
 				then( ( srcEnvironment: DimeEnvironmentDetail ) => {
 					// console.log(new Date(), 'Received source environment');
 					sourceEnvironment = srcEnvironment;
-					return this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: targetStream.environment } ).then( this.environmentTool.getTypeDetails );
+					return this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: targetStream.environment } );
 				} ).
 				then( ( tarEnvironment: DimeEnvironmentDetail ) => {
 					// console.log(new Date(), 'Received target environment');
@@ -470,19 +471,19 @@ export class MapTools {
 					return 'OK';
 				} ).
 				then( () => {
-					if ( sourceEnvironment.typedetails === undefined ) {
+					if ( !sourceEnvironment.type ) {
 						reject( 'Source environment details are not valid.' );
-					} else if ( !targetEnvironment.typedetails ) {
+					} else if ( !targetEnvironment.type ) {
 						reject( 'Target environment details are not valid.' );
 					} else {
 						sourceFields.forEach( ( curField ) => {
 							mapFields.forEach( ( mapField ) => {
-								if ( sourceEnvironment.typedetails && mapField.srctar === 'source' && mapField.name === curField.name ) {
+								if ( sourceEnvironment.type && mapField.srctar === 'source' && mapField.name === curField.name ) {
 									// console.log(curField.name, curField.isDescribed, sourceEnvironment.typedetails.value);
 									finalFields.push( {
 										id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL'
 									} );
-									if ( curField.isDescribed || sourceEnvironment.typedetails.value === 'HP' || sourceEnvironment.typedetails.value === 'PBCS' ) {
+									if ( curField.isDescribed || sourceEnvironment.type === DimeEnvironmentType.HP || sourceEnvironment.type === DimeEnvironmentType.PBCS ) {
 										finalFields.push( { id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + sourceStream.id + '_DESCTBL' + curField.id } );
 									}
 								}
@@ -490,10 +491,10 @@ export class MapTools {
 						} );
 						targetFields.forEach( ( curField ) => {
 							mapFields.forEach( ( mapField ) => {
-								if ( targetEnvironment.typedetails && mapField.srctar === 'target' && mapField.name === curField.name ) {
+								if ( targetEnvironment.type && mapField.srctar === 'target' && mapField.name === curField.name ) {
 									// console.log(curField.name, curField.isDescribed, targetEnvironment.typedetails.value);
 									finalFields.push( { id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'main', table: 'MAP' + curMap.id + '_MAPTBL' } );
-									if ( curField.isDescribed || targetEnvironment.typedetails.value === 'HP' || targetEnvironment.typedetails.value === 'PBCS' ) {
+									if ( curField.isDescribed || sourceEnvironment.type === DimeEnvironmentType.HP || sourceEnvironment.type === DimeEnvironmentType.PBCS ) {
 										finalFields.push( { id: curField.id, name: curField.name, srctar: mapField.srctar, type: 'description', table: 'STREAM' + targetStream.id + '_DESCTBL' + curField.id } );
 									}
 								}

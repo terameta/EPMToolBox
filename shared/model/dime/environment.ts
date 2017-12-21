@@ -7,5 +7,6 @@ export interface DimeEnvironment {
 	verified: number,
 	identitydomain: string,
 	credential: number,
-	tags: any
+	tags: any,
+	SID: string
 }

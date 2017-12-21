@@ -21,6 +21,8 @@ export const DimeStreamActions = {
 		LOAD: {
 			INITIATE: 'DIME_STREAM_ACTIONS_ONE_LOAD_INITIATE',
 			initiate: ( payload: number ): Action => { return { type: DimeStreamActions.ONE.LOAD.INITIATE, payload: payload } },
+			INITIATEIFEMPTY: 'DIME_STREAM_ACTIONS_ONE_LOAD_INITIATE_IF_EMPTY',
+			initiateifempty: ( payload: number ): Action => { return { type: DimeStreamActions.ONE.LOAD.INITIATEIFEMPTY, payload: payload }; },
 			COMPLETE: 'DIME_STREAM_ACTIONS_ONE_LOAD_COMPLETE',
 			complete: ( payload: DimeStreamDetail ): Action => { return { type: DimeStreamActions.ONE.LOAD.COMPLETE, payload: payload } }
 		},

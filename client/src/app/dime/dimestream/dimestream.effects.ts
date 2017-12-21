@@ -12,6 +12,7 @@ import { DimeStatusActions } from 'app/ngstore/applicationstatus';
 import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
 import { DimeStreamBackend } from 'app/dime/dimestream/dimestream.backend';
 import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
+import { dimeStreamInitialState } from 'app/dime/dimestream/dimestream.state';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -63,6 +64,13 @@ export class DimeStreamEffects {
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
 				.finally( () => { this.store$.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() ) } );
 		} );
+
+	@Effect() ONE_LOAD_INITIATE_IF_EMPTY$ = this.actions$
+		.ofType( DimeStreamActions.ONE.LOAD.INITIATEIFEMPTY )
+		.withLatestFrom( this.store$ )
+		.filter( ( [action, store] ) => { return ( !store.dimeStream.curItem || store.dimeStream.curItem.id === 0 ); } )
+		.map( ( [action, store] ) => action )
+		.switchMap( ( action: Action ) => of( DimeStreamActions.ONE.LOAD.initiate( action.payload ) ) );
 
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
 		.ofType( DimeStreamActions.ONE.UPDATE.INITIATE )

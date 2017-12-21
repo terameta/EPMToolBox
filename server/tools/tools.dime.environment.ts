@@ -25,7 +25,7 @@ export class EnvironmentTools {
 	constructor( public db: Pool, public tools: MainTools ) {
 		this.mssqlTool = new MSSQLTools( this.tools );
 		this.hpTool = new HPTools( this.tools );
-		this.pbcsTool = new PBCSTools( this.tools );
+		this.pbcsTool = new PBCSTools( this.db, this.tools );
 		this.credentialTool = new CredentialTools( this.db, this.tools );
 	}
 

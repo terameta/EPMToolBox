@@ -12,8 +12,8 @@ import { DimeProcessRunning } from '../../shared/model/dime/processrunning';
 import { DimeProcessStep } from '../../shared/model/dime/processstep';
 import { DimeProcessStepRunning } from '../../shared/model/dime/processsteprunning';
 import { DimeStream } from '../../shared/model/dime/stream';
-import { DimeStreamField } from '../../shared/model/dime/streamfield';
-import { DimeStreamType } from '../../shared/model/dime/streamtype';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
+import { DimeStreamType, dimeGetStreamTypeDescription } from '../../shared/enums/dime/streamtypes';
 import { EnvironmentTools } from './tools.dime.environment';
 import { MapTools } from './tools.dime.map';
 import { StreamTools } from './tools.dime.stream';
@@ -22,6 +22,7 @@ import { MailTool } from './tools.mailer';
 import { MainTools } from './tools.main';
 import { SettingsTool } from './tools.settings';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
+import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
@@ -526,35 +527,31 @@ export class ProcessTools {
 			this.getOne( id ).
 				then( this.setInitiated ).
 				then( ( innerObj: DimeProcess ) => {
-					let curProcess: DimeProcessRunning;
+					const curProcess: DimeProcessRunning = <DimeProcessRunning>{};
 					if ( innerObj.id && innerObj.name && innerObj.source && innerObj.target && innerObj.status ) {
-						curProcess = {
-							id: innerObj.id,
-							name: innerObj.name,
-							source: innerObj.source,
-							target: innerObj.target,
-							status: parseInt( innerObj.status, 10 ),
-							erroremail: innerObj.erroremail || '',
-							steps: [],
-							sourceEnvironment: <DimeEnvironmentDetail>{ id: 0 },
-							sourceStream: { id: 0, name: '', type: 0, environment: 0 },
-							sourceStreamFields: [],
-							sourceStreamType: '',
-							targetEnvironment: <DimeEnvironmentDetail>{ id: 0 },
-							targetStream: { id: 0, name: '', type: 0, environment: 0 },
-							targetStreamFields: [],
-							targetStreamType: '',
-							isReady: [],
-							curStep: 0,
-							filters: [],
-							filtersDataFile: [],
-							wherers: [],
-							wherersWithSrc: [],
-							pullResult: [],
-							recepients: '',
-							CRSTBLDescribedFields: [],
-							mapList: []
-						};
+						curProcess.id = innerObj.id;
+						curProcess.name = innerObj.name;
+						curProcess.source = innerObj.source;
+						curProcess.target = innerObj.target;
+						curProcess.status = parseInt( innerObj.status, 10 );
+						curProcess.erroremail = innerObj.erroremail || '';
+						curProcess.steps = [];
+						curProcess.sourceEnvironment = <DimeEnvironmentDetail>{ id: 0 };
+						curProcess.sourceStream = <DimeStream>{ id: 0, name: '', type: 0, environment: 0 };
+						curProcess.sourceStreamFields = [];
+						curProcess.targetEnvironment = <DimeEnvironmentDetail>{ id: 0 };
+						curProcess.targetStream = <DimeStream>{ id: 0, name: '', type: 0, environment: 0 };
+						curProcess.targetStreamFields = [];
+						curProcess.isReady = [];
+						curProcess.curStep = 0;
+						curProcess.filters = [];
+						curProcess.filtersDataFile = [];
+						curProcess.wherers = [];
+						curProcess.wherersWithSrc = [];
+						curProcess.pullResult = [];
+						curProcess.recepients = '';
+						curProcess.CRSTBLDescribedFields = [];
+						curProcess.mapList = [];
 						this.runAction( curProcess );
 						resolve( innerObj );
 					} else {
@@ -702,15 +699,15 @@ export class ProcessTools {
 						if ( curMapField.srctar === 'source' ) {
 							refProcess.sourceStreamFields.forEach( ( curStreamField ) => {
 								if ( curStreamField.name === curMapField.name ) {
-									mapFieldList.push( { id: curStreamField.id, name: curStreamField.name, srctar: 'source', type: 'main', streamid: curStreamField.stream, order: curStreamField.fOrder } );
-									if ( curStreamField.isDescribed || refProcess.sourceStreamType === 'HPDB' ) {
+									mapFieldList.push( { id: curStreamField.id, name: curStreamField.name, srctar: 'source', type: 'main', streamid: curStreamField.stream, order: curStreamField.position } );
+									if ( curStreamField.isDescribed || refProcess.sourceStream.type === DimeStreamType.HPDB ) {
 										mapFieldList.push( {
 											id: curStreamField.id,
 											name: curStreamField.name,
 											srctar: 'source',
 											type: 'description',
 											streamid: curStreamField.stream,
-											order: curStreamField.fOrder
+											order: curStreamField.position
 										} );
 									}
 								}
@@ -725,16 +722,16 @@ export class ProcessTools {
 										srctar: 'target',
 										type: 'main',
 										streamid: curStreamField.stream,
-										order: curStreamField.fOrder
+										order: curStreamField.position
 									} );
-									if ( curStreamField.isDescribed || refProcess.targetStreamType === 'HPDB' ) {
+									if ( curStreamField.isDescribed || refProcess.targetStream.type === DimeStreamType.HPDB ) {
 										mapFieldList.push( {
 											id: curStreamField.id,
 											name: curStreamField.name,
 											srctar: 'target',
 											type: 'description',
 											streamid: curStreamField.stream,
-											order: curStreamField.fOrder
+											order: curStreamField.position
 										} );
 									}
 								}
@@ -950,16 +947,16 @@ export class ProcessTools {
 					refProcess.sourceStreamFields.forEach( ( curField: any ) => {
 						if ( !curField.isCrossTab && !curField.isData && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
-							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'string' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'string' ) {
 								createQuery += ', SRC_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
 							}
-							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'number' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'number' ) {
 								createQuery += ', SRC_' + curField.name + ' NUMERIC(' + curField.fPrecision + ',' + curField.fDecimals + ')';
 							}
-							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'date' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'date' ) {
 								createQuery += ', SRC_' + curField.name + ' DATETIME';
 							}
-							if ( refProcess.sourceStreamType === 'HPDB' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.HPDB ) {
 								createQuery += ', SRC_' + curField.name + ' VARCHAR(80)';
 								createQuery += ', SRC_' + curField.name + '_Desc VARCHAR(1024)';
 								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'SRC_' + curField.name } );
@@ -984,16 +981,16 @@ export class ProcessTools {
 					refProcess.targetStreamFields.forEach( ( curField ) => {
 						if ( !curField.isCrossTab && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
-							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'string' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'string' ) {
 								createQuery += ', TAR_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
 							}
-							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'number' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'number' ) {
 								createQuery += ', TAR_' + curField.name + ' NUMERIC(' + curField.fPrecision + ',' + curField.fDecimals + ')';
 							}
-							if ( refProcess.sourceStreamType === 'RDBT' && curField.type === 'date' ) {
+							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'date' ) {
 								createQuery += ', TAR_' + curField.name + ' DATETIME';
 							}
-							if ( refProcess.targetStreamType === 'HPDB' ) {
+							if ( refProcess.targetStream.type === DimeStreamType.HPDB ) {
 								createQuery += ', TAR_' + curField.name + ' VARCHAR(80)';
 								createQuery += ', TAR_' + curField.name + '_DESC VARCHAR(1024)';
 								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'TAR_' + curField.name } );
@@ -1346,7 +1343,7 @@ export class ProcessTools {
 					stepDetails.variables.forEach( ( curVariable: any ) => {
 						if ( curVariable.valuetype !== 'manualvalue' ) {
 							refProcess.targetStreamFields.forEach( ( curField ) => {
-								if ( curField.name === curVariable.value ) { curVariable.vOrder = curField.fOrder; }
+								if ( curField.name === curVariable.value ) { curVariable.vOrder = curField.position; }
 							} );
 						} else {
 							curVariable.vOrder = 0;
@@ -2072,9 +2069,7 @@ export class ProcessTools {
 	private populateStreamDescriptions = ( refEnvironment: DimeEnvironmentDetail, refStream: DimeStream, refFields: DimeStreamField[] ) => {
 		let promises: any[]; promises = [];
 		refFields.forEach( ( curField ) => {
-			let envType: any; envType = refEnvironment.typedetails;
-			if ( !envType ) { envType = { value: '---' }; }
-			if ( curField.isDescribed || envType.value === 'HP' || envType.value === 'PBCS' ) {
+			if ( curField.isDescribed || refEnvironment.type === DimeEnvironmentType.HP || refEnvironment.type === DimeEnvironmentType.PBCS ) {
 				promises.push( this.populateStreamDescriptionsAction( refEnvironment, refStream, curField ) );
 			}
 		} );
@@ -2333,7 +2328,6 @@ export class ProcessTools {
 	private identifySourceEnvironment = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refProcess.source }, true ).
-				then( this.environmentTool.getTypeDetails ).
 				then( ( result: DimeEnvironmentDetail ) => {
 					refProcess.sourceEnvironment = result;
 					resolve( refProcess );
@@ -2343,7 +2337,6 @@ export class ProcessTools {
 	private identifyTargetEnvironment = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refProcess.target }, true ).
-				then( this.environmentTool.getTypeDetails ).
 				then( ( result: DimeEnvironmentDetail ) => {
 					refProcess.targetEnvironment = result;
 					resolve( refProcess );
@@ -2375,7 +2368,7 @@ export class ProcessTools {
 			let createQuery: string; createQuery = '';
 			createQuery += 'CREATE TABLE PROCESS' + refProcess.id + '_SUMTBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 			refProcess.targetStreamFields.forEach( ( curField ) => {
-				if ( refProcess.targetStreamType === 'HPDB' ) {
+				if ( refProcess.targetStream.type === DimeStreamType.HPDB ) {
 					createQuery += ', ' + curField.name + ' VARCHAR(80)';
 				} else if ( curField.type === 'string' ) {
 					createQuery += ', ' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -2403,7 +2396,7 @@ export class ProcessTools {
 			let createQuery: string; createQuery = '';
 			createQuery += 'CREATE TABLE PROCESS' + refProcess.id + '_DATATBL (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 			refProcess.sourceStreamFields.forEach( ( curField ) => {
-				if ( refProcess.sourceStreamType === 'HPDB' ) {
+				if ( refProcess.sourceStream.type === DimeStreamType.HPDB ) {
 					createQuery += ', SRC_' + curField.name + ' VARCHAR(80)';
 				} else if ( curField.type === 'string' ) {
 					createQuery += ', SRC_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -2417,7 +2410,7 @@ export class ProcessTools {
 				}
 			} );
 			refProcess.targetStreamFields.forEach( ( curField ) => {
-				if ( refProcess.targetStreamType === 'HPDB' ) {
+				if ( refProcess.targetStream.type === DimeStreamType.HPDB ) {
 					createQuery += ', TAR_' + curField.name + ' VARCHAR(80)';
 				} else if ( curField.type === 'string' ) {
 					createQuery += ', TAR_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
@@ -2513,20 +2506,21 @@ export class ProcessTools {
 			this.logTool.appendLog( refProcess.status, 'Identifying process streams.' );
 			this.identifySourceStream( refProcess ).
 				then( this.identifyTargetStream ).
-				then( ( innerObj: DimeProcessRunning ) => {
-					this.streamTool.listTypes().
-						then( ( types: DimeStreamType[] ) => {
-							types.forEach( ( curType ) => {
-								if ( curType.id === refProcess.sourceStream.type ) {
-									refProcess.sourceStreamType = curType.value;
-								}
-								if ( curType.id === refProcess.targetStream.type ) {
-									refProcess.targetStreamType = curType.value;
-								}
-							} );
-							resolve( refProcess );
-						} ).catch( reject );
-				} ).
+				// then( ( innerObj: DimeProcessRunning ) => {
+				// 	this.streamTool.listTypes().
+				// 		then( ( types: DimeStreamType[] ) => {
+				// 			types.forEach( ( curType ) => {
+				// 				if ( curType.id === refProcess.sourceStream.type ) {
+				// 					refProcess.sourceStreamType = ;
+				// 				}
+				// 				if ( curType.id === refProcess.targetStream.type ) {
+				// 					refProcess.targetStreamType = curType.value;
+				// 				}
+				// 			} );
+				// 			resolve( refProcess );
+				// 		} ).catch( reject );
+				// } ).
+				then( resolve ).
 				catch( reject );
 		} );
 	};
@@ -2548,7 +2542,7 @@ export class ProcessTools {
 						refProcess.sourceStream = curStream;
 						return this.streamTool.retrieveFields( ourStep.referedid || 0 );
 					} ).
-					then( ( fields: DimeStreamField[] ) => {
+					then( ( fields: DimeStreamFieldDetail[] ) => {
 						if ( fields.length === 0 ) {
 							return Promise.reject( 'No stream fields are defined for source stream' );
 						} else {
@@ -2579,7 +2573,7 @@ export class ProcessTools {
 						refProcess.targetStream = curStream;
 						return this.streamTool.retrieveFields( ourStep.referedid || 0 );
 					} ).
-					then( ( fields: DimeStreamField[] ) => {
+					then( ( fields: DimeStreamFieldDetail[] ) => {
 						if ( fields.length === 0 ) {
 							return Promise.reject( 'No stream fields are defined for target stream' );
 						} else {
