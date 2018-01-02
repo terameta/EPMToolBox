@@ -15,6 +15,105 @@ export class SmartViewTools {
 		this.xmlBuilder = new xml2js.Builder();
 		this.xmlParser = new xml2js.Parser();
 	}
+	public listAliasTables = ( refObj: DimeEnvironmentSmartView ) => {
+		return this.smartviewListAliasTables( refObj ).then( ( result ) => result.aliastables );
+	}
+	private smartviewListAliasTables = ( refObj: DimeEnvironmentSmartView ): Promise<DimeEnvironmentSmartView> => {
+		return new Promise( ( resolve, reject ) => {
+			this.smartviewOpenCube( refObj )
+				.then( ( innerObj: DimeEnvironmentSmartView ) => {
+					request.post( {
+						url: innerObj.planningurl,
+						body: '<req_EnumAliasTables><sID>' + innerObj.SID + '</sID><ODL_ECID>0000</ODL_ECID></req_EnumAliasTables>',
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+					}, ( err, response, body ) => {
+						if ( err ) {
+							reject( err );
+						} else {
+							try {
+								refObj.aliastables = [];
+								console.log( '===========================================' );
+								console.log( '===========================================' );
+								console.log( body );
+								console.log( '===========================================' );
+								console.log( '===========================================' );
+							} catch ( error ) {
+								reject( error );
+							}
+						}
+					} );
+				} )
+				.catch( reject );
+		} );
+	}
+	public listDimensions = ( refObj: DimeEnvironmentSmartView ) => {
+		return this.smartviewListDimensions( refObj ).then( ( result ) => result.dimensions );
+	}
+	private smartviewListDimensions = ( refObj: DimeEnvironmentSmartView ): Promise<DimeEnvironmentSmartView> => {
+		return new Promise( ( resolve, reject ) => {
+			this.smartviewOpenCube( refObj )
+				.then( ( innerObj: DimeEnvironmentSmartView ) => {
+					request.post( {
+						url: innerObj.planningurl,
+						body: '<req_EnumDims><sID>' + innerObj.SID + '</sID><cube>' + innerObj.table + '</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>',
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+					}, ( err, response, body ) => {
+						if ( err ) {
+							reject( err );
+						} else {
+							try {
+								refObj.dimensions = [];
+								const $ = cheerio.load( body );
+								$( 'dim' ).toArray().forEach( ( curDim ) => {
+									refObj.dimensions.push( curDim.attribs );
+								} );
+								resolve( refObj );
+							} catch ( error ) {
+								reject( error );
+							}
+						}
+					} );
+				} )
+				.catch( reject );
+		} );
+	}
+	private smartviewOpenCube = ( refObj: DimeEnvironmentSmartView ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.listServers( refObj )
+				.then( this.smartviewListApplications )
+				.then( this.smartviewOpenApplication )
+				.then( this.smartviewGetAvailableServices )
+				.then( this.smartviewListDocuments )
+				.then( this.smartviewListCubes )
+				.then( ( innerObj: DimeEnvironmentSmartView ) => {
+					request.post( {
+						url: innerObj.planningurl,
+						body: '<req_OpenCube><sID>' + innerObj.SID + '</sID><srv>' + innerObj.server + '</srv><app>' + innerObj.database + '</app><cube>' + innerObj.table + '</cube><type></type><url></url><form></form></req_OpenCube>',
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+					}, ( err, response, body ) => {
+						if ( err ) {
+							reject( err );
+						} else {
+							try {
+								let isCubeOpen = false;
+								const $ = cheerio.load( body );
+								$( 'body' ).children().toArray().forEach( curElem => {
+									if ( curElem.name === 'res_opencube' ) { isCubeOpen = true; }
+								} );
+								if ( isCubeOpen ) {
+									resolve( innerObj );
+								} else {
+									reject( new Error( 'Failure to open cube@smartviewOpenCube' ) );
+								}
+							} catch ( error ) {
+								reject( error );
+							}
+						}
+					} );
+				} )
+				.catch( reject );
+		} );
+	}
 	public listCubes = ( refObj: DimeEnvironmentSmartView ) => {
 		return this.listServers( refObj )
 			.then( this.smartviewListApplications )
@@ -157,7 +256,7 @@ export class SmartViewTools {
 	}
 	public validateSID = ( refObj: DimeEnvironmentSmartView ) => {
 		return new Promise( ( resolve, reject ) => {
-			if ( refObj.SID && refObj.cookies ) {
+			if ( refObj.SID ) {
 				this.smartviewValidateSID( refObj )
 					.then( resolve )
 					.catch( () => {
@@ -169,6 +268,10 @@ export class SmartViewTools {
 				switch ( refObj.type ) {
 					case DimeEnvironmentType.PBCS: {
 						resolve( this.pbcsObtainSID( refObj ).then( this.smartviewValidateSID ) );
+						break;
+					}
+					case DimeEnvironmentType.HP: {
+						resolve( this.hpObtainSID( refObj ).then( this.smartviewValidateSID ) );
 						break;
 					}
 					default: {
@@ -191,15 +294,19 @@ export class SmartViewTools {
 						body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd></req_ConnectToProvider>',
 						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
 					}, ( err, response, body ) => {
-						let isConnectionEstablished = false;
-						const $ = cheerio.load( body );
-						$( 'body' ).children().toArray().forEach( curElem => {
-							if ( curElem.name === 'res_connecttoprovider' ) { isConnectionEstablished = true; }
-						} );
-						if ( isConnectionEstablished ) {
-							resolve( refObj );
+						if ( err ) {
+							reject( err );
 						} else {
-							reject( 'Failure to connect smartview provider' );
+							let isConnectionEstablished = false;
+							const $ = cheerio.load( body );
+							$( 'body' ).children().toArray().forEach( curElem => {
+								if ( curElem.name === 'res_connecttoprovider' ) { isConnectionEstablished = true; }
+							} );
+							if ( isConnectionEstablished ) {
+								resolve( refObj );
+							} else {
+								reject( 'Failure to connect smartview provider' );
+							}
 						}
 					} );
 				} ).catch( reject );
@@ -211,6 +318,64 @@ export class SmartViewTools {
 			refObj.planningurl = refObj.server + ':' + refObj.port + '/HyperionPlanning/SmartView';
 			if ( !refObj.cookies ) { refObj.cookies = ''; }
 			resolve( refObj );
+		} );
+	}
+	private hpObtainSID = ( refObj: DimeEnvironmentSmartView ) => {
+		return this.smartviewEstablishConnection( refObj )
+			.then( this.hpObtainSID01 )
+			.then( this.hpObtainSID02 );
+	}
+	private hpObtainSID01 = ( refObj: DimeEnvironmentSmartView ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.post( {
+				url: refObj.smartviewurl,
+				body: '<req_GetProvisionedDataSources><usr>' + refObj.username + '</usr><pwd>' + refObj.password + '</pwd><filters></filters></req_GetProvisionedDataSources>',
+				headers: { 'Content-Type': 'application/xml' }
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					const $ = cheerio.load( body );
+					$( 'Product' ).each( ( i: any, elem: any ) => {
+						if ( $( elem ).attr( 'id' ) === 'HP' ) {
+							refObj.planningurl = refObj.server + ':' + refObj.port + $( elem ).children( 'Server' ).attr( 'context' );
+						}
+					} );
+					// We are using SID here as SSO since we don't need to save it;
+					// there is no need to create a new elemen in the object.
+					refObj.SID = $( 'sso' ).text();
+					if ( !refObj.planningurl ) {
+						reject( 'No planning url could be identified@hpObtainSID01' );
+					} else if ( !refObj.SID ) {
+						reject( 'No sso token was found@hpObtainSID01' );
+					} else {
+						resolve( refObj );
+					}
+				}
+			} );
+		} );
+	}
+	private hpObtainSID02 = ( refObj: DimeEnvironmentSmartView ) => {
+		return new Promise( ( resolve, reject ) => {
+			request.post( {
+				url: refObj.planningurl,
+				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><sso>' + refObj.SID + '</sso></req_ConnectToProvider>',
+				headers: { 'Content-Type': 'application/xml' }
+			}, ( err, response, body ) => {
+				const $ = cheerio.load( body );
+				refObj.SID = $( 'sID' ).text();
+				if ( refObj.SID ) {
+					this.db.query( 'UPDATE environments SET SID = ? WHERE id = ?', [refObj.SID, refObj.id], ( uErr, result ) => {
+						if ( uErr ) {
+							reject( uErr );
+						} else {
+							resolve( refObj );
+						}
+					} );
+				} else {
+					reject( 'No SID found@hpObtainSID02' )
+				}
+			} );
 		} );
 	}
 	private pbcsObtainSID = ( refObj: DimeEnvironmentSmartView ) => {
@@ -446,9 +611,9 @@ export class SmartViewTools {
 				} );
 				refInfo.refDetails.ssotoken = $( 'sso' ).text();
 				if ( !refInfo.refObj.planningurl ) {
-					reject( 'No planning url could be identified' );
+					reject( 'No planning url could be identified@pbcsObtainSID09' );
 				} else if ( !refInfo.refDetails.ssotoken ) {
-					reject( 'No sso token was found' );
+					reject( 'No sso token was found@pbcsObtainSID09' );
 				} else {
 					resolve( refInfo );
 				}
@@ -466,14 +631,14 @@ export class SmartViewTools {
 				refInfo.refObj.SID = $( 'sID' ).text();
 				if ( refInfo.refObj.SID ) {
 					this.db.query( 'UPDATE environments SET SID = ?, cookies = ? WHERE id = ?', [refInfo.refObj.SID, refInfo.refDetails.currentCookie, refInfo.refObj.id], ( uErr, result ) => {
-						if ( err ) {
-							reject( err );
+						if ( uErr ) {
+							reject( uErr );
 						} else {
 							resolve( refInfo.refObj );
 						}
 					} );
 				} else {
-					reject( 'No SID found' );
+					reject( 'No SID found@pbcsObtainSID10' );
 				}
 			} );
 		} );

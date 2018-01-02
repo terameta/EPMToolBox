@@ -36,6 +36,7 @@ export class DimeEnvironmentService {
 	public typeList = EnumToArray( DimeEnvironmentType );
 	public typeObject = _.keyBy( this.typeList, 'value' );
 	public getEnvironmentTypeDescription = dimeGetEnvironmentTypeDescription;
+	public testResult: any;
 
 	constructor(
 		private toastr: ToastrService,
@@ -91,6 +92,18 @@ export class DimeEnvironmentService {
 				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
 				return resp;
 			} );
+	}
+
+	public testAll = () => {
+		this.backend.testAll().subscribe( resp => {
+			this.testResult = resp;
+		}, error => {
+			this.testResult = error;
+		} );
+		// .catch( resp => {
+		// 	this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+		// 	return resp;
+		// } );
 	}
 
 	/*

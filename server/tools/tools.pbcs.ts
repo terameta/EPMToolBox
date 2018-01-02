@@ -22,13 +22,18 @@ export class PBCSTools {
 		return this.smartview.validateSID( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
 
-	public listApplications = ( refObj: DimeEnvironmentPBCS ) => {
+	public listDatabases = ( refObj: DimeEnvironmentPBCS ) => {
 		return this.smartview.listApplications( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
-	public listCubes = ( refObj: DimeEnvironmentPBCS ) => {
+	public listTables = ( refObj: DimeEnvironmentPBCS ) => {
 		return this.smartview.listCubes( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
-
+	public listFields = ( refObj: DimeEnvironmentPBCS ) => {
+		return this.smartview.listDimensions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public listAliasTables = ( refObj: DimeEnvironmentPBCS ) => {
+		return this.smartview.listAliasTables( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
 	/*
 		private staticVerify = ( refObj: DimeEnvironmentPBCS ) => {
 			return new Promise( ( resolve, reject ) => {

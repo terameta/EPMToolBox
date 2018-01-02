@@ -6,6 +6,8 @@ export interface DimeEnvironmentSmartView extends DimeEnvironmentDetail {
 	planningserver: string,
 	applications: { name: string }[],
 	cubes: string[],
+	dimensions: any[],
+	aliastables: any[],
 	cookies: string
 }
 

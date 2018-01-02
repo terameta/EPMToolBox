@@ -17,19 +17,110 @@ import { EnumToArray } from '../../shared/utilities/utilityFunctions';
 import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../shared/enums/dime/environmenttypes';
 
 export class EnvironmentTools {
-	mssqlTool: MSSQLTools;
-	hpTool: HPTools;
-	pbcsTool: PBCSTools;
+	sourceTools: any;
+	// mssqlTool: MSSQLTools;
+	// hpTool: HPTools;
+	// pbcsTool: PBCSTools;
 	credentialTool: CredentialTools;
 
 	constructor( public db: Pool, public tools: MainTools ) {
-		this.mssqlTool = new MSSQLTools( this.tools );
-		this.hpTool = new HPTools( this.tools );
-		this.pbcsTool = new PBCSTools( this.db, this.tools );
+		this.sourceTools = {};
+		this.sourceTools[DimeEnvironmentType.HP] = new HPTools( this.db, this.tools );
+		this.sourceTools[DimeEnvironmentType.PBCS] = new PBCSTools( this.db, this.tools );
+		this.sourceTools[DimeEnvironmentType.MSSQL] = new MSSQLTools( this.tools );
+
 		this.credentialTool = new CredentialTools( this.db, this.tools );
 	}
 
-	public getAll = () => {
+	public testAll = () => {
+		return new Promise( async ( resolve, reject ) => {
+			const toResolve: any = {};
+			const topEnvironments: { [key: number]: DimeEnvironmentDetailWithCredentials } = {};
+			this.getAll()
+				.then( ( allEnvironments ) => {
+					const promises: Promise<any>[] = [];
+					allEnvironments.forEach( ( curEnv ) => {
+						const envID = curEnv.id;
+						toResolve[envID] = {};
+						toResolve[envID].name = curEnv.name;
+						toResolve[envID].sid = curEnv.SID;
+						promises.push( this.getEnvironmentDetails( <DimeEnvironmentDetail>curEnv, true ) );
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( allEnvironments ) => {
+					const promises: Promise<any>[] = [];
+					allEnvironments.forEach( ( curEnv ) => {
+						const envID = curEnv.id;
+						topEnvironments[envID] = curEnv;
+						toResolve[envID].detailsReceived = true;
+						promises.push( this.verify( envID ) );
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( verifications ) => {
+					const promises: Promise<any>[] = [];
+					verifications.forEach( ( curVerification ) => {
+						toResolve[curVerification.id].verified = true;
+						promises.push(
+							this.listDatabases( topEnvironments[curVerification.id] )
+								.then( ( result ) => ( { id: curVerification.id, result } ) )
+						);
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( databases ) => {
+					const promises: Promise<any>[] = [];
+					databases.forEach( ( curRes ) => {
+						toResolve[curRes.id].selectedDatabase = curRes.result[0].name;
+						topEnvironments[curRes.id].database = curRes.result[0].name;
+						promises.push(
+							this.listTables( topEnvironments[curRes.id] )
+								.then( ( result ) => ( { id: curRes.id, result } ) )
+						);
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( tables ) => {
+					const promises: Promise<any>[] = [];
+					tables.forEach( ( curTable ) => {
+						toResolve[curTable.id].selectedTable = curTable.result[0].name;
+						topEnvironments[curTable.id].table = curTable.result[0].name;
+						promises.push(
+							this.listFields( topEnvironments[curTable.id] )
+								.then( ( result ) => ( { id: curTable.id, result } ) )
+						);
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( fields ) => {
+					const promises: Promise<any>[] = [];
+					fields.forEach( ( curFieldList ) => {
+						toResolve[curFieldList.id].selectedField = curFieldList.result[0].name;
+						topEnvironments[curFieldList.id].auiauiea;
+						promises.push(
+							this.listAliasTables( topEnvironments[curFieldList.id] )
+								.then( ( result ) => ( { id: curFieldList.id, result } ) )
+						);
+						console.log( curFieldList );
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( result ) => {
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( result );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+				} )
+				.then( () => {
+					resolve( toResolve );
+				} )
+				.catch( reject );
+		} );
+	}
+
+	public getAll = (): Promise<DimeEnvironment[]> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM environments', function ( err, rows, fields ) {
 				if ( err ) {
@@ -82,37 +173,6 @@ export class EnvironmentTools {
 		} );
 	};
 
-	// public listTypes = () => {
-	// 	return new Promise( ( resolve, reject ) => {
-	// 		this.db.query( 'SELECT * FROM environmenttypes', function ( err, rows, fields ) {
-	// 			if ( err ) {
-	// 				reject( { error: err, message: 'Retrieving environment type list has failed' } );
-	// 			} else {
-	// 				resolve( rows );
-	// 			}
-	// 		} );
-	// 	} );
-	// };
-
-	// public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
-	// 	return new Promise( ( resolve, reject ) => {
-	// 		refObj.typedetails = EnumToArray( DimeEnvironmentType )[refObj.type];
-	// 		console.log( EnumToArray( DimeEnvironmentType ) );
-	// 		console.log( refObj.typedetails );
-	// 		resolve( refObj );
-	// 		// this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
-	// 		// 	if ( err ) {
-	// 		// 		reject( err );
-	// 		// 	} else if ( results.length > 0 ) {
-	// 		// 		refObj.typedetails = results[0];
-	// 		// 		resolve( refObj );
-	// 		// 	} else {
-	// 		// 		resolve( refObj );
-	// 		// 	}
-	// 		// } );
-	// 	} );
-	// };
-
 	public create = () => {
 		const newEnv = { name: 'New Environment', type: 0, server: '', port: '' };
 		return new Promise( ( resolve, reject ) => {
@@ -157,21 +217,10 @@ export class EnvironmentTools {
 			environmentObject = <DimeEnvironmentDetail>{ id: envID };
 			this.getEnvironmentDetails( environmentObject, true ).
 				// then( this.getTypeDetails ).
-				then( ( curObj ) => {
-					if ( curObj.type === DimeEnvironmentType.MSSQL ) {
-						return this.mssqlTool.verify( curObj );
-					} else if ( curObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.verify( <DimeEnvironmentHP>curObj );
-					} else if ( curObj.type === DimeEnvironmentType.PBCS ) {
-						return this.pbcsTool.verify( <DimeEnvironmentPBCS>curObj );
-					} else {
-						return Promise.reject( 'Undefined Environment Type' );
-					}
-				} ).
+				then( ( curObj ) => this.sourceTools[curObj.type].verify( curObj ) ).
 				then( this.setVerified ).
 				then( ( result ) => {
-					// console.log(result);
-					resolve( { result: 'OK' } );
+					resolve( { id: envID, result: 'OK' } );
 				} ).catch( ( issue ) => {
 					reject( issue );
 				} );
@@ -196,17 +245,7 @@ export class EnvironmentTools {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).
 				// then( this.getTypeDetails ).
-				then( ( curObj ) => {
-					if ( curObj.type === DimeEnvironmentType.MSSQL ) {
-						return this.mssqlTool.listDatabases( curObj );
-					} else if ( curObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.listApplications( <DimeEnvironmentHP>curObj );
-					} else if ( curObj.type === DimeEnvironmentType.PBCS ) {
-						return this.pbcsTool.listApplications( <DimeEnvironmentPBCS>curObj );
-					} else {
-						return Promise.reject( 'Undefined Environment Type' );
-					}
-				} ).
+				then( ( curObj ) => this.sourceTools[curObj.type].listDatabases( curObj ) ).
 				then( resolve ).
 				catch( ( issue ) => {
 					reject( { error: issue, message: 'Failed to list the databases' } );
@@ -218,61 +257,45 @@ export class EnvironmentTools {
 			this.getEnvironmentDetails( refObj, true )
 				.then( ( curObj ) => {
 					curObj.database = refObj.database;
-					switch ( curObj.type ) {
-						case DimeEnvironmentType.MSSQL: { return this.mssqlTool.listTables( curObj ); }
-						case DimeEnvironmentType.HP: { return this.hpTool.listCubes( <DimeEnvironmentHP>curObj ); }
-						case DimeEnvironmentType.PBCS: { return this.pbcsTool.listCubes( <DimeEnvironmentPBCS>curObj ); }
-						default: { return Promise.reject( 'Undefined Environment Type' ); }
-					}
+					return this.sourceTools[curObj.type].listTables( curObj );
 				} )
 				.then( resolve )
 				.catch( reject );
 		} );
 	}
-
 	public listFields = ( refObj: DimeEnvironmentDetail ) => {
-		// console.log( '===========================================' );
-		// console.log( '===========================================' );
-		// console.log( 'We are here' );
-		// console.log( refObj );
-		// console.log( '===========================================' );
-		// console.log( '===========================================' );
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).
-				// then( this.getTypeDetails ).
 				then( ( innerObj ) => {
 					innerObj.database = refObj.database;
 					innerObj.query = refObj.query;
 					innerObj.table = refObj.table;
-					if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
-						return this.mssqlTool.listFields( innerObj );
-					} else if ( innerObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.listDimensions( <DimeEnvironmentHP>innerObj );
-					} else {
-						return Promise.reject( 'Undefined Environment Type' );
-					}
+					return this.sourceTools[innerObj.type].listFields( innerObj );
 				} ).
 				then( resolve ).
 				catch( reject );
 		} );
 	}
-
+	public listAliasTables = ( refObj: DimeEnvironmentDetail ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.getEnvironmentDetails( refObj, true )
+				.then( ( innerObj ) => {
+					innerObj.database = refObj.database;
+					innerObj.query = refObj.query;
+					innerObj.table = refObj.table;
+					return this.sourceTools[innerObj.type].listAliasTables( innerObj );
+				} )
+				.then( resolve )
+				.catch( reject );
+		} );
+	}
 	public listProcedures = ( curStream: DimeStream ) => {
 		return new Promise( ( resolve, reject ) => {
-			// console.log(curStream);
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: curStream.environment }, true ).
-				// then( this.getTypeDetails ).
 				then( ( innerObj ) => {
-					// console.log(innerObj);
 					if ( curStream.dbName ) { innerObj.database = curStream.dbName; }
 					if ( curStream.tableName ) { innerObj.table = curStream.tableName; }
-					if ( innerObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.listRules( <DimeEnvironmentHP>innerObj );
-					} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
-						return this.pbcsTool.listRules( <DimeEnvironmentPBCS>innerObj );
-					} else {
-						return Promise.reject( 'Undefined Environment Type' );
-					}
+					return this.sourceTools[innerObj.type].listProcedures( innerObj );
 				} ).
 				then( resolve ).
 				catch( reject );
@@ -282,19 +305,11 @@ export class EnvironmentTools {
 	public listProcedureDetails = ( refObj: { stream: DimeStream, procedure: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.stream.environment }, true ).
-				// then( this.getTypeDetails ).
 				then( ( innerObj: any ) => {
-					// console.log(innerObj);
 					innerObj.database = refObj.stream.dbName;
 					innerObj.table = refObj.stream.tableName;
 					innerObj.procedure = refObj.procedure;
-					if ( innerObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.listRuleDetails( innerObj );
-					} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
-						return this.pbcsTool.listRuleDetails( innerObj );
-					} else {
-						return Promise.reject( 'Undefined Environment Type' );
-					}
+					return this.sourceTools[innerObj.type].listProcedureDetails( innerObj );
 				} ).
 				then( resolve ).
 				catch( reject );
@@ -317,15 +332,7 @@ export class EnvironmentTools {
 						innerObj.database = refObj.stream.dbName;
 						innerObj.table = refObj.stream.tableName;
 						innerObj.procedure = refObj.procedure;
-						if ( innerObj.type === DimeEnvironmentType.HP ) {
-							return this.hpTool.runProcedure( innerObj );
-						} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
-							return this.pbcsTool.runProcedure( innerObj );
-						} else if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
-							return this.mssqlTool.runProcedure( innerObj, innerObj.procedure );
-						} else {
-							return Promise.reject( 'Undefined Environment type.' );
-						}
+						return this.sourceTools[innerObj.type].runProcedure( innerObj );
 					} ).
 					then( resolve ).
 					catch( reject );
@@ -343,15 +350,7 @@ export class EnvironmentTools {
 						innerObj.database = refStream.dbName;
 						innerObj.table = refStream.tableName;
 						innerObj.field = refField;
-						if ( innerObj.type === DimeEnvironmentType.HP ) {
-							return this.hpTool.getDescriptions( innerObj );
-						} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
-							return this.pbcsTool.getDescriptions( innerObj );
-						} else if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
-							return this.mssqlTool.getDescriptions( innerObj );
-						} else {
-							return Promise.reject( 'Undefined Environment type.' );
-						}
+						return this.sourceTools[innerObj.type].getDescriptions( innerObj );
 					} ).
 					then( resolve ).
 					catch( reject );
@@ -368,18 +367,40 @@ export class EnvironmentTools {
 					innerObj.data = refObj.data;
 					innerObj.sparseDims = refObj.sparseDims;
 					innerObj.denseDim = refObj.denseDim;
-					if ( innerObj.type === DimeEnvironmentType.HP ) {
-						return this.hpTool.writeData( innerObj );
-					} else if ( innerObj.type === DimeEnvironmentType.PBCS ) {
-						return this.pbcsTool.writeData( innerObj );
-					} else if ( innerObj.type === DimeEnvironmentType.MSSQL ) {
-						return this.mssqlTool.writeData( innerObj );
-					} else {
-						return Promise.reject( 'Undefined Environment type.' );
-					}
+					return this.sourceTools[innerObj.type].writeData( innerObj );
 				} ).
 				then( resolve ).
 				catch( reject );
 		} );
 	};
+	// public listTypes = () => {
+	// 	return new Promise( ( resolve, reject ) => {
+	// 		this.db.query( 'SELECT * FROM environmenttypes', function ( err, rows, fields ) {
+	// 			if ( err ) {
+	// 				reject( { error: err, message: 'Retrieving environment type list has failed' } );
+	// 			} else {
+	// 				resolve( rows );
+	// 			}
+	// 		} );
+	// 	} );
+	// };
+
+	// public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
+	// 	return new Promise( ( resolve, reject ) => {
+	// 		refObj.typedetails = EnumToArray( DimeEnvironmentType )[refObj.type];
+	// 		console.log( EnumToArray( DimeEnvironmentType ) );
+	// 		console.log( refObj.typedetails );
+	// 		resolve( refObj );
+	// 		// this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
+	// 		// 	if ( err ) {
+	// 		// 		reject( err );
+	// 		// 	} else if ( results.length > 0 ) {
+	// 		// 		refObj.typedetails = results[0];
+	// 		// 		resolve( refObj );
+	// 		// 	} else {
+	// 		// 		resolve( refObj );
+	// 		// 	}
+	// 		// } );
+	// 	} );
+	// };
 }

@@ -1,8 +1,11 @@
 <form class="form-inline">
 	<div class="form-group form-group-sm">
 		<div class="input-group">
-			<a class="input-group-addon btn" title="Environment List" routerLink="/dime/environments"><i class="fa fa-building fa-fw"></i> Environments</a>
-			<select class="form-control" style="width:0px;padding-left:0px;padding-right:0px;border:none;"><option value="0">Hidden</option></select>
+			<a class="input-group-addon btn" title="Environment List" routerLink="/dime/environments">
+				<i class="fa fa-building fa-fw"></i> Environments</a>
+			<select class="form-control" style="width:0px;padding-left:0px;padding-right:0px;border:none;">
+				<option value="0">Hidden</option>
+			</select>
 			<a class="input-group-addon btn" title="Current Item: {{mainService.currentItem.name}}" *ngIf="mainService.currentItem.id > 0" [routerLink]="['/dime/environments/environment-detail', mainService.currentItem.id]">
 				<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.currentItem.name}}
 			</a>
@@ -10,12 +13,15 @@
 	</div>
 	<div class="form-group form-group-sm">
 		<div class="input-group">
-			<a class="input-group-addon btn" title="Tag List" routerLink="/dime/environments"><i class="fa fa-list fa-fw"></i> List</a>
+			<a class="input-group-addon btn" title="Tag List" routerLink="/dime/environments">
+				<i class="fa fa-list fa-fw"></i> List</a>
 			<select class="form-control" name="selecteddimetag" (change)="mainService.navigateTo($event.target.value)" [ngModel]="mainService.currentItem.id">
 				<option value="0">Go To</option>
 				<option *ngFor="let item of mainService.itemList" value="{{item.id}}">{{item.name}}</option>
 			</select>
-			<div class="input-group-addon btn" title="New Credential" (click)="mainService.create()"><i class="fa fa-plus fa-fw"></i> New</div>
+			<div class="input-group-addon btn" title="New Credential" (click)="mainService.create()">
+				<i class="fa fa-plus fa-fw"></i> New</div>
+			<div class="input-group-addon btn" title="Test Environments" (click)="mainService.testAll()">Test All</div>
 		</div>
 	</div>
 

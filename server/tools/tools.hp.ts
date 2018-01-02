@@ -1,57 +1,39 @@
 import * as request from 'request';
 import * as xml2js from 'xml2js';
+import { Pool } from 'mysql';
 
 import { DimeEnvironmentHP } from '../../shared/model/dime/environmentHP';
 import { MainTools } from './tools.main';
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { SmartViewTools } from './tools.smartview';
+import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSmartView';
 
 export class HPTools {
 	xmlParser: any;
+	smartview: SmartViewTools;
 
-	constructor( public tools: MainTools ) {
+	constructor( public db: Pool, public tools: MainTools ) {
 		this.xmlParser = xml2js.parseString;
+		this.smartview = new SmartViewTools( this.db, this.tools );
 	}
 
 	public verify = ( refObj: DimeEnvironmentHP ) => {
-		return this.staticVerify( refObj ).
-			then( this.hpEstablishConnection ).
-			then( this.hpGetDataSources ).
-			then( this.hpConnectToProvider );
-
-		// return new Promise((resolve, reject) => {
-		// 	this.staticVerify(refObj).
-		// 		then(this.hpEstablishConnection).
-		// 		then(this.hpGetDataSources).
-		// 		then(this.hpConnectToProvider).
-		// 		then((result) => {
-		// 			console.log("Successfully completed");
-		// 			reject({ issue: "notok" });
-		// 		}).catch(reject);
-		// });
+		return this.smartview.validateSID( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
-	private staticVerify = ( refObj: DimeEnvironmentHP ) => {
-		return new Promise( ( resolve, reject ) => {
-			if ( !refObj ) {
-				reject( 'No data provided' );
-			} else if ( !refObj.username ) {
-				reject( 'No username provided' );
-			} else if ( !refObj.password ) {
-				reject( 'No password provided' );
-			} else if ( !refObj.server ) {
-				reject( 'No server is provided' );
-			} else if ( !refObj.port ) {
-				reject( 'No port is provided' );
-			} else if ( refObj.server.substr( 0, 4 ) !== 'http' ) {
-				reject( 'Server address is not valid. Make sure it starts with http:// or https://' );
-			} else {
-				refObj.address = refObj.server + ':' + refObj.port;
-				refObj.smartviewurl = refObj.address + '/workspace/SmartViewProviders';
-				resolve( refObj );
-			}
-		} );
+	public listDatabases = ( refObj: DimeEnvironmentHP ) => {
+		return this.smartview.listApplications( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public listTables = ( refObj: DimeEnvironmentHP ) => {
+		return this.smartview.listCubes( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public listFields = ( refObj: DimeEnvironmentHP ) => {
+		return this.smartview.listDimensions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public listAliasTables = ( refObj: DimeEnvironmentHP ) => {
+		return this.smartview.listAliasTables( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
 	// Old Step0100
-	private hpEstablishConnection = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpEstablishConnection = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			request.post( {
 				url: refObj.smartviewurl || '',
@@ -67,9 +49,9 @@ export class HPTools {
 				}
 			} );
 		} );
-	}
+	} */
 	// Old Step0200
-	private hpGetDataSources = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpGetDataSources = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			request.post( {
 				url: refObj.smartviewurl || '',
@@ -125,9 +107,9 @@ export class HPTools {
 				}
 			} );
 		} );
-	}
+	} */
 	// Old Step0300
-	private hpConnectToProvider = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpConnectToProvider = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.staticVerify( refObj ).
 				then( this.hpEstablishConnection ).
@@ -165,18 +147,10 @@ export class HPTools {
 					}
 				} ).catch( reject );
 		} )
-	}
-	public listApplications = ( refObj: DimeEnvironmentHP ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.hpListApplications( refObj ).
-				then( ( innerObj: DimeEnvironmentHP ) => {
-					resolve( innerObj.apps );
-				} ).
-				catch( reject );
-		} )
-	};
+	} */
+
 	// Old Step0400
-	private hpListServers = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpListServers = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpConnectToProvider( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -206,9 +180,9 @@ export class HPTools {
 					} );
 				} ).catch( reject );
 		} );
-	};
+	}; */
 	// Old Step0500
-	private hpListApplications = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpListApplications = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpListServers( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -247,27 +221,27 @@ export class HPTools {
 					} )
 				} ).catch( reject );
 		} );
-	};
-	public listCubes = ( refObj: DimeEnvironmentHP ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.hpListCubes( refObj ).
-				then( ( innerObj: DimeEnvironmentHP ) => {
-					if ( !innerObj.cubes ) {
-						reject( 'No cubes are found' );
-					} else {
-						let toReturn: any[];
-						toReturn = [];
-						innerObj.cubes.forEach( ( curCube ) => {
-							toReturn.push( { name: curCube, type: 'cube' } );
-						} );
-						resolve( toReturn )
-					}
-				} ).
-				catch( reject );
-		} );
-	};
+	}; */
+	/* public listTables = ( refObj: DimeEnvironmentHP ) => {
+			return new Promise( ( resolve, reject ) => {
+				this.hpListCubes( refObj ).
+					then( ( innerObj: DimeEnvironmentHP ) => {
+						if ( !innerObj.cubes ) {
+							reject( 'No cubes are found' );
+						} else {
+							let toReturn: any[];
+							toReturn = [];
+							innerObj.cubes.forEach( ( curCube ) => {
+								toReturn.push( { name: curCube, type: 'cube' } );
+							} );
+							resolve( toReturn )
+						}
+					} ).
+					catch( reject );
+			} );
+		}; */
 	// Old Step0600
-	private hpOpenApplication = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpOpenApplication = ( refObj: DimeEnvironmentHP ) => {
 		let curBody = '';
 		return new Promise( ( resolve, reject ) => {
 			this.hpListApplications( refObj ).
@@ -306,9 +280,9 @@ export class HPTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}; */
 	// Old Step0700
-	private hpGetAvailableServices = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpGetAvailableServices = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpOpenApplication( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -336,9 +310,9 @@ export class HPTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}; */
 	// Old Step0800
-	private hpListDocuments = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpListDocuments = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpGetAvailableServices( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -366,9 +340,9 @@ export class HPTools {
 				} ).
 				catch( reject );
 		} )
-	};
+	}; */
 	// Old Step0900
-	private hpListCubes = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpListCubes = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpListDocuments( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -402,15 +376,15 @@ export class HPTools {
 				catch();
 		} );
 	};
-	public listDimensions = ( refObj: DimeEnvironmentHP ) => {
+	public listFields = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpListDimensions( refObj ).
 				then( resolve ).
 				catch( reject );
 		} );
-	}
+	} */
 	// Old Step1000
-	private hpOpenCube = ( refObj: DimeEnvironmentHP ) => {
+	/* private hpOpenCube = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpListCubes( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -437,8 +411,8 @@ export class HPTools {
 				} ).
 				catch( reject );
 		} );
-	}
-	private hpListDimensions = ( refObj: DimeEnvironmentHP ) => {
+	} */
+	/* private hpListDimensions = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpOpenCube( refObj ).
 				then( ( innerObj: DimeEnvironmentHP ) => {
@@ -472,7 +446,7 @@ export class HPTools {
 				catch( reject );
 		} );
 	}
-	public listRules = ( refObj: DimeEnvironmentHP ) => {
+	public listProcedures = ( refObj: DimeEnvironmentHP ) => {
 		return this.hpListRules( refObj );
 	}
 	private hpListRules = ( refObj: DimeEnvironmentHP ) => {
@@ -533,7 +507,7 @@ export class HPTools {
 				catch( reject );
 		} );
 	}
-	public listRuleDetails = ( refObj: DimeEnvironmentHP ) => {
+	public listProcedureDetails = ( refObj: DimeEnvironmentHP ) => {
 		return this.hpListRuleDetails( refObj );
 	}
 	private hpListRuleDetails = ( refObj: DimeEnvironmentHP ) => {
@@ -615,14 +589,14 @@ export class HPTools {
 					}
 				} ).catch( reject );
 		} );
-	};
-	public runProcedure = ( refObj: DimeEnvironmentHP ) => {
+	}; */
+	/* public runProcedure = ( refObj: DimeEnvironmentHP ) => {
 		return this.hpRunProcedure( refObj );
-	};
-	private hpRunProcedure = ( refObj: any ) => {
+	}; */
+	/* private hpRunProcedure = ( refObj: any ) => {
 		return this.hpOpenCube( refObj ).then( this.hpRunProcedureAction );
-	};
-	private hpRunProcedureAction = ( refObj: any ) => {
+	}; */
+	/* private hpRunProcedureAction = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			let theBody: string; theBody = '';
 			theBody += '<req_LaunchBusinessRule>';
@@ -674,8 +648,8 @@ export class HPTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	}
-	private hpGetDescriptions = ( refObj: any ) => {
+	} */
+	/* private hpGetDescriptions = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			refObj.memberList = [];
 			refObj.dimension = refObj.field.name;
@@ -696,8 +670,8 @@ export class HPTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
-	private hpGetDescriptionsAction = ( refObj: any, curMbr: any, curParent: any ) => {
+	}; */
+	/* private hpGetDescriptionsAction = ( refObj: any, curMbr: any, curParent: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			let curBody: string; curBody = '';
 			curBody += '<req_EnumMembers>';
@@ -771,8 +745,8 @@ export class HPTools {
 				resolve( refObj );
 			}
 		} );
-	};
-	private hpGetMemberAlias = ( refObj: any, curMember: any ) => {
+	}; */
+	/* private hpGetMemberAlias = ( refObj: any, curMember: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			let curBody: string; curBody = '';
 			curBody += '<req_GetMemberInformation>';
@@ -831,16 +805,16 @@ export class HPTools {
 				}
 			} );
 		} );
-	};
-	public writeData = ( refObj: any ) => {
+	}; */
+	/* public writeData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.hpOpenCube( refObj ).
 				then( this.hpWriteData ).
 				then( resolve ).
 				catch( reject );
 		} );
-	};
-	private hpWriteData = ( refObj: any ) => {
+	}; */
+	/* private hpWriteData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			let theBody: string; theBody = '';
 			theBody += '<req_WriteBack>';
@@ -946,5 +920,5 @@ export class HPTools {
 				}
 			} );
 		} );
-	};
+	}; */
 }

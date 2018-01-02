@@ -89,6 +89,7 @@ export class MSSQLTools {
 		return new Promise( ( resolve, reject ) => {
 			this.connect( refObj ).
 				then( ( innerObj: any ) => {
+					refObj.query = refObj.query ? refObj.query : 'SELECT * FROM ' + refObj.table;
 					const theQuery = 'SELECT TOP 100 * FROM (' + refObj.query + ') T';
 					innerObj.connection.request().query( theQuery, ( err: any, result: any ) => {
 						if ( err ) {
@@ -130,6 +131,9 @@ export class MSSQLTools {
 				catch( reject );
 		} );
 	};
+	public listAliasTables = ( refObj: DimeEnvironmentDetail ) => {
+		return Promise.resolve( ['default'] );
+	}
 	public runProcedure = ( refEnvironment: DimeEnvironmentDetail, procedure: string ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.connect( refEnvironment ).
