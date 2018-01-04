@@ -5,7 +5,7 @@ import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeEnvironmentDetailWithCredentials } from '../../shared/model/dime/environmentDetailWithCredentials';
 import { DimeStream } from '../../shared/model/dime/stream';
-import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { MSSQLTools } from './tools.mssql';
 import { HPTools } from './tools.hp';
 import { PBCSTools } from './tools.pbcs';
@@ -34,10 +34,17 @@ export class EnvironmentTools {
 
 	public testAll = () => {
 		return new Promise( async ( resolve, reject ) => {
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( 'Testing started' );
+			console.log( '===========================================' );
 			const toResolve: any = {};
 			const topEnvironments: { [key: number]: DimeEnvironmentDetailWithCredentials } = {};
 			this.getAll()
 				.then( ( allEnvironments ) => {
+					console.log( '===========================================' );
+					console.log( 'We received all the environments' );
+					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					allEnvironments.forEach( ( curEnv ) => {
 						const envID = curEnv.id;
@@ -49,6 +56,9 @@ export class EnvironmentTools {
 					return Promise.all( promises );
 				} )
 				.then( ( allEnvironments ) => {
+					console.log( '===========================================' );
+					console.log( 'We received all the environments\' details' );
+					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					allEnvironments.forEach( ( curEnv ) => {
 						const envID = curEnv.id;
@@ -59,6 +69,9 @@ export class EnvironmentTools {
 					return Promise.all( promises );
 				} )
 				.then( ( verifications ) => {
+					console.log( '===========================================' );
+					console.log( 'All enviorments are now verified' );
+					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					verifications.forEach( ( curVerification ) => {
 						toResolve[curVerification.id].verified = true;
@@ -70,6 +83,9 @@ export class EnvironmentTools {
 					return Promise.all( promises );
 				} )
 				.then( ( databases ) => {
+					console.log( '===========================================' );
+					console.log( 'Databases Listed' );
+					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					databases.forEach( ( curRes ) => {
 						toResolve[curRes.id].selectedDatabase = curRes.result[0].name;
@@ -82,6 +98,9 @@ export class EnvironmentTools {
 					return Promise.all( promises );
 				} )
 				.then( ( tables ) => {
+					console.log( '===========================================' );
+					console.log( 'Tables Listed' );
+					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					tables.forEach( ( curTable ) => {
 						toResolve[curTable.id].selectedTable = curTable.result[0].name;
@@ -94,22 +113,51 @@ export class EnvironmentTools {
 					return Promise.all( promises );
 				} )
 				.then( ( fields ) => {
+					console.log( '===========================================' );
+					console.log( 'Fields Listed' );
+					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					fields.forEach( ( curFieldList ) => {
 						toResolve[curFieldList.id].selectedField = curFieldList.result[0].name;
-						topEnvironments[curFieldList.id].auiauiea;
 						promises.push(
 							this.listAliasTables( topEnvironments[curFieldList.id] )
 								.then( ( result ) => ( { id: curFieldList.id, result } ) )
 						);
-						console.log( curFieldList );
+					} );
+					return Promise.all( promises );
+				} )
+				.then( ( aliasTables ) => {
+					console.log( '===========================================' );
+					console.log( 'Alias tables listed' );
+					console.log( '===========================================' );
+					const promises: Promise<any>[] = [];
+					aliasTables.forEach( ( curAliasTable ) => {
+						if ( topEnvironments[curAliasTable.id].type === DimeEnvironmentType.HP || topEnvironments[curAliasTable.id].type === DimeEnvironmentType.PBCS ) {
+							toResolve[curAliasTable.id].selectedAliasTable = curAliasTable.result[0];
+							promises.push(
+								this.getDescriptions(
+									<DimeStream>{
+										id: 0,
+										environment: curAliasTable.id,
+										dbName: topEnvironments[curAliasTable.id].database,
+										tableName: topEnvironments[curAliasTable.id].table
+									}, <DimeStreamFieldDetail>{
+										id: 0,
+										name: toResolve[curAliasTable.id].selectedField,
+										aliasTable: curAliasTable.result[0]
+									} )
+									.then( ( result ) => ( { id: curAliasTable.id, result } ) )
+							);
+						}
 					} );
 					return Promise.all( promises );
 				} )
 				.then( ( result ) => {
 					console.log( '===========================================' );
 					console.log( '===========================================' );
-					console.log( result );
+					result.forEach( curResult => {
+						console.log( curResult );
+					} );
 					console.log( '===========================================' );
 					console.log( '===========================================' );
 				} )
@@ -350,7 +398,7 @@ export class EnvironmentTools {
 						innerObj.database = refStream.dbName;
 						innerObj.table = refStream.tableName;
 						innerObj.field = refField;
-						return this.sourceTools[innerObj.type].getDescriptions( innerObj );
+						return this.sourceTools[innerObj.type].getDescriptions( innerObj, refField );
 					} ).
 					then( resolve ).
 					catch( reject );

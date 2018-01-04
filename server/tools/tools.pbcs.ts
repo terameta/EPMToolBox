@@ -9,6 +9,7 @@ import { DimeEnvironmentPBCS } from '../../shared/model/dime/environmentPBCS';
 import { MainTools } from './tools.main';
 import { SmartViewTools } from './tools.smartview';
 import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSmartView';
+import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 
 
 export class PBCSTools {
@@ -33,6 +34,9 @@ export class PBCSTools {
 	}
 	public listAliasTables = ( refObj: DimeEnvironmentPBCS ) => {
 		return this.smartview.listAliasTables( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public getDescriptions = ( refObj: DimeEnvironmentPBCS, refField: DimeStreamFieldDetail ) => {
+		return this.smartview.getDescriptions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ), refField );
 	}
 	/*
 		private staticVerify = ( refObj: DimeEnvironmentPBCS ) => {

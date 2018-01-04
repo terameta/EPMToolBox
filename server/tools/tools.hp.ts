@@ -4,7 +4,7 @@ import { Pool } from 'mysql';
 
 import { DimeEnvironmentHP } from '../../shared/model/dime/environmentHP';
 import { MainTools } from './tools.main';
-import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SmartViewTools } from './tools.smartview';
 import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSmartView';
 
@@ -31,6 +31,9 @@ export class HPTools {
 	}
 	public listAliasTables = ( refObj: DimeEnvironmentHP ) => {
 		return this.smartview.listAliasTables( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public getDescriptions = ( refObj: DimeEnvironmentHP, refField: DimeStreamFieldDetail ) => {
+		return this.smartview.getDescriptions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ), refField );
 	}
 	// Old Step0100
 	/* private hpEstablishConnection = ( refObj: DimeEnvironmentHP ) => {

@@ -13,6 +13,10 @@ export class MainTools {
 		this.encryptionKey = this.config.hash.substr( 0, 32 );
 	}
 
+	public htmlEncode = ( str: string ): string => {
+		return String( str ).replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' ).replace( /"/g, '&quot;' );
+	}
+
 	generateLongString( sentLength?: number ): string {
 		const length: number = sentLength || 128;
 		const charset = 'abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789()$^!_%|';

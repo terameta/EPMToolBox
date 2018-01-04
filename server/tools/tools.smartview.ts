@@ -7,6 +7,7 @@ import * as cheerio from 'cheerio';
 import { MainTools } from './tools.main';
 import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSmartView';
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
+import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 
 export class SmartViewTools {
 	xmlBuilder: xml2js.Builder;
@@ -14,6 +15,134 @@ export class SmartViewTools {
 	constructor( public db: Pool, public tools: MainTools ) {
 		this.xmlBuilder = new xml2js.Builder();
 		this.xmlParser = new xml2js.Parser();
+	}
+	public getDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ) => {
+		return this.smartviewOpenCube( refObj )
+			.then( ( cubeOpened: DimeEnvironmentSmartView ) => this.smartviewGetDescriptions( cubeOpened, refField ) )
+			.then( ( describedEnvironment ) => this.smartviewGetAliases( describedEnvironment, refField ) )
+			.then( result => result.memberList );
+	}
+	private smartviewGetDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
+		return new Promise( ( resolve, reject ) => {
+			refObj.memberList = [];
+			this.smartviewGetDescriptionsAction( refObj, refField, refField.name, refObj.memberList )
+				.then( () => { resolve( refObj ); } )
+				.catch( reject );
+		} );
+	}
+	private smartviewGetAliases = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
+		return new Promise( ( resolve, reject ) => {
+			let selectedMember = -1;
+			refObj.memberList.forEach( ( curMember: any, curKey ) => {
+				if ( selectedMember < 0 ) {
+					if ( !curMember.aliasReceived ) { selectedMember = curKey; }
+				}
+			} );
+			if ( selectedMember >= 0 ) {
+				this.smartviewGetAlias( refObj, refField, refObj.memberList[selectedMember] )
+					.then( () => {
+						refObj.memberList[selectedMember].aliasReceived = true;
+						resolve( this.smartviewGetAliases( refObj, refField ) );
+					} )
+					.catch( reject );
+			} else {
+				resolve( refObj );
+			}
+		} );
+	}
+	private smartviewGetAlias = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail, curMember: any ) => {
+		return new Promise( ( resolve, reject ) => {
+			let curBody = '';
+			curBody += '<req_GetMemberInformation>';
+			curBody += '<sID>' + refObj.SID + '</sID>';
+			// curBody += '<alsTbl>' + refField.aliasTable + '</alsTbl>';
+			curBody += '<alsTbl>none</alsTbl>';
+			curBody += '<dim>' + refField.name + '</dim>';
+			curBody += '<member>' + this.tools.htmlEncode( curMember.name ) + '</member>';
+			curBody += '<ODL_ECID>0000</ODL_ECID>';
+			curBody += '</req_GetMemberInformation>';
+			request.post( {
+				url: refObj.planningurl,
+				body: curBody,
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					try {
+						const $ = cheerio.load( body );
+						const aliasNames = $( '[name=AliasNames]' ).text().split( '|' );
+						const aliasTables = $( '[name=AliasTables]' ).text().split( '|' );
+						const aliasObject: any = {};
+						aliasTables.forEach( ( curTable, index ) => {
+							aliasObject[curTable] = aliasNames[index];
+						} );
+						// We pulled all the aliases here and now if the alias exists we will replace the description.
+						if ( aliasObject[refField.aliasTable] ) {
+							curMember.Description = aliasObject[refField.aliasTable];
+						}
+						// Furthermore, if the description is still empty, we will write the member name here.
+						if ( !curMember.Description ) {
+							curMember.Description = curMember.name;
+						}
+						resolve();
+					} catch ( error ) {
+						reject( error );
+					}
+				}
+			} );
+		} );
+	}
+	private smartviewGetDescriptionsAction = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail, curMbr: string, curParent: any[] ) => {
+		return new Promise( ( resolve, reject ) => {
+			let curBody = '';
+			curBody += '<req_EnumMembers>';
+			curBody += '<sID>' + refObj.SID + '</sID>';
+			curBody += '<dim>' + refField.name + '</dim>';
+			curBody += '<memberFilter><filter name="Hierarchy"><arg id="0">' + curMbr + '</arg></filter></memberFilter>';
+			curBody += '<getAtts>1</getAtts>';
+			curBody += '<alsTbl>none</alsTbl>';
+			curBody += '<allGenerations>0</allGenerations>';
+			curBody += '<cube>' + refObj.table + '</cube>';
+			curBody += '<includeDescriptionInLabel>0</includeDescriptionInLabel>';
+			curBody += '<ODL_ECID>0000</ODL_ECID>';
+			curBody += '</req_EnumMembers>';
+			request.post( {
+				url: refObj.planningurl,
+				body: curBody,
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
+			}, ( err, response, body ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					try {
+						const promises: Promise<any>[] = [];
+						const $ = cheerio.load( body );
+						const memberNames = $( 'mbrs' ).text().split( '|' );
+						const memberAttributes = $( 'atts' ).text().split( '|' );
+						const memberDescriptions = $( 'mbrdesc' ).text().split( '|' );
+						let currentMember: any;
+						memberNames.forEach( ( currentName, index ) => {
+							currentMember = {};
+							currentMember.name = currentName;
+							currentMember.attribute = memberAttributes[index];
+							currentMember.Description = memberDescriptions[index];
+							curParent.push( currentMember );
+							if ( currentMember.attribute === '2' ) {
+								promises.push(
+									this.smartviewGetDescriptionsAction( refObj, refField, currentMember.name, curParent )
+								);
+							}
+							resolve( Promise.all( promises ) );
+						} );
+					} catch ( error ) {
+						reject( error );
+					}
+				}
+			} );
+		} );
 	}
 	public listAliasTables = ( refObj: DimeEnvironmentSmartView ) => {
 		return this.smartviewListAliasTables( refObj ).then( ( result ) => result.aliastables );
@@ -25,18 +154,16 @@ export class SmartViewTools {
 					request.post( {
 						url: innerObj.planningurl,
 						body: '<req_EnumAliasTables><sID>' + innerObj.SID + '</sID><ODL_ECID>0000</ODL_ECID></req_EnumAliasTables>',
-						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+						timeout: 120000
 					}, ( err, response, body ) => {
 						if ( err ) {
 							reject( err );
 						} else {
 							try {
-								refObj.aliastables = [];
-								console.log( '===========================================' );
-								console.log( '===========================================' );
-								console.log( body );
-								console.log( '===========================================' );
-								console.log( '===========================================' );
+								const $ = cheerio.load( body );
+								refObj.aliastables = $( 'alstbls' ).text().split( '|' );
+								resolve( refObj );
 							} catch ( error ) {
 								reject( error );
 							}
@@ -56,7 +183,8 @@ export class SmartViewTools {
 					request.post( {
 						url: innerObj.planningurl,
 						body: '<req_EnumDims><sID>' + innerObj.SID + '</sID><cube>' + innerObj.table + '</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>',
-						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+						timeout: 120000
 					}, ( err, response, body ) => {
 						if ( err ) {
 							reject( err );
@@ -89,7 +217,8 @@ export class SmartViewTools {
 					request.post( {
 						url: innerObj.planningurl,
 						body: '<req_OpenCube><sID>' + innerObj.SID + '</sID><srv>' + innerObj.server + '</srv><app>' + innerObj.database + '</app><cube>' + innerObj.table + '</cube><type></type><url></url><form></form></req_OpenCube>',
-						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+						timeout: 120000
 					}, ( err, response, body ) => {
 						if ( err ) {
 							reject( err );
@@ -130,7 +259,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: '<req_ListCubes><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><app>' + refObj.database + '</app><type></type><url></url></req_ListCubes>',
-				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				const $ = cheerio.load( body );
 				refObj.cubes = $( 'cubes' ).text().split( '|' );
@@ -143,7 +273,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: '<req_ListDocuments><sID>' + refObj.SID + '</sID><type>all</type><folder>/</folder><ODL_ECID>0000</ODL_ECID></req_ListDocuments>',
-				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				let isSuccessful = false;
 				const $ = cheerio.load( body );
@@ -163,7 +294,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: '<req_GetAvailableServices><sID>' + refObj.SID + '</sID><CubeView/></req_GetAvailableServices>',
-				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -195,7 +327,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: curBody,
-				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -226,7 +359,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: '<req_ListApplications><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><type></type><url></url></req_ListApplications>',
-				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -246,7 +380,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: '<req_ListServers><sID>' + refObj.SID + '</sID></req_ListServers>',
-				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				const $ = cheerio.load( body );
 				refObj.planningserver = $( 'srvs' ).text();
@@ -292,7 +427,8 @@ export class SmartViewTools {
 					request.post( {
 						url: theEnvironment.planningurl,
 						body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd></req_ConnectToProvider>',
-						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies }
+						headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
+						timeout: 120000
 					}, ( err, response, body ) => {
 						if ( err ) {
 							reject( err );
@@ -330,7 +466,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.smartviewurl,
 				body: '<req_GetProvisionedDataSources><usr>' + refObj.username + '</usr><pwd>' + refObj.password + '</pwd><filters></filters></req_GetProvisionedDataSources>',
-				headers: { 'Content-Type': 'application/xml' }
+				headers: { 'Content-Type': 'application/xml' },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -360,7 +497,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refObj.planningurl,
 				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><sso>' + refObj.SID + '</sso></req_ConnectToProvider>',
-				headers: { 'Content-Type': 'application/xml' }
+				headers: { 'Content-Type': 'application/xml' },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				const $ = cheerio.load( body );
 				refObj.SID = $( 'sID' ).text();
@@ -426,7 +564,8 @@ export class SmartViewTools {
 				// tslint:disable-next-line:max-line-length
 				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
 				headers: { 'Content-Type': 'application/xml', cookie: refDetails.originalCookie },
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -449,7 +588,8 @@ export class SmartViewTools {
 			request.get( {
 				url: refInfo.refDetails.redirectTarget,
 				headers: { cookie: refInfo.refDetails.oamPrefsCookie },
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -466,7 +606,8 @@ export class SmartViewTools {
 				headers: {
 					cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext
 				},
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				refInfo.refDetails.redirectTarget = response.headers.location;
 				if ( this.pbcsGetRequestContext( response.headers['set-cookie'] ) ) {
@@ -488,7 +629,8 @@ export class SmartViewTools {
 				headers: {
 					cookie: refInfo.refDetails.oamPrefsCookie
 				},
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				const $ = cheerio.load( response.body );
 				refInfo.refDetails.formFields = {};
@@ -528,7 +670,8 @@ export class SmartViewTools {
 					cookie: refInfo.refDetails.oamPrefsCookie + '; ' + refInfo.refDetails.formCookie,
 				},
 				form: refInfo.refDetails.formFields,
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -549,7 +692,8 @@ export class SmartViewTools {
 					cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext,
 					referer: refInfo.refDetails.referer
 				},
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
@@ -569,7 +713,8 @@ export class SmartViewTools {
 					cookie: refInfo.refDetails.currentCookie,
 					referer: refInfo.refDetails.referer
 				},
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
 				resolve( refInfo );
@@ -586,7 +731,8 @@ export class SmartViewTools {
 				},
 				// tslint:disable-next-line:max-line-length
 				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				resolve( refInfo );
 			} );
@@ -601,7 +747,8 @@ export class SmartViewTools {
 					cookie: refInfo.refDetails.currentCookie
 				},
 				body: '<req_GetProvisionedDataSources><usr></usr><pwd></pwd><filters></filters></req_GetProvisionedDataSources>',
-				followRedirect: false
+				followRedirect: false,
+				timeout: 120000
 			}, ( err, response, body ) => {
 				const $ = cheerio.load( body );
 				$( 'Product' ).each( ( i: any, elem: any ) => {
@@ -625,7 +772,8 @@ export class SmartViewTools {
 			request.post( {
 				url: refInfo.refObj.planningurl,
 				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><sso>' + refInfo.refDetails.ssotoken + '</sso></req_ConnectToProvider>',
-				headers: { 'Content-Type': 'application/xml', cookie: refInfo.refDetails.currentCookie }
+				headers: { 'Content-Type': 'application/xml', cookie: refInfo.refDetails.currentCookie },
+				timeout: 120000
 			}, ( err, response, body ) => {
 				const $ = cheerio.load( body );
 				refInfo.refObj.SID = $( 'sID' ).text();

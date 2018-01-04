@@ -8,6 +8,7 @@ export interface DimeEnvironmentSmartView extends DimeEnvironmentDetail {
 	cubes: string[],
 	dimensions: any[],
 	aliastables: any[],
+	memberList: any[],
 	cookies: string
 }
 

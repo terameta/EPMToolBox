@@ -3,7 +3,7 @@ import * as mssql from 'mssql';
 import { MainTools } from './tools.main';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
-import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SortByName } from '../../shared/utilities/utilityFunctions';
 
 export class MSSQLTools {
@@ -149,20 +149,17 @@ export class MSSQLTools {
 				catch( reject );
 		} );
 	};
-	public getDescriptions = ( refObj: any ) => {
+	public getDescriptions = ( refObj: any, refField: DimeStreamFieldDetail ) => {
 		return new Promise( ( resolve, reject ) => {
-			if ( refObj.field.descriptiveDB ) {
-				refObj.database = refObj.field.descriptiveDB;
-			}
 			this.connect( refObj ).
 				then( ( innerObj: any ) => {
-					let selectQuery: string; selectQuery = '';
-					selectQuery += 'SELECT DISTINCT ' + refObj.field.drfName + ' AS RefField, ' + refObj.field.ddfName + ' AS Description ';
+					let selectQuery = '';
+					selectQuery += 'SELECT DISTINCT ' + refField.drfName + ' AS RefField, ' + refField.ddfName + ' AS Description ';
 					selectQuery += 'FROM '
-					if ( refObj.field.descriptiveTable === 'Custom Query' ) {
-						selectQuery += '(' + refObj.field.descriptiveQuery + ') AS TCQ';
+					if ( refField.descriptiveTable === 'Custom Query' ) {
+						selectQuery += '(' + refField.descriptiveQuery + ') AS TCQ';
 					} else {
-						selectQuery += refObj.field.descriptiveTable;
+						selectQuery += refField.descriptiveTable;
 					}
 					selectQuery += ' ORDER BY 1, 2';
 					innerObj.connection.request().query( selectQuery, ( err: any, result: any ) => {
