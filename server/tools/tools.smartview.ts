@@ -86,6 +86,7 @@ export class SmartViewTools {
 						if ( !curMember.Description ) {
 							curMember.Description = curMember.name;
 						}
+						console.log( refObj.name, curMember.name, curMember.Description );
 						resolve();
 					} catch ( error ) {
 						reject( error );
@@ -284,7 +285,7 @@ export class SmartViewTools {
 				if ( isSuccessful ) {
 					resolve( refObj );
 				} else {
-					reject( 'Failure to connect smartview provider' );
+					reject( 'List Documents - Failure to connect smartview provider: ' + refObj.name );
 				}
 			} );
 		} );
@@ -308,7 +309,7 @@ export class SmartViewTools {
 					if ( isSuccessful ) {
 						resolve( refObj );
 					} else {
-						reject( 'Failure to connect smartview provider' );
+						reject( 'Get Available Services - Failure to connect smartview provider: ' + refObj.name );
 					}
 				}
 			} );
@@ -341,7 +342,7 @@ export class SmartViewTools {
 					if ( isSuccessful ) {
 						resolve( refObj );
 					} else {
-						reject( 'Failure to connect smartview provider' );
+						reject( 'Open Application - Failure to connect smartview provider: ' + refObj.name );
 					}
 				}
 			} );
@@ -356,18 +357,31 @@ export class SmartViewTools {
 	}
 	private smartviewListApplications = ( refObj: DimeEnvironmentSmartView ) => {
 		return new Promise( ( resolve, reject ) => {
+			const curBody = '<req_ListApplications><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><type></type><url></url></req_ListApplications>';
 			request.post( {
 				url: refObj.planningurl,
-				body: '<req_ListApplications><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><type></type><url></url></req_ListApplications>',
+				body: curBody,
 				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
 				timeout: 120000
 			}, ( err, response, body ) => {
 				if ( err ) {
 					reject( err );
 				} else {
-					const $ = cheerio.load( body );
-					refObj.applications = $( 'apps' ).text().split( '|' ).map( curApp => ( { name: curApp } ) );
-					resolve( refObj );
+					try {
+						let isListed = false;
+						const $ = cheerio.load( body );
+						$( 'body' ).children().toArray().forEach( curElem => {
+							if ( curElem.name === 'res_listapplications' ) { isListed = true; }
+						} );
+						if ( isListed ) {
+							refObj.applications = $( 'apps' ).text().split( '|' ).map( curApp => ( { name: curApp } ) );
+							resolve( refObj );
+						} else {
+							reject( new Error( 'Failure to list applications@smartviewListApplications' ) );
+						}
+					} catch ( error ) {
+						reject( error );
+					}
 				}
 			} );
 		} );
@@ -383,9 +397,21 @@ export class SmartViewTools {
 				headers: { 'Content-Type': 'application/xml', cookie: refObj.cookies },
 				timeout: 120000
 			}, ( err, response, body ) => {
-				const $ = cheerio.load( body );
-				refObj.planningserver = $( 'srvs' ).text();
-				resolve( refObj );
+				try {
+					let isListed = false;
+					const $ = cheerio.load( body );
+					$( 'body' ).children().toArray().forEach( curElem => {
+						if ( curElem.name === 'res_listservers' ) { isListed = true; }
+					} );
+					if ( isListed ) {
+						refObj.planningserver = $( 'srvs' ).text();
+						resolve( refObj );
+					} else {
+						reject( new Error( 'Failure to list servers@smartviewListServers' ) );
+					}
+				} catch ( error ) {
+					reject( error );
+				}
 			} );
 		} );
 	}
@@ -393,7 +419,9 @@ export class SmartViewTools {
 		return new Promise( ( resolve, reject ) => {
 			if ( refObj.SID ) {
 				this.smartviewValidateSID( refObj )
-					.then( resolve )
+					.then( result => {
+						resolve( result );
+					} )
 					.catch( () => {
 						delete refObj.SID;
 						delete refObj.cookies;
@@ -417,8 +445,9 @@ export class SmartViewTools {
 		} );
 	}
 	private smartviewValidateSID = ( refObj: DimeEnvironmentSmartView ) => {
-		return this.smartviewPrepareEnvironment( refObj )
-			.then( this.smartviewEstablishConnection );
+		return this.smartviewEstablishConnection( refObj )
+			.then( this.smartviewListServers )
+			.then( this.smartviewListApplications );
 	}
 	private smartviewEstablishConnection = ( refObj: DimeEnvironmentSmartView ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -441,7 +470,7 @@ export class SmartViewTools {
 							if ( isConnectionEstablished ) {
 								resolve( refObj );
 							} else {
-								reject( 'Failure to connect smartview provider' );
+								reject( 'Establish Connection - Failure to connect smartview provider: ' + refObj.name );
 							}
 						}
 					} );
@@ -511,7 +540,7 @@ export class SmartViewTools {
 						}
 					} );
 				} else {
-					reject( 'No SID found@hpObtainSID02' )
+					reject( 'No SID found@hpObtainSID02: ' + refObj.name );
 				}
 			} );
 		} );

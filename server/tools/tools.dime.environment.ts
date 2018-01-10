@@ -46,13 +46,15 @@ export class EnvironmentTools {
 					console.log( 'We received all the environments' );
 					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
-					allEnvironments.forEach( ( curEnv ) => {
-						const envID = curEnv.id;
-						toResolve[envID] = {};
-						toResolve[envID].name = curEnv.name;
-						toResolve[envID].sid = curEnv.SID;
-						promises.push( this.getEnvironmentDetails( <DimeEnvironmentDetail>curEnv, true ) );
-					} );
+					allEnvironments
+						// .filter( curResult => ( curResult.name === 'HP Demo' ) )
+						.forEach( ( curEnv ) => {
+							const envID = curEnv.id;
+							toResolve[envID] = {};
+							toResolve[envID].name = curEnv.name;
+							toResolve[envID].sid = curEnv.SID;
+							promises.push( this.getEnvironmentDetails( <DimeEnvironmentDetail>curEnv, true ) );
+						} );
 					return Promise.all( promises );
 				} )
 				.then( ( allEnvironments ) => {
@@ -118,7 +120,9 @@ export class EnvironmentTools {
 					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					fields.forEach( ( curFieldList ) => {
-						toResolve[curFieldList.id].selectedField = curFieldList.result[0].name;
+						console.log( curFieldList );
+						// toResolve[curFieldList.id].selectedField = curFieldList.result[0].name;
+						toResolve[curFieldList.id].selectedField = 'Version';
 						promises.push(
 							this.listAliasTables( topEnvironments[curFieldList.id] )
 								.then( ( result ) => ( { id: curFieldList.id, result } ) )
