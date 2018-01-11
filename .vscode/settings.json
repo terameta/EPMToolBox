@@ -37,7 +37,7 @@
 	"terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
 	"terminal.integrated.fontSize": 12,
 	"workbench.iconTheme": null,
-	"html.format.wrapLineLength": 0,
+	"html.format.wrapLineLength": 240,
 	"html.format.indentInnerHtml": true,
 	"html.format.endWithNewline": true,
 	"html.suggest.angular1": false,

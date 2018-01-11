@@ -3,7 +3,7 @@
 	"version": "2.0.0",
 	"description": "EPM Tools for epmvirtual users",
 	"scripts": {
-		"watch": "nodemon -w . -e ts,json --exec ts-node server.ts",
+		"watch": "nodemon -w . -e ts,json --exec ts-node server.ts --type-check",
 		"prod": "ts-node server.ts"
 	},
 	"dependencies": {

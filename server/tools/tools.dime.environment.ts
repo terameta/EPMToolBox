@@ -120,7 +120,7 @@ export class EnvironmentTools {
 					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					fields.forEach( ( curFieldList ) => {
-						console.log( curFieldList );
+						// console.log( curFieldList );
 						// toResolve[curFieldList.id].selectedField = curFieldList.result[0].name;
 						toResolve[curFieldList.id].selectedField = 'Version';
 						promises.push(
