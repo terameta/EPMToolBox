@@ -47,7 +47,7 @@ export class EnvironmentTools {
 					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					allEnvironments
-						// .filter( curResult => ( curResult.name === 'HP Demo' ) )
+						// .filter( curResult => ( curResult.name !== 'vkimhyp816' ) )
 						.forEach( ( curEnv ) => {
 							const envID = curEnv.id;
 							toResolve[envID] = {};
@@ -72,7 +72,7 @@ export class EnvironmentTools {
 				} )
 				.then( ( verifications ) => {
 					console.log( '===========================================' );
-					console.log( 'All enviorments are now verified' );
+					console.log( 'All envirenments are now verified' );
 					console.log( '===========================================' );
 					const promises: Promise<any>[] = [];
 					verifications.forEach( ( curVerification ) => {
@@ -122,7 +122,7 @@ export class EnvironmentTools {
 					fields.forEach( ( curFieldList ) => {
 						// console.log( curFieldList );
 						// toResolve[curFieldList.id].selectedField = curFieldList.result[0].name;
-						toResolve[curFieldList.id].selectedField = 'Version';
+						toResolve[curFieldList.id].selectedField = 'Period';
 						promises.push(
 							this.listAliasTables( topEnvironments[curFieldList.id] )
 								.then( ( result ) => ( { id: curFieldList.id, result } ) )
@@ -156,14 +156,13 @@ export class EnvironmentTools {
 					} );
 					return Promise.all( promises );
 				} )
-				.then( ( result ) => {
+				.then( ( memberDescriptionArrays ) => {
 					console.log( '===========================================' );
+					console.log( 'Member Descriptions received' );
 					console.log( '===========================================' );
-					result.forEach( curResult => {
-						console.log( curResult );
+					memberDescriptionArrays.forEach( ( curMemberDescriptionArray ) => {
+						toResolve[curMemberDescriptionArray.id].memberList = curMemberDescriptionArray.result;
 					} );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
 				} )
 				.then( () => {
 					resolve( toResolve );
