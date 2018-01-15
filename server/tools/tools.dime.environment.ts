@@ -148,7 +148,7 @@ export class EnvironmentTools {
 									}, <DimeStreamFieldDetail>{
 										id: 0,
 										name: toResolve[curAliasTable.id].selectedField,
-										aliasTable: curAliasTable.result[0]
+										descriptiveTable: curAliasTable.result[0]
 									} )
 									.then( ( result ) => ( { id: curAliasTable.id, result } ) )
 							);

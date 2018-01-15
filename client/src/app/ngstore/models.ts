@@ -184,7 +184,7 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 							return DimeStreamActions.ALL.LOAD.initiateifempty();
 						}
 						case 'stream-detail/:id': {
-							return DimeStreamActions.ONE.LOAD.initiate( paramset.params.id );
+							return DimeStreamActions.ONE.LOAD.initiateifempty( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at streams default' );

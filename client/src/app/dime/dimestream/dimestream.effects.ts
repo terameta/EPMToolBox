@@ -13,6 +13,7 @@ import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
 import { DimeStreamBackend } from 'app/dime/dimestream/dimestream.backend';
 import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
 import { dimeStreamInitialState } from 'app/dime/dimestream/dimestream.state';
+import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -26,7 +27,10 @@ export class DimeStreamEffects {
 		.ofType( DimeStreamActions.ALL.LOAD.INITIATE )
 		.switchMap( ( action ) => {
 			return this.backend.allLoad()
-				.map( resp => DimeStreamActions.ALL.LOAD.complete( resp ) )
+				.mergeMap( resp => [
+					DimeStreamActions.ALL.LOAD.complete( resp ),
+					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
 		} );
 
@@ -60,15 +64,19 @@ export class DimeStreamEffects {
 		.ofType( DimeStreamActions.ONE.LOAD.INITIATE )
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneLoad( action.payload )
-				.map( resp => DimeStreamActions.ONE.LOAD.complete( resp ) )
+				.mergeMap( resp => [
+					DimeStreamActions.ONE.LOAD.complete( resp ),
+					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
 				.finally( () => { this.store$.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() ) } );
 		} );
 
 	@Effect() ONE_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeStreamActions.ONE.LOAD.INITIATEIFEMPTY )
+		.map( action => ( Object.assign( <Action>{}, action ) ) )		// This is necessary because at the below filter action type is not correctly known
 		.withLatestFrom( this.store$ )
-		.filter( ( [action, store] ) => { return ( !store.dimeStream.curItem || store.dimeStream.curItem.id === 0 ); } )
+		.filter( ( [action, store] ) => ( !store.dimeStream.curItem || store.dimeStream.curItem.id === 0 || store.dimeStream.curItem.id !== parseInt( action.payload, 10 ) ) )
 		.map( ( [action, store] ) => action )
 		.switchMap( ( action: Action ) => of( DimeStreamActions.ONE.LOAD.initiate( action.payload ) ) );
 

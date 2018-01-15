@@ -8,12 +8,10 @@ export interface DimeStreamField {
 }
 
 export interface DimeStreamFieldDetail extends DimeStreamField {
-	aliasTable: string,
 	fCharacters: number,
 	fPrecision: number,
 	fDecimals: number,
 	fDateFormat: string,
-	shouldIgnore: boolean,
 	shouldIgnoreCrossTab: boolean,
 	isFilter: boolean,
 	isCrossTab: boolean,

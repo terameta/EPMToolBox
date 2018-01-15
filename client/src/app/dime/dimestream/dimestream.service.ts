@@ -67,7 +67,7 @@ export class DimeStreamService {
 	}
 
 	public navigateTo = ( id: number ) => {
-		this.router.navigateByUrl( '/dime/streams/stream-detail/' + id );
+		this.router.navigateByUrl( '/dime/streams/stream-detail/' + id + '/' + _.last( this.router.routerState.snapshot.url.split( '/' ) ) );
 	}
 
 	public markDirty = () => {
@@ -132,6 +132,9 @@ export class DimeStreamService {
 		theField.position = nextOrder;
 		theFieldList.sort( SortByPosition );
 	}
+
+	public isRDBT = () => this.currentItem.type === DimeStreamType.RDBT;
+	public isHPDB = () => this.currentItem.type === DimeStreamType.HPDB;
 
 	// constructor(
 	// 	private http: Http,

@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from 'app/ngstore/models';
 import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
 import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { DimeStreamType } from '../../../../../../../shared/enums/dime/streamtypes';
 
 @Component( {
 	selector: 'app-dime-stream-detail-main-definitions',
@@ -12,6 +13,7 @@ import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
 	styleUrls: ['./dime-stream-detail-main-definitions.component.css']
 } )
 export class DimeStreamDetailMainDefinitionsComponent implements OnInit {
+	public dimeStreamType = DimeStreamType;
 
 	constructor(
 		public mainService: DimeStreamService,
@@ -43,6 +45,11 @@ export class DimeStreamDetailMainDefinitionsComponent implements OnInit {
 	}
 
 	public markDirty = () => {
+		if ( this.isEnvironmentThisType( 'HP' ) || this.isEnvironmentThisType( 'PBCS' ) ) {
+			this.mainService.currentItem.type = this.dimeStreamType.HPDB;
+		} else {
+			this.mainService.currentItem.type = this.dimeStreamType.RDBT;
+		}
 		this.mainService.markDirty();
 	}
 

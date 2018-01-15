@@ -8,6 +8,7 @@ import { EnumToArray, SortByName } from '../../shared/utilities/utilityFunctions
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { MainTools } from '../tools/tools.main';
 import { DimeCredential } from '../../shared/model/dime/credential';
+import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
 
 interface TableDefiner {
 	name: string;
@@ -44,7 +45,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).
 		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then( version0048to0049 ).then( version0049to0050 ).
 		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).
-		then( version0055to0056 ).then( version0056to0057 ).
+		then( version0055to0056 ).then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -52,6 +53,60 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 			console.log( '===============================================' );
 		} ).
 		then( clearResidue );
+}
+
+const version0059to0060 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 59;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE streamfields DROP shouldIgnore', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+}
+
+const version0058to0059 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 58;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'UPDATE streamfields SET isDescribed = 1 WHERE stream IN (SELECT id FROM streams WHERE type = ?)', DimeStreamType.HPDB, ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+}
+
+const version0057to0058 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 57;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE environments DROP SID, DROP cookies', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
 }
 
 const version0056to0057 = ( currentVersion: number ) => {

@@ -15,6 +15,10 @@ import { DescribedFieldFilter } from './dimestream.describedfield.pipe';
 import { DimeStreamDetailMainDefinitionsComponent } from './dimestream-detail/dime-stream-detail-main-definitions/dime-stream-detail-main-definitions.component';
 import { DimeStreamDetailFieldsComponent } from './dimestream-detail/dime-stream-detail-fields/dime-stream-detail-fields.component';
 import { DimeStreamDetailFieldDescriptionsComponent } from './dimestream-detail/dime-stream-detail-field-descriptions/dime-stream-detail-field-descriptions.component';
+import { DimeStreamDetailFieldsHpdbComponent } from './dimestream-detail/dime-stream-detail-fields-hpdb/dime-stream-detail-fields-hpdb.component';
+import { DimeStreamDetailFieldsRdbtComponent } from './dimestream-detail/dime-stream-detail-fields-rdbt/dime-stream-detail-fields-rdbt.component';
+import { DimeStreamDetailFieldDescriptionsHpdbComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-hpdb/dime-stream-detail-field-descriptions-hpdb.component';
+import { DimeStreamDetailFieldDescriptionsRdbtComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-rdbt/dime-stream-detail-field-descriptions-rdbt.component';
 
 const dimeStreamRoutes: Routes = [
 	{ path: 'dime/streams', pathMatch: 'prefix', redirectTo: 'dime/streams/stream-list' },
@@ -51,7 +55,11 @@ const dimeStreamRoutes: Routes = [
 		DescribedFieldFilter,
 		DimeStreamDetailMainDefinitionsComponent,
 		DimeStreamDetailFieldsComponent,
-		DimeStreamDetailFieldDescriptionsComponent
+		DimeStreamDetailFieldDescriptionsComponent,
+		DimeStreamDetailFieldsHpdbComponent,
+		DimeStreamDetailFieldsRdbtComponent,
+		DimeStreamDetailFieldDescriptionsHpdbComponent,
+		DimeStreamDetailFieldDescriptionsRdbtComponent
 	]
 } )
 export class DimestreamModule { }

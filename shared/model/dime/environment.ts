@@ -8,5 +8,6 @@ export interface DimeEnvironment {
 	identitydomain: string,
 	credential: number,
 	tags: any,
-	SID: string
+	SID: string,
+	ssotoken: string
 }

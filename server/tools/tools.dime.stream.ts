@@ -5,6 +5,7 @@ import { MainTools } from './tools.main';
 import { DimeStream, DimeStreamDetail } from '../../shared/model/dime/stream';
 import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
+import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -180,14 +181,13 @@ export class StreamTools {
 				reject( 'Field list is not valid' );
 			} else {
 				this.fieldsStartOver( refObj ).
-					then( ( innerObj: DimeStreamDetail ) => {
+					then( ( refStream: DimeStreamDetail ) => {
 						let promises: any[]; promises = [];
-						innerObj.fieldList.forEach( ( curField: DimeStreamFieldDetail ) => {
-							curField.stream = innerObj.id;
+						refStream.fieldList.forEach( ( curField: DimeStreamFieldDetail ) => {
+							curField.stream = refStream.id;
 							curField.name = curField.name;
 							curField.type = curField.type;
 							curField.position = curField.position;
-							curField.shouldIgnore = curField.shouldIgnore;
 
 							if ( curField.type === 'string' && curField.fCharacters === undefined ) { curField.fCharacters = 1024; }
 							if ( curField.type === 'number' && curField.fPrecision === undefined ) { curField.fPrecision = 28; }
@@ -195,6 +195,7 @@ export class StreamTools {
 							if ( curField.type === 'number' && curField.fDecimals < 0 ) { curField.fDecimals = 0; }
 							if ( curField.type === 'number' && ( curField.fPrecision <= curField.fDecimals ) ) { curField.fDecimals = curField.fPrecision - 1; }
 							if ( curField.type === 'date' && curField.fDateFormat === undefined ) { curField.fDateFormat = 'YYYY-MM-DD'; }
+							if ( refStream.type === DimeStreamType.HPDB ) { curField.isDescribed = true; }
 							promises.push( this.assignField( curField ) );
 						} );
 						return Promise.all( promises );
