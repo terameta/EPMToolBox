@@ -1,5 +1,6 @@
-<div class="jumbotron">Do we have described fields: {{doWeHaveDescribedFields()}}</div>
+<div class="tab-pane active" *ngIf="mainService.doWeHaveDescribedFields()">
+	<app-dime-stream-detail-field-descriptions-hpdb *ngIf="mainService.isHPDB()"></app-dime-stream-detail-field-descriptions-hpdb>
+	<app-dime-stream-detail-field-descriptions-rdbt *ngIf="mainService.isRDBT()"></app-dime-stream-detail-field-descriptions-rdbt>
+</div>
+<hr>
 <pre>{{mainService.currentItem | json}}</pre>
-
-<app-dime-stream-detail-field-descriptions-hpdb *ngIf="mainService.isHPDB()"></app-dime-stream-detail-field-descriptions-hpdb>
-<app-dime-stream-detail-field-descriptions-rdbt *ngIf="mainService.isRDBT()"></app-dime-stream-detail-field-descriptions-rdbt>

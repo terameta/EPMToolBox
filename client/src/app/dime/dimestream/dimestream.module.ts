@@ -19,6 +19,7 @@ import { DimeStreamDetailFieldsHpdbComponent } from './dimestream-detail/dime-st
 import { DimeStreamDetailFieldsRdbtComponent } from './dimestream-detail/dime-stream-detail-fields-rdbt/dime-stream-detail-fields-rdbt.component';
 import { DimeStreamDetailFieldDescriptionsHpdbComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-hpdb/dime-stream-detail-field-descriptions-hpdb.component';
 import { DimeStreamDetailFieldDescriptionsRdbtComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-rdbt/dime-stream-detail-field-descriptions-rdbt.component';
+import { DimeStreamDetailFieldDescriptionsRouterComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-router/dime-stream-detail-field-descriptions-router.component';
 
 const dimeStreamRoutes: Routes = [
 	{ path: 'dime/streams', pathMatch: 'prefix', redirectTo: 'dime/streams/stream-list' },
@@ -28,7 +29,12 @@ const dimeStreamRoutes: Routes = [
 			{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
 			{ path: 'definitions', component: DimeStreamDetailMainDefinitionsComponent },
 			{ path: 'fields', component: DimeStreamDetailFieldsComponent },
-			{ path: 'fielddescriptions', component: DimeStreamDetailFieldDescriptionsComponent }
+			{
+				path: 'fielddescriptions', component: DimeStreamDetailFieldDescriptionsRouterComponent, children: [
+					{ path: '', component: DimeStreamDetailFieldDescriptionsComponent },
+					{ path: ':fieldid', component: DimeStreamDetailFieldDescriptionsComponent }
+				]
+			}
 		]
 	}
 ]
@@ -59,7 +65,8 @@ const dimeStreamRoutes: Routes = [
 		DimeStreamDetailFieldsHpdbComponent,
 		DimeStreamDetailFieldsRdbtComponent,
 		DimeStreamDetailFieldDescriptionsHpdbComponent,
-		DimeStreamDetailFieldDescriptionsRdbtComponent
+		DimeStreamDetailFieldDescriptionsRdbtComponent,
+		DimeStreamDetailFieldDescriptionsRouterComponent
 	]
 } )
 export class DimestreamModule { }

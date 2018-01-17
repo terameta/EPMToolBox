@@ -67,7 +67,25 @@ export class DimeStreamService {
 	}
 
 	public navigateTo = ( id: number ) => {
-		this.router.navigateByUrl( '/dime/streams/stream-detail/' + id + '/' + _.last( this.router.routerState.snapshot.url.split( '/' ) ) );
+		delete this.currentItem.fieldList;
+		this.router.navigateByUrl( this.router.routerState.snapshot.url
+			.split( '/' )
+			.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )	// This part replaces the stream ID to the target stream's ID
+			.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )						// If we are at the field descriptions part, this will take us to parent and companent will handle redirecting
+			.join( '/' )
+		);
+	}
+
+	public doWeHaveDescribedFields = () => {
+		if ( !this.currentItem ) {
+			return false;
+		} else if ( !this.currentItem.fieldList ) {
+			return false;
+		} else if ( this.currentItem.fieldList.length === 0 ) {
+			return false;
+		} else {
+			return this.currentItem.fieldList.map( currentField => parseInt( ( currentField.isDescribed ? '1' : '0' ), 10 ) ).reduce( ( accumulator, currentItem ) => accumulator + currentItem ) > 0;
+		}
 	}
 
 	public markDirty = () => {
