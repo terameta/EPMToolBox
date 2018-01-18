@@ -42,6 +42,10 @@ import { DimeStreamState, dimeStreamInitialState } from 'app/dime/dimestream/dim
 import { dimeStreamReducer } from 'app/dime/dimestream/dimestream.reducer';
 import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
 
+import { DimeMapState, dimeMapInitialState } from 'app/dime/dimemap/dimemap.state';
+import { dimeMapReducer } from 'app/dime/dimemap/dimemap.reducer';
+import { DimeMapActions } from 'app/dime/dimemap/dimemap.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
@@ -52,6 +56,7 @@ export interface AppState {
 	dimeAsyncProcess: DimeAsyncProcessState,
 	dimeEnvironment: DimeEnvironmentState,
 	dimeStream: DimeStreamState,
+	dimeMap: DimeMapState,
 	dimeMatrix: DimeMatrixState
 }
 
@@ -64,6 +69,7 @@ export const appInitialState: AppState = {
 	dimeAsyncProcess: <DimeAsyncProcessState>{},
 	dimeEnvironment: dimeEnvironmentInitialState,
 	dimeStream: dimeStreamInitialState,
+	dimeMap: dimeMapInitialState,
 	dimeMatrix: dimeMatrixInitialState
 }
 
@@ -107,6 +113,7 @@ export const reducers = {
 	dimeAsyncProcess: dimeAsyncProcessReducer,
 	dimeEnvironment: dimeEnvironmentReducer,
 	dimeStream: dimeStreamReducer,
+	dimeMap: dimeMapReducer,
 	dimeMatrix: dimeMatrixReducer
 }
 
@@ -188,6 +195,20 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						}
 						default: {
 							console.log( 'We are at streams default' );
+							return new DoNothingAction();
+						}
+					}
+				}
+				case 'maps': {
+					switch ( segments[2] ) {
+						case 'map-list': {
+							return DimeMapActions.ALL.LOAD.initiateifempty();
+						}
+						case 'map-detail/:id': {
+							return DimeMapActions.ONE.LOAD.initiateifempty( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at maps default' );
 							return new DoNothingAction();
 						}
 					}

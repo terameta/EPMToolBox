@@ -314,6 +314,24 @@ export class EnvironmentTools {
 				.catch( reject );
 		} );
 	}
+	public listDescriptiveTables = ( refObj: DimeEnvironmentDetail ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.getEnvironmentDetails( refObj, true )
+				.then( ( curObj ) => {
+					curObj.database = refObj.database;
+					switch ( curObj.type ) {
+						case DimeEnvironmentType.HP:
+						case DimeEnvironmentType.PBCS:
+							curObj.table = refObj.table;
+							return this.sourceTools[curObj.type].listAliasTables( curObj );
+						default:
+							return this.sourceTools[curObj.type].listTables( curObj );
+					}
+				} )
+				.then( resolve )
+				.catch( reject );
+		} );
+	}
 	public listFields = ( refObj: DimeEnvironmentDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( refObj, true ).

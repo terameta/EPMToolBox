@@ -20,6 +20,8 @@ export interface DimeStreamFieldDetail extends DimeStreamField {
 	aggregateFunction: string,
 	descriptiveDB: string,
 	descriptiveTable: string,
+	descriptiveTableList: any[],
+	descriptiveFieldList: any[],
 	descriptiveQuery: string,
 	drfName: string,
 	drfType: string,

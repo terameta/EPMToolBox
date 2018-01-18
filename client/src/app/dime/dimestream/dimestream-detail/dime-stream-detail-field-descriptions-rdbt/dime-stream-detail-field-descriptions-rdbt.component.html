@@ -1,4 +1,4 @@
-<form #fieldf="ngForm" class="form-horizontal">
+<form #fieldf="ngForm" (ngSubmit)="mainService.update()" class="form-horizontal">
 	<div class="form-group">
 		<label for="fieldDescriptiveDB" class="col-xs-2 control-label">DB Name:</label>
 		<div class="col-xs-10">
@@ -17,7 +17,10 @@
 		<div class="col-xs-10">
 			<div class="input-group">
 				<select name="fieldDescriptiveTable" id="fieldDescriptiveTable" class="form-control" [(ngModel)]="field.descriptiveTable">
-					<option *ngFor="let selectableTable of mainService.descriptiveTables[field.descriptiveDB]" [value]="selectableTable.name">{{selectableTable.name}} ({{selectableTable.type}})</option>
+					<option *ngFor="let selectableTable of field.descriptiveTableList" [value]="selectableTable.name">
+						{{selectableTable.name}}
+						<span *ngIf="selectableTable.type"> ({{selectableTable.type}})</span>
+					</option>
 				</select>
 				<span class="input-group-btn">
 					<button class="btn btn-default" type="button" [disabled]="!field.descriptiveDB" (click)="mainService.fieldRefreshTables(field)">Refresh</button>
@@ -25,108 +28,88 @@
 			</div>
 			<span class="help-block" *ngIf="!field.descriptiveDB">
 				<div class="well well-warning well-sm">
-					Please assign a database to be able to change the tablename.
+					Please assign a database to be able to change the tablename. {{field.descriptiveDB}}
 				</div>
 			</span>
 		</div>
 	</div>
-</form>
-<!--
-	<div class="box-body">
-		<div class="tab-content">
-
-			<div class="tab-pane fade" id="streamtabfielddescriptiontables">
-				<div class="box box-primary">
-					<div class="box-header">
-						<ul class="nav nav-tabs">
-							<li *ngFor="let curField of (mainService.curItemAssignedFields | describedFieldFilter);let i = index;let last=last;let first=first;" [class.active]="first">
-								<a href="#FieldDescriptionDefinition{{curField.id}}" data-toggle="tab">
-									{{curField.name}}
-								</a>
-							</li>
-						</ul>
-					</div>
-					<div class="box-body">
-						<div class="tab-content">
-							<div class="tab-pane fade" *ngFor="let field of (mainService.curItemAssignedFields | describedFieldFilter);let i = index;let last=last;let first=first;" id="FieldDescriptionDefinition{{field.id}}" [class.in]="first" [class.active]="first">
-								<form (ngSubmit)="mainService.fieldsSave()" #fieldf="ngForm" class="form-horizontal">
-									<fieldset>
-
-
-
-										<div class="form-group" *ngIf="mainService.curItemEnvironmentType == 'MSSQL'">
-											<label for="fieldDescriptiveQuery" class="col-xs-2 control-label">Custom Query:</label>
-											<div class="col-xs-10">
-												<textarea name="fieldDescriptiveQuery" id="fieldDescriptiveQuery" rows="10" class="form-control" [(ngModel)]="field.descriptiveQuery" *ngIf="field.descriptiveTable == 'Custom Query'"></textarea>
-												<input type="text" class="form-control" id="fieldDescriptiveQuery" name="fieldDescriptiveQuery" [(ngModel)]="field.descriptiveQuery" disabled *ngIf="field.descriptiveTable != 'Custom Query'">
-											</div>
-										</div>
-										<div class="form-group">
-											<label for="fieldDescriptiveFieldsRefresh" class="col-xs-2 control-label">Field List</label>
-											<div class="col-xs-10">
-												<div class="input-group">
-													<span class="input-group-btn">
-														<button class="btn btn-default" type="button" (click)="mainService.fieldListDescriptiveFields(field)" [disabled]="!field.descriptiveDB || !field.descriptiveTable">Refresh</button>
-													</span>
-												</div>
-											</div>
-											<div class="col-xs-10 col-xs-offset-2">
-											</div>
-										</div>
-										<div class="form-group">
-											<label for="fieldDescriptiveReferenceField" class="col-xs-2 control-label">Reference Field:</label>
-											<div class="col-xs-10" *ngIf="mainService.descriptiveFields[field.descriptiveDB]">
-												<div class="input-group">
-													<select name="fieldDescriptiveReferenceField" id="fieldDescriptiveReferenceField" class="form-control" [(ngModel)]="field.drfName" (change)="mainService.setdrfType(field, $event)">
-														<option *ngFor="let selectableField of mainService.descriptiveFields[field.descriptiveDB][field.descriptiveTable]" [value]="selectableField.name">{{selectableField.name}} ({{selectableField.type}})</option>
-													</select>
-													<span *ngIf="field.drfType=='string'" class="input-group-addon"><b># of Chars:</b></span>
-													<input *ngIf="field.drfType=='string'" name="fielddrfCharacters" type="number" class="form-control" min="1" max="1024" [(ngModel)]="field.drfCharacters">
-													<span *ngIf="field.drfType=='string'" class="input-group-addon">(Max: 1024)</span>
-													<span *ngIf="field.drfType=='number'" class="input-group-addon"><b># of Digits:</b></span>
-													<input *ngIf="field.drfType=='number'" name="fielddrfPrecision" type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.drfPrecision" min="1" max="65">
-													<span *ngIf="field.drfType=='number'" class="input-group-addon">(Min: 1, Max: 65)</span>
-													<input *ngIf="field.drfType=='number'" name="fielddrfDecimals" type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="field.drfDecimals" min="0" max="{{field.drfPrecision -1 || 0}}">
-													<span *ngIf="field.drfType=='number'" class="input-group-addon">(Min: 0, Max: {{field.drfPrecision -1 || 0}})</span>
-													<span *ngIf="field.drfType=='date'" class="input-group-addon"><b>Format:</b></span>
-													<input *ngIf="field.drfType=='date'" name="fielddrfDateFormat" type="text" class="form-control" [(ngModel)]="field.drfDateFormat" placeholder="YYYY-MM-DD HH:mm">
-													<span *ngIf="field.drfType=='date'" class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
-												</div>
-											</div>
-										</div>
-										<div class="form-group">
-											<label for="fieldDescriptiveDescriptionField" class="col-xs-2 control-label">Description Field:</label>
-											<div class="col-xs-10" *ngIf="mainService.descriptiveFields[field.descriptiveDB]">
-												<div class="input-group">
-													<select name="fieldDescriptiveDescriptionField" id="fieldDescriptiveDescriptionField" class="form-control" [(ngModel)]="field.ddfName" (change)="mainService.setddfType(field, $event)">
-														<option *ngFor="let selectableField of mainService.descriptiveFields[field.descriptiveDB][field.descriptiveTable]" [value]="selectableField.name">{{selectableField.name}} ({{selectableField.type}})</option>
-													</select>
-													<span *ngIf="field.ddfType=='string'" class="input-group-addon"><b># of Chars:</b></span>
-													<input *ngIf="field.ddfType=='string'" name="fieldddfCharacters" type="number" class="form-control" min="1" max="1024" [(ngModel)]="field.ddfCharacters">
-													<span *ngIf="field.ddfType=='string'" class="input-group-addon">(Max: 1024)</span>
-													<span *ngIf="field.ddfType=='number'" class="input-group-addon"><b># of Digits:</b></span>
-													<input *ngIf="field.ddfType=='number'" name="fieldddfPrecision" type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.ddfPrecision" min="1" max="65">
-													<span *ngIf="field.ddfType=='number'" class="input-group-addon">(Min: 1, Max: 65)</span>
-													<input *ngIf="field.ddfType=='number'" name="fieldddfDecimals" type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="field.ddfDecimals" min="0" max="{{field.ddfPrecision -1 || 0}}">
-													<span *ngIf="field.ddfType=='number'" class="input-group-addon">(Min: 0, Max: {{field.ddfPrecision -1 || 0}})</span>
-													<span *ngIf="field.ddfType=='date'" class="input-group-addon"><b>Format:</b></span>
-													<input *ngIf="field.ddfType=='date'" name="fieldddfDateFormat" type="text" class="form-control" [(ngModel)]="field.ddfDateFormat" placeholder="YYYY-MM-DD HH:mm">
-													<span *ngIf="field.ddfType=='date'" class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
-												</div>
-											</div>
-										</div>
-										<div class="form-group">
-											<div class="col-xs-10 col-xs-offset-2">
-												<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-											</div>
-										</div>
-									</fieldset>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
+	<div class="form-group">
+		<label for="fieldDescriptiveQuery" class="col-xs-2 control-label">Custom Query:</label>
+		<div class="col-xs-10">
+			<textarea name="fieldDescriptiveQuery" id="fieldDescriptiveQuery" rows="10" class="form-control" [(ngModel)]="field.descriptiveQuery" *ngIf="field.descriptiveTable == 'Custom Query'"></textarea>
+			<input type="text" class="form-control" id="fieldDescriptiveQuery" name="fieldDescriptiveQuery" [(ngModel)]="field.descriptiveQuery" disabled *ngIf="field.descriptiveTable != 'Custom Query'">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="fieldDescriptiveFieldsRefresh" class="col-xs-2 control-label">Field List</label>
+		<div class="col-xs-10">
+			<div class="input-group">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" (click)="mainService.fieldListDescriptiveFields(field)" [disabled]="!field.descriptiveDB || !field.descriptiveTable">Refresh</button>
+				</span>
+			</div>
+		</div>
+		<div class="col-xs-10 col-xs-offset-2">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="fieldDescriptiveReferenceField" class="col-xs-2 control-label">Reference Field:</label>
+		<div class="col-xs-10">
+			<div class="input-group">
+				<select name="fieldDescriptiveReferenceField" id="fieldDescriptiveReferenceField" class="form-control" [(ngModel)]="field.drfName" (change)="setdrfType($event)">
+					<option *ngFor="let selectableField of field.descriptiveFieldList" [value]="selectableField.name">{{selectableField.name}} ({{selectableField.type}})</option>
+				</select>
+				<span *ngIf="field.drfType=='string'" class="input-group-addon">
+					<b># of Chars:</b>
+				</span>
+				<input *ngIf="field.drfType=='string'" name="fielddrfCharacters" type="number" class="form-control" min="1" max="1024" [(ngModel)]="field.drfCharacters">
+				<span *ngIf="field.drfType=='string'" class="input-group-addon">(Max: 1024)</span>
+				<span *ngIf="field.drfType=='number'" class="input-group-addon">
+					<b># of Digits:</b>
+				</span>
+				<input *ngIf="field.drfType=='number'" name="fielddrfPrecision" type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.drfPrecision" min="1" max="65">
+				<span *ngIf="field.drfType=='number'" class="input-group-addon">(Min: 1, Max: 65)</span>
+				<input *ngIf="field.drfType=='number'" name="fielddrfDecimals" type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="field.drfDecimals" min="0" max="{{field.drfPrecision -1 || 0}}">
+				<span *ngIf="field.drfType=='number'" class="input-group-addon">(Min: 0, Max: {{field.drfPrecision -1 || 0}})</span>
+				<span *ngIf="field.drfType=='date'" class="input-group-addon">
+					<b>Format:</b>
+				</span>
+				<input *ngIf="field.drfType=='date'" name="fielddrfDateFormat" type="text" class="form-control" [(ngModel)]="field.drfDateFormat" placeholder="YYYY-MM-DD HH:mm">
+				<span *ngIf="field.drfType=='date'" class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
 			</div>
 		</div>
 	</div>
-</div> -->
+	<div class="form-group">
+		<label for="fieldDescriptiveDescriptionField" class="col-xs-2 control-label">Description Field:</label>
+		<div class="col-xs-10">
+			<div class="input-group">
+				<select name="fieldDescriptiveDescriptionField" id="fieldDescriptiveDescriptionField" class="form-control" [(ngModel)]="field.ddfName" (change)="setddfType($event)">
+					<option *ngFor="let selectableField of field.descriptiveFieldList" [value]="selectableField.name">{{selectableField.name}} ({{selectableField.type}})</option>
+				</select>
+				<span *ngIf="field.ddfType=='string'" class="input-group-addon">
+					<b># of Chars:</b>
+				</span>
+				<input *ngIf="field.ddfType=='string'" name="fieldddfCharacters" type="number" class="form-control" min="1" max="1024" [(ngModel)]="field.ddfCharacters">
+				<span *ngIf="field.ddfType=='string'" class="input-group-addon">(Max: 1024)</span>
+				<span *ngIf="field.ddfType=='number'" class="input-group-addon">
+					<b># of Digits:</b>
+				</span>
+				<input *ngIf="field.ddfType=='number'" name="fieldddfPrecision" type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="field.ddfPrecision" min="1" max="65">
+				<span *ngIf="field.ddfType=='number'" class="input-group-addon">(Min: 1, Max: 65)</span>
+				<input *ngIf="field.ddfType=='number'" name="fieldddfDecimals" type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="field.ddfDecimals" min="0" max="{{field.ddfPrecision -1 || 0}}">
+				<span *ngIf="field.ddfType=='number'" class="input-group-addon">(Min: 0, Max: {{field.ddfPrecision -1 || 0}})</span>
+				<span *ngIf="field.ddfType=='date'" class="input-group-addon">
+					<b>Format:</b>
+				</span>
+				<input *ngIf="field.ddfType=='date'" name="fieldddfDateFormat" type="text" class="form-control" [(ngModel)]="field.ddfDateFormat" placeholder="YYYY-MM-DD HH:mm">
+				<span *ngIf="field.ddfType=='date'" class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-xs-10 col-xs-offset-2">
+			<button class="btn btn-primary btn-xs" type="submit">
+				<i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+		</div>
+	</div>
+</form>

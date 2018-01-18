@@ -1,18 +1,74 @@
-import { ActivatedRoute, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
-import { Headers, Http, Response, ResponseContentType } from '@angular/http';
+import { Router } from '@angular/router';
 
-import { BehaviorSubject, Observable } from 'rxjs/Rx';
-import { AuthHttp } from 'angular2-jwt';
 import { ToastrService } from 'ngx-toastr';
-
-import { DimeStreamService } from '../dimestream/dimestream.service';
+import { Store } from '@ngrx/store';
+import * as _ from 'lodash';
 
 import { DimeMap } from '../../../../../shared/model/dime/map';
-import { DimeStream } from '../../../../../shared/model/dime/stream';
+import { AppState } from 'app/ngstore/models';
+import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { DimeMapActions } from 'app/dime/dimemap/dimemap.actions';
+import { DimeMapBackend } from 'app/dime/dimemap/dimemap.backend';
 
 @Injectable()
 export class DimeMapService {
+	private serviceName = 'Streams';
+	public itemList: DimeMap[];
+	public itemObject: { [key: number]: DimeMap };
+	public currentItem: DimeMap = <DimeMap>{};
+	public currentItemClean: boolean;
+
+	constructor(
+		private toastr: ToastrService,
+		private store: Store<AppState>,
+		private router: Router,
+		private backend: DimeMapBackend
+	) {
+		this.store.select( 'dimeMap' ).subscribe( mapState => {
+			this.itemList = _.values( mapState.items ).sort( SortByName );
+			this.itemObject = mapState.items;
+			this.currentItem = mapState.curItem;
+			this.currentItemClean = mapState.curItemClean;
+		} );
+	}
+
+	public create = () => this.store.dispatch( DimeMapActions.ONE.CREATE.initiate( <DimeMap>{} ) );
+	public update = () => this.store.dispatch( DimeMapActions.ONE.UPDATE.initiate( this.currentItem ) );
+	public delete = ( id: number, name?: string ) => {
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.store.dispatch( DimeMapActions.ONE.DELETE.initiate( id ) );
+		}
+	}
+	public navigateTo = ( id: number ) => {
+		this.router.navigateByUrl( this.router.routerState.snapshot.url
+			.split( '/' )
+			.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )	// This part replaces the stream ID to the target stream's ID
+			.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )						// If we are at the field descriptions part, this will take us to parent and companent will handle redirecting
+			.join( '/' )
+		);
+	}
+	public rePrepareTables = () => {
+		const verificationQuestion = this.serviceName + ': Are you sure to reprepare the map tables for ' + this.currentItem.name + ', this will erase all the map entries assigned?';
+		if ( confirm( verificationQuestion ) ) {
+			this.prepareTables();
+		}
+	}
+	public prepareTables = () => {
+		this.backend.prepare( this.currentItem.id ).subscribe( ( result ) => {
+			this.toastr.info( 'Map tables are successfully created.', this.serviceName );
+			console.log( 'PrepareTables:', result );
+			this.isReady();
+		}, ( error ) => {
+			this.toastr.error( 'Failed to prepare the map tables.', this.serviceName );
+			console.log( error );
+		} )
+	}
+	public isReady = () => this.store.dispatch( DimeMapActions.ONE.ISREADY.initiate( this.currentItem.id ) );
+
+	/*
+
 	items: Observable<DimeMap[]>;
 	itemCount: Observable<number>;
 	curItem: DimeMap;
@@ -38,6 +94,7 @@ export class DimeMapService {
 
 	private filesToUpload: Array<File> = [];
 
+
 	constructor(
 		private http: Http,
 		private authHttp: AuthHttp,
@@ -46,7 +103,6 @@ export class DimeMapService {
 		private route: ActivatedRoute,
 		private streamService: DimeStreamService
 	) {
-		/*
 		this.baseUrl = '/api/dime/map';
 		this.dataStore = { items: [] };
 		this._items = <BehaviorSubject<DimeMap[]>>new BehaviorSubject( [] );
@@ -55,55 +111,7 @@ export class DimeMapService {
 		this.serviceName = 'Maps';
 		this.resetCurItem();
 		this.getAll();
-		*/
 	}
-	/*
-		getAll = () => {
-			this.authHttp.get( this.baseUrl ).
-				map(( response ) => {
-					return response.json();
-				} ).
-				subscribe(( data ) => {
-					data.sort( this.sortByName );
-					this.dataStore.items = data;
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-				}, ( error ) => {
-					console.log( 'Could not load maps.' );
-				} );
-		}
-		getOne = ( id: number ) => {
-			this.fetchOne( id ).
-				subscribe(( result ) => {
-					let notFound = true;
-
-					this.dataStore.items.forEach(( item, index ) => {
-						if ( item.id === result.id ) {
-							this.dataStore.items[index] = result;
-							notFound = false;
-						}
-					} );
-
-					if ( notFound ) {
-						this.dataStore.items.push( result );
-					}
-
-					this.dataStore.items.sort( this.sortByName );
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.curItem = result;
-					this.curItemClean = true;
-					if ( this.curItem.source ) { this.getStreamDefinition( this.curItem.source, 'source' ); }
-					if ( this.curItem.target ) { this.getStreamDefinition( this.curItem.target, 'target' ); }
-					this.isReady( this.curItem.id );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to get the item.', this.serviceName );
-					console.log( error );
-				} );
-		}
-		fetchOne = ( id: number ) => {
-			return this.authHttp.get( this.baseUrl + '/' + id ).
-				map( response => response.json() ).
-				catch( error => Observable.throw( error ) );
-		}
 		private getStreamDefinition = ( id: number, srctar: string ) => {
 			this.streamService.fetchOne( id ).subscribe(( result ) => {
 				if ( srctar === 'source' ) { this.curItemSourceStream = result; }
@@ -121,79 +129,6 @@ export class DimeMapService {
 				console.log( error );
 			} )
 		}
-		create = () => {
-			this.authHttp.post( this.baseUrl, {}, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.dataStore.items.push( result );
-					this.dataStore.items.sort( this.sortByName );
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.resetCurItem();
-					this.router.navigate( ['/dime/maps/map-detail', result.id] );
-					this.toastr.info( 'New item is created, navigating to the details', this.serviceName );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to create new item.', this.serviceName );
-					console.log( error );
-				}
-				);
-		};
-		update = ( curItem?: DimeMap ) => {
-			let shouldUpdate = false;
-			if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; };
-			this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.dataStore.items.forEach(( item, index ) => {
-						if ( item.id === result.id ) { this.dataStore.items[index] = result; }
-					} );
-					this.dataStore.items.sort( this.sortByName );
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.toastr.info( 'Item is successfully saved.', this.serviceName );
-					// If the update request came from another source, then it is an ad-hoc save of a non-current stream.
-					// This shouldn't change the state of the current item.
-					if ( shouldUpdate ) { this.curItemClean = true; }
-				}, error => {
-					this.toastr.error( 'Failed to save the item.', this.serviceName );
-					console.log( error );
-				} );
-		};
-		delete( id: number ) {
-			const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
-			if ( confirm( verificationQuestion ) ) {
-				this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
-					this.dataStore.items.forEach(( item, index ) => {
-						if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
-					} );
-					this.dataStore.items.sort( this.sortByName );
-					this._items.next( Object.assign( {}, this.dataStore ).items );
-					this.toastr.info( 'Item is deleted.', this.serviceName );
-					this.router.navigate( ['/dime/maps/map-list'] );
-					this.resetCurItem();
-				}, ( error ) => {
-					this.toastr.error( 'Failed to delete item.', this.serviceName );
-					console.log( error );
-				} );
-			} else {
-				this.toastr.info( 'Item deletion is cancelled.', this.serviceName );
-			}
-		};
-		private resetCurItem = () => {
-			this.curItem = { id: 0, name: '-' };
-			this.curItemFields = undefined;
-			this.curItemClean = true;
-			this.curItemIsReady = false;
-			this.curItemMapData = [];
-			this.curItemMapColumns = [];
-		};
-		private sortByName = ( e1, e2 ) => {
-			if ( e1.name > e2.name ) {
-				return 1;
-			} else if ( e1.name < e2.name ) {
-				return -1;
-			} else {
-				return 0;
-			}
-		};
 		public assignSourceFields = () => {
 			let fieldsToAssign: string[];
 			fieldsToAssign = [];
@@ -269,30 +204,8 @@ export class DimeMapService {
 				} );
 			}
 		};
-		public prepareTables = ( id?: number ) => {
-			if ( !id ) { id = this.curItem.id; }
-			this.authHttp.get( this.baseUrl + '/prepare/' + id, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.toastr.info( 'Map tables are successfully created.', this.serviceName );
-					console.log( 'PrepareTables:', result );
-					this.isReady();
-				}, ( error ) => {
-					this.toastr.error( 'Failed to prepare the map tables.', this.serviceName );
-					console.log( error );
-				} )
-		}
-		public isReady = ( id?: number ) => {
-			if ( !id ) { id = this.curItem.id; }
-			this.authHttp.get( this.baseUrl + '/isReady/' + id, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					if ( result.result === 'YES' ) { this.curItemIsReady = true; }
-				}, ( error ) => {
-					this.toastr.error( 'Failed to check the readiness of the map tables.', this.serviceName );
-					console.log( error );
-				} )
-		}
+
+
 		public refreshMapTable = () => {
 			this.curItemMapReadyToShow = false;
 			return this.authHttp.post( this.baseUrl + '/mapData?i=' + new Date().getTime(), { mapid: this.curItem.id } ).

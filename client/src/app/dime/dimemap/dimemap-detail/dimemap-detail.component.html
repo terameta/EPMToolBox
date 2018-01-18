@@ -4,33 +4,27 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li><a href="#maptabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
-			<li class="active"><a href="#maptabmaptable" data-toggle="tab">Map Table</a></li>
-			<li><a href="#maptabsourcedefinitions" data-toggle="tab">Source Definitions</a></li>
-			<li><a href="#maptabtargetdefinitions" data-toggle="tab">Target Definitions</a></li>
-			<li><a href="#maptabimportexport" data-toggle="tab">Import/Export</a></li>
+			<li routerLinkActive="active">
+				<a routerLink="maindefinitions" data-toggle="tab">Main Definitions</a>
+			</li>
+			<li routerLinkActive="active">
+				<a routerLink="maptable" data-toggle="tab">Map Table</a>
+			</li>
+			<li routerLinkActive="active">
+				<a routerLink="sourcedefinitions" data-toggle="tab">Source Definitions</a>
+			</li>
+			<li routerLinkActive="active">
+				<a routerLink="targetdefinitions" data-toggle="tab">Target Definitions</a>
+			</li>
+			<li routerLinkActive="active">
+				<a routerLink="importexport" data-toggle="tab">Import/Export</a>
+			</li>
 		</ul>
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
-			<div class="tab-pane fade in" id="maptabmaindefinitions">
-				<app-dimemap-detail-tab-maindefinitions></app-dimemap-detail-tab-maindefinitions>
-			</div>
-			<div class="tab-pane fade in active" id="maptabmaptable">
-				<!--<app-dimemap-detail-tab-maptable *ngIf="mainService.curItemIsReady"></app-dimemap-detail-tab-maptable>-->
-				<app-dimemap-detail-tab-maptable></app-dimemap-detail-tab-maptable>
-				<div class="well well-warning well-sm" *ngIf="!mainService.curItemIsReady">
-					This map definition is not ready for mapping. <br>
-				</div>
-			</div>
-			<div class="tab-pane fade in" id="maptabsourcedefinitions">
-				<app-dimemap-detail-tab-sourcedefinitions></app-dimemap-detail-tab-sourcedefinitions>
-			</div>
-			<div class="tab-pane fade in" id="maptabtargetdefinitions">
-				<app-dimemap-detail-tab-targetdefinitions></app-dimemap-detail-tab-targetdefinitions>
-			</div>
-			<div class="tab-pane fade in" id="maptabimportexport">
-				<app-dimemap-detail-tab-importexport></app-dimemap-detail-tab-importexport>
+			<div class="tab-pane fade in active">
+				<router-outlet></router-outlet>
 			</div>
 		</div>
 	</div>

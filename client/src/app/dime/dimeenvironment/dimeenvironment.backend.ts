@@ -19,6 +19,7 @@ export class DimeEnvironmentBackend {
 
 	public listDatabases = ( id: number ) => this.http.get( this.baseUrl + '/listDatabases/' + id );
 	public listTables = ( id: number, db: string ) => this.http.get( this.baseUrl + '/listTables/' + id + '/' + db );
+	public listDescriptiveTables = ( id: number, db: string, cube: string ) => this.http.get( this.baseUrl + '/listDescriptiveTables/' + id + '/' + db + '/' + cube );
 
 	public testAll = () => this.http.get( this.baseUrl + '/testall' );
 

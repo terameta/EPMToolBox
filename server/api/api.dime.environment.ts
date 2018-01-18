@@ -26,6 +26,7 @@ export class ApiDimeEnvironment {
 		this.apiRoutes.get( '/verify/:id', ( req, res ) => { this.rester.respond( this.environmentTool.verify, req.params.id, req, res ); } );
 		this.apiRoutes.get( '/listDatabases/:id', ( req, res ) => { this.rester.respond( this.environmentTool.listDatabases, { id: req.params.id }, req, res ); } );
 		this.apiRoutes.get( '/listTables/:id/:db', ( req, res ) => { this.rester.respond( this.environmentTool.listTables, { id: req.params.id, database: req.params.db }, req, res ); } );
+		this.apiRoutes.get( '/listDescriptiveTables/:id/:db/:cube', ( req, res ) => { this.rester.respond( this.environmentTool.listDescriptiveTables, { id: req.params.id, database: req.params.db, table: req.params.cube }, req, res ); } );
 		this.apiRoutes.post( '/listProcedures/:id', ( req, res ) => { this.rester.respond( this.environmentTool.listProcedures, req.body, req, res ); } );
 		this.apiRoutes.post( '/listProcedureDetails/:id', ( req, res ) => { this.rester.respond( this.environmentTool.listProcedureDetails, req.body, req, res ); } );
 	}

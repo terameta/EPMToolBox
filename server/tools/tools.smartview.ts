@@ -118,7 +118,7 @@ export class SmartViewTools {
 			} );
 	}
 	public listAliasTables = ( refObj: DimeEnvironmentSmartView ) => {
-		return this.smartviewListAliasTables( refObj ).then( result => result.aliastables );
+		return this.smartviewListAliasTables( refObj ).then( result => result.aliastables.map( curTable => ( { name: curTable, type: 'Alias Table' } ) ) );
 	}
 	private smartviewListAliasTables = ( refObj: DimeEnvironmentSmartView ): Promise<DimeEnvironmentSmartView> => {
 		return this.smartviewOpenCube( refObj )

@@ -23,14 +23,23 @@ import { DimemapDetailTabImportexportComponent } from './dimemap-detail/dimemap-
 const dimeMapRoutes: Routes = [
 	{ path: 'dime/maps', pathMatch: 'prefix', redirectTo: 'dime/maps/map-list' },
 	{ path: 'map-list', component: DimemapListComponent },
-	{ path: 'map-detail/:id', component: DimemapDetailComponent }
+	{
+		path: 'map-detail/:id', component: DimemapDetailComponent, children: [
+			{ path: '', pathMatch: 'prefix', redirectTo: 'maindefinitions' },
+			{ path: 'maindefinitions', component: DimemapDetailTabMaindefinitionsComponent },
+			{ path: 'maptable', component: DimemapDetailTabMaptableComponent },
+			{ path: 'sourcedefinitions', component: DimemapDetailTabSourcedefinitionsComponent },
+			{ path: 'targetdefinitions', component: DimemapDetailTabTargetdefinitionsComponent },
+			{ path: 'importexport', component: DimemapDetailTabImportexportComponent }
+		]
+	}
 ]
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild(dimeMapRoutes),
+		RouterModule.forChild( dimeMapRoutes ),
 		AuthModule,
 		HotTableModule
 	],
@@ -51,5 +60,5 @@ const dimeMapRoutes: Routes = [
 		DimemapDetailTabTargetdefinitionsComponent,
 		DimemapDetailTabImportexportComponent
 	]
-})
+} )
 export class DimemapModule { }

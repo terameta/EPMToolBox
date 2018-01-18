@@ -3,30 +3,22 @@ import { Store } from '@ngrx/store';
 import { SortByName, EnumToArray, SortByPosition } from '../../../../../shared/utilities/utilityFunctions';
 import { DimeStreamType, dimeGetStreamTypeDescription } from '../../../../../shared/enums/dime/streamtypes';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Headers, Http, Response } from '@angular/http';
+// import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/Rx';
-import { AuthHttp } from 'angular2-jwt';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
 import { DimeStream, DimeStreamDetail } from '../../../../../shared/model/dime/stream';
 import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
+import { DimeStreamFieldDetail } from '../../../../../shared/model/dime/streamfield';
+import { DimeStreamBackend } from 'app/dime/dimestream/dimestream.backend';
 
 @Injectable()
 export class DimeStreamService {
-	// items: Observable<DimeStream[]>;	// typeList: DimeStreamType[];	// private _items: BehaviorSubject<DimeStream[]>;	// private baseUrl: string;	// private dataStore: { items: DimeStream[] };
-	// private headers = new Headers( { 'Content-Type': 'application/json' } );// private serviceName: string;	// // CurItem Related Information all together	// curItem: DimeStream;	// curItemEnvironmentType: string;
-	// curItemSourcedFields: any[];// curItemAssignedFields: any[];	// curItemClean = true;	// curItemDatabaseList = [];	// curItemTableList = [];
-	// // Field detail related information all together	// descriptiveTables: any = {};	// descriptiveFields: any = {};
-	// pbcsFieldTypes = [	// 	'Accounts',	// 	'Entity',	// 	'Generic',	// 	'Scenario',	// 	'Time',	// 	'Year',	// 	'Version'	// ];
-
-
-
-
 	private serviceName = 'Streams';
 
 	public itemList: DimeStream[];
@@ -41,6 +33,7 @@ export class DimeStreamService {
 		private toastr: ToastrService,
 		private store: Store<AppState>,
 		private router: Router,
+		private backend: DimeStreamBackend,
 		private environmentService: DimeEnvironmentService
 	) {
 		this.store.select( 'dimeStream' ).subscribe( streamState => {
@@ -153,6 +146,46 @@ export class DimeStreamService {
 
 	public isRDBT = () => this.currentItem.type === DimeStreamType.RDBT;
 	public isHPDB = () => this.currentItem.type === DimeStreamType.HPDB;
+
+	public fieldRefreshTables = ( field: DimeStreamFieldDetail ) => {
+		if ( !field.descriptiveDB ) {
+			this.toastr.error( 'Please assign a database to the field description before refreshing the table list' );
+			return false;
+		}
+		this.environmentService.listDescriptiveTables( this.currentItem.environment, field.descriptiveDB, this.currentItem.tableName ).subscribe(
+			( result: any[] ) => {
+				this.toastr.info( 'Table list is updated' );
+				field.descriptiveTableList = result;
+				if ( !field.descriptiveTable && result && result.length > 0 ) { field.descriptiveTable = result[0].name; }
+			}, ( error ) => {
+				this.toastr.error( 'Failed to refresh table list.', this.serviceName );
+				console.log( error );
+			}
+		);
+	};
+
+	public fieldListDescriptiveFields = ( field: DimeStreamFieldDetail ) => {
+		this.backend.listFieldsforField( { environmentID: this.currentItem.environment, field } ).subscribe( result => {
+			this.toastr.info( 'Descriptive fields are refreshed from the server for ' + field.name, this.serviceName );
+			field.descriptiveFieldList = result;
+		}, error => {
+			this.toastr.error( 'Failed to refresh descriptive fields.', this.serviceName );
+			console.error( 'fieldListDescriptiveFields:', error );
+		} );
+		// const bodyToSend = { environmentID: this.curItem.environment, field: field };
+		// this.authHttp.post( this.baseUrl + '/listFieldsforField', bodyToSend, { headers: this.headers } ).
+		// 	map( response => response.json() ).
+		// 	subscribe( ( result ) => {
+		// 		this.toastr.info( 'Descriptive fields are refreshed from the server for ' + field.name, this.serviceName );
+		// 		if ( !this.descriptiveFields[field.descriptiveDB] ) {
+		// 			this.descriptiveFields[field.descriptiveDB] = {};
+		// 		}
+		// 		this.descriptiveFields[field.descriptiveDB][field.descriptiveTable] = result;
+		// 	}, ( error ) => {
+		// 		this.toastr.error( 'Failed to refresh descriptive fields.', this.serviceName );
+		// 		console.log( error );
+		// 	} );
+	};
 
 	// constructor(
 	// 	private http: Http,
@@ -337,45 +370,10 @@ export class DimeStreamService {
 				curField.order = curKey + 1;
 			} );
 		}
-		public fieldRefreshTables = ( field: any ) => {
-			if ( !field.descriptiveDB ) {
-				this.toastr.error( 'Please assign a database to the field description before refreshing the table list' );
-				return false;
-			}
-			this.environmentService.listTables( this.curItem.environment, field.descriptiveDB ).subscribe(
-				( result ) => {
-					this.toastr.info( 'Table list is updated' );
-					this.descriptiveTables[field.descriptiveDB] = result;
-				}, ( error ) => {
-					this.toastr.error( 'Failed to refresh table list.', this.serviceName );
-					console.log( error );
-				}
-			);
-		};
-		public fieldListDescriptiveFields = ( field: any ) => {
-			const bodyToSend = { environmentID: this.curItem.environment, field: field };
-			this.authHttp.post( this.baseUrl + '/listFieldsforField', bodyToSend, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe( ( result ) => {
-					this.toastr.info( 'Descriptive fields are refreshed from the server for ' + field.name, this.serviceName );
-					if ( !this.descriptiveFields[field.descriptiveDB] ) {
-						this.descriptiveFields[field.descriptiveDB] = {};
-					}
-					this.descriptiveFields[field.descriptiveDB][field.descriptiveTable] = result;
-				}, ( error ) => {
-					this.toastr.error( 'Failed to refresh descriptive fields.', this.serviceName );
-					console.log( error );
-				} );
-		};
 		public fetchFieldDescriptions = ( stream: number, field: number ) => {
 			return this.authHttp.post( this.baseUrl + '/getFieldDescriptions', { stream: stream, field: field } ).
 				map( response => response.json() ).
 				catch( error => Observable.throw( error ) );
 		};
-		setdrfType( field, event ) {
-			field.drfType = this.descriptiveFields[field.descriptiveDB][field.descriptiveTable][event.target.selectedIndex].type;
-		}
-		setddfType( field, event ) {
-			field.ddfType = this.descriptiveFields[field.descriptiveDB][field.descriptiveTable][event.target.selectedIndex].type;
-		}*/
+		*/
 }

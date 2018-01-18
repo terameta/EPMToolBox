@@ -94,6 +94,14 @@ export class DimeEnvironmentService {
 			} );
 	}
 
+	public listDescriptiveTables = ( id: number, db: string, cube: string ) => {
+		return this.backend.listDescriptiveTables( id, db, cube )
+			.catch( resp => {
+				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+				return resp;
+			} );
+	}
+
 	public testAll = () => {
 		this.backend.testAll().subscribe( resp => {
 			this.testResult = resp;
