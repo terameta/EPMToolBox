@@ -1,13 +1,13 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-# /dist
+/dist
+/dist-server
 /tmp
 /out-tsc
 
 # dependencies
 /node_modules
-**/node_modules
 
 # IDEs and editors
 /.idea
@@ -24,8 +24,6 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-!.vscode/snippets
-!.vscode/snippets/*
 
 # misc
 /.sass-cache
@@ -44,9 +42,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Exclude Robots File
-**/robots.txt
-
 # Exclude Credentials
-**/system.conf
-**/system.conf.orig
+**/system.conf.ts
+**/system.conf.orig.ts

@@ -1,66 +1,27 @@
-# AsliTool #
+# AsliTool
 
-A toolbox for Oracle Hyperion EPM professionals.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.5.
 
-### Road Map  ###
-* Data Integration
-    * Data Integration with MSSQL DB (Done)
-    * Data Integration with Oracle DB
-    * Data Integration with MySQL DB
-* Metadata Management
-* Dashboard
+## Development server
 
-### Information ###
-This repository is developed by Visual Studio Code (http://code.visualstudio.com)
-The dev installation steps provide the information for this IDE.
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
-### Installation ###
+## Code scaffolding
 
-* Install node.js
-* Pull from the repository
-* npm install -g typescript
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-### Dev Installation ###
-* Install node.js (https://nodejs.org/en/download/)
-* Install Visual Studio Code (https://code.visualstudio.com/Download)
-* npm install -g typescript
-* npm install -g eslint
-* npm install -g tslint
-* npm install -g ts-node
-* npm install -g @angular/cli
-* npm install -g nodemon
-* npm install -g npm-check-updates
-* npm install -g node-gyp
-* (below should be run as administrator with elevated privilages)
-* npm install --global --production windows-build-tools
-* Update git hook
-    * Edit file: <project-folder>/.git/hooks/post-commit
-    * Type below content:
-        * \#!/bin/sh
-        * git push origin master
-* Go to Visual Studio Code, Click to File->Preferences->Settings
-    * Make sure you are currently on user settings while you are editing settings.json
-    * Add "typescript.tsdk": "C:/Users/username/AppData/Roaming/npm/node_modules/typescript/lib" to the json.
-    * Verify the path using npm list -g typescript
-    * Restart VSCode, and see that at the right-bottom side of the window the correct version of typescript listed when editing a TS file.
-* In Visual Studio Code 
-    * Ctrl+Shit+P
-    * Install extension
-    * Install Below Extensions
-        * tslint
-		* eslint
+## Build
 
-### About ###
-* Owner: Ali Dikici
-* Community: Oracle EPM
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
 
-### Self Notes ###
-* cd client && ng generate module dime/dimemap                                        (This will generate a module -> /src/app/dime/dimemap/dimemap.module.ts)
-* cd client && ng generate service dime/dimemap/dimemap                               (This will generate a service -> /src/app/dime/dimemap/dimemap.service.ts)
-* edit dimemap.service.ts and rename service from DimemapService to DimeMapService
-* edit app.module.ts add providers array and add "DimeMapService" to this array
-* cd client && ng generate component dime/dimemap/dimemaps                            (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemaps.component.*)
-* cd client && ng generate component dime/dimemap/dimemap-toolbar                     (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-toolbar.component.*)
-* cd client && ng generate component dime/dimemap/dimemap-list                        (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-list.component.*)
-* cd client && ng generate component dime/dimemap/dimemap-detail                      (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap-detail.component.*)
-* cd client && ng generate component dime/dimemap/dimemap                             (This will generate a component -> /src/app/dime/dimemap/dimemaps/dimemap.component.*)
+## Running unit tests
+
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+
+## Running end-to-end tests
+
+Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+
+## Further help
+
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
