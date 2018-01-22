@@ -1,6 +1,6 @@
 import { of } from 'rxjs/observable/of';
-import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
-import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
+import { DimeMatrixDetail } from '../../../../shared/model/dime/matrixDetail';
+import { DimeMatrix } from '../../../../shared/model/dime/matrix';
 import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';

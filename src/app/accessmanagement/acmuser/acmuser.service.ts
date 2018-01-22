@@ -2,10 +2,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthHttp } from 'angular2-jwt';
 import { Headers, Http } from '@angular/http';
-import { BehaviorSubject, Observable } from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 
-import { AcmUser } from '../../../../../shared/model/accessmanagement/user';
+import { AcmUser } from '../../../../shared/model/accessmanagement/user';
 
 @Injectable()
 export class AcmUserService {
@@ -39,7 +40,7 @@ export class AcmUserService {
 	}
 
 	public getAll = ( isSilent?: boolean ) => {
-		this.fetchAll().subscribe(( data ) => {
+		this.fetchAll().subscribe( ( data ) => {
 			this.dataStore.items = data;
 			this._items.next( Object.assign( {}, this.dataStore ).items );
 			if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
@@ -47,7 +48,7 @@ export class AcmUserService {
 			this.toastr.error( 'Failed to get items from server.', this.serviceName );
 			console.log( error );
 		} );
-	};
+	}
 	public fetchAll = () => {
 		return this.authHttp.get( this.baseUrl ).
 			map( response => response.json() ).
@@ -65,13 +66,13 @@ export class AcmUserService {
 				this.toastr.error( 'Failed to create new item.', this.serviceName );
 				console.log( error );
 			} );
-	};
+	}
 	public getOne = ( id: number ) => {
 		this.fetchOne( id ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				let notFound = true;
 
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) {
 						this.dataStore.items[index] = data;
 						notFound = false;
@@ -90,18 +91,18 @@ export class AcmUserService {
 				console.log( error );
 			} );
 		this.fetchUserRights( id ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				this.curItemAccessRights = data;
 			}, ( error ) => {
 				this.toastr.error( 'Failed to get user access rights' );
 				console.error( error );
-			} )
-	};
+			} );
+	}
 	public fetchOne = ( id: number ) => {
 		return this.authHttp.get( this.baseUrl + '/' + id ).
 			map( response => response.json() ).
 			catch( error => Observable.throw( error ) );
-	};
+	}
 	public fetchUserRights = ( id: number ) => {
 		return this.authHttp.get( this.baseUrl + '/userrights/' + id ).
 			map( response => response.json() ).
@@ -109,14 +110,14 @@ export class AcmUserService {
 	}
 	public update = ( curItem?: AcmUser ) => {
 		let shouldUpdate = false;
-		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; };
+		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; }
 		if ( curItem.type === 'directory' ) {
 			curItem.username = curItem.email;
 		}
 		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe( data => {
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) { this.dataStore.items[index] = data; }
 				} );
 
@@ -129,21 +130,21 @@ export class AcmUserService {
 				this.toastr.error( 'Failed to save the item.', this.serviceName );
 				console.log( error );
 			} );
-	};
+	}
 	public updateAccessRights = () => {
 		this.authHttp.put( this.baseUrl + '/userrights/' + this.curItem.id, this.curItemAccessRights, { headers: this.headers } ).
 			map( response => response.json() ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				console.log( data );
 			}, ( error ) => {
 				console.error( error );
 			} );
-	};
+	}
 	public delete( id: number, name?: string ) {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
 			this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );
 
@@ -158,12 +159,12 @@ export class AcmUserService {
 		} else {
 			this.toastr.info( 'Item deletion is cancelled.', this.serviceName );
 		}
-	};
+	}
 
 	private resetCurItem = () => {
 		this.curItem = <AcmUser>{};
 		this.curItemClean = true;
 		this.curItemAccessRights = {};
-	};
+	}
 
 }

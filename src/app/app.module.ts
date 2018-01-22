@@ -3,7 +3,7 @@ import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
 import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';
-// import { AuthHttp, AuthConfig, AUTH_PROVIDERS, provideAuth } from 'angular2-jwt';
+import { AuthHttp, AuthConfig, AUTH_PROVIDERS, provideAuth } from 'angular2-jwt';
 import { JwtModule } from '@auth0/angular-jwt';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -13,6 +13,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+// import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
 import { ToastrModule } from 'ngx-toastr';
 
@@ -27,7 +28,7 @@ import { EndUserModule } from './enduser/enduser.module';
 
 // Dime Services & Backends
 import { DimeCredentialService } from './dime/dimecredential/dimecredential.service';
-import { DimeCredentialEffects } from 'app/dime/dimecredential/dimecredential.effects';
+import { DimeCredentialEffects } from './dime/dimecredential/dimecredential.effects';
 import { DimeCredentialBackend } from './dime/dimecredential/dimecredential.backend';
 
 import { DimeEnvironmentService } from './dime/dimeenvironment/dimeenvironment.service';
@@ -39,13 +40,13 @@ import { DimeStreamEffects } from './dime/dimestream/dimestream.effects';
 import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
 
 import { DimeMapService } from './dime/dimemap/dimemap.service';
-import { DimeMapEffects } from 'app/dime/dimemap/dimemap.effects';
-import { DimeMapBackend } from 'app/dime/dimemap/dimemap.backend';
+import { DimeMapEffects } from './dime/dimemap/dimemap.effects';
+import { DimeMapBackend } from './dime/dimemap/dimemap.backend';
 
 import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
 import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
 import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
-import { DimeAsyncProcessService } from 'app/dime/dimeasyncprocess/dimeasyncprocess.service';
+import { DimeAsyncProcessService } from './dime/dimeasyncprocess/dimeasyncprocess.service';
 
 // Access Management Services
 import { AcmServerService } from './accessmanagement/acmserver/acmserver.service';
@@ -53,17 +54,16 @@ import { AcmUserService } from './accessmanagement/acmuser/acmuser.service';
 
 // End User Services
 import { EndUserService } from './enduser/enduser.service';
-import { reducers, appInitialState, RouteEffects } from 'app/ngstore/models';
+import { reducers, appInitialState, RouteEffects } from './ngstore/models';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { DimeUIEffects } from 'app/ngstore/uistate.effects';
-import { DimeUIBackend } from 'app/ngstore/uistate.backend';
-import { DimeUIService } from 'app/ngstore/uistate.service';
-import { DimeTagBackend } from 'app/dime/dimetag/dimetag.backend';
-import { DimeTagGroupBackend } from 'app/dime/dimetag/dimetaggroup.backend';
-import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
-import { DimeTagEffects } from 'app/dime/dimetag/dimetag.effects';
-import { DimeStatusEffects } from 'app/ngstore/applicationstatus';
+import { DimeUIEffects } from './ngstore/uistate.effects';
+import { DimeUIBackend } from './ngstore/uistate.backend';
+import { DimeUIService } from './ngstore/uistate.service';
+import { DimeTagBackend } from './dime/dimetag/dimetag.backend';
+import { DimeTagGroupBackend } from './dime/dimetag/dimetaggroup.backend';
+import { DimeTagService } from './dime/dimetag/dimetag.service';
+import { DimeTagEffects } from './dime/dimetag/dimetag.effects';
+import { DimeStatusEffects } from './ngstore/applicationstatus';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -110,9 +110,9 @@ export function tokenGetter() {
 			DimeMatrixEffects
 		] ),
 		StoreRouterConnectingModule,
-		StoreDevtoolsModule.instrument( {
-			maxAge: 25
-		} )
+		// StoreDevtoolsModule.instrument( {
+		// 	maxAge: 25
+		// } )
 	],
 	providers: [
 		AuthGuard,

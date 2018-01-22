@@ -1,10 +1,10 @@
 import { Action as NgRXAction, Store } from '@ngrx/store';
-import { DimeTag } from '../../../../../shared/model/dime/tag';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
-import { DimeTagState } from 'app/dime/dimetag/dimetag.state';
+import { DimeTag } from '../../../../shared/model/dime/tag';
+import { DimeTagActions } from './dimetag.actions';
+import { DimeTagState } from './dimetag.state';
 import * as _ from 'lodash';
-import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
-import { AppState } from 'app/ngstore/models';
+import { DimeTagGroupActions } from './dimetaggroup.actions';
+import { AppState } from '../../ngstore/models';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -38,19 +38,19 @@ const handleAllLoadComplete = ( state: DimeTagState, action: Action ): DimeTagSt
 	const newState: DimeTagState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
 	return newState;
-}
+};
 
 const handleOneLoadComplete = ( state: DimeTagState, action: Action ): DimeTagState => {
 	const newState: DimeTagState = Object.assign( {}, state );
 	newState.curItem = action.payload;
 	return newState;
-}
+};
 
 const handleGroupAllLoadComplete = ( state: DimeTagState, action: Action ): DimeTagState => {
 	const newState: DimeTagState = Object.assign( {}, state );
 	newState.groups = _.keyBy( action.payload, 'id' );
 	return newState;
-}
+};
 
 const handleGroupOneReorder = ( state: DimeTagState, action: Action ): DimeTagState => {
 	const newState: DimeTagState = Object.assign( {}, state );
@@ -70,11 +70,11 @@ const handleGroupOneReorder = ( state: DimeTagState, action: Action ): DimeTagSt
 		newState.groups[tarId].isReordered = true;
 	}
 	return newState;
-}
+};
 
 const handleGroupOneSelected = ( state: DimeTagState, action: Action ): DimeTagState => {
 	const newState: DimeTagState = Object.assign( {}, state );
 	newState.curGroup = newState.groups[action.payload];
 	newState.curGroupID = action.payload;
 	return newState;
-}
+};

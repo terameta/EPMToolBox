@@ -2,8 +2,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthHttp } from 'angular2-jwt';
 import { Headers, Http } from '@angular/http';
-import { BehaviorSubject, Observable } from 'rxjs/Rx';
-import { AcmServer } from '../../../../../shared/model/accessmanagement/server';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { AcmServer } from '../../../../shared/model/accessmanagement/server';
 import { Injectable } from '@angular/core';
 
 @Injectable()
@@ -36,7 +37,7 @@ export class AcmServerService {
 	}
 
 	public getAll = ( isSilent?: boolean ) => {
-		this.fetchAll().subscribe(( data ) => {
+		this.fetchAll().subscribe( ( data ) => {
 			this.dataStore.items = data;
 			this._items.next( Object.assign( {}, this.dataStore ).items );
 			if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
@@ -65,10 +66,10 @@ export class AcmServerService {
 	};
 	public getOne = ( id: number ) => {
 		this.fetchOne( id ).
-			subscribe(( data ) => {
+			subscribe( ( data ) => {
 				let notFound = true;
 
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) {
 						this.dataStore.items[index] = data;
 						notFound = false;
@@ -98,7 +99,7 @@ export class AcmServerService {
 		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe( data => {
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) { this.dataStore.items[index] = data; }
 				} );
 
@@ -116,7 +117,7 @@ export class AcmServerService {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
 			this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
-				this.dataStore.items.forEach(( item, index ) => {
+				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );
 

@@ -1,7 +1,7 @@
-import { DimeScheduleStepType } from '../../../../../../../shared/enums/dime/schedulesteptypes';
-import { EnumToArray, SortByPosition } from '../../../../../../../shared/utilities/utilityFunctions';
+import { DimeScheduleStepType } from '../../../../../../shared/enums/dime/schedulesteptypes';
+import { EnumToArray, SortByPosition } from '../../../../../../shared/utilities/utilityFunctions';
 import { Component, OnInit } from '@angular/core';
-import { DimeScheduleService } from 'app/dime/dimeschedule/dimeschedule.service';
+import { DimeScheduleService } from '../../dimeschedule.service';
 import { DimeProcessService } from '../../../dimeprocess/dimeprocess.service';
 
 

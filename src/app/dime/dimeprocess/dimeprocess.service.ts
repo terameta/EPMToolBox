@@ -3,15 +3,14 @@ import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 
 import { ToastrService } from 'ngx-toastr';
-import { BehaviorSubject } from 'rxjs/Rx';
-import 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { AuthHttp } from 'angular2-jwt';
 
-import { DimeProcess } from '../../../../../shared/model/dime/process';
-import { DimeProcessStep } from '../../../../../shared/model/dime/processstep';
-import { DimeProcessStepType } from '../../../../../shared/model/dime/processsteptype';
-import { DimeStream } from '../../../../../shared/model/dime/stream';
+import { DimeProcess } from '../../../../shared/model/dime/process';
+import { DimeProcessStep } from '../../../../shared/model/dime/processstep';
+import { DimeProcessStepType } from '../../../../shared/model/dime/processsteptype';
+import { DimeStream } from '../../../../shared/model/dime/stream';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
 import { DimeStreamService } from '../dimestream/dimestream.service';

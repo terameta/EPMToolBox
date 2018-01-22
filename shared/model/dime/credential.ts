@@ -5,3 +5,7 @@ export interface DimeCredential {
 	password: string,
 	tags: any
 }
+
+export interface DimeCredentialDetail extends DimeCredential {
+	clearPassword: string
+}

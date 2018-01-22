@@ -5,14 +5,20 @@ import { Effect, Actions } from '@ngrx/effects';
 import { Action as NgRXAction, Store } from '@ngrx/store';
 
 import { of } from 'rxjs/observable/of';
+import 'rxjs/add/operator/switchMap';
+import 'rxjs/add/operator/withLatestFrom';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/finally';
 
-import { AppState } from 'app/ngstore/models';
-import { DimeStatusActions } from 'app/ngstore/applicationstatus';
 
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
-import { DimeTagBackend } from 'app/dime/dimetag/dimetag.backend';
-import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
-import { DimeTagGroupBackend } from 'app/dime/dimetag/dimetaggroup.backend';
+import { AppState } from '../../ngstore/models';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
+
+import { DimeTagActions } from './dimetag.actions';
+import { DimeTagBackend } from './dimetag.backend';
+import { DimeTagGroupActions } from './dimetaggroup.actions';
+import { DimeTagGroupBackend } from './dimetaggroup.backend';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -86,7 +92,7 @@ export class DimeTagEffects {
 			return this.backend.oneLoad( action.payload )
 				.map( resp => DimeTagActions.ONE.LOAD.complete( resp ) )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
-				.finally( () => { this.store$.dispatch( DimeTagActions.ALL.LOAD.initiateifempty() ) } );
+				.finally( () => { this.store$.dispatch( DimeTagActions.ALL.LOAD.initiateifempty() ); } );
 		} );
 
 	@Effect() GROUP_ALL_LOAD_INITIATE$ = this.actions$

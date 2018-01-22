@@ -1,6 +1,6 @@
-import { SortByName } from '../../../../../../shared/utilities/utilityFunctions';
+import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
 import { AppState } from '../../../ngstore/models';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs/Subscription';
 import { DimeAsyncProcessState } from '../dimeasyncprocess.ngrx';
 import { Store } from '@ngrx/store';
 import { Component, OnDestroy, OnInit } from '@angular/core';

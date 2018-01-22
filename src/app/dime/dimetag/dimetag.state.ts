@@ -1,5 +1,5 @@
-import { DimeTag } from '../../../../../shared/model/dime/tag';
-import { DimeTagGroup } from '../../../../../shared/model/dime/taggroup';
+import { DimeTag } from '../../../../shared/model/dime/tag';
+import { DimeTagGroup } from '../../../../shared/model/dime/taggroup';
 
 
 
@@ -17,4 +17,4 @@ export const dimeTagInitialState: DimeTagState = {
 	groups: [],
 	curGroup: <DimeTagGroup>{ id: 0 },
 	curGroupID: 0
-}
+};

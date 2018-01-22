@@ -1,11 +1,11 @@
 import { DimeAsyncProcessBackend } from './dimeasyncprocess.backend';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
-import { DimeAsyncProcess } from '../../../../../shared/model/dime/asyncprocess';
+import { DimeAsyncProcess } from '../../../../shared/model/dime/asyncprocess';
 import { Action } from '@ngrx/store';
 
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
-import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
+import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
+import { DimeStreamActions } from '../dimestream/dimestream.actions';
 
 import * as _ from 'lodash';
 
@@ -31,7 +31,7 @@ export const DIME_ASYNC_PROCESS_ACTIONS = {
 			COMPLETE: 'DIME_ASYNC_PROCESS_ACTIONS_ONE_CREATE_COMPLETE'
 		}
 	}
-}
+};
 
 export function dimeAsyncProcessReducer( state: DimeAsyncProcessState, action: Action ): DimeAsyncProcessState {
 	switch ( action.type ) {
@@ -91,10 +91,10 @@ const handleAllLoadComplete = ( state: DimeAsyncProcessState, action: DimeAsyncP
 	const newState: DimeAsyncProcessState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
 	return newState;
-}
+};
 
 const handleOneCreateComplete = ( state: DimeAsyncProcessState, action: DimeAsyncProcessOneCreateCompleteAction ): DimeAsyncProcessState => {
 	const newState: DimeAsyncProcessState = Object.assign( {}, state );
 	newState.items[action.payload.id] = action.payload;
 	return newState;
-}
+};

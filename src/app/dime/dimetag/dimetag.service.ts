@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
-import { AppState } from 'app/ngstore/models';
 import * as _ from 'lodash';
-import { SortByName, SortByPosition } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName, SortByPosition } from '../../../../shared/utilities/utilityFunctions';
 import { Router } from '@angular/router';
-import { DimeTag } from '../../../../../shared/model/dime/tag';
-import { DimeTagGroup } from '../../../../../shared/model/dime/taggroup';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
-import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
-import { DimeUIService } from 'app/ngstore/uistate.service';
+import { DimeTag } from '../../../../shared/model/dime/tag';
+import { DimeTagGroup } from '../../../../shared/model/dime/taggroup';
+import { DimeTagActions } from './dimetag.actions';
+import { DimeTagGroupActions } from './dimetaggroup.actions';
+import { AppState } from '../../ngstore/models';
+import { DimeUIService } from '../../ngstore/uistate.service';
 
 @Injectable()
 export class DimeTagService {

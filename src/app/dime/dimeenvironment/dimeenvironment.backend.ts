@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { DimeEnvironment } from '../../../../../shared/model/dime/environment';
-import { DimeEnvironmentDetail } from '../../../../../shared/model/dime/environmentDetail';
+import { DimeEnvironment } from '../../../../shared/model/dime/environment';
+import { DimeEnvironmentDetail } from '../../../../shared/model/dime/environmentDetail';
 
 @Injectable()
 export class DimeEnvironmentBackend {

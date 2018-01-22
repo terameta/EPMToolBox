@@ -2,8 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { DimeCredential } from '../../../../../shared/model/dime/credential';
-import { DimeCredentialDetail } from '../../../../../shared/model/dime/credentialDetail';
+import { DimeCredential, DimeCredentialDetail } from '../../../../shared/model/dime/credential';
 
 @Injectable()
 export class DimeCredentialBackend {

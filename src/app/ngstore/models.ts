@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import {
 	DimeMatrixAllLoadInitiateAction,
 	DimeMatrixAllLoadInitiateIfEmptyAction,
@@ -20,31 +20,31 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { Action, State, Store } from '@ngrx/store';
 import { of } from 'rxjs/observable/of';
-import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from 'app/ngstore/applicationstatus';
+import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from './applicationstatus';
 
-import { dimeUIReducer } from 'app/ngstore/uistate.reducer';
-import { DimeUIState, dimeUIInitialState } from 'app/ngstore/uistate.state';
+import { dimeUIReducer } from './uistate.reducer';
+import { DimeUIState, dimeUIInitialState } from './uistate.state';
 
-import { DimeTagState, dimeTagInitialState } from 'app/dime/dimetag/dimetag.state';
-import { dimeTagReducer } from 'app/dime/dimetag/dimetag.reducer';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
-import { DimeTagGroupActions } from 'app/dime/dimetag/dimetaggroup.actions';
+import { DimeTagState, dimeTagInitialState } from '../dime/dimetag/dimetag.state';
+import { dimeTagReducer } from '../dime/dimetag/dimetag.reducer';
+import { DimeTagActions } from '../dime/dimetag/dimetag.actions';
+import { DimeTagGroupActions } from '../dime/dimetag/dimetaggroup.actions';
 
-import { DimeCredentialState, dimeCredentialInitialState } from 'app/dime/dimecredential/dimecredential.state';
-import { dimeCredentialReducer } from 'app/dime/dimecredential/dimecredential.reducer';
-import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
+import { DimeCredentialState, dimeCredentialInitialState } from '../dime/dimecredential/dimecredential.state';
+import { dimeCredentialReducer } from '../dime/dimecredential/dimecredential.reducer';
+import { DimeCredentialActions } from '../dime/dimecredential/dimecredential.actions';
 
-import { DimeEnvironmentState, dimeEnvironmentInitialState } from 'app/dime/dimeenvironment/dimeenvironment.state';
-import { dimeEnvironmentReducer } from 'app/dime/dimeenvironment/dimeenvironment.reducer';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeEnvironmentState, dimeEnvironmentInitialState } from '../dime/dimeenvironment/dimeenvironment.state';
+import { dimeEnvironmentReducer } from '../dime/dimeenvironment/dimeenvironment.reducer';
+import { DimeEnvironmentActions } from '../dime/dimeenvironment/dimeenvironment.actions';
 
-import { DimeStreamState, dimeStreamInitialState } from 'app/dime/dimestream/dimestream.state';
-import { dimeStreamReducer } from 'app/dime/dimestream/dimestream.reducer';
-import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
+import { DimeStreamState, dimeStreamInitialState } from '../dime/dimestream/dimestream.state';
+import { dimeStreamReducer } from '../dime/dimestream/dimestream.reducer';
+import { DimeStreamActions } from '../dime/dimestream/dimestream.actions';
 
-import { DimeMapState, dimeMapInitialState } from 'app/dime/dimemap/dimemap.state';
-import { dimeMapReducer } from 'app/dime/dimemap/dimemap.reducer';
-import { DimeMapActions } from 'app/dime/dimemap/dimemap.actions';
+import { DimeMapState, dimeMapInitialState } from '../dime/dimemap/dimemap.state';
+import { dimeMapReducer } from '../dime/dimemap/dimemap.reducer';
+import { DimeMapActions } from '../dime/dimemap/dimemap.actions';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
@@ -71,7 +71,7 @@ export const appInitialState: AppState = {
 	dimeStream: dimeStreamInitialState,
 	dimeMap: dimeMapInitialState,
 	dimeMatrix: dimeMatrixInitialState
-}
+};
 
 export class DoNothingAction implements Action {
 	readonly type = 'DONOTHINGATALL';
@@ -115,7 +115,7 @@ export const reducers = {
 	dimeStream: dimeStreamReducer,
 	dimeMap: dimeMapReducer,
 	dimeMatrix: dimeMatrixReducer
-}
+};
 
 @Injectable()
 export class RouteEffects {

@@ -1,12 +1,12 @@
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment.service';
-import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
-import { DimeUIService } from 'app/ngstore/uistate.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
 
 @Component( {
 	selector: 'app-dimeenvironment-list',

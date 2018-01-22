@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 
-import { HotTableModule } from 'ng2-handsontable';
+// import { HotTableModule } from 'ng2-handsontable';
 
 
 import { AuthModule } from '../../welcome/auth.module';
@@ -33,7 +33,7 @@ const dimeMapRoutes: Routes = [
 			{ path: 'importexport', component: DimemapDetailTabImportexportComponent }
 		]
 	}
-]
+];
 
 @NgModule( {
 	imports: [
@@ -41,7 +41,7 @@ const dimeMapRoutes: Routes = [
 		FormsModule,
 		RouterModule.forChild( dimeMapRoutes ),
 		AuthModule,
-		HotTableModule
+		// HotTableModule
 	],
 	exports: [
 		RouterModule

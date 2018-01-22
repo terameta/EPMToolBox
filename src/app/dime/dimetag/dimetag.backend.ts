@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { DimeTag } from '../../../../../shared/model/dime/tag';
+import { DimeTag } from '../../../../shared/model/dime/tag';
 
 @Injectable()
 export class DimeTagBackend {

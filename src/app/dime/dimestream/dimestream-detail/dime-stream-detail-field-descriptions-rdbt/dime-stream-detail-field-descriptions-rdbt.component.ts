@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { DimeStreamFieldDetail } from '../../../../../../../shared/model/dime/streamfield';
-import { DimeStreamService } from 'app/dime/dimestream/dimestream.service';
+import { DimeStreamFieldDetail } from '../../../../../../shared/model/dime/streamfield';
+import { DimeStreamService } from '../../dimestream.service';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 

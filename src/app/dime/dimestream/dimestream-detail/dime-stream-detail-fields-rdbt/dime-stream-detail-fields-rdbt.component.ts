@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DimeStreamService } from 'app/dime/dimestream/dimestream.service';
+import { DimeStreamService } from '../../dimestream.service';
 
 @Component( {
 	selector: 'app-dime-stream-detail-fields-rdbt',

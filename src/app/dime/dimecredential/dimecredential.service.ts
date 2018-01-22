@@ -9,11 +9,10 @@ import { Store } from '@ngrx/store';
 
 import * as _ from 'lodash';
 
-import { DimeCredential } from '../../../../../shared/model/dime/credential';
-import { DimeCredentialDetail } from '../../../../../shared/model/dime/credentialDetail';
-import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
+import { DimeCredential, DimeCredentialDetail } from '../../../../shared/model/dime/credential';
+import { DimeCredentialActions } from './dimecredential.actions';
 
-import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName } from '../../../../shared/utilities/utilityFunctions';
 
 @Injectable()
 export class DimeCredentialService {

@@ -1,4 +1,4 @@
-import { DimeMap } from '../../../../../shared/model/dime/map';
+import { DimeMap } from '../../../../shared/model/dime/map';
 
 export interface DimeMapState {
 	items: { [key: number]: DimeMap },

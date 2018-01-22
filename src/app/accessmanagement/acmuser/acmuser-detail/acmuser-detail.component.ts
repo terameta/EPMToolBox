@@ -1,5 +1,5 @@
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs/Subscription';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
@@ -61,7 +61,7 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 		if ( this.mainService.curItem.type === 'directory' ) {
 			this.mainService.curItem.username = this.mainService.curItem.email;
 		}
-	};
+	}
 	private populateAccessRights = () => {
 		if ( Object.keys( this.mainService.curItemAccessRights ).length === 0 ) {
 			setTimeout( this.populateAccessRights, 1000 );
@@ -79,7 +79,7 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 				curAssignedProcess.user = this.mainService.curItem.id;
 			} );
 		}
-	};
+	}
 	private processAccessRightChange = () => {
 		this.mainService.curItemAccessRights.processes = [];
 		this.assignedProcesses.forEach( ( curAssignedProcess ) => {
@@ -87,5 +87,5 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 				this.mainService.curItemAccessRights.processes.push( { user: curAssignedProcess.user, process: curAssignedProcess.id } );
 			}
 		} );
-	};
+	}
 }

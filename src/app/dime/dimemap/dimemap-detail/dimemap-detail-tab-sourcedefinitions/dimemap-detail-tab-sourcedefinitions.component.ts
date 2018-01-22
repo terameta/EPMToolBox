@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { DimeMapService } from '../../dimemap.service';
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
-import { DimeMapField } from '../../../../../../../shared/model/dime/map';
+import { DimeMapField } from '../../../../../../shared/model/dime/map';
 
 @Component( {
 	selector: 'app-dimemap-detail-tab-sourcedefinitions',

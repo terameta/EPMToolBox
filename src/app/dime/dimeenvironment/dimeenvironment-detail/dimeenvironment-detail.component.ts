@@ -3,17 +3,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
 import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 
 import { DimeEnvironmentService } from '../dimeenvironment.service';
-import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
 import { Store } from '@ngrx/store';
-import { AppState } from 'app/ngstore/models';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
-import { DimeCredentialService } from 'app/dime/dimecredential/dimecredential.service';
-import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
-
-// import { DimeEnvironment } from "../../../../../../shared/model/dime/environment";
+import { AppState } from '../../../ngstore/models';
+import { DimeEnvironmentActions } from '../dimeenvironment.actions';
+import { DimeCredentialService } from '../../dimecredential/dimecredential.service';
+import { DimeCredentialActions } from '../../dimecredential/dimecredential.actions';
 
 @Component( {
 	selector: 'app-dimeenvironment-detail',
@@ -21,11 +19,6 @@ import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.ac
 	styleUrls: ['./dimeenvironment-detail.component.css']
 } )
 export class DimeenvironmentDetailComponent implements OnInit, OnDestroy {
-	// curItem: Environment;
-	// paramsSubscription: Subscription;
-
-	// curEnvironmentID: number;
-	// curEnvironment: any = {};
 
 	constructor(
 		private route: ActivatedRoute,

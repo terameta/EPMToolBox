@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { DimeStream, DimeStreamDetail } from '../../../../../shared/model/dime/stream';
-import { DimeStreamField, DimeStreamFieldDetail } from '../../../../../shared/model/dime/streamfield';
+import { DimeStream, DimeStreamDetail } from '../../../../shared/model/dime/stream';
+import { DimeStreamField, DimeStreamFieldDetail } from '../../../../shared/model/dime/streamfield';
 
 
 @Injectable()

@@ -1,15 +1,15 @@
-import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
+import { DimeMatrixDetail } from '../../../../shared/model/dime/matrixDetail';
 import { of } from 'rxjs/observable/of';
 import { DimeMatrixBackend } from './dimematrix.backend';
 import { AppState } from '../../ngstore/models';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
-import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
+import { DimeMatrix } from '../../../../shared/model/dime/matrix';
 import { Router } from '@angular/router';
 
 import * as _ from 'lodash';
-import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
+import { DimeStreamActions } from '../dimestream/dimestream.actions';
 
 export interface DimeMatrixState {
 	items: { [key: number]: DimeMatrix }
@@ -19,7 +19,7 @@ export interface DimeMatrixState {
 export const dimeMatrixInitialState: DimeMatrixState = {
 	items: [],
 	curItem: <DimeMatrixDetail>{}
-}
+};
 
 export const DIME_MATRIX_ACTIONS = {
 	ALL: {
@@ -47,7 +47,7 @@ export const DIME_MATRIX_ACTIONS = {
 			COMPLETE: 'DIME_MATRIX_ACTIONS_ONE_UPDATE_COMPLETE'
 		}
 	}
-}
+};
 
 export function dimeMatrixReducer( state: DimeMatrixState, action: Action ): DimeMatrixState {
 	switch ( action.type ) {
@@ -72,7 +72,7 @@ export class DimeMatrixEffects {
 	@Effect() DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DIME_MATRIX_ACTIONS.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.state$ )
-		.filter( ( [action, state] ) => { return ( !state.dimeMatrix.items || Object.keys( state.dimeMatrix.items ).length === 0 ); } )
+		.filter( ( [action, state] ) => ( !state.dimeMatrix.items || Object.keys( state.dimeMatrix.items ).length === 0 ) )
 		.map( ( [action, state] ) => action )
 		.switchMap( ( a: DimeMatrixAllLoadInitiateIfEmptyAction ) => of( new DimeMatrixAllLoadInitiateAction() ) );
 
@@ -177,10 +177,10 @@ const handleAllLoadComplete = ( state: DimeMatrixState, action: DimeMatrixAllLoa
 	const newState: DimeMatrixState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
 	return newState;
-}
+};
 
 const handleOneLoadComplete = ( state: DimeMatrixState, action: DimeMatrixOneLoadCompleteAction ): DimeMatrixState => {
 	const newState: DimeMatrixState = Object.assign( {}, state );
 	newState.curItem = action.payload;
 	return newState;
-}
+};

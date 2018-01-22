@@ -5,11 +5,11 @@ import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
 import * as _ from 'lodash';
 
-import { DimeMap } from '../../../../../shared/model/dime/map';
-import { AppState } from 'app/ngstore/models';
-import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
-import { DimeMapActions } from 'app/dime/dimemap/dimemap.actions';
-import { DimeMapBackend } from 'app/dime/dimemap/dimemap.backend';
+import { DimeMap } from '../../../../shared/model/dime/map';
+import { SortByName } from '../../../../shared/utilities/utilityFunctions';
+import { DimeMapActions } from './dimemap.actions';
+import { DimeMapBackend } from './dimemap.backend';
+import { AppState } from '../../ngstore/models';
 
 @Injectable()
 export class DimeMapService {
@@ -62,7 +62,7 @@ export class DimeMapService {
 		}, ( error ) => {
 			this.toastr.error( 'Failed to prepare the map tables.', this.serviceName );
 			console.log( error );
-		} )
+		} );
 	}
 	public isReady = () => this.store.dispatch( DimeMapActions.ONE.ISREADY.initiate( this.currentItem.id ) );
 

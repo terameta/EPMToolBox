@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs/Subscription';
 
 import { DimeProcessService } from '../dimeprocess.service';
 import { DimeStreamService } from '../../dimestream/dimestream.service';

@@ -1,10 +1,10 @@
-import { DimeStream } from '../../../../../../shared/model/dime/stream';
-import { SortByName } from '../../../../../../shared/utilities/utilityFunctions';
-import { DimeMatrix } from '../../../../../../shared/model/dime/matrix';
+import { DimeStream } from '../../../../../shared/model/dime/stream';
+import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
 import { AppState } from '../../../ngstore/models';
 import { Store } from '@ngrx/store';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs/Subscription';
 import * as _ from 'lodash';
 
 import { DimeMatrixService } from '../dimematrix.service';

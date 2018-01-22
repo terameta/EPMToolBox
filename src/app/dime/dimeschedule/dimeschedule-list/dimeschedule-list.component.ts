@@ -1,5 +1,5 @@
-import { EnumToArray } from '../../../../../../shared/utilities/utilityFunctions';
-import { ATStatusType } from '../../../../../../shared/enums/generic/statustypes';
+import { EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
+import { ATStatusType } from '../../../../../shared/enums/generic/statustypes';
 import { DimeScheduleService } from '../dimeschedule.service';
 import { Component, OnInit } from '@angular/core';
 
@@ -28,5 +28,5 @@ export class DimescheduleListComponent implements OnInit {
 			}
 		} );
 		return toReturn;
-	};
+	}
 }

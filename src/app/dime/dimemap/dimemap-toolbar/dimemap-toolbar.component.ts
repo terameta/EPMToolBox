@@ -1,9 +1,9 @@
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import { Component, OnInit } from '@angular/core';
 
 import { DimeMapService } from '../dimemap.service';
-import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
-import { DimeUIService } from 'app/ngstore/uistate.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
 
 @Component( {
 	selector: 'app-dimemap-toolbar',

@@ -1,5 +1,4 @@
-import { DimeCredential } from '../../../../../shared/model/dime/credential';
-import { DimeCredentialDetail } from '../../../../../shared/model/dime/credentialDetail';
+import { DimeCredential, DimeCredentialDetail } from '../../../../shared/model/dime/credential';
 
 export interface DimeCredentialState {
 	items: { [key: number]: DimeCredential },
@@ -9,4 +8,4 @@ export interface DimeCredentialState {
 export const dimeCredentialInitialState: DimeCredentialState = {
 	items: [],
 	curItem: <DimeCredentialDetail>{ id: 0, tags: {} }
-}
+};

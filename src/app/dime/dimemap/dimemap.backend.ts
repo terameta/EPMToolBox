@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { DimeMap } from '../../../../../shared/model/dime/map';
+import { DimeMap } from '../../../../shared/model/dime/map';
 
 @Injectable()
 export class DimeMapBackend {

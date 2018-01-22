@@ -6,13 +6,13 @@ import { Effect, Actions } from '@ngrx/effects';
 
 import { of } from 'rxjs/observable/of';
 
-import { AppState } from 'app/ngstore/models';
-import { DimeMapBackend } from 'app/dime/dimemap/dimemap.backend';
-import { DimeMapActions } from 'app/dime/dimemap/dimemap.actions';
-import { DimeStatusActions } from 'app/ngstore/applicationstatus';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
-import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { AppState } from '../../ngstore/models';
+import { DimeMapBackend } from './dimemap.backend';
+import { DimeMapActions } from './dimemap.actions';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
+import { DimeTagActions } from '../dimetag/dimetag.actions';
+import { DimeStreamActions } from '../dimestream/dimestream.actions';
+import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -37,7 +37,7 @@ export class DimeMapEffects {
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeMapActions.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.store$ )
-		.filter( ( [action, store] ) => { return ( !store.dimeMap.items || Object.keys( store.dimeMap.items ).length === 0 ); } )
+		.filter( ( [action, store] ) => ( !store.dimeMap.items || Object.keys( store.dimeMap.items ).length === 0 ) )
 		.map( ( [action, store] ) => action )
 		.switchMap( action => of( DimeMapActions.ALL.LOAD.initiate() ) );
 
@@ -70,7 +70,7 @@ export class DimeMapEffects {
 					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
-				.finally( () => { this.store$.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() ) } );
+				.finally( () => { this.store$.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() ); } );
 		} );
 
 	@Effect() ONE_LOAD_COMPLETE$ = this.actions$

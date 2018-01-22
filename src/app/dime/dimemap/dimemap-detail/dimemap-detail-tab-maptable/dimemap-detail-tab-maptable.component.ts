@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
-import * as Handsontable from 'handsontable/dist/handsontable.full.js';
+// import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
-import { DimeMapService } from 'app/dime/dimemap/dimemap.service';
+import { DimeMapService } from '../../../dimemap/dimemap.service';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -20,7 +20,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	private options: any;
 	private dataObject;
 
-	private hot: Handsontable;
+	// private hot: Handsontable;
 
 	private filterChangeWaiter: any;
 

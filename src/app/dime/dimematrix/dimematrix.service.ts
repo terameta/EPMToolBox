@@ -1,5 +1,5 @@
 import { DimeMatrixOneUpdateInitiateAction } from './dimematrix.ngrx';
-import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName } from '../../../../shared/utilities/utilityFunctions';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
@@ -7,9 +7,9 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AppState } from '../../ngstore/models';
 
-import { DimeMatrix } from '../../../../../shared/model/dime/matrix';
-import { DimeMatrixDetail } from '../../../../../shared/model/dime/matrixDetail';
-import { DimeMatrixBackend } from 'app/dime/dimematrix/dimematrix.backend';
+import { DimeMatrix } from '../../../../shared/model/dime/matrix';
+import { DimeMatrixDetail } from '../../../../shared/model/dime/matrixDetail';
+import { DimeMatrixBackend } from './dimematrix.backend';
 
 import { DimeMapService } from '../dimemap/dimemap.service';
 import { DimeStreamService } from '../dimestream/dimestream.service';
@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs/Subscription';
 import * as _ from 'lodash';
 import { Store } from '@ngrx/store';
 
-import { DimeMatrixOneDeleteInitiateAction } from 'app/dime/dimematrix/dimematrix.ngrx';
+import { DimeMatrixOneDeleteInitiateAction } from './dimematrix.ngrx';
 
 @Injectable()
 export class DimeMatrixService {

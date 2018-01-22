@@ -1,8 +1,8 @@
 import { Http, Headers, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
-import 'rxjs/Rx';
-import { Observable } from 'rxjs/Observable'
+import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import 'rxjs/add/operator/map';
 import { Router } from '@angular/router';
 import { tokenNotExpired, JwtHelper } from 'angular2-jwt';
 
@@ -24,19 +24,17 @@ export class AuthService {
 	signinUser( username: string, password: string ) {
 		const headers = new Headers( { 'Content-Type': 'application/json' } );
 
-		return this.http.post( '/api/auth/signin', { username: username, password: password }, { headers: headers } ).map(
+		return this.http.post( '/api/auth/signin', { username: username, password: password }, { headers: headers } )
+			.map(
 			( response: Response ) => {
 				const data = response.json();
 				this._setSession( data );
 				return data;
-			}
-		).catch(
-			( error: Response ) => {
+			}, ( error: Response ) => {
 				// console.log(error.json());
 				const errorMessage: string = error.json().message;
 				return Observable.throw( errorMessage );
-			}
-			);
+			} );
 	}
 
 	setLoggedIn( value: boolean ) {

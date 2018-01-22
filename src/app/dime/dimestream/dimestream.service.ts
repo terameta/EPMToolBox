@@ -1,28 +1,27 @@
 import { AppState } from '../../ngstore/models';
 import { Store } from '@ngrx/store';
-import { SortByName, EnumToArray, SortByPosition } from '../../../../../shared/utilities/utilityFunctions';
-import { DimeStreamType, dimeGetStreamTypeDescription } from '../../../../../shared/enums/dime/streamtypes';
+import { SortByName, EnumToArray, SortByPosition } from '../../../../shared/utilities/utilityFunctions';
+import { DimeStreamType, dimeGetStreamTypeDescription } from '../../../../shared/enums/dime/streamtypes';
 import { ActivatedRoute, Router } from '@angular/router';
-// import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
 import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
-import { DimeStream, DimeStreamDetail } from '../../../../../shared/model/dime/stream';
-import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
-import { DimeStreamFieldDetail } from '../../../../../shared/model/dime/streamfield';
-import { DimeStreamBackend } from 'app/dime/dimestream/dimestream.backend';
+import { DimeStream, DimeStreamDetail } from '../../../../shared/model/dime/stream';
+import { DimeStreamActions } from './dimestream.actions';
+import { DimeStreamFieldDetail } from '../../../../shared/model/dime/streamfield';
+import { DimeStreamBackend } from './dimestream.backend';
 
 @Injectable()
 export class DimeStreamService {
 	private serviceName = 'Streams';
 
 	public itemList: DimeStreamDetail[];
-	public itemObject: { [key: number]: DimeStreamDetail }
+	public itemObject: { [key: number]: DimeStreamDetail };
 	public currentItem: DimeStreamDetail;
 	public currentItemClean: boolean;
 	public typeList = EnumToArray( DimeStreamType );
@@ -125,10 +124,10 @@ export class DimeStreamService {
 
 	public fieldsListFromSourceEnvironment = ( id: number ) => {
 		this.store.dispatch( DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.initiate( id ) );
-	};
+	}
 
 	public fieldsStartOver = ( id?: number ) => {
-		if ( !id ) { id = this.currentItem.id };
+		if ( !id ) { id = this.currentItem.id; }
 		if ( confirm( 'Are you sure to delete all the assigned fields?' ) ) {
 			this.store.dispatch( DimeStreamActions.ONE.FIELDS.STARTOVER.initiate( id ) );
 		}
@@ -162,7 +161,7 @@ export class DimeStreamService {
 				console.log( error );
 			}
 		);
-	};
+	}
 
 	public fieldListDescriptiveFields = ( field: DimeStreamFieldDetail ) => {
 		this.backend.listFieldsforField( { environmentID: this.currentItem.environment, field } ).subscribe( result => {
@@ -172,7 +171,7 @@ export class DimeStreamService {
 			this.toastr.error( 'Failed to refresh descriptive fields.', this.serviceName );
 			console.error( 'fieldListDescriptiveFields:', error );
 		} );
-	};
+	}
 
 	// constructor(
 	// 	private http: Http,

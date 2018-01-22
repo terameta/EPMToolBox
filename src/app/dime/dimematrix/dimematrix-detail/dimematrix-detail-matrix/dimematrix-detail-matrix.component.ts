@@ -1,8 +1,8 @@
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMatrixService } from '../../dimematrix.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import * as Handsontable from 'handsontable/dist/handsontable.full.js';
-import { HotTable } from 'ng2-handsontable';
+// import * as Handsontable from 'handsontable/dist/handsontable.full.js';
+// import { HotTable } from 'ng2-handsontable';
 import { ToastrService } from 'ngx-toastr';
 
 @Component( {
@@ -42,6 +42,10 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 
 	ngOnInit() {
 		// this.getReady();
+	}
+
+	public windowResized = () => {
+		console.log( 'Window is resized' );
 	}
 	/*
 		private getReady = () => {

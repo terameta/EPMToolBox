@@ -9,14 +9,14 @@ import { ToastrService } from 'ngx-toastr';
 
 import * as _ from 'lodash';
 
-import { DimeEnvironment } from '../../../../../shared/model/dime/environment';
-import { DimeEnvironmentDetail } from '../../../../../shared/model/dime/environmentDetail';
+import { DimeEnvironment } from '../../../../shared/model/dime/environment';
+import { DimeEnvironmentDetail } from '../../../../shared/model/dime/environmentDetail';
 
-import { SortByName, EnumToArray } from '../../../../../shared/utilities/utilityFunctions';
-import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../../../../shared/enums/dime/environmenttypes';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
-import { DimeEnvironmentBackend } from 'app/dime/dimeenvironment/dimeenvironment.backend';
-import { DimeStatusActions } from 'app/ngstore/applicationstatus';
+import { SortByName, EnumToArray } from '../../../../shared/utilities/utilityFunctions';
+import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../../../shared/enums/dime/environmenttypes';
+import { DimeEnvironmentActions } from './dimeenvironment.actions';
+import { DimeEnvironmentBackend } from './dimeenvironment.backend';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
 
 @Injectable()
 export class DimeEnvironmentService {

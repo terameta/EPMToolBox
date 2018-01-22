@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { DimeStreamService } from 'app/dime/dimestream/dimestream.service';
-import { DimeEnvironmentService } from 'app/dime/dimeenvironment/dimeenvironment.service';
+import { DimeStreamService } from '../../dimestream.service';
+import { DimeEnvironmentService } from '../../../dimeenvironment/dimeenvironment.service';
 import { Store } from '@ngrx/store';
-import { AppState } from 'app/ngstore/models';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
-import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
-import { DimeStreamType } from '../../../../../../../shared/enums/dime/streamtypes';
+import { AppState } from '../../../../ngstore/models';
+import { DimeEnvironmentActions } from '../../../dimeenvironment/dimeenvironment.actions';
+import { DimeTagService } from '../../../dimetag/dimetag.service';
+import { DimeStreamType } from '../../../../../../shared/enums/dime/streamtypes';
 
 @Component( {
 	selector: 'app-dime-stream-detail-main-definitions',
