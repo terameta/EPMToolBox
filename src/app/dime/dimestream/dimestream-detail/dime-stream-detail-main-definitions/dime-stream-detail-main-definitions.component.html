@@ -116,13 +116,16 @@
 					Changes must be saved before assignment.
 				</div>
 			</span>
-			<button class="btn btn-primary btn-xs " type="submit ">
+			<button class="btn btn-primary btn-xs" type="submit ">
 				<i class="fa fa-floppy-o fa-fw "></i> Save Changes
 			</button>
-			<button class="btn btn-warning btn-xs " type="button" routerLink="/dime/streams/stream-list ">
+			<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/streams/stream-list ">
 				<i class="fa fa-ban fa-fw "></i> Cancel
 			</button>
-			<button class="btn btn-danger btn-xs pull-right " type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name) ">
+			<button class="btn btn-success btn-xs" type="button" (click)="mainService.prepareTables()">
+				<i class="fa fa-check-circle"></i> Prepare Tables
+			</button>
+			<button class="btn btn-danger btn-xs pull-right " type="button" (click)="mainService.delete(mainService.currentItem.id, mainService.currentItem.name) ">
 				<i class="fa fa-trash fa-fw "></i> Delete Stream
 			</button>
 		</div>

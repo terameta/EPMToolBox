@@ -45,7 +45,7 @@ export class AcmServerService {
 			this.toastr.error( 'Failed to get items from server.', this.serviceName );
 			console.log( error );
 		} );
-	};
+	}
 	public fetchAll = () => {
 		return this.authHttp.get( this.baseUrl ).
 			map( response => response.json() ).
@@ -63,7 +63,7 @@ export class AcmServerService {
 				this.toastr.error( 'Failed to create new item.', this.serviceName );
 				console.log( error );
 			} );
-	};
+	}
 	public getOne = ( id: number ) => {
 		this.fetchOne( id ).
 			subscribe( ( data ) => {
@@ -87,15 +87,15 @@ export class AcmServerService {
 				this.toastr.error( 'Failed to get the item.', this.serviceName );
 				console.log( error );
 			} );
-	};
+	}
 	public fetchOne = ( id: number ) => {
 		return this.authHttp.get( this.baseUrl + '/' + id ).
 			map( response => response.json() ).
 			catch( error => Observable.throw( error ) );
-	};
+	}
 	public update = ( curItem?: AcmServer ) => {
 		let shouldUpdate = false;
-		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; };
+		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; }
 		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
 			map( response => response.json() ).
 			subscribe( data => {
@@ -112,7 +112,7 @@ export class AcmServerService {
 				this.toastr.error( 'Failed to save the item.', this.serviceName );
 				console.log( error );
 			} );
-	};
+	}
 	public delete( id: number, name?: string ) {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
@@ -132,11 +132,11 @@ export class AcmServerService {
 		} else {
 			this.toastr.info( 'Item deletion is cancelled.', this.serviceName );
 		}
-	};
+	}
 
 	private resetCurItem = () => {
 		this.curItem = <AcmServer>{};
 		this.curItemClean = true;
-	};
+	}
 
 }

@@ -17,4 +17,6 @@ export class DimeMapBackend {
 	public oneDelete = ( id: number ) => this.http.delete( this.baseUrl + '/' + id );
 	public prepare = ( id: number ) => this.http.get( this.baseUrl + '/prepare/' + id );
 	public isready = ( id: number ) => this.http.get( this.baseUrl + '/isready/' + id );
+	public mapExport = ( id: number ) => this.http.get( this.baseUrl + /mapExport/ + id, { responseType: 'blob' } );
+	public mapImport = ( formData: FormData ) => this.http.post( this.baseUrl + '/mapImport', formData );
 }

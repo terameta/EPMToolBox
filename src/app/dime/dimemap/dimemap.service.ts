@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import * as _ from 'lodash';
 
 import { DimeMap } from '../../../../shared/model/dime/map';
-import { SortByName } from '../../../../shared/utilities/utilityFunctions';
+import { SortByName, getFormattedDate } from '../../../../shared/utilities/utilityFunctions';
 import { DimeMapActions } from './dimemap.actions';
 import { DimeMapBackend } from './dimemap.backend';
 import { AppState } from '../../ngstore/models';
@@ -18,6 +18,8 @@ export class DimeMapService {
 	public itemObject: { [key: number]: DimeMap };
 	public currentItem: DimeMap = <DimeMap>{};
 	public currentItemClean: boolean;
+
+	private filesToUpload: Array<File> = [];
 
 	constructor(
 		private toastr: ToastrService,
@@ -66,6 +68,47 @@ export class DimeMapService {
 	}
 	public isReady = () => this.store.dispatch( DimeMapActions.ONE.ISREADY.initiate( this.currentItem.id ) );
 
+	public mapExport = () => {
+		this.backend.mapExport( this.currentItem.id )
+			.subscribe( response => {
+				this.mapExportDownload( response );
+			}, error => {
+				this.toastr.error( 'Failed to export the map. Please contact system administrator.' );
+				console.error( error );
+			} );
+	}
+
+	private mapExportDownload = ( response: any ) => {
+		let blob: any; blob = new Blob( [response], { type: 'application/vnd.ms-excel' } );
+		const url = window.URL.createObjectURL( blob, { oneTimeOnly: true } );
+		const a = document.createElement( 'a' );
+		a.href = url;
+		a.download = this.currentItem.name + ' ' + getFormattedDate() + '.xlsx';
+		window.document.body.appendChild( a );
+		a.click();
+		window.document.body.removeChild( a );
+		window.URL.revokeObjectURL( url );
+	}
+
+	public mapImport = () => {
+		let formData: FormData; formData = new FormData();
+		const files: Array<File> = this.filesToUpload;
+
+		formData.append( 'uploads[]', files[0], files[0].name );
+		formData.append( 'id', this.currentItem.id.toString() );
+		this.backend.mapImport( formData ).subscribe(
+			response => {
+				this.toastr.info( 'Map is now updated.', this.serviceName );
+			}, error => {
+				this.toastr.error( 'Failed to import map.', this.serviceName );
+			}
+		);
+	}
+	public mapImportFileChangeEvent = ( fileInput: any ) => {
+		this.filesToUpload = <Array<File>>fileInput.target.files;
+	}
+
+
 	/*
 
 	items: Observable<DimeMap[]>;
@@ -91,7 +134,7 @@ export class DimeMapService {
 	};
 	private headers = new Headers( { 'Content-Type': 'application/json' } );
 
-	private filesToUpload: Array<File> = [];
+
 
 
 	constructor(
@@ -229,61 +272,5 @@ export class DimeMapService {
 					return Observable.throw( new Error( error ) );
 				} );
 		};
-		public mapExport = () => {
-			this.authHttp.get( this.baseUrl + '/mapExport/' + this.curItem.id, { responseType: ResponseContentType.Blob } ).
-				// map( res => { console.log( res ); return res.blob(); } ).
-				subscribe(( response ) => {
-					this.mapExportDownload( response );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to export the map. Please contact system administrator.' );
-					console.error( error );
-				} );
-		};
-		private mapExportDownload = ( response: any ) => {
-			let blob: any; blob = new Blob( [response._body], { type: 'application/vnd.ms-excel' } );
-			// bb = new Blob( [ab2str( pot.data )], {  } );
-			// saveAs( bb, 'repo.xlsx' );
-			const url = window.URL.createObjectURL( blob, { oneTimeOnly: true } );
-			const a = document.createElement( 'a' );
-			// a.style = 'display:none';
-			a.href = url;
-			a.download = this.curItem.name + ' ' + this.getFormattedDate() + '.xlsx';
-			window.document.body.appendChild( a );
-			a.click();
-			window.document.body.removeChild( a );
-			window.URL.revokeObjectURL( url );
-		};
-
-		private getFormattedDate = () => {
-			const myDate = new Date();
-			let toReturn: string; toReturn = '';
-			toReturn += myDate.getFullYear() + '-';
-			toReturn += this.padDatePart( myDate.getMonth() + 1 ) + '-';
-			toReturn += this.padDatePart( myDate.getDate() ) + ' ';
-			toReturn += this.padDatePart( myDate.getHours() ) + '-';
-			toReturn += this.padDatePart( myDate.getMinutes() ) + '-';
-			toReturn += this.padDatePart( myDate.getSeconds() );
-			return toReturn;
-		};
-		private padDatePart = ( curPart: string | number ) => {
-			return ( '0' + curPart ).substr( -2 );
-		};
-		public mapImport = () => {
-			let formData: any; formData = new FormData();
-			const files: Array<File> = this.filesToUpload;
-
-			formData.append( 'uploads[]', files[0], files[0].name );
-			formData.append( 'id', this.curItem.id );
-			this.authHttp.post( this.baseUrl + '/mapImport', formData ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.toastr.info( 'Map is now updated.', this.serviceName );
-				}, ( error ) => {
-					this.toastr.error( 'error', this.serviceName );
-					console.error( error );
-				} );
-		};
-		public mapImportFileChangeEvent = ( fileInput: any ) => {
-			this.filesToUpload = <Array<File>>fileInput.target.files;
-		};*/
+		*/
 }

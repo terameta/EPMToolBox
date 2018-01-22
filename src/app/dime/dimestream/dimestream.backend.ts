@@ -21,4 +21,5 @@ export class DimeStreamBackend {
 	public oneFieldsListFromSourceEnvironment = ( id: number ): Observable<DimeStreamField[]> => this.http.get<DimeStreamField[]>( this.baseUrl + '/fieldsListFromSourceEnvironment/' + id );
 	public oneFieldsStartOver = ( id: number ) => this.http.get( this.baseUrl + '/fieldsStartOver/' + id );
 	public listFieldsforField = ( body: { environmentID: number, field: DimeStreamFieldDetail } ): Observable<DimeStreamField[]> => this.http.post<DimeStreamField[]>( this.baseUrl + '/listFieldsforField', body );
+	public prepareTables = ( id: number ) => this.http.get( this.baseUrl + '/prepareTables/' + id );
 }

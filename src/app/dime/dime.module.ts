@@ -17,19 +17,19 @@ import { DimemapsComponent } from './dimemap/dimemaps/dimemaps.component';
 import { DimeMatricesComponent } from './dimematrix/dimematrices/dimematrices.component';
 import { DimeAsyncProcessesComponent } from './dimeasyncprocess/dimeasyncprocesses/dimeasyncprocesses.component';
 
-import { DimeCredentialModule } from 'app/dime/dimecredential/dimecredential.module';
+import { DimeCredentialModule } from './dimecredential/dimecredential.module';
 import { DimescheduleModule } from './dimeschedule/dimeschedule.module';
 import { DimeprocessModule } from './dimeprocess/dimeprocess.module';
 import { DimeEnvironmentModule } from './dimeenvironment/dimeenvironment.module';
 import { DimestreamModule } from './dimestream/dimestream.module';
 import { DimemapModule } from './dimemap/dimemap.module';
 import { DimematrixModule } from './dimematrix/dimematrix.module';
-import { DimeAsyncProcessModule } from 'app/dime/dimeasyncprocess/dimeasyncprocess.module';
+import { DimeAsyncProcessModule } from './dimeasyncprocess/dimeasyncprocess.module';
 
 import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
-import { DimeCredentialsComponent } from 'app/dime/dimecredential/dimecredentials/dimecredentials.component';
-import { DimeTagsComponent } from 'app/dime/dimetag/dimetags/dimetags.component';
-import { DimeTagModule } from 'app/dime/dimetag/dimetag.module';
+import { DimeCredentialsComponent } from './dimecredential/dimecredentials/dimecredentials.component';
+import { DimeTagsComponent } from './dimetag/dimetags/dimetags.component';
+import { DimeTagModule } from './dimetag/dimetag.module';
 
 
 

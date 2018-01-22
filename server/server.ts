@@ -7,7 +7,7 @@ import { InitiateCronWorker } from './config/config.croner';
 import { initiateInitiator } from './config/config.initiator';
 import { configuration } from './system.conf';
 
-const numCPUs = configuration.environment === 'development' ? 1 : cpus().length;
+const numCPUs = configuration.numberofCPUs ? configuration.numberofCPUs : cpus().length;
 
 const db: mysql.Pool = mysql.createPool( {
 	connectionLimit: 10,

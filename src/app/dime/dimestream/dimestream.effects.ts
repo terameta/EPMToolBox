@@ -6,14 +6,14 @@ import { Effect, Actions } from '@ngrx/effects';
 
 import { of } from 'rxjs/observable/of';
 
-import { AppState } from 'app/ngstore/models';
-import { DimeStatusActions } from 'app/ngstore/applicationstatus';
+import { AppState } from '../../ngstore/models';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
 
-import { DimeStreamActions } from 'app/dime/dimestream/dimestream.actions';
-import { DimeStreamBackend } from 'app/dime/dimestream/dimestream.backend';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
-import { dimeStreamInitialState } from 'app/dime/dimestream/dimestream.state';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeStreamActions } from './dimestream.actions';
+import { DimeStreamBackend } from './dimestream.backend';
+import { DimeTagActions } from '../dimetag/dimetag.actions';
+import { dimeStreamInitialState } from './dimestream.state';
+import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -37,7 +37,7 @@ export class DimeStreamEffects {
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeStreamActions.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.store$ )
-		.filter( ( [action, store] ) => { return ( !store.dimeStream.items || Object.keys( store.dimeStream.items ).length === 0 ); } )
+		.filter( ( [action, store] ) => ( !store.dimeStream.items || Object.keys( store.dimeStream.items ).length === 0 ) )
 		.map( ( [action, store] ) => action )
 		.switchMap( action => of( DimeStreamActions.ALL.LOAD.initiate() ) );
 
@@ -69,7 +69,7 @@ export class DimeStreamEffects {
 					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
-				.finally( () => { this.store$.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() ) } );
+				.finally( () => { this.store$.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() ); } );
 		} );
 
 	@Effect() ONE_LOAD_INITIATE_IF_EMPTY$ = this.actions$
@@ -109,7 +109,7 @@ export class DimeStreamEffects {
 		.switchMap( ( action: Action ) => {
 			this.router.navigateByUrl( 'dime/streams/stream-list' );
 			return of( DimeStreamActions.ALL.LOAD.initiate() );
-		} )
+		} );
 
 	@Effect() ONE_FIELDS_LIST_FROMSOURCEENVIRONMENT_INITIATE$ = this.actions$
 		.ofType( DimeStreamActions.ONE.FIELDS.LIST.FROMSOURCEENVIRONMENT.INITIATE )
@@ -124,6 +124,14 @@ export class DimeStreamEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneFieldsStartOver( action.payload )
 				.map( () => DimeStreamActions.ONE.LOAD.initiate( action.payload ) )
+				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_PREPARETABLES$ = this.actions$
+		.ofType( DimeStreamActions.ONE.PREPARETABLES )
+		.switchMap( ( action: Action ) => {
+			return this.backend.prepareTables( action.payload )
+				.map( () => DimeStatusActions.success( 'Tables are successfully prepared', this.serviceName ) )
 				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
 		} );
 

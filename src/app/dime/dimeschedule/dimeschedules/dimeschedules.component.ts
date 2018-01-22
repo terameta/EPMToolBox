@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
-@Component({
+@Component( {
 	selector: 'app-dimeschedules',
 	templateUrl: './dimeschedules.component.html',
 	styleUrls: ['./dimeschedules.component.css']
-})
+} )
 export class DimeschedulesComponent implements OnInit {
 
 	allowNewServer = false;
@@ -16,10 +16,10 @@ export class DimeschedulesComponent implements OnInit {
 	servers = ['Dev Server', 'Test Server', 'Prod Server'];
 
 	constructor() {
-		setTimeout(() => {
+		setTimeout( () => {
 			this.allowNewServer = true;
 			this.isServerOnline = true;
-		}, 5000);
+		}, 5000 );
 	}
 
 	ngOnInit() {
@@ -27,7 +27,7 @@ export class DimeschedulesComponent implements OnInit {
 
 	onCreateServer() {
 		this.serverCreated = true;
-		this.servers.push(this.serverName);
+		this.servers.push( this.serverName );
 		this.serverCreationStatus = 'Server was created! Server name is ' + this.serverName;
 	}
 
@@ -35,12 +35,12 @@ export class DimeschedulesComponent implements OnInit {
 		this.isServerOnline = !this.isServerOnline;
 	}
 
-	getServerActivityColor(){
+	getServerActivityColor() {
 		return this.isServerOnline === true ? 'green' : 'red';
 	}
 
-	onUpdateServerName(event: Event) {
-		this.serverName = (<HTMLInputElement>event.target).value;
+	onUpdateServerName( event: Event ) {
+		this.serverName = ( <HTMLInputElement>event.target ).value;
 	}
 
 }

@@ -58,6 +58,10 @@ export class DimeStreamService {
 		}
 	}
 
+	public prepareTables = () => {
+		this.store.dispatch( DimeStreamActions.ONE.preparetables( this.currentItem.id ) );
+	}
+
 	public navigateTo = ( id: number ) => {
 		delete this.currentItem.fieldList;
 		this.router.navigateByUrl( this.router.routerState.snapshot.url

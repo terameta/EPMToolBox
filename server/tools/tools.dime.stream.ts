@@ -41,7 +41,7 @@ export class StreamTools {
 				}
 			} );
 		} );
-	};
+	}
 	public getOne = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streams WHERE id = ?', id, ( err, rows, fields ) => {
@@ -109,7 +109,7 @@ export class StreamTools {
 				}
 			} );
 		} );
-	};
+	}
 	public update = ( refItem: DimeStreamDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			delete refItem.databaseList;
@@ -243,7 +243,7 @@ export class StreamTools {
 				} else {
 					resolve();
 				}
-			} )
+			} );
 		} );
 	}
 	public fieldsStartOver = ( refObj: DimeStreamDetail ) => {
@@ -254,7 +254,7 @@ export class StreamTools {
 				} else {
 					resolve( refObj );
 				}
-			} )
+			} );
 		} );
 	}
 	public retrieveFields = ( id: number ) => {
@@ -329,7 +329,7 @@ export class StreamTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private checkTables = ( id: number ) => {
 		let topStream: any;
 		let tablesReady: { tableName: string, stream: number, streamType: string, field: number, status: boolean }[]; tablesReady = [];
@@ -382,7 +382,7 @@ export class StreamTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	public prepareTables = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.checkTables( id ).
@@ -393,10 +393,12 @@ export class StreamTools {
 					} );
 					return Promise.all( promises );
 				} ).
-				then( resolve ).
+				then( ( result ) => {
+					resolve( { preparedTables: result.length } );
+				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private prepareTable = ( tableStatus: { tableName: string, stream: number, streamType: string, field: number, status: boolean } ) => {
 		return new Promise( ( resolve, reject ) => {
 			if ( tableStatus.status ) {
@@ -418,13 +420,8 @@ export class StreamTools {
 							curQuery += ', RefField VARCHAR(256)';
 							curQuery += ', Description VARCHAR(1024)';
 						}
-						curQuery += ', INDEX (RefField)'
+						curQuery += ', INDEX (RefField)';
 						curQuery += ', PRIMARY KEY(id) );';
-						// console.log(field.name,
-						// 	field.drfName, field.drfType, field.drfCharacters, field.drfPrecision, field.drfDecimals,
-						// 	field.ddfName, field.ddfType, field.ddfCharacters, field.ddfPrecision, field.ddfDecimals);
-						// console.log(tableStatus);
-						// console.log( curQuery );
 						this.db.query( curQuery, ( err, result, fields ) => {
 							if ( err ) {
 								reject( err );
@@ -436,7 +433,7 @@ export class StreamTools {
 					catch( reject );
 			}
 		} );
-	};
+	}
 	public getFieldDescriptions = ( refObj: { stream: number, field: number } ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT RefField, Description FROM STREAM' + refObj.stream + '_DESCTBL' + refObj.field + ' ORDER BY 1, 2', {}, ( err, result, fields ) => {
