@@ -1,0 +1,59 @@
+<table class="table table-hover table-condensed">
+	<thead>
+		<tr>
+			<th width="100px">Field</th>
+			<th>Details</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th>Name:</th>
+			<td>
+				{{ streamService.itemObject[mainService.currentItem.source]?.name }}
+			</td>
+		</tr>
+		<tr>
+			<th>Fields:</th>
+			<td>
+				<table class="table table-condensed">
+					<thead>
+						<tr>
+							<th width="100px">Name</th>
+							<th>
+								Mapped?
+								<span class="label label-info">Data fields are excluded</span>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr *ngFor="let field of sourceFields; let i = index;">
+							<td> {{ field.name }} </td>
+							<td>
+								<input type="checkbox" [(ngModel)]="field.isMapped" (change)="redesignFields()">
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2">
+								<button class="btn btn-default btn-xs" type="button" (click)="mainService.update()">
+									<i class="fa fa-check-circle"></i> Apply</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<div class="row">
+	<div class="col-xs-4">
+		<pre>{{mainService.currentItem | json}}</pre>
+	</div>
+	<div class="col-xs-4">
+		<pre>{{sourceFields | json}}</pre>
+	</div>
+	<div class="col-xs-4">
+		<pre>{{targetFields | json}}</pre>
+	</div>
+</div>
+
+<pre>{{streamService.itemObject | json}}</pre>

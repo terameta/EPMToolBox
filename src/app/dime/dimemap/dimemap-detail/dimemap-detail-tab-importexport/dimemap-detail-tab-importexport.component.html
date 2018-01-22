@@ -1,0 +1,13 @@
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#maptabimport" data-toggle="tab">Import</a></li>
+	<li><a href="#maptabexport" data-toggle="tab">Export</a></li>
+</ul>
+<div class="tab-content">
+	<div class="tab-pane fade in active" id="maptabimport">
+		<input type="file" id="mapimportfile" name="file" (change)="mainService.mapImportFileChangeEvent($event)" >
+		<button type="button" class="btn btn-default btn-xs" (click)="mainService.mapImport()">Import</button>
+	</div>
+	<div class="tab-pane fade in" id="maptabexport">
+		<button type="button" class="btn btn-default btn-xs" title="Export Map" (click)="mainService.mapExport()">Export</button>
+	</div>
+</div>

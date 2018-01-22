@@ -1,0 +1,120 @@
+<div class="box box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">Edit User</h3>
+	</div>
+	<div class="box-header">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#usertabmaindefinitions" data-toggle="tab">Details</a></li>
+			<li><a href="#usertabaccessdefinitions" data-toggle="tab">Access Definitions</a></li>
+		</ul>
+	</div>
+	<div class="box-body">
+		<div class="tab-content">
+			<div class="tab-pane fade in active" id="usertabmaindefinitions">
+				<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
+					<fieldset>
+						<div class="form-group">
+							<label for="itemName" class="col-xs-2 control-label">Name:</label>
+							<div class="col-xs-10">
+								<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.curItem.name">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemSurName" class="col-xs-2 control-label">Surname:</label>
+							<div class="col-xs-10">
+								<input type="text" class="form-control" id="itemSurName" name="itemSurName" [(ngModel)]="mainService.curItem.surname">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemUserName" class="col-xs-2 control-label">Username:</label>
+							<div class="col-xs-10">
+								<input type="text" class="form-control" id="itemUserName" name="itemUserName" [(ngModel)]="mainService.curItem.username"
+									[disabled]="mainService.curItem.type=='directory'"
+								>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemPassword" class="col-xs-2 control-label">Password:</label>
+							<div class="col-xs-10">
+								<input type="text" class="form-control" id="itemPassword" name="itemPassword" [(ngModel)]="mainService.curItem.password"
+									[disabled]="mainService.curItem.type=='directory'"
+								>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemRole" class="col-xs-2 control-label">Role:</label>
+							<div class="col-xs-10">
+								<select name="itemRole" id="itemRole" class="form-control" [(ngModel)]="mainService.curItem.role">
+									<option value="admin">Administrator</option>
+									<option value="poweruser">Power User</option>
+									<option value="user">User</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemType" class="col-xs-2 control-label">Type:</label>
+							<div class="col-xs-10">
+								<select name="itemType" id="itemType" class="form-control" [(ngModel)]="mainService.curItem.type">
+									<option value="local">Local User</option>
+									<option value="directory">Directory User</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemServer" class="col-xs-2 control-label">Directory Server:</label>
+							<div class="col-xs-10">
+								<select name="itemServer" id="itemServer" [disabled]="mainService.curItem.type !='directory'" class="form-control" [(ngModel)]="mainService.curItem.ldapserver">
+									<option
+										*ngFor="let server of serverService.items | async"
+										[value]="server.id">{{server.name}} ({{server.hostname}})</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="itemEmail" class="col-xs-2 control-label">Email:</label>
+							<div class="col-xs-10">
+								<input type="email" class="form-control" id="itemEmail" name="itemEmail" [(ngModel)]="mainService.curItem.email" (keyup)="onEmailChange()">
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-xs-10 col-xs-offset-2">
+								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+								<button class="btn btn-warning btn-xs" type="button" routerLink="/accessmanagement/users/user-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
+								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)"><i class="fa fa-trash fa-fw"></i> Delete User</button>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<div class="tab-pane fade in" id="usertabaccessdefinitions">
+				<form (ngSubmit)="mainService.updateAccessRights()" #f="ngForm" class="form-horizontal">
+					<fieldset>
+						<div class="form-group" *ngFor="let process of assignedProcesses;">
+							<label for="isassigned{{process.id}}" class="col-xs-6 col-md-2 control-label">{{process.name}}</label>
+							<div class="col-xs-6 col-md-10 checkbox">
+								<label>
+									<input
+										type="checkbox"
+										id="isassigned{{process.id}}"
+										name="isassigned{{process.id}}"
+										[(ngModel)]="process.isAssigned"
+										(change)='processAccessRightChange()'
+									>
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-xs-6 col-md-10 col-xs-offset-6 col-md-offset-2">
+								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+							</div>
+						</div>
+					</fieldset>
+				</form>
+				<!--<pre>{{assignedProcesses | json}}</pre>
+				<pre>{{dimeProcessService.items | async | json}}</pre>
+				<pre>{{mainService.curItemAccessRights | json}}</pre>-->
+
+			</div>
+		</div>
+	</div>
+</div>

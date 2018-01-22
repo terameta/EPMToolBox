@@ -1,0 +1,38 @@
+<div class="container-fluid" style="background-color: white; position:absolute; top:0; bottom:100px; left:0; right:0">
+	<div class="row">
+		<div class="col-xs-2 col-xs-offset-5" style="text-align:center;padding-top: 20px">
+			<img src="/assets/images/AsliToolboxIcon.png" alt="Logo"><br />
+			<span style="font-size: 24px; font-weight: bold;">EPM ToolBox</span>
+		</div>
+	</div>
+</div>
+<div class="container-fluid" style="background-color: #004050 !important; position: absolute; bottom:0; top:100px; left:0; right:0">
+	<div class="row">
+		<div class="col-xs-12">
+			<br />
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-3 col-xs-offset-2">
+			<span style="font-size:72px; line-height: 72px; font-weight:bold; color: white">EPM<br />Innovated</span><br />
+			<span style="font-size:18px; font-weight:bold; color: white">
+				DIME: Data Integraton Made Easy<br />
+				AsyncBR: Asynchronous Business Rules
+			</span>
+		</div>
+		<div class="col-xs-3 col-xs-offset-2" style="text-align: center" *ngIf="!authService.authenticated">
+			<div class="row">
+				<button class="btn btn-primary btn-lg" routerLink="signin">Start Here</button>
+			</div>
+		</div>
+		<div class="col-xs-3 col-xs-offset-2" style="text-align: center" *ngIf="curUserRole === 'admin'">
+			<div class="row" *ngIf="authService.authenticated">
+				<button class="btn btn-primary btn-md btn-block" routerLink="/dime">Go to DIME</button>
+				<br>
+				<button class="btn btn-primary btn-md btn-block" routerLink="/accessmanagement"><i class="fa fa-handshake-o fa-fw"></i> Go to Access Management</button>
+				<br>
+				<button class="btn btn-primary btn-md btn-block" routerLink="/welcome/signout"><i class="fa fa-sign-out fa-fw"></i> Sign Out</button>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,53 @@
+<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
+	<fieldset>
+		<div class="form-group">
+			<label for="itemName" class="col-xs-6 col-md-1 control-label">Name:</label>
+			<div class="col-xs-6 col-md-11">
+				<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.curItem.name">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="itemSchedule" class="col-xs-6 col-md-1 control-label">Schedule:</label>
+			<div class="col-xs-6 col-md-11" *ngIf="mainService.curItem">
+					<div class="input-group" *ngFor="let curSchedule of mainService.curItem.schedule; let i = index;let last = last; let first = first">
+						<span class="input-group-addon">Second:</span>
+						<select name="schedule{{i}}Second" class="form-control" [(ngModel)]="curSchedule.second">
+							<option *ngFor="let curSecond of listSeconds()" [value]="curSecond.value">{{curSecond.label}}</option>
+						</select>
+						<!-- <span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span> -->
+						<span class="input-group-addon">Minute:</span>
+						<select name="schedule{{i}}Minute" class="form-control" [(ngModel)]="curSchedule.minute">
+							<option *ngFor="let curMinute of listMinutes()" [value]="curMinute.value">{{curMinute.label}}</option>
+						</select>
+						<span class="input-group-addon">Hour:</span>
+						<select name="schedule{{i}}Hour" class="form-control" [(ngModel)]="curSchedule.hour">
+							<option *ngFor="let curHour of listHours()" [value]="curHour.value">{{curHour.label}}</option>
+						</select>
+						<span class="input-group-addon">Day of Month:</span>
+						<select name="schedule{{i}}DayofMonth" class="form-control" [(ngModel)]="curSchedule.dayofmonth">
+							<option *ngFor="let curDayofMonth of listDayofMonth()" [value]="curDayofMonth.value">{{curDayofMonth.label}}</option>
+						</select>
+						<span class="input-group-addon">Month:</span>
+						<select name="schedule{{i}}Month" class="form-control" [(ngModel)]="curSchedule.month">
+							<option *ngFor="let curMonth of listMonths()" [value]="curMonth.value">{{curMonth.label}}</option>
+						</select>
+						<span class="input-group-addon">Day of Week:</span>
+						<select name="schedule{{i}}DayofWeek" class="form-control" [(ngModel)]="curSchedule.dayofweek">
+							<option *ngFor="let curDayofWeek of listDayofWeek()" [value]="curDayofWeek.value">{{curDayofWeek.label}}</option>
+						</select>
+						<span class="input-group-addon">
+							<i class="fa fa-trash fa-fw" (click)="deleteScheduleItem(i)"></i>
+						</span>
+					</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-xs-11 col-xs-offset-1">
+				<button class="btn btn-success btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+				<button class="btn btn-primary btn-xs" type="button" (click)="addScheduleItem()"><i class="fa fa-plus fa-fw"></i> Add Schedule Item</button>
+				<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/schedules/schedule-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
+				<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)"><i class="fa fa-trash fa-fw"></i> Delete Schedule</button>
+			</div>
+		</div>
+	</fieldset>
+</form>

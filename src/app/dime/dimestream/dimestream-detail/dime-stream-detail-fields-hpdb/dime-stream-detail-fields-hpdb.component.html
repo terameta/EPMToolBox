@@ -1,0 +1,162 @@
+<button *ngIf="!mainService.currentItem.fieldList" type="button" class="btn btn-primary btn-xs" (click)="mainService.fieldsListFromSourceEnvironment(mainService.currentItem.id)">
+	<i class="fa fa-refresh fa-fw"></i> Refresh Fields from Server
+</button>
+
+<table class="table table-striped table-bordered table-hover table-condensed" *ngIf="mainService.currentItem.fieldList">
+	<tr>
+		<th>Name</th>
+		<th>Type</th>
+		<th>Described?</th>
+		<th>Crosstab Ignore?</th>
+		<th width="80">Actions</th>
+	</tr>
+	<tr *ngFor="let curField of mainService.currentItem.fieldList;let i = index;let last=last;let first=first">
+		<td>{{curField.name}}</td>
+		<td>{{curField.type}}</td>
+		<td>
+			<input type="checkbox" [(ngModel)]="curField.isDescribed" ngTrueValue="1" ng-false-value="0" disabled>
+		</td>
+		<td>
+			<input type="checkbox" [(ngModel)]="curField.shouldIgnoreCrossTab" ngTrueValue="1" ng-false-value="0">
+		</td>
+		<td>
+			<div class="btn-group btn-group-xs" role="group">
+				<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.fieldMove(mainService.currentItem.fieldList, curField, 'down')">
+					<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
+				</button>
+				<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!">
+					<i class="fa fa-fw" aria-hidden="true"></i>
+				</button>
+				<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.fieldMove(mainService.currentItem.fieldList, curField, 'up')">
+					<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
+				</button>
+			</div>
+		</td>
+
+	</tr>
+	<tr>
+		<td colspan="100">
+			<div class="btn-toolbar">
+				<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.fieldsStartOver()">
+					<i class="fa fa-trash fa-fw "></i> Start Over
+				</button>
+				<button class="btn btn-primary btn-xs pull-right" type="button" (click)="mainService.update()">
+					<i class="fa fa-refresh fa-fw "></i> Save Changes
+				</button>
+			</div>
+		</td>
+	</tr>
+</table>
+
+<!-- <table class="table table-striped table-bordered table-hover table-condensed" *ngIf="mainService.currentItem.fieldList">
+	<tr>
+		<th>Name</th>
+		<th>Type</th>
+		<th *ngIf="isRDBT()">Should Ignore?</th>
+		<th *ngIf="isRDBT()">Assign Properties</th>
+		<th>Actions</th>
+	</tr>
+	<tr *ngFor="let curField of mainService.currentItem.fieldList;let i = index;let last=last;let first=first">
+		<td>{{curField.name}}</td>
+		<td>{{curField.type}}</td>
+		<td *ngIf="isRDBT()">
+			<input type="checkbox" [(ngModel)]="curField.shouldIgnore">
+		</td>
+		<td *ngIf="isRDBT()">
+			<div class="input-group" *ngIf="curField.type=='number'">
+				<span class="input-group-addon">
+					<b># of Digits:</b>
+				</span>
+				<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.precision" min="1" max="65">
+				<span class="input-group-addon">(Min: 1, Max: 65)</span>
+				<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.decimals" min="0" max="{{curField.precision -1 || 0}}">
+				<span class="input-group-addon">(Min: 0, Max: {{curField.precision -1 || 0}})</span>
+			</div>
+			<div class="input-group" *ngIf="curField.type=='string'">
+				<span class="input-group-addon">
+					<b># of Chars:</b>
+				</span>
+				<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.characters">
+				<span class="input-group-addon">(Max: 1024)</span>
+			</div>
+			<div class="input-group" *ngIf="curField.type=='date'">
+				<span class="input-group-addon">
+					<b>Format:</b>
+				</span>
+				<input type="text" class="form-control" [(ngModel)]="curField.dateFormat" placeholder="YYYY-MM-DD HH:mm">
+				<span class="input-group-addon">(Y: Year, M: Month, D: Day, H: Hour, m: Minute)</span>
+			</div>
+		</td>
+		<td>
+			<div class="btn-group btn-group-xs" role="group">
+				<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.fieldMove(mainService.curItemSourcedFields, curField, 'down')">
+					<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
+				</button>
+				<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!">
+					<i class="fa fa-fw" aria-hidden="true"></i>
+				</button>
+				<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.fieldMove(mainService.curItemSourcedFields, curField, 'up')">
+					<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
+				</button>
+			</div>
+		</td>
+
+	</tr>
+</table> -->
+
+<!-- <button *ngIf="!mainService.curItemAssignedFields && !mainService.curItemSourcedFields && mainService.curItemEnvironmentType == 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="mainService.fieldsInitiateForPBCS()">Start</button>
+<button *ngIf="!mainService.curItemAssignedFields && mainService.curItemSourcedFields && mainService.curItemEnvironmentType == 'PBCS'" type="button" class="btn btn-default btn-xs" (click)="mainService.fieldsAddtoPBCS()">Add New Field</button>
+<button *ngIf="mainService.curItemSourcedFields" type="button" class="btn btn-default btn-xs" (click)="mainService.assignFields()">Assign Fields</button> -->
+
+
+<!-- <button *ngIf="mainService.curItemAssignedFields" type="button" class="btn btn-default btn-xs" (click)="mainService.fieldsSave()">
+	<i class="fa fa-save fa-fw"></i> Save Changes</button>
+<hr *ngIf="mainService.curItemSourcedFields  || mainService.curItemAssignedFields"> -->
+<!-- <div *ngIf="mainService.curItemSourcedFields && !mainService.curItemAssignedFields && mainService.curItemEnvironmentType != 'PBCS'">
+
+</div>
+<div *ngIf="mainService.curItemSourcedFields && !mainService.curItemAssignedFields && mainService.curItemEnvironmentType == 'PBCS'">
+	<table class="table table-striped table-bordered table-hover table-condensed">
+		<tr>
+			<th>Name</th>
+			<th>Type</th>
+			<th *ngIf="isRDBT()">Should Ignore?</th>
+			<th *ngIf="isRDBT()">Assign Properties</th>
+			<th width="160px">Actions</th>
+		</tr>
+		<tr *ngFor="let curField of mainService.curItemSourcedFields;let i = index;let last=last;let first=first">
+			<td>
+				<input type="text" class="form-control" placeholder="Dimension Name" [(ngModel)]="curField.name">
+			</td>
+			<td>
+				<select [(ngModel)]="curField.type" class="form-control">
+					<option *ngFor="let curType of mainService.pbcsFieldTypes" value="{{curType}}">{{curType}}</option>
+				</select>
+			</td>
+			<td>
+				<div class="btn-group btn-group-xs" role="group">
+					<button *ngIf="!last" type="button" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.fieldMove(mainService.curItemSourcedFields, curField, 'down')">
+						<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
+					</button>
+					<button *ngIf="last || first" type="button" class="btn btn-xs btn-default" title="Nothing to do!">
+						<i class="fa fa-fw" aria-hidden="true"></i>
+					</button>
+					<button *ngIf="!first" type="button" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.fieldMove(mainService.curItemSourcedFields, curField, 'up')">
+						<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
+					</button>
+				</div>
+				<div class="btn-group btn-group-xs pull-right" role="group">
+					<button class="btn btn-danger" type="button" (click)="mainService.fieldsRemoveFromPBCS(i)">
+						<i class="fa fa-trash fa-fw"></i>
+					</button>
+				</div>
+			</td>
+
+		</tr>
+	</table>
+</div>
+<div *ngIf="mainService.curItemAssignedFields">
+
+</div>
+
+<pre>{{ mainService.currentItem | json }}</pre> -->
