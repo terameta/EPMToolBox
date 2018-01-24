@@ -5,6 +5,8 @@ import { ToastrService } from 'ngx-toastr';
 
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMapService } from '../../../dimemap/dimemap.service';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../ngstore/models';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -15,33 +17,182 @@ import { DimeMapService } from '../../../dimemap/dimemap.service';
 export class DimemapDetailTabMaptableComponent implements OnInit {
 
 	public numberofRowsinMap: string;
-	private columns: any[];
-	private colHeaders: string[];
-	private options: any;
-	private dataObject;
+	public hotTableHeight = 250;
+	public currentItemID = 0;
+	public filtersShown = false;
+	public sortersShown = false;
+	public filters: { source: any[], target: any[] };
+	public availableSorters = [];
+	public activeSorters = [];
+
+	public mapSettings = {
+		colHeaders: [],
+		rowHeaders: true
+	};
+	// private columns: any[];
+	// private colHeaders: string[];
+	// private options: any;
+	// private dataObject;
 
 	// private hot: Handsontable;
 
-	private filterChangeWaiter: any;
+	// private filterChangeWaiter: any;
 
-	private hotElement;
-	private hotElementContainer;
-	private hotSettings;
-	private hotInstance: any;
-	private rowHeaders: string[];
-	private filterOptions: string[];
-	private fieldDescriptions: any;
+	// private hotElement;
+	// private hotElementContainer;
+	// private hotSettings;
+	// private hotInstance: any;
+	// private rowHeaders: string[];
+	// private filterOptions: string[];
+	// private fieldDescriptions: any;
 
 	constructor(
 		public mainService: DimeMapService,
 		private toastr: ToastrService,
-		private streamService: DimeStreamService
+		private streamService: DimeStreamService,
+		private store: Store<AppState>
 	) {
 		this.numberofRowsinMap = 'Please wait, preparing...';
+
+		this.store.select( 'dimeMap' ).subscribe( currentState => {
+			if ( currentState.curItem.id !== this.currentItemID ) {
+				this.currentItemID = currentState.curItem.id;
+				this.getReady();
+			}
+		} );
 	}
 
 	ngOnInit() {
-		// this.getReady();
+		this.windowResized();
+	}
+
+	public windowResized = () => {
+		this.hotTableHeight = window.innerHeight - 320;
+		// console.log( 'Window width:', window.innerWidth, 'Window Height:', window.innerHeight, 'Hot Table Height:', this.hotTableHeight );
+	}
+
+	public refreshMapTable = () => {
+		this.filtersShown = false;
+		this.sortersShown = false;
+		console.log( 'Refresh map table is called' );
+	}
+
+	private getReady = () => {
+		console.log( 'getReady is called' );
+		this.waitUntilItemIsReady()
+			.then( this.prepareFilters )
+			.then( this.prepareAvailableSorters )
+			.then( ( result ) => {
+				console.log( 'We are at getReady' );
+				console.log( 'waitUntilItemIsReady() completed' );
+				console.log( 'prepareFilters() completed' );
+				console.log( result );
+			} );
+	}
+	private prepareColumns = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.mapSettings.colHeaders = [];
+			this.mapSettings.colHeaders.push( 'Ali' );
+			this.mapSettings.colHeaders.push( 'Veli' );
+			this.mapSettings.colHeaders.push( '49' );
+			this.mapSettings.colHeaders.push( '50' );
+		} );
+	}
+	private waitUntilItemIsReady = () => {
+		return new Promise( ( resolve, reject ) => {
+			if ( !this.mainService.currentItem
+				|| !this.mainService.currentItem.sourcefields || this.mainService.currentItem.sourcefields.length === 0
+				|| !this.streamService.itemObject[this.mainService.currentItem.source]
+				|| !this.mainService.currentItem.targetfields || this.mainService.currentItem.targetfields.length === 0
+				|| !this.streamService.itemObject[this.mainService.currentItem.target]
+			) {
+				setTimeout( () => { resolve( this.waitUntilItemIsReady() ); }, 1000 );
+			} else {
+				resolve();
+			}
+		} );
+	}
+	private prepareFilters = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.filters = { source: [], target: [] };
+			this.streamService.itemObject[this.mainService.currentItem.source].fieldList
+				.filter( currentStreamField => ( this.mainService.currentItem.sourcefields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+				.forEach( currentStreamField => {
+					this.filters.source.push( { name: currentStreamField.name, type: 'is', value: '' } );
+				} );
+			this.streamService.itemObject[this.mainService.currentItem.target].fieldList
+				.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+				.forEach( currentStreamField => {
+					this.filters.target.push( { name: currentStreamField.name, type: 'is', value: '' } );
+				} );
+			resolve();
+		} );
+	}
+	private prepareAvailableSorters = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.availableSorters = [];
+			this.activeSorters = [];
+			this.streamService.itemObject[this.mainService.currentItem.source].fieldList
+				.filter( currentStreamField => ( this.mainService.currentItem.sourcefields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+				.forEach( currentStreamField => {
+					this.availableSorters.push( { name: currentStreamField.name, type: 'SRC', isAsc: true, label: 'Source ' + currentStreamField.name } );
+				} );
+			this.streamService.itemObject[this.mainService.currentItem.target].fieldList
+				.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+				.forEach( currentStreamField => {
+					this.availableSorters.push( { name: currentStreamField.name, type: 'TAR', isAsc: true, label: 'Target ' + currentStreamField.name } );
+				} );
+			resolve();
+		} );
+	}
+	public addToActiveSorters = ( index: number ) => {
+		this.activeSorters.push( this.availableSorters.splice( index, 1 )[0] );
+	}
+	public removeFromActiveSorters = ( index: number ) => {
+		this.availableSorters.push( this.activeSorters.splice( index, 1 )[0] );
+	}
+	public swapActiveSorters = ( from: number, to: number ) => {
+		const temp = this.activeSorters[to];
+		this.activeSorters[to] = this.activeSorters[from];
+		this.activeSorters[from] = temp;
+	}
+	private getMapTable = () => {
+		this.numberofRowsinMap = 'Please wait, refreshing...';
+		return new Promise( ( resolve, reject ) => {
+			// let currentFilter: any;
+			// if ( this.dataObject ) {
+			// 	currentFilter = {};
+			// 	Object.keys( this.dataObject[0] ).forEach( ( curKey ) => {
+			// 		if ( this.dataObject[0][curKey] !== 'Filter Type' ) {
+			// 			if ( this.dataObject[1][curKey] ) {
+			// 				// console.log( curKey, this.dataObject[0][curKey], this.dataObject[1][curKey] );
+			// 				currentFilter[curKey] = {
+			// 					type: this.dataObject[0][curKey],
+			// 					value: this.dataObject[1][curKey]
+			// 				};
+			// 			}
+			// 		}
+			// 	} );
+			// } else {
+			// 	currentFilter = {};
+			// }
+			// this.mainService.fetchMapTable( currentFilter ).subscribe( ( data ) => {
+			// 	if ( this.dataObject ) {
+			// 		this.dataObject = [this.dataObject[0], this.dataObject[1]];
+			// 	} else {
+			// 		this.dataObject = [{ id: 'Filter Type' }, { id: 'Filter' }];
+			// 	}
+			// 	// console.log( 'We received data' );
+			// 	data.forEach( ( curData ) => {
+			// 		this.dataObject.push( curData );
+			// 		// console.log( curData );
+			// 	} );
+			// 	this.numberofRowsinMap = data.length + ' rows';
+			// 	resolve();
+			// }, ( error ) => {
+			// 	reject( error );
+			// } );
+		} );
 	}
 	/*
 		private getReady = () => {
@@ -171,9 +322,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				}
 			}
 		};
-		public windowResized = () => {
-			console.log( 'Window Resized called' );
-		}
+
 		private filterChange = () => {
 			clearTimeout( this.filterChangeWaiter );
 			this.filterChangeWaiter = setTimeout( this.filterChangeAction, 1000 );
@@ -211,131 +360,11 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				} );
 			}
 		};
-		private waitUntilItemIsReady = () => {
-			return new Promise(( resolve, reject ) => {
-				if ( !this.mainService.curItemIsReady || !this.mainService.curItemFields || !this.mainService.curItemSourceStreamFields || !this.mainService.curItemTargetStreamFields ) {
-					// console.log( 'Current  Item:', !!this.mainService.curItemIsReady );
-					// console.log( 'CurItemFields:', !!this.mainService.curItemFields );
-					// console.log( 'Source Fields:', !!this.mainService.curItemSourceStreamFields );
-					// console.log( 'Target Fields:', !!this.mainService.curItemTargetStreamFields );
-					setTimeout(() => {
-						resolve( this.waitUntilItemIsReady() );
-					}, 1000 );
-				} else {
-					// console.log( this.mainService.curItemFields );
-					// console.log( this.mainService.curItemSourceStreamFields );
-					// console.log( this.mainService.curItemTargetStreamFields );
-					resolve();
-				}
-			} );
-		};
-		private prepareColumnOrders = () => {
-			return new Promise(( resolve, reject ) => {
-				this.mainService.curItemFields.forEach(( curField ) => {
-					if ( curField.srctar === 'source' ) {
-						this.mainService.curItemSourceStreamFields.forEach(( curSourceField ) => {
-							if ( curSourceField.name === curField.name ) {
-								curField.fOrder = '00000' + curSourceField.fOrder;
-								curField.isDescribed = curSourceField.isDescribed;
-								curField.stream = curSourceField.stream;
-								curField.streamFieldID = curSourceField.id;
-							}
-						} );
-					} else {
-						this.mainService.curItemTargetStreamFields.forEach(( curTargetField ) => {
-							if ( curTargetField.name === curField.name ) {
-								curField.fOrder = '00000' + curTargetField.fOrder;
-								curField.isDescribed = curTargetField.isDescribed;
-								curField.stream = curTargetField.stream;
-								curField.streamFieldID = curTargetField.id;
-							}
-						} );
-					}
-					curField.fOrder = curField.srctar + curField.fOrder.toString().substr( -6 );
-				} );
-				this.mainService.curItemFields.sort(( a, b ) => {
-					if ( a.fOrder > b.fOrder ) {
-						return 1;
-					} else if ( a.fOrder < b.fOrder ) {
-						return -1;
-					} else {
-						return 0;
-					}
-				} );
-				this.streamService.listTypesFetch().subscribe(( result ) => {
-					let srcHyperionPlanning = false;
-					let tarHyperionPlanning = false;
-					result.forEach(( curType ) => {
-						if ( curType.id === this.mainService.curItemSourceStream.type && curType.value === 'HPDB' ) {
-							srcHyperionPlanning = true;
-						}
-						if ( curType.id === this.mainService.curItemTargetStream.type && curType.value === 'HPDB' ) {
-							tarHyperionPlanning = true;
-						}
-					} );
-					this.mainService.curItemFields.forEach(( curField ) => {
-						if ( curField.srctar === 'source' && srcHyperionPlanning ) {
-							curField.isDescribed = 1;
-						}
-						if ( curField.srctar === 'target' && tarHyperionPlanning ) {
-							curField.isDescribed = 1;
-						}
-					} );
-					resolve();
-				}, ( error ) => {
-					console.error( error );
-					reject( 'Error while getting stream type list' );
-				} )
-			} );
-		}
-		private defineHotItems = () => {
-			return new Promise(( resolve, reject ) => {
-				this.hotElement = document.querySelector( '#mapHotTable' + this.mainService.curItem.id );
-				this.hotElementContainer = this.hotElement.parentNode;
-				resolve();
-			} );
-		};
+
 		public refreshMapTable = () => {
 			this.getMapTable();
 		}
-		private getMapTable = () => {
-			this.numberofRowsinMap = 'Please wait, refreshing...';
-			return new Promise(( resolve, reject ) => {
-				let currentFilter: any;
-				if ( this.dataObject ) {
-					currentFilter = {};
-					Object.keys( this.dataObject[0] ).forEach(( curKey ) => {
-						if ( this.dataObject[0][curKey] !== 'Filter Type' ) {
-							if ( this.dataObject[1][curKey] ) {
-								// console.log( curKey, this.dataObject[0][curKey], this.dataObject[1][curKey] );
-								currentFilter[curKey] = {
-									type: this.dataObject[0][curKey],
-									value: this.dataObject[1][curKey]
-								};
-							}
-						}
-					} );
-				} else {
-					currentFilter = {};
-				}
-				this.mainService.fetchMapTable( currentFilter ).subscribe(( data ) => {
-					if ( this.dataObject ) {
-						this.dataObject = [this.dataObject[0], this.dataObject[1]];
-					} else {
-						this.dataObject = [{ id: 'Filter Type' }, { id: 'Filter' }];
-					}
-					// console.log( 'We received data' );
-					data.forEach(( curData ) => {
-						this.dataObject.push( curData );
-						// console.log( curData );
-					} );
-					this.numberofRowsinMap = data.length + ' rows';
-					resolve();
-				}, ( error ) => {
-					reject( error );
-				} );
-			} );
-		};
+
 		private prepareColumns = () => {
 			return new Promise(( resolve, reject ) => {
 				this.columns = [];

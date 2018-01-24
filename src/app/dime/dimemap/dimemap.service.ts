@@ -44,6 +44,8 @@ export class DimeMapService {
 		}
 	}
 	public navigateTo = ( id: number ) => {
+		delete this.currentItem.sourcefields;
+		delete this.currentItem.targetfields;
 		this.router.navigateByUrl( this.router.routerState.snapshot.url
 			.split( '/' )
 			.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )	// This part replaces the stream ID to the target stream's ID
@@ -108,8 +110,16 @@ export class DimeMapService {
 		this.filesToUpload = <Array<File>>fileInput.target.files;
 	}
 
-
 	/*
+
+	public refreshMapTable = () => {
+		this.curItemMapReadyToShow = false;
+		return this.authHttp.post( this.baseUrl + '/mapData?i=' + new Date().getTime(), { mapid: this.curItem.id } ).
+			map( response => response.json() ).
+			catch( ( error ) => {
+				return Observable.throw( new Error( error ) );
+			} );
+	}
 
 	items: Observable<DimeMap[]>;
 	itemCount: Observable<number>;
@@ -248,14 +258,7 @@ export class DimeMapService {
 		};
 
 
-		public refreshMapTable = () => {
-			this.curItemMapReadyToShow = false;
-			return this.authHttp.post( this.baseUrl + '/mapData?i=' + new Date().getTime(), { mapid: this.curItem.id } ).
-				map( response => response.json() ).
-				catch(( error ) => {
-					return Observable.throw( new Error( error ) );
-				} );
-		};
+
 		public fetchMapTable = ( currentFilter?: any ) => {
 			if ( !currentFilter ) {
 				currentFilter = {};
