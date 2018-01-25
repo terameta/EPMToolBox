@@ -23,14 +23,14 @@ export class SmartViewTools {
 	private smartviewGetDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
 		return this.smartviewListAliasTables( refObj )
 			.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
-			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsAction( refObj, refField ) } );
+			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsAction( refObj, refField ); } );
 	}
 	private smartviewOpenDimension = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
 		return this.smartviewOpenApplication( refObj )
 			.then( resEnv => {
 				refObj = resEnv;
 				const body = '<req_OpenCube><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><app>' + refObj.database + '</app><cube>HSP_DIM_' + refField.name + '</cube><type></type><url></url><form></form></req_OpenCube>';
-				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } )
+				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )
 			.then( response => {
 				let isSuccessful = false;
@@ -125,7 +125,7 @@ export class SmartViewTools {
 			.then( resEnv => {
 				refObj = resEnv;
 				const body = '<req_EnumAliasTables><sID>' + refObj.SID + '</sID><ODL_ECID>0000</ODL_ECID></req_EnumAliasTables>';
-				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } )
+				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )
 			.then( response => {
 				let isSuccessful = false;
@@ -148,7 +148,7 @@ export class SmartViewTools {
 			.then( resEnv => {
 				refObj = resEnv;
 				const body = '<req_EnumDims><sID>' + refObj.SID + '</sID><srv>' + refObj.server + '</srv><app>' + refObj.database + '</app><cube>' + refObj.table + '</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>';
-				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } )
+				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )
 			.then( response => {
 				let isSuccessful = false;
@@ -197,7 +197,7 @@ export class SmartViewTools {
 			.then( resEnv => {
 				refObj = resEnv;
 				body = '<req_ListCubes><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><app>' + refObj.database + '</app><type></type><url></url></req_ListCubes>';
-				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } )
+				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )
 			.then( response => {
 				let isSuccessful = false;
@@ -248,7 +248,7 @@ export class SmartViewTools {
 			.then( resEnv => {
 				refObj = resEnv;
 				body = '<req_OpenApplication><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><app>' + refObj.database + '</app><type></type><url></url></req_OpenApplication>';
-				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } )
+				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )
 			.then( response => {
 				let isSuccessful = false;
@@ -521,7 +521,7 @@ export class SmartViewTools {
 				} else {
 					resolve( refInfo );
 				}
-			} )
+			} );
 		} );
 	}
 	private pbcsObtainSID03 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {

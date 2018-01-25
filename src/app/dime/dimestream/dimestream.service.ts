@@ -176,6 +176,19 @@ export class DimeStreamService {
 			console.error( 'fieldListDescriptiveFields:', error );
 		} );
 	}
+	public fetchFieldDescriptions = ( stream: number, field: number ) => {
+		return this.backend.fetchFieldDescriptions( { stream, field } );
+	}
+	public populateFieldDescriptions = () => {
+		this.toastr.info( 'Please wait, refreshing the field descriptions from the source system', this.serviceName );
+		this.backend.populateFieldDescriptions( this.currentItem.id ).subscribe( result => {
+			this.toastr.info( 'Field descriptions are successfully pulled from the source system.', this.serviceName );
+		}, error => {
+			this.toastr.error( 'Failed to populate field descriptions.', this.serviceName );
+			console.error( 'Populate Field Descriptions' );
+			console.error( error );
+		} );
+	}
 
 	// constructor(
 	// 	private http: Http,

@@ -14,5 +14,12 @@ export interface DimeMapField {
 	id: number,
 	map: number,
 	srctar: 'source' | 'target',
-	name: string
+	name: string,
+	descriptions: { RefField: string, Description: string }[]
+}
+
+export interface DimeMapRefreshPayload {
+	map: number,
+	filters: any,
+	sorters: any
 }

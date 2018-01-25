@@ -17,9 +17,7 @@
 </div>
 <!-- <div id="mapHotTable{{mainService.currentItem.id}}" (window:resize)="windowResized()"></div> -->
 
-<hot-table [height]="hotTableHeight" (window:resize)="windowResized()" [settings]="mapSettings">
-	<hot-column *ngFor="let column of mainService.currentItem.sourcefields"></hot-column>
-</hot-table>
+<hot-table [height]="hotTableHeight" fixedColumnsLeft="1" startRows="0" colWidths="100" [settings]="mapSettings" [rowHeaders]="true" [colHeaders]="true" [columns]="mapColumns" [data]="mapData" (window:resize)="windowResized()"></hot-table>
 <div class="overlay" *ngIf="filtersShown">
 	<form class="form-horizontal" (ngSubmit)="refreshMapTable()">
 		<div class="box box-primary box-solid">

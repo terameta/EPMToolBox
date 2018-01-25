@@ -2,7 +2,7 @@ import { Pool } from 'mysql';
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
 import { Readable } from 'stream';
-import * as tempy from 'tempy';
+// import * as tempy from 'tempy';
 import * as fs from 'fs';
 
 import { MainTools } from './tools.main';
@@ -41,7 +41,7 @@ export class MapTools {
 					} );
 					resolve( Promise.all( promises ) );
 				}
-			} )
+			} );
 		} );
 	}
 	public getOne = ( id: number ) => {
@@ -76,7 +76,7 @@ export class MapTools {
 					newMap.id = rows.insertId;
 					resolve( newMap );
 				}
-			} )
+			} );
 		} );
 	}
 	public update = ( dimeMap: DimeMap ) => {
@@ -105,7 +105,7 @@ export class MapTools {
 				} else {
 					resolve( id );
 				}
-			} )
+			} );
 		} );
 	}
 	public getFields = ( id: number ): Promise<DimeMapField[]> => {
@@ -116,7 +116,7 @@ export class MapTools {
 				} else {
 					resolve( rows );
 				}
-			} )
+			} );
 		} );
 	}
 	public setFields = ( dimeMap: DimeMap ): Promise<DimeMap> => {
@@ -140,7 +140,7 @@ export class MapTools {
 						} );
 						Promise.all( promises ).then( () => resolve( dimeMap ) ).catch( reject );
 					}
-				} )
+				} );
 			}
 		} );
 	}
@@ -152,7 +152,7 @@ export class MapTools {
 				} else {
 					resolve( rows );
 				}
-			} )
+			} );
 		} );
 	}
 	public prepare = ( id: number ) => {
@@ -297,14 +297,14 @@ export class MapTools {
 							if ( curMapField.srctar === curField.srctar && curMapField.name === curField.name ) {
 								curField.mappable = true;
 							}
-						} )
+						} );
 					} );
 					return refObj;
 				} ).
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private fieldSort( a: any, b: any ) {
 		if ( a.fOrder < b.fOrder ) {
 			return -1;
@@ -335,7 +335,7 @@ export class MapTools {
 							refObj.mapFields.forEach( ( curField: any ) => {
 								if ( curField.srctar === 'source' ) { numSrcFields++; }
 								if ( curField.srctar === 'target' ) { numTarFields++; }
-							} )
+							} );
 							if ( maptblExists && numSrcFields > 0 && numTarFields > 0 ) {
 								resolve( { isready: true } );
 							} else {
@@ -347,7 +347,7 @@ export class MapTools {
 				} )
 				.catch( reject );
 		} );
-	};
+	}
 	public rejectIfNotReady = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.isReady( id ).
@@ -381,7 +381,7 @@ export class MapTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private retrieveMapDescriptionsAction = ( refObj: any, curField: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM ' + curField.table + ' ORDER BY 1,2', ( err, result, fields ) => {
@@ -396,7 +396,7 @@ export class MapTools {
 				}
 			} );
 		} );
-	};
+	}
 	private retrieveMapDataAction = ( refObj: any ) => {
 		// console.log( refObj );
 		return new Promise( ( resolve, reject ) => {
@@ -571,7 +571,7 @@ export class MapTools {
 				}
 			} );
 		} );
-	};
+	}
 	/*public mapImport = ( refObj: any ) => {
 		return new Promise(( resolve, reject ) => {
 			console.log( refObj );
@@ -645,7 +645,7 @@ export class MapTools {
 					catch( reject );
 			}
 		} );
-	};
+	}
 	public mapImportGetExcelData = ( workbook: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			const colHeaders: string[] = [];
@@ -687,7 +687,7 @@ export class MapTools {
 				}
 			}
 		} );
-	};
+	}
 	public clearMapTable = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'TRUNCATE MAP' + id + '_MAPTBL', ( err, result, fields ) => {
@@ -698,7 +698,7 @@ export class MapTools {
 				}
 			} );
 		} );
-	};
+	}
 	public populateMapTable = ( id: number, tuples: any[] ) => {
 		return new Promise( ( resolve, reject ) => {
 			const curKeys = Object.keys( tuples[0] );
@@ -718,7 +718,7 @@ export class MapTools {
 				}
 			} );
 		} );
-	};
+	}
 	public mapExport = ( refObj: { id: number, requser: any, res: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getOne( refObj.id ).
@@ -734,7 +734,7 @@ export class MapTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private mapExportConvertToExcel = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 
@@ -779,7 +779,7 @@ export class MapTools {
 
 			resolve( workbook );
 		} );
-	};
+	}
 	private mapExportSendToUser = ( refBook: any, refUser: any, response: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			// resolve( refBuffer.getContents() );
@@ -816,5 +816,5 @@ export class MapTools {
 			// 	]
 			// } );
 		} );
-	};
+	}
 }

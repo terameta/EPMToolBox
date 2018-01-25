@@ -15,7 +15,7 @@ export class StreamTools {
 		this.environmentTool = new EnvironmentTools( this.db, this.tools );
 	}
 
-	public getAll = () => {
+	public getAll = (): Promise<DimeStreamDetail[]> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streams', ( err, rows, fields ) => {
 				if ( err ) {
@@ -42,7 +42,7 @@ export class StreamTools {
 			} );
 		} );
 	}
-	public getOne = ( id: number ) => {
+	public getOne = ( id: number ): Promise<DimeStreamDetail> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM streams WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
@@ -443,6 +443,75 @@ export class StreamTools {
 					resolve( result );
 				}
 			} );
+		} );
+	}
+	public populateFieldDescriptions = ( id: number ) => {
+		return this.getOne( id )
+			.then( this.populateFieldDescriptionsClear )
+			.then( this.populateFieldDescriptionsPullandSet );
+	}
+	private populateFieldDescriptionsClear = ( stream: DimeStreamDetail ): Promise<DimeStreamDetail> => {
+		return new Promise( ( resolve, reject ) => {
+			const promises = [];
+			stream.fieldList
+				.filter( currentField => currentField.isDescribed )
+				.forEach( currentField => {
+					promises.push( new Promise( ( subResolve, subReject ) => {
+						this.db.query( 'TRUNCATE TABLE STREAM' + stream.id + '_DESCTBL' + currentField.id, ( err, result, fields ) => {
+							if ( err ) {
+								subReject( err );
+							} else {
+								subResolve( 'OK' );
+							}
+						} );
+					} ) );
+				} );
+			Promise.all( promises ).then( () => {
+				resolve( stream );
+			} ).catch( reject );
+		} );
+	}
+	private populateFieldDescriptionsPullandSet = ( stream: DimeStreamDetail ) => {
+		return new Promise( ( resolve, reject ) => {
+			const promises = [];
+			stream.fieldList
+				.filter( currentField => currentField.isDescribed )
+				.forEach( currentField => {
+					promises.push(
+						this.environmentTool.getDescriptions( stream, currentField )
+							.then( ( result: { RefField: string, Description: string }[] ) => this.populateFieldDescriptionsSet( result, stream, currentField ) )
+					);
+				} );
+			Promise.all( promises ).then( () => {
+				resolve( stream );
+			} ).catch( reject );
+		} );
+	}
+	private populateFieldDescriptionsSet = ( descriptions: { RefField: string, Description: string }[], stream: DimeStream, field: DimeStreamField ) => {
+		return new Promise( ( resolve, reject ) => {
+			if ( descriptions.length > 0 ) {
+				const curKeys = Object.keys( descriptions[0] );
+				let insertQuery: string; insertQuery = '';
+				insertQuery += 'INSERT INTO STREAM' + stream.id + '_DESCTBL' + field.id + '(' + curKeys.join( ', ' ) + ') VALUES ?';
+				let curArray: any[];
+				const descriptionsToInsert: any[] = [];
+				descriptions.forEach( ( curResult, curItem ) => {
+					curArray = [];
+					curKeys.forEach( ( curKey ) => {
+						curArray.push( curResult[curKey] );
+					} );
+					descriptionsToInsert.push( curArray );
+				} );
+				this.db.query( insertQuery, [descriptionsToInsert], ( err, rows, fields ) => {
+					if ( err ) {
+						reject( err );
+					} else {
+						resolve( 'OK' );
+					}
+				} );
+			} else {
+				resolve( 'OK' );
+			}
 		} );
 	}
 }

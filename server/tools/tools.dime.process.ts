@@ -792,7 +792,7 @@ export class ProcessTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private sendMissingRunQuery = ( refQuery: string, refMap: DimeMap ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( refQuery, ( err, result, fields ) => {
@@ -842,7 +842,7 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			let fromAddress: string; fromAddress = '';
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Missing Maps: Sending data file.' ).
-				then( () => { return this.settingsTool.getOne( 'systemadminemailaddress' ); } ).
+				then( () => this.settingsTool.getOne( 'systemadminemailaddress' ) ).
 				then( ( systemadminemailaddress: any ) => {
 					fromAddress = systemadminemailaddress.value;
 					return this.workbookToStreamBuffer( refBook );
@@ -909,13 +909,13 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			refProcess.recepients = refStep.details.split( ';' ).join( ',' );
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Send data.' ).
-				then( () => { return this.sendDataDropCrossTable( refProcess, refStep ); } ).
-				then( () => { return this.sendDataCreateCrossTable( refProcess, refStep ); } ).
-				then( ( result ) => { return this.sendDataInsertDistincts( refProcess, refStep, result ); } ).
-				then( ( result ) => { return this.sendDataPopulateDataColumns( refProcess, refStep, result ); } ).
-				then( ( result ) => { return this.sendDataPopulateDescriptionColumns( refProcess, refStep, result ); } ).
-				then( ( result ) => { return this.sendDataCreateFile( refProcess, refStep, result ); } ).
-				then( ( result ) => { return this.sendDataSendFile( refProcess, refStep, result ); } ).
+				then( () => this.sendDataDropCrossTable( refProcess, refStep ) ).
+				then( () => this.sendDataCreateCrossTable( refProcess, refStep ) ).
+				then( ( result ) => this.sendDataInsertDistincts( refProcess, refStep, result ) ).
+				then( ( result ) => this.sendDataPopulateDataColumns( refProcess, refStep, result ) ).
+				then( ( result ) => this.sendDataPopulateDescriptionColumns( refProcess, refStep, result ) ).
+				then( ( result ) => this.sendDataCreateFile( refProcess, refStep, result ) ).
+				then( ( result ) => this.sendDataSendFile( refProcess, refStep, result ) ).
 				then( resolve ).
 				catch( reject );
 		} );
@@ -1290,7 +1290,7 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			let fromAddress: string; fromAddress = '';
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Send Data: Sending data file.' ).
-				then( () => { return this.settingsTool.getOne( 'systemadminemailaddress' ); } ).
+				then( () => this.settingsTool.getOne( 'systemadminemailaddress' ) ).
 				then( ( systemadminemailaddress: any ) => {
 					fromAddress = systemadminemailaddress.value;
 					return this.workbookToStreamBuffer( refDefs.workbook );
@@ -1536,7 +1536,7 @@ export class ProcessTools {
 				if ( curKey < ( currentProcedure.procedure.variables.length - 1 ) ) { toLog += ', '; }
 			} );
 			this.logTool.appendLog( tracker, toLog ).
-				then( () => { return this.environmentTool.runProcedure( currentProcedure ); } ).
+				then( () => this.environmentTool.runProcedure( currentProcedure ) ).
 				then( resolve ).
 				catch( reject );
 		} );
@@ -1544,13 +1544,13 @@ export class ProcessTools {
 	private runPushData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Push data is initiating.' ).
-				then( () => { return this.populateTargetStreamDescriptions( refProcess ); } ).
-				then( () => { return this.clearSummaryTable( refProcess, refStep ); } ).
-				then( () => { return this.summarizeData( refProcess, refStep ); } ).
-				then( () => { return this.fetchSummarizedData( refProcess, refStep ); } ).
-				then( ( result: any[] ) => { return this.pushDataAction( refProcess, refStep, result ); } ).
-				then( ( result: any ) => { return this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': ' + JSON.stringify( result ) ); } ).
-				then( ( result: any ) => { return this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Push data is completed.' ); } ).
+				then( () => this.populateTargetStreamDescriptions( refProcess ) ).
+				then( () => this.clearSummaryTable( refProcess, refStep ) ).
+				then( () => this.summarizeData( refProcess, refStep ) ).
+				then( () => this.fetchSummarizedData( refProcess, refStep ) ).
+				then( ( result: any[] ) => this.pushDataAction( refProcess, refStep, result ) ).
+				then( ( result: any ) => this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': ' + JSON.stringify( result ) ) ).
+				then( ( result: any ) => this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Push data is completed.' ) ).
 				then( resolve ).
 				catch( reject );
 		} );
@@ -1913,14 +1913,14 @@ export class ProcessTools {
 	private runMapData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Map Data is initiating.' ).
-				then( () => { return this.mapDataAction( refProcess, refStep ); } ).
-				then( () => { return this.mapDataAssignMissing( refProcess, refStep ); } ).
-				then( () => { return this.mapDataClearMap( refProcess, refStep ); } ).
-				then( () => { return this.mapDataRefreshMap( refProcess, refStep ); } ).
+				then( () => this.mapDataAction( refProcess, refStep ) ).
+				then( () => this.mapDataAssignMissing( refProcess, refStep ) ).
+				then( () => this.mapDataClearMap( refProcess, refStep ) ).
+				then( () => this.mapDataRefreshMap( refProcess, refStep ) ).
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private mapDataAssignMissing = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Identifying missing maps.' ).
@@ -1950,7 +1950,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private mapDataClearMap = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Clearing map table from the missing map tuples.' ).
@@ -1975,7 +1975,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private mapDataRefreshMap = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ' - Map Data: Populating the map table with missing maps to be mapped.' ).
@@ -2038,7 +2038,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private runPullData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Pull Data is initiating.' ).
@@ -2074,18 +2074,19 @@ export class ProcessTools {
 			}
 		} );
 		return Promise.all( promises );
-	};
+	}
 	private populateStreamDescriptionsAction = ( refEnvironment: DimeEnvironment, refStream: DimeStream, refField: DimeStreamField ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.clearStreamDescriptions( refField ).
-				then( () => {
-					return this.environmentTool.getDescriptions( refStream, refField );
-				} ).
-				then( ( result: any[] ) => {
-					return this.setStreamDescriptions( result, refStream, refField );
-				} ).
-				then( resolve ).
-				catch( reject );
+			// this.clearStreamDescriptions( refField ).
+			// 	then( () => {
+			// 		return this.environmentTool.getDescriptions( refStream, refField );
+			// 	} ).
+			// 	then( ( result: any[] ) => {
+			// 		return this.setStreamDescriptions( result, refStream, refField );
+			// 	} ).
+			// 	then( resolve ).
+			// 	catch( reject );
+			reject( new Error( 'This function belongs to stream tools@populateStreamDescriptionsAction' ) );
 		} );
 	}
 	private clearStreamDescriptions = ( refField: DimeStreamField ) => {
@@ -2104,7 +2105,7 @@ export class ProcessTools {
 			if ( refObj.length > 0 ) {
 				const curKeys = Object.keys( refObj[0] );
 				let insertQuery: string; insertQuery = '';
-				insertQuery += 'INSERT INTO STREAM' + refStream.id + '_DESCTBL' + refField.id + '(' + curKeys.join( ', ' ) + ') VALUES ?'
+				insertQuery += 'INSERT INTO STREAM' + refStream.id + '_DESCTBL' + refField.id + '(' + curKeys.join( ', ' ) + ') VALUES ?';
 				let curArray: any[];
 				refObj.forEach( ( curResult, curItem ) => {
 					curArray = [];
@@ -2189,7 +2190,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private pullFromSource = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Pulling data from source stream with the given filters.' ).
@@ -2238,7 +2239,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private clearStaging = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Clearing staging table.' ).
@@ -2262,7 +2263,7 @@ export class ProcessTools {
 					} );
 				} ).catch( reject );
 		} );
-	};
+	}
 	private fetchFiltersToRefProcess = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refProcess.curStep + ' - Pull Data: Fetching filters.' ).
@@ -2302,7 +2303,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private runSourceProcedure = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Step ' + refStep.sOrder + ': Source procedure is initiating.' ).
@@ -2312,7 +2313,7 @@ export class ProcessTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private identifyEnvironments = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Identifying process environments.' ).
@@ -2324,7 +2325,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private identifySourceEnvironment = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refProcess.source }, true ).
@@ -2333,7 +2334,7 @@ export class ProcessTools {
 					resolve( refProcess );
 				} ).catch( reject );
 		} );
-	};
+	}
 	private identifyTargetEnvironment = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.environmentTool.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refProcess.target }, true ).
@@ -2342,7 +2343,7 @@ export class ProcessTools {
 					resolve( refProcess );
 				} ).catch( reject );
 		} );
-	};
+	}
 	private createTables = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Creating process tables if necessary.' );
@@ -2361,7 +2362,7 @@ export class ProcessTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	private createSumTable = ( refProcess: DimeProcessRunning, refKey: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Process sum table was missing. Creating now.' );
@@ -2523,7 +2524,7 @@ export class ProcessTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private identifySourceStream = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			let ourStep: DimeProcessStep; ourStep = { id: 0, process: refProcess.id, referedid: 0 };
@@ -2554,7 +2555,7 @@ export class ProcessTools {
 					catch( reject );
 			}
 		} );
-	};
+	}
 	private identifyTargetStream = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			let ourStep: DimeProcessStep; ourStep = { id: 0, process: refProcess.id, referedid: 0 };
@@ -2585,7 +2586,7 @@ export class ProcessTools {
 					catch( reject );
 			}
 		} );
-	};
+	}
 	private identifySteps = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.status, 'Identifying process steps.' );
@@ -2600,7 +2601,7 @@ export class ProcessTools {
 							details: curStep.details || '',
 							sOrder: curStep.sOrder || ( curKey + 1 ),
 							isPending: true
-						} )
+						} );
 					} );
 					// refProcess.steps = steps;
 					if ( steps.length === 0 ) {
@@ -2640,7 +2641,7 @@ export class ProcessTools {
 	}
 	private isNumeric = ( n: any ) => {
 		return !isNaN( parseFloat( n ) ) && isFinite( n );
-	};
+	}
 	public sendDataFile = ( refObj: { id: number, requser: any } ) => {
 		const id = refObj.id;
 		const requser = refObj.requser;
@@ -2686,5 +2687,5 @@ export class ProcessTools {
 				} );
 
 		} );
-	};
+	}
 }

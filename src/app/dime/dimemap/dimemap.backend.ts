@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { DimeMap } from '../../../../shared/model/dime/map';
+import { DimeMap, DimeMapRefreshPayload } from '../../../../shared/model/dime/map';
 
 @Injectable()
 export class DimeMapBackend {
@@ -19,4 +19,5 @@ export class DimeMapBackend {
 	public isready = ( id: number ) => this.http.get( this.baseUrl + '/isready/' + id );
 	public mapExport = ( id: number ) => this.http.get( this.baseUrl + /mapExport/ + id, { responseType: 'blob' } );
 	public mapImport = ( formData: FormData ) => this.http.post( this.baseUrl + '/mapImport', formData );
+	public mapRefresh = ( payload: DimeMapRefreshPayload ) => this.http.post( this.baseUrl + '/mapRefresh', payload );
 }

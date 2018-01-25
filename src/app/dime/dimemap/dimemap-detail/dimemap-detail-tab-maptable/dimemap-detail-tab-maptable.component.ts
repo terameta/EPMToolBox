@@ -7,6 +7,7 @@ import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMapService } from '../../../dimemap/dimemap.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
+import { DimeMapField } from '../../../../../../shared/model/dime/map';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -26,9 +27,11 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public activeSorters = [];
 
 	public mapSettings = {
-		colHeaders: [],
+		colHeaders: true,
 		rowHeaders: true
 	};
+	public mapColumns: any[] = [];
+	public mapData: any[] = [];
 	// private columns: any[];
 	// private colHeaders: string[];
 	// private options: any;
@@ -74,7 +77,11 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public refreshMapTable = () => {
 		this.filtersShown = false;
 		this.sortersShown = false;
-		console.log( 'Refresh map table is called' );
+		this.mainService.mapRefresh( { map: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ).subscribe( result => {
+			console.log( 'RefreshMapTable:', result );
+		}, error => {
+			console.error( 'RefreshMapTable:', error );
+		} );
 	}
 
 	private getReady = () => {
@@ -82,20 +89,108 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		this.waitUntilItemIsReady()
 			.then( this.prepareFilters )
 			.then( this.prepareAvailableSorters )
+			.then( this.prepareColumns )
+			.then( this.prepareDescriptions )
+			.then( this.prepareDropdowns )
+			.then( this.refreshMapTable )
 			.then( ( result ) => {
-				console.log( 'We are at getReady' );
-				console.log( 'waitUntilItemIsReady() completed' );
-				console.log( 'prepareFilters() completed' );
-				console.log( result );
+				console.log( 'should be ready' );
+			} ).catch( console.error );
+	}
+	private prepareDropdowns = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.streamService.itemObject[this.mainService.currentItem.target].fieldList.forEach( ( currentStreamField ) => {
+				this.mainService.currentItem.targetfields.forEach( ( currentMapField ) => {
+					if ( currentMapField.name === currentStreamField.name ) {
+						let columnIndex: number;
+						this.mapColumns
+							.forEach( ( currentColumn, currentIndex ) => {
+								if ( currentColumn.data === 'TAR_' + currentStreamField.name ) {
+									columnIndex = currentIndex;
+								}
+							} );
+						this.mapColumns[columnIndex].type = 'autocomplete';
+						this.mapColumns[columnIndex].strict = true;
+						this.mapColumns[columnIndex].allowInvalid = true;
+						this.mapColumns[columnIndex].source = [];
+						currentMapField.descriptions.forEach( ( currentDescription ) => {
+							this.mapColumns[columnIndex].source.push( currentDescription.RefField + '::' + currentDescription.Description );
+						} );
+					}
+				} );
 			} );
+			resolve();
+		} );
+	}
+	private prepareDescriptions = () => {
+		return new Promise( ( resolve, reject ) => {
+			const currentPrefix = '_TAR';
+			const promises = [];
+			this.streamService.itemObject[this.mainService.currentItem.target].fieldList.forEach( ( currentStreamField ) => {
+				this.mainService.currentItem.targetfields.forEach( ( currentMapField ) => {
+					if ( currentMapField.name === currentStreamField.name ) {
+						promises.push( this.prepareDescriptionsAction( currentMapField, currentStreamField.stream, currentStreamField.id, currentPrefix ) );
+					}
+				} );
+			} );
+			Promise.all( promises ).then( resolve ).catch( reject );
+		} );
+	}
+	private prepareDescriptionsAction = ( mapField: DimeMapField, stream: number, field: number, prefix: string ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.streamService.fetchFieldDescriptions( stream, field ).subscribe( ( result: any[] ) => {
+				mapField.descriptions = result;
+				mapField.descriptions.push( { RefField: 'ignore', Description: 'ignore' } );
+				resolve();
+			}, ( error ) => {
+				reject( error );
+			} );
+		} );
 	}
 	private prepareColumns = () => {
 		return new Promise( ( resolve, reject ) => {
-			this.mapSettings.colHeaders = [];
-			this.mapSettings.colHeaders.push( 'Ali' );
-			this.mapSettings.colHeaders.push( 'Veli' );
-			this.mapSettings.colHeaders.push( '49' );
-			this.mapSettings.colHeaders.push( '50' );
+			this.mapColumns = [];
+			let currentColumn: any;
+			let currentPrefix: string;
+			this.streamService.itemObject[this.mainService.currentItem.source].fieldList
+				.filter( currentStreamField => ( this.mainService.currentItem.sourcefields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+				.forEach( currentField => {
+					currentColumn = {};
+					currentPrefix = 'SRC_';
+					currentColumn.data = currentPrefix + currentField.name;
+					currentColumn.type = 'text';
+					currentColumn.readOnly = true; 	// Because it is a source field, it is always read-only
+					currentColumn.title = currentField.name;
+					this.mapColumns.push( currentColumn );
+					if ( currentField.isDescribed ) {
+						currentColumn = {};
+						currentColumn.data = currentPrefix + currentField.name + '_DESC';
+						currentColumn.title = currentField.name + ' Description';
+						currentColumn.type = 'text';
+						currentColumn.readOnly = true;
+						this.mapColumns.push( currentColumn );
+					}
+				} );
+			this.streamService.itemObject[this.mainService.currentItem.target].fieldList
+				.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+				.forEach( currentField => {
+					currentColumn = {};
+					currentPrefix = 'TAR_';
+					currentColumn.data = currentPrefix + currentField.name;
+					currentColumn.type = 'text';
+					currentColumn.title = currentField.name;
+					this.mapColumns.push( currentColumn );
+					if ( currentField.isDescribed ) {
+						currentColumn = {};
+						currentColumn.data = currentPrefix + currentField.name + '_DESC';
+						currentColumn.title = currentField.name + ' Description';
+						currentColumn.type = 'text';
+						currentColumn.readOnly = true;
+						this.mapColumns.push( currentColumn );
+					}
+				} );
+			this.mapColumns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html', title: 'Save Result' } );
+			resolve();
 		} );
 	}
 	private waitUntilItemIsReady = () => {
@@ -364,107 +459,5 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		public refreshMapTable = () => {
 			this.getMapTable();
 		}
-
-		private prepareColumns = () => {
-			return new Promise(( resolve, reject ) => {
-				this.columns = [];
-				this.colHeaders = [];
-				// this.columns.push( { data: 'id', type: 'text', readOnly: true } );
-				// this.colHeaders.push( 'id' );
-				this.mainService.curItemFields.forEach(( curField ) => {
-					// console.log( curField );
-					let curPrefix = '';
-					if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
-					if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
-					let toPush: any; toPush = {};
-					toPush.data = curPrefix + curField.name;
-					toPush.type = 'text';
-					if ( curField.srctar === 'source' ) { toPush.readOnly = true; }
-					this.columns.push( toPush );
-					this.dataObject[0][curPrefix + curField.name] = 'Contains';
-					this.dataObject[1][curPrefix + curField.name] = '';
-					this.colHeaders.push( curField.name );
-					if ( curField.isDescribed ) {
-						let toPushD: any; toPushD = {};
-						toPushD.data = curPrefix + curField.name + '_DESC';
-						this.dataObject[0][curPrefix + curField.name + '_DESC'] = 'Contains';
-						this.dataObject[1][curPrefix + curField.name + '_DESC'] = '';
-						toPushD.type = 'text';
-						toPushD.readOnly = true;
-						this.columns.push( toPushD );
-						this.colHeaders.push( curField.name + ' Description' );
-					}
-				} );
-				this.columns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html' } );
-				this.colHeaders.push( 'Save Result' );
-				resolve();
-			} );
-		};
-		private getDescriptions = () => {
-			return new Promise(( resolve, reject ) => {
-				this.fieldDescriptions = {};
-				const promises = [];
-				this.mainService.curItemFields.forEach(( curField ) => {
-					let curPrefix = '';
-					if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
-					if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
-					if ( curField.isDescribed && curField.srctar === 'target' ) {
-						promises.push( this.getDescriptionsAction( curField.name, curField.stream, curField.streamFieldID, curPrefix ) );
-					}
-				} );
-				Promise.all( promises ).then( resolve ).catch( reject );
-			} );
-		};
-		private getDescriptionsAction = ( fieldName: string, stream: number, field: number, prefix: string ) => {
-			return new Promise(( resolve, reject ) => {
-				// console.log( 'getDescriptiansAction is running', fieldName, stream, field );
-				this.streamService.fetchFieldDescriptions( stream, field ).subscribe(( result ) => {
-					this.fieldDescriptions[prefix + fieldName] = result;
-					this.fieldDescriptions[prefix + fieldName].push( { RefField: 'ignore', Description: 'ignore' } );
-					resolve();
-				}, ( error ) => {
-					reject( error );
-				} );
-			} );
-		};
-		private applyDescriptions = () => {
-			return new Promise(( resolve, reject ) => {
-				Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
-					// console.log( curFieldName );
-					this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
-						this.dataObject.forEach(( curTuple ) => {
-							if ( curTuple[curFieldName] === curDescription.RefField ) {
-								curTuple[curFieldName + '_DESC'] = curDescription.Description;
-							}
-						} );
-					} );
-				} );
-				resolve();
-			} );
-		};
-		private prepareDropdowns = () => {
-			return new Promise(( resolve, reject ) => {
-				// console.log( this.columns );
-				this.columns.forEach(( curColumn ) => {
-					Object.keys( this.fieldDescriptions ).forEach(( curFieldName: string ) => {
-						if ( curColumn.data === curFieldName ) {
-							// console.log( curColumn.data, curFieldName );
-							curColumn.type = 'autocomplete';
-							curColumn.strict = true;
-							curColumn.allowInvalid = false;
-							curColumn.source = [];
-							this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
-								curColumn.source.push( curDescription.RefField + '::' + curDescription.Description );
-							} );
-							this.fieldDescriptions[curFieldName].forEach(( curDescription ) => {
-								curColumn.source.push( curDescription.RefField );
-							} );
-							// console.log( curColumn.source );
-						}
-					} );
-				} );
-				// console.log( this.columns );
-				resolve();
-			} );
-		};*/
+		*/
 }

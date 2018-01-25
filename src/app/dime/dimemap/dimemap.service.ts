@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
 import * as _ from 'lodash';
 
-import { DimeMap } from '../../../../shared/model/dime/map';
+import { DimeMap, DimeMapRefreshPayload } from '../../../../shared/model/dime/map';
 import { SortByName, getFormattedDate } from '../../../../shared/utilities/utilityFunctions';
 import { DimeMapActions } from './dimemap.actions';
 import { DimeMapBackend } from './dimemap.backend';
@@ -110,16 +110,13 @@ export class DimeMapService {
 		this.filesToUpload = <Array<File>>fileInput.target.files;
 	}
 
+	public mapRefresh = ( payload: DimeMapRefreshPayload ) => {
+		return this.backend.mapRefresh( payload );
+	}
+
 	/*
 
-	public refreshMapTable = () => {
-		this.curItemMapReadyToShow = false;
-		return this.authHttp.post( this.baseUrl + '/mapData?i=' + new Date().getTime(), { mapid: this.curItem.id } ).
-			map( response => response.json() ).
-			catch( ( error ) => {
-				return Observable.throw( new Error( error ) );
-			} );
-	}
+
 
 	items: Observable<DimeMap[]>;
 	itemCount: Observable<number>;
