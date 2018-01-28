@@ -145,7 +145,7 @@ export class DimeMapService {
 
 
 	constructor(
-		private http: Http,
+		// private http: Http,
 		private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private router: Router,

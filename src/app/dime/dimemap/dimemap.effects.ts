@@ -31,7 +31,7 @@ export class DimeMapEffects {
 					DimeStreamActions.ALL.LOAD.initiateifempty(),
 					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
 				] )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
@@ -50,7 +50,7 @@ export class DimeMapEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneCreate( action.payload )
 				.map( resp => DimeMapActions.ONE.CREATE.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$
@@ -69,7 +69,7 @@ export class DimeMapEffects {
 					DimeStreamActions.ALL.LOAD.initiateifempty(),
 					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
 				] )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
 				.finally( () => { this.store$.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() ); } );
 		} );
 
@@ -90,7 +90,7 @@ export class DimeMapEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneUpdate( action.payload )
 				.map( resp => DimeMapActions.ONE.UPDATE.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_UPDATE_COMPLETE$ = this.actions$
@@ -106,7 +106,7 @@ export class DimeMapEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneDelete( action.payload )
 				.map( resp => DimeMapActions.ONE.DELETE.complete() )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_DELETE_COMPLETE$ = this.actions$
@@ -121,7 +121,7 @@ export class DimeMapEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.isready( action.payload )
 				.map( ( resp: { isready: boolean } ) => DimeMapActions.ONE.ISREADY.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_PREPARETABLES_INITIATE = this.actions$
@@ -129,7 +129,7 @@ export class DimeMapEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.prepare( action.payload )
 				.map( ( resp: { result: string } ) => DimeMapActions.ONE.PREPARETABLES.complete( action.payload ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_PREPARETABLES_COMPLETE = this.actions$

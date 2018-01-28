@@ -3,7 +3,7 @@ import { DimeProcessService } from '../../dime/dimeprocess/dimeprocess.service';
 import { AuthService } from '../../welcome/auth.service';
 
 import { Component, OnInit } from '@angular/core';
-import { AuthHttp } from 'angular2-jwt';
+// import { AuthHttp } from 'angular2-jwt';
 import { ToastrService } from 'ngx-toastr';
 
 @Component( {
@@ -19,7 +19,7 @@ export class EnduserDimeComponent implements OnInit {
 	constructor(
 		private authService: AuthService,
 		private userService: AcmUserService,
-		private authHttp: AuthHttp,
+		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private processService: DimeProcessService
 	) { }

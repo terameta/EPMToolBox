@@ -1,18 +1,22 @@
-import { Http, Headers, Response } from '@angular/http';
+// import { Http, Headers, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/map';
 import { Router } from '@angular/router';
-import { tokenNotExpired, JwtHelper } from 'angular2-jwt';
+import { JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class AuthService {
 	loggedIn: boolean;
 	loggedIn$ = new BehaviorSubject<boolean>( this.loggedIn );
-	jwtHelper: JwtHelper = new JwtHelper();
 
-	constructor( private http: Http, private router: Router ) {
+	constructor(
+		private http: HttpClient,
+		private router: Router,
+		public jwtHelper: JwtHelper
+	) {
 		if ( this.authenticated ) {
 			// console.log( 'User is authenticated' );
 			// const token = localStorage.getItem( 'token' );
@@ -24,15 +28,13 @@ export class AuthService {
 	signinUser( username: string, password: string ) {
 		const headers = new Headers( { 'Content-Type': 'application/json' } );
 
-		return this.http.post( '/api/auth/signin', { username: username, password: password }, { headers: headers } )
+		return this.http.post( '/api/auth/signin', { username: username, password: password } )
 			.map(
 			( response: Response ) => {
-				const data = response.json();
-				this._setSession( data );
-				return data;
-			}, ( error: Response ) => {
-				// console.log(error.json());
-				const errorMessage: string = error.json().message;
+				this._setSession( response );
+				return response;
+			}, ( error ) => {
+				const errorMessage: string = error.message;
 				return Observable.throw( errorMessage );
 			} );
 	}
@@ -43,7 +45,8 @@ export class AuthService {
 	}
 
 	get authenticated() {
-		return tokenNotExpired();
+		console.log( !this.jwtHelper.isTokenExpired() );
+		return !this.jwtHelper.isTokenExpired();
 	}
 
 	private _setSession( authResult ) {

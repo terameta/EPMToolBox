@@ -1,11 +1,11 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { Headers, Http, Response } from '@angular/http';
+// import { Headers, Http, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
 
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { AuthHttp } from 'angular2-jwt';
+// import { AuthHttp } from 'angular2-jwt';
 
 import { DimeProcess } from '../../../../shared/model/dime/process';
 import { DimeProcessStep } from '../../../../shared/model/dime/processstep';
@@ -14,6 +14,7 @@ import { DimeStream } from '../../../../shared/model/dime/stream';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
 import { DimeStreamService } from '../dimestream/dimestream.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class DimeProcessService {
@@ -49,8 +50,7 @@ export class DimeProcessService {
 	private headers = new Headers( { 'Content-Type': 'application/json' } );
 
 	constructor(
-		private http: Http,
-		private authHttp: AuthHttp,
+		private http: HttpClient,
 		private toastr: ToastrService,
 		private router: Router,
 		private route: ActivatedRoute,

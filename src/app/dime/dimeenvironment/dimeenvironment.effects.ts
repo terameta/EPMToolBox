@@ -6,12 +6,12 @@ import { Effect, Actions } from '@ngrx/effects';
 
 import { of } from 'rxjs/observable/of';
 
-import { AppState } from 'app/ngstore/models';
-import { DimeStatusActions } from 'app/ngstore/applicationstatus';
+import { AppState } from '../../ngstore/models';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
 
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
-import { DimeEnvironmentBackend } from 'app/dime/dimeenvironment/dimeenvironment.backend';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
+import { DimeEnvironmentActions } from './dimeenvironment.actions';
+import { DimeEnvironmentBackend } from './dimeenvironment.backend';
+import { DimeTagActions } from '../dimetag/dimetag.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -26,13 +26,13 @@ export class DimeEnvironmentEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.allLoad()
 				.map( resp => DimeEnvironmentActions.ALL.LOAD.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeEnvironmentActions.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.store$ )
-		.filter( ( [action, store] ) => { return ( !store.dimeEnvironment.items || Object.keys( store.dimeEnvironment.items ).length === 0 ); } )
+		.filter( ( [action, store] ) => ( !store.dimeEnvironment.items || Object.keys( store.dimeEnvironment.items ).length === 0 ) )
 		.map( ( [action, store] ) => action )
 		.switchMap( action => of( DimeEnvironmentActions.ALL.LOAD.initiate() ) );
 
@@ -45,7 +45,7 @@ export class DimeEnvironmentEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneCreate( action.payload )
 				.map( resp => DimeEnvironmentActions.ONE.CREATE.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$
@@ -60,8 +60,8 @@ export class DimeEnvironmentEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneLoad( action.payload )
 				.map( resp => DimeEnvironmentActions.ONE.LOAD.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
-				.finally( () => { this.store$.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() ) } );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				.finally( () => { this.store$.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() ); } );
 		} );
 
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
@@ -69,7 +69,7 @@ export class DimeEnvironmentEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneUpdate( action.payload )
 				.map( resp => DimeEnvironmentActions.ONE.UPDATE.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_UPDATE_COMPLETE$ = this.actions$
@@ -81,7 +81,7 @@ export class DimeEnvironmentEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneDelete( action.payload )
 				.map( resp => DimeEnvironmentActions.ONE.DELETE.complete() )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_DELETE_COMPLETE$ = this.actions$
@@ -100,7 +100,7 @@ export class DimeEnvironmentEffects {
 					DimeEnvironmentActions.ONE.LOAD.initiate( action.payload ),
 					DimeEnvironmentActions.ALL.LOAD.initiate()
 				] )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	constructor(

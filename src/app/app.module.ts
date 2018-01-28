@@ -3,12 +3,12 @@ import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
 import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';
-import { AuthHttp, AuthConfig, AUTH_PROVIDERS, provideAuth } from 'angular2-jwt';
+// import { AuthHttp, AuthConfig, AUTH_PROVIDERS, provideAuth } from 'angular2-jwt';
 import { JwtModule } from '@auth0/angular-jwt';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+// import { HttpModule } from '@angular/http';
 import { Routes, RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
@@ -81,11 +81,12 @@ export function tokenGetter() {
 	imports: [
 		BrowserModule,
 		FormsModule,
-		HttpModule,
+		// HttpModule,
 		HttpClientModule,
 		JwtModule.forRoot( {
 			config: {
-				tokenGetter: tokenGetter
+				tokenGetter: tokenGetter,
+				// whitelistedDomains: ['localhost:7000', 'localhost:4200']
 			}
 		} ),
 		WelcomeModule,

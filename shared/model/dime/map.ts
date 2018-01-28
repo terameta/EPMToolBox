@@ -1,10 +1,12 @@
+import { ATReadyStatus } from '../../enums/generic/readiness';
+
 export interface DimeMap {
 	id: number,
 	name: string,
 	type: number,
 	source: number,
 	target: number,
-	isready: boolean,
+	isready: ATReadyStatus,
 	sourcefields: DimeMapField[],
 	targetfields: DimeMapField[],
 	tags: any
@@ -19,7 +21,7 @@ export interface DimeMapField {
 }
 
 export interface DimeMapRefreshPayload {
-	map: number,
+	id: number,
 	filters: any,
 	sorters: any
 }

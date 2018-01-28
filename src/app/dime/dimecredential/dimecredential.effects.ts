@@ -6,12 +6,12 @@ import { Effect, Actions } from '@ngrx/effects';
 
 import { of } from 'rxjs/observable/of';
 
-import { AppState } from 'app/ngstore/models';
-import { DimeStatusActions } from 'app/ngstore/applicationstatus';
+import { AppState } from '../../ngstore/models';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
 
-import { DimeCredentialBackend } from 'app/dime/dimecredential/dimecredential.backend';
-import { DimeCredentialActions } from 'app/dime/dimecredential/dimecredential.actions';
-import { DimeTagActions } from 'app/dime/dimetag/dimetag.actions';
+import { DimeCredentialBackend } from './dimecredential.backend';
+import { DimeCredentialActions } from './dimecredential.actions';
+import { DimeTagActions } from '../dimetag/dimetag.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -26,18 +26,18 @@ export class DimeCredentialEffects {
 		.switchMap( action => {
 			return this.backend.allLoad()
 				.map( resp => DimeCredentialActions.ALL.LOAD.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeCredentialActions.ALL.LOAD.INITIATEIFEMPTY )
 		.withLatestFrom( this.store$ )
-		.filter( ( [action, store] ) => { return ( !store.dimeCredential.items || Object.keys( store.dimeCredential.items ).length === 0 ); } )
+		.filter( ( [action, store] ) => ( !store.dimeCredential.items || Object.keys( store.dimeCredential.items ).length === 0 ) )
 		.map( ( [action, store] ) => action )
 		.switchMap( ( action: Action ) => {
 			return this.backend.allLoad()
 				.map( resp => DimeCredentialActions.ALL.LOAD.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ALL_LOAD_COMPLETE$ = this.actions$
@@ -49,7 +49,7 @@ export class DimeCredentialEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneCreate( action.payload )
 				.map( resp => DimeCredentialActions.ONE.CREATE.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$
@@ -64,8 +64,8 @@ export class DimeCredentialEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneLoad( action.payload )
 				.map( resp => DimeCredentialActions.ONE.LOAD.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) )
-				.finally( () => { this.store$.dispatch( DimeCredentialActions.ALL.LOAD.initiateifempty() ) } );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				.finally( () => { this.store$.dispatch( DimeCredentialActions.ALL.LOAD.initiateifempty() ); } );
 		} );
 
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
@@ -73,7 +73,7 @@ export class DimeCredentialEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneUpdate( action.payload )
 				.map( resp => DimeCredentialActions.ONE.UPDATE.complete( resp ) )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_UPDATE_COMPLETE$ = this.actions$
@@ -85,7 +85,7 @@ export class DimeCredentialEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneDelete( action.payload )
 				.map( resp => DimeCredentialActions.ONE.DELETE.complete() )
-				.catch( resp => of( DimeStatusActions.error( resp.error, this.serviceName ) ) );
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_DELETE_COMPLETE$ = this.actions$
@@ -100,7 +100,7 @@ export class DimeCredentialEffects {
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneReveal( action.payload )
 				.map( resp => DimeCredentialActions.ONE.REVEAL.complete( resp ) )
-				.catch( resp => { console.log( resp ); return of( DimeStatusActions.error( resp.error, this.serviceName ) ) } );
+				.catch( resp => { console.log( resp ); return of( DimeStatusActions.error( resp, this.serviceName ) ); } );
 		} );
 
 	constructor( private actions$: Actions, private store$: Store<AppState>, private backend: DimeCredentialBackend, private router: Router ) { }

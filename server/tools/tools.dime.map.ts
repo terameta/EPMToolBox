@@ -16,6 +16,7 @@ import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
+import { ATReadyStatus } from '../../shared/enums/generic/readiness';
 
 export class MapTools {
 	private streamTool: StreamTools;
@@ -314,7 +315,7 @@ export class MapTools {
 			return 0;
 		}
 	}
-	public isReady = ( id: number ): Promise<{ isready: boolean }> => {
+	public isReady = ( id: number ): Promise<{ isready: ATReadyStatus }> => {
 		return new Promise( ( resolve, reject ) => {
 			let maptblExists: boolean; maptblExists = false;
 			let descriptivetblExists: any; descriptivetblExists = {};
@@ -325,7 +326,7 @@ export class MapTools {
 						if ( err ) {
 							reject( err );
 						} else if ( rows.length === 0 ) {
-							resolve( { isready: false } );
+							resolve( { isready: ATReadyStatus.NotReady } );
 						} else {
 							rows.forEach( ( curTable: any ) => {
 								if ( curTable.TABLE_NAME === 'MAP' + refObj.id + '_MAPTBL' ) { maptblExists = true; }
@@ -337,9 +338,9 @@ export class MapTools {
 								if ( curField.srctar === 'target' ) { numTarFields++; }
 							} );
 							if ( maptblExists && numSrcFields > 0 && numTarFields > 0 ) {
-								resolve( { isready: true } );
+								resolve( { isready: ATReadyStatus.Ready } );
 							} else {
-								resolve( { isready: false } );
+								resolve( { isready: ATReadyStatus.NotReady } );
 							}
 						}
 					} );
@@ -362,40 +363,7 @@ export class MapTools {
 		} );
 	}
 	public retrieveMapData = ( refObj: any ) => {
-		return this.retrieveMapDataAction( refObj ).
-			then( this.retrieveMapDescriptions );
-	}
-	private retrieveMapDescriptions = ( refObj: any ) => {
-		return new Promise( ( resolve, reject ) => {
-			let promises: any[]; promises = [];
-			refObj.descriptions = {};
-			refObj.finalFields.forEach( ( curField: any ) => {
-				if ( curField.type === 'description' && curField.srctar === 'target' ) {
-					promises.push( this.retrieveMapDescriptionsAction( refObj, curField ) );
-				}
-			} );
-			Promise.all( promises ).
-				then( () => {
-					// resolve( refObj );
-					resolve( refObj.map );
-				} ).
-				catch( reject );
-		} );
-	}
-	private retrieveMapDescriptionsAction = ( refObj: any, curField: any ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM ' + curField.table + ' ORDER BY 1,2', ( err, result, fields ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					let objectFieldName: string; objectFieldName = '';
-					if ( curField.srctar === 'source' ) { objectFieldName = 'SRC_' + curField.name; }
-					if ( curField.srctar === 'target' ) { objectFieldName = 'TAR_' + curField.name; }
-					refObj.descriptions[objectFieldName] = result;
-					resolve();
-				}
-			} );
-		} );
+		return this.retrieveMapDataAction( refObj ).then( ( result: any ) => result.map );
 	}
 	private retrieveMapDataAction = ( refObj: any ) => {
 		// console.log( refObj );
@@ -413,7 +381,6 @@ export class MapTools {
 			this.getOne( refObj.id ).
 				then( ( theMap: DimeMap ) => {
 					curMap = theMap;
-					// console.log(new Date(), 'Received map');
 					return this.streamTool.retrieveFields( curMap.source || 0 );
 				} ).
 				then( ( srcFields: DimeStreamField[] ) => {
@@ -514,31 +481,77 @@ export class MapTools {
 							}
 						} );
 						// console.log( selectQuery );
-						selectQuery = 'SELECT * FROM (' + selectQuery + ') FSQMAPDESCRIBED WHERE 1 = 1';
+						selectQuery = 'SELECT * FROM (' + selectQuery + ') FSQMAPDESCRIBED \nWHERE 1 = 1';
 						let wherers: string[]; wherers = [];
 						let wherevals: any[]; wherevals = [];
-						Object.keys( refObj.filters ).forEach( ( curFilter ) => {
-							let filterText: string; filterText = curFilter;
-							if ( refObj.filters[curFilter].type === 'Exact Match' ) {
-								filterText += ' = ?';
-								wherevals.push( refObj.filters[curFilter].value );
-							} else if ( refObj.filters[curFilter].type === 'Contains' ) {
-								filterText += ' LIKE ?';
-								wherevals.push( '%' + refObj.filters[curFilter].value + '%' );
-							} else if ( refObj.filters[curFilter].type === 'Begins with' ) {
-								filterText += ' LIKE ?';
-								wherevals.push( refObj.filters[curFilter].value + '%' );
-							} else if ( refObj.filters[curFilter].type === 'Ends with' ) {
-								filterText += ' LIKE ?';
-								wherevals.push( '%' + refObj.filters[curFilter].value );
+						if ( refObj.filters ) {
+							if ( refObj.filters.source ) {
+								refObj.filters.source.forEach( currentFilter => {
+									if ( currentFilter.value ) {
+										switch ( currentFilter.type ) {
+											case 'is': {
+												wherers.push( 'SRC_' + currentFilter.name + ' = ?' );
+												wherevals.push( currentFilter.value );
+												break;
+											}
+											case 'co': {
+												wherers.push( 'SRC_' + currentFilter.name + ' LIKE ?' );
+												wherevals.push( '%' + currentFilter.value + '%' );
+												break;
+											}
+											case 'bw': {
+												wherers.push( 'SRC_' + currentFilter.name + ' LIKE ?' );
+												wherevals.push( currentFilter.value + '%' );
+												break;
+											}
+											case 'ew': {
+												wherers.push( 'SRC_' + currentFilter.name + ' LIKE ?' );
+												wherevals.push( '%' + currentFilter.value );
+												break;
+											}
+										}
+									}
+								} );
 							}
-							wherers.push( filterText );
-
-						} );
+							if ( refObj.filters.target ) {
+								refObj.filters.target.forEach( currentFilter => {
+									if ( currentFilter.value ) {
+										switch ( currentFilter.type ) {
+											case 'is': {
+												wherers.push( 'TAR_' + currentFilter.name + ' = ?' );
+												wherevals.push( currentFilter.value );
+												break;
+											}
+											case 'co': {
+												wherers.push( 'TAR_' + currentFilter.name + ' LIKE ?' );
+												wherevals.push( '%' + currentFilter.value + '%' );
+												break;
+											}
+											case 'bw': {
+												wherers.push( 'TAR_' + currentFilter.name + ' LIKE ?' );
+												wherevals.push( currentFilter.value + '%' );
+												break;
+											}
+											case 'ew': {
+												wherers.push( 'TAR_' + currentFilter.name + ' LIKE ?' );
+												wherevals.push( '%' + currentFilter.value );
+												break;
+											}
+										}
+									}
+								} );
+							}
+						}
 						wherers.forEach( ( curWhere: string ) => {
 							selectQuery += '\n\tAND ';
 							selectQuery += curWhere;
 						} );
+						if ( refObj.sorters && refObj.sorters.length > 0 ) {
+							selectQuery += ' \nORDER BY ';
+							selectQuery += refObj.sorters
+								.map( currentSorter => ( '\n\t' + currentSorter.type + '_' + currentSorter.name + ' ' + ( currentSorter.isAsc ? 'ASC' : 'DESC' ) ) )
+								.join( ', ' );
+						}
 						// console.log( selectQuery );
 						this.db.query( selectQuery, wherevals, ( err, result, fields ) => {
 							if ( err ) {

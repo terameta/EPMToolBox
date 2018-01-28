@@ -1,7 +1,8 @@
 import { Action as NgRXAction } from '@ngrx/store';
 import * as _ from 'lodash';
-import { DimeMapState, dimeMapInitialState } from 'app/dime/dimemap/dimemap.state';
-import { DimeMapActions } from 'app/dime/dimemap/dimemap.actions';
+import { DimeMapState, dimeMapInitialState } from './dimemap.state';
+import { DimeMapActions } from './dimemap.actions';
+import { ATReadyStatus } from '../../../../shared/enums/generic/readiness';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -24,6 +25,9 @@ export function dimeMapReducer( state: DimeMapState, action: Action ): DimeMapSt
 		case DimeMapActions.ONE.MARK.CLEAN: {
 			return handleOneMarkClean( state, action );
 		}
+		case DimeMapActions.ONE.ISREADY.INITIATE: {
+			return handleOneIsReadyInitiate( state, action );
+		}
 		case DimeMapActions.ONE.ISREADY.COMPLETE: {
 			return handleOneIsReadyComplete( state, action );
 		}
@@ -37,35 +41,41 @@ const handleAllLoadComplete = ( state: DimeMapState, action: Action ): DimeMapSt
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
 	return newState;
-}
+};
 
 const handleOneLoadComplete = ( state: DimeMapState, action: Action ): DimeMapState => {
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.curItem = action.payload;
 	newState.curItemClean = true;
 	return newState;
-}
+};
 
 const handleOneUnload = ( state: DimeMapState, action: Action ): DimeMapState => {
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.curItem = dimeMapInitialState.curItem;
 	return newState;
-}
+};
 
 const handleOneMarkDirty = ( state: DimeMapState, action: Action ): DimeMapState => {
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.curItemClean = false;
 	return newState;
-}
+};
 
 const handleOneMarkClean = ( state: DimeMapState, action: Action ): DimeMapState => {
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.curItemClean = true;
 	return newState;
-}
+};
+
+const handleOneIsReadyInitiate = ( state: DimeMapState, action: Action ): DimeMapState => {
+	const newState: DimeMapState = Object.assign( {}, state );
+	newState.curItem.isready = ATReadyStatus.Checking;
+	return newState;
+};
 
 const handleOneIsReadyComplete = ( state: DimeMapState, action: Action ): DimeMapState => {
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.curItem.isready = action.payload.isready;
 	return newState;
-}
+};

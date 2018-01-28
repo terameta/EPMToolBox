@@ -8,6 +8,7 @@ import { DimeMapService } from '../../../dimemap/dimemap.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
 import { DimeMapField } from '../../../../../../shared/model/dime/map';
+import { DimeStatusActions } from '../../../../ngstore/applicationstatus';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -28,7 +29,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 
 	public mapSettings = {
 		colHeaders: true,
-		rowHeaders: true
+		rowHeaders: true,
+		stretchH: 'all'
 	};
 	public mapColumns: any[] = [];
 	public mapData: any[] = [];
@@ -55,7 +57,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		private streamService: DimeStreamService,
 		private store: Store<AppState>
 	) {
-		this.numberofRowsinMap = 'Please wait, preparing...';
+		this.numberofRowsinMap = '0';
 
 		this.store.select( 'dimeMap' ).subscribe( currentState => {
 			if ( currentState.curItem.id !== this.currentItemID ) {
@@ -77,8 +79,10 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public refreshMapTable = () => {
 		this.filtersShown = false;
 		this.sortersShown = false;
-		this.mainService.mapRefresh( { map: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ).subscribe( result => {
-			console.log( 'RefreshMapTable:', result );
+		this.numberofRowsinMap = 'Please wait, preparing...';
+		this.mainService.mapRefresh( { id: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ).subscribe( ( result: any[] ) => {
+			this.mapData = result;
+			this.numberofRowsinMap = result.length.toString();
 		}, error => {
 			console.error( 'RefreshMapTable:', error );
 		} );

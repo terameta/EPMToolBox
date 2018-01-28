@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { DimeMapService } from '../../dimemap.service';
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
+import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
 
 @Component( {
 	selector: 'app-dimemap-detail-tab-maindefinitions',
@@ -9,6 +10,7 @@ import { DimeStreamService } from '../../../dimestream/dimestream.service';
 	styleUrls: ['./dimemap-detail-tab-maindefinitions.component.css']
 } )
 export class DimemapDetailTabMaindefinitionsComponent implements OnInit {
+	public atReadyStatus = ATReadyStatus;
 
 	constructor(
 		public mainService: DimeMapService,

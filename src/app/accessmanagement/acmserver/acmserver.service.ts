@@ -1,11 +1,12 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AuthHttp } from 'angular2-jwt';
-import { Headers, Http } from '@angular/http';
+// import { AuthHttp } from 'angular2-jwt';
+// import { Headers, Http } from '@angular/http';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { AcmServer } from '../../../../shared/model/accessmanagement/server';
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class AcmServerService {
@@ -20,8 +21,8 @@ export class AcmServerService {
 	curItemClean = true;
 
 	constructor(
-		private http: Http,
-		private authHttp: AuthHttp,
+		private http: HttpClient,
+		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private router: Router,
 		private route: ActivatedRoute,
@@ -47,13 +48,12 @@ export class AcmServerService {
 		} );
 	}
 	public fetchAll = () => {
-		return this.authHttp.get( this.baseUrl ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl ).
 			catch( error => Observable.throw( error ) );
 	}
 	public create = () => {
-		this.authHttp.post( this.baseUrl, {}, { headers: this.headers } )
-			.map( response => response.json() ).subscribe( data => {
+		this.http.post<AcmServer>( this.baseUrl, {} )
+			.subscribe( data => {
 				this.dataStore.items.push( data );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				this.resetCurItem();
@@ -89,15 +89,13 @@ export class AcmServerService {
 			} );
 	}
 	public fetchOne = ( id: number ) => {
-		return this.authHttp.get( this.baseUrl + '/' + id ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl + '/' + id ).
 			catch( error => Observable.throw( error ) );
 	}
 	public update = ( curItem?: AcmServer ) => {
 		let shouldUpdate = false;
 		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; }
-		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
-			map( response => response.json() ).
+		this.http.put<AcmServer>( this.baseUrl, curItem ).
 			subscribe( data => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) { this.dataStore.items[index] = data; }
@@ -116,7 +114,7 @@ export class AcmServerService {
 	public delete( id: number, name?: string ) {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
-			this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
+			this.http.delete( this.baseUrl + '/' + id ).subscribe( response => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );

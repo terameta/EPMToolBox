@@ -34,7 +34,16 @@ export class DimeStatusEffects {
 	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_ERROR$ = this.actions$
 		.ofType( DimeStatusActions.ERROR )
 		.map( ( action: Action ) => {
-			this.toastr.error( action.payload.error.message, action.payload.caller );
+			let message = 'No message received';
+			console.log( action );
+			if ( action.payload instanceof Error ) {
+				message = action.payload.message;
+			} else if ( action.payload.error ) {
+				if ( action.payload.error instanceof Error ) {
+					message = action.payload.error.message;
+				}
+			}
+			this.toastr.error( message, action.payload.caller );
 		} );
 	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_SUCCESS$ = this.actions$
 		.ofType( DimeStatusActions.SUCCESS )

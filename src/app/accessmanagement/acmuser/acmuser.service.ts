@@ -1,12 +1,13 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AuthHttp } from 'angular2-jwt';
-import { Headers, Http } from '@angular/http';
+// import { AuthHttp } from 'angular2-jwt';
+// import { Headers, Http } from '@angular/http';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Injectable } from '@angular/core';
 
 import { AcmUser } from '../../../../shared/model/accessmanagement/user';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class AcmUserService {
@@ -14,7 +15,6 @@ export class AcmUserService {
 	private _items: BehaviorSubject<AcmUser[]>;
 	private baseUrl: string;
 	private dataStore: { items: AcmUser[] };
-	private headers = new Headers( { 'Content-Type': 'application/json' } );
 	private serviceName: string;
 
 	curItem: AcmUser;
@@ -22,8 +22,8 @@ export class AcmUserService {
 	curItemAccessRights: any;
 
 	constructor(
-		private http: Http,
-		private authHttp: AuthHttp,
+		private http: HttpClient,
+		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
 		private router: Router,
 		private route: ActivatedRoute,
@@ -50,13 +50,12 @@ export class AcmUserService {
 		} );
 	}
 	public fetchAll = () => {
-		return this.authHttp.get( this.baseUrl ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl ).
 			catch( error => Observable.throw( error ) );
 	}
 	public create = () => {
-		this.authHttp.post( this.baseUrl, {}, { headers: this.headers } )
-			.map( response => response.json() ).subscribe( data => {
+		this.http.post<AcmUser>( this.baseUrl, {} )
+			.subscribe( ( data ) => {
 				this.dataStore.items.push( data );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
 				this.resetCurItem();
@@ -99,13 +98,11 @@ export class AcmUserService {
 			} );
 	}
 	public fetchOne = ( id: number ) => {
-		return this.authHttp.get( this.baseUrl + '/' + id ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl + '/' + id ).
 			catch( error => Observable.throw( error ) );
 	}
 	public fetchUserRights = ( id: number ) => {
-		return this.authHttp.get( this.baseUrl + '/userrights/' + id ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl + '/userrights/' + id ).
 			catch( error => Observable.throw( error ) );
 	}
 	public update = ( curItem?: AcmUser ) => {
@@ -114,8 +111,7 @@ export class AcmUserService {
 		if ( curItem.type === 'directory' ) {
 			curItem.username = curItem.email;
 		}
-		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
-			map( response => response.json() ).
+		this.http.put<AcmUser>( this.baseUrl, curItem ).
 			subscribe( data => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) { this.dataStore.items[index] = data; }
@@ -132,8 +128,7 @@ export class AcmUserService {
 			} );
 	}
 	public updateAccessRights = () => {
-		this.authHttp.put( this.baseUrl + '/userrights/' + this.curItem.id, this.curItemAccessRights, { headers: this.headers } ).
-			map( response => response.json() ).
+		this.http.put( this.baseUrl + '/userrights/' + this.curItem.id, this.curItemAccessRights ).
 			subscribe( ( data ) => {
 				console.log( data );
 			}, ( error ) => {
@@ -143,7 +138,7 @@ export class AcmUserService {
 	public delete( id: number, name?: string ) {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
-			this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
+			this.http.delete( this.baseUrl + '/' + id ).subscribe( response => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );

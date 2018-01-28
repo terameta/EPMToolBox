@@ -1,8 +1,8 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
-import { Headers, Http, Response } from '@angular/http';
+// import { Headers, Http, Response } from '@angular/http';
 
-import { AuthHttp } from 'angular2-jwt';
+// import { AuthHttp } from 'angular2-jwt';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { ToastrService } from 'ngx-toastr';
@@ -11,6 +11,7 @@ import { EnumToArray, SortByName } from '../../../../shared/utilities/utilityFun
 
 import { DimeSchedule } from '../../../../shared/model/dime/schedule';
 import { DimeScheduleStepType } from '../../../../shared/enums/dime/schedulesteptypes';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class DimeScheduleService {
@@ -25,8 +26,7 @@ export class DimeScheduleService {
 	private headers = new Headers( { 'Content-Type': 'application/json' } );
 
 	constructor(
-		private http: Http,
-		private authHttp: AuthHttp,
+		private http: HttpClient,
 		private toastr: ToastrService,
 		private router: Router,
 		private route: ActivatedRoute
@@ -54,8 +54,7 @@ export class DimeScheduleService {
 			} );
 	}
 	public fetchAll = () => {
-		return this.authHttp.get( this.baseUrl ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl ).
 			catch( error => Observable.throw( error ) );
 	}
 	getOne = ( id: number ) => {
@@ -90,13 +89,11 @@ export class DimeScheduleService {
 			} );
 	}
 	public fetchOne = ( id: number ) => {
-		return this.authHttp.get( this.baseUrl + '/' + id ).
-			map( response => response.json() ).
+		return this.http.get( this.baseUrl + '/' + id ).
 			catch( error => Observable.throw( error ) );
 	}
 	create = () => {
-		this.authHttp.post( this.baseUrl, {}, { headers: this.headers } ).
-			map( response => response.json() ).
+		this.http.post<DimeSchedule>( this.baseUrl, {} ).
 			subscribe( ( result ) => {
 				this.dataStore.items.push( result );
 				this.dataStore.items.sort( SortByName );
@@ -114,8 +111,7 @@ export class DimeScheduleService {
 		if ( !curItem ) {
 			curItem = this.curItem;
 		}
-		this.authHttp.put( this.baseUrl, curItem, { headers: this.headers } ).
-			map( response => response.json() ).
+		this.http.put<DimeSchedule>( this.baseUrl, curItem ).
 			subscribe( ( result ) => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === result.id ) { this.dataStore.items[index] = result; }
@@ -131,7 +127,7 @@ export class DimeScheduleService {
 	delete( id: number, name?: string ) {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
-			this.authHttp.delete( this.baseUrl + '/' + id ).subscribe( response => {
+			this.http.delete( this.baseUrl + '/' + id ).subscribe( response => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === id ) { this.dataStore.items.splice( index, 1 ); }
 				} );

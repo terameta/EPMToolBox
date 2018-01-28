@@ -27,10 +27,9 @@ export class ApiDimeMap {
 		this.apiRoutes.get( '/fields/:id', ( req, res ) => { this.rester.respond( this.mapTools.getFields, req.params.id, req, res ); } );
 		this.apiRoutes.get( '/isready/:id', ( req, res ) => { this.rester.respond( this.mapTools.isReady, req.params.id, req, res ); } );
 		this.apiRoutes.get( '/prepare/:id', ( req, res ) => { this.rester.respond( this.mapTools.prepare, req.params.id, req, res ); } );
-		this.apiRoutes.post( '/mapData', ( req, res ) => { this.rester.respond( this.mapTools.retrieveMapData, req.body, req, res ); } );
+		this.apiRoutes.post( '/mapRefresh', ( req, res ) => { this.rester.respond( this.mapTools.retrieveMapData, req.body, req, res ); } );
 		this.apiRoutes.post( '/saveMapTuple', ( req, res ) => { this.rester.respond( this.mapTools.saveMapTuple, req.body, req, res ); } );
 		this.apiRoutes.get( '/mapExport/:id', ( req, res ) => { this.rester.respond( this.mapTools.mapExport, { id: req.params.id, requser: req.user, res: res }, req, res ); } );
 		this.apiRoutes.post( '/mapImport', ( req, res ) => { this.rester.respond( this.mapTools.mapImport, { body: req.body, files: req.files }, req, res ); } );
-		this.apiRoutes.post( '/mapRefresh', ( req, res ) => { this.rester.respond( this.mapTools.mapRefresh, { body: req.body }, req, res ); } );
 	}
 }

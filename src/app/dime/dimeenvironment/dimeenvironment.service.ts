@@ -81,7 +81,7 @@ export class DimeEnvironmentService {
 	public listDatabases = ( id: number ) => {
 		return this.backend.listDatabases( id )
 			.catch( resp => {
-				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+				this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 				return resp;
 			} );
 	}
@@ -89,7 +89,7 @@ export class DimeEnvironmentService {
 	public listTables = ( id: number, db: string ) => {
 		return this.backend.listTables( id, db )
 			.catch( resp => {
-				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+				this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 				return resp;
 			} );
 	}
@@ -97,7 +97,7 @@ export class DimeEnvironmentService {
 	public listDescriptiveTables = ( id: number, db: string, cube: string ) => {
 		return this.backend.listDescriptiveTables( id, db, cube )
 			.catch( resp => {
-				this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+				this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 				return resp;
 			} );
 	}
@@ -109,7 +109,7 @@ export class DimeEnvironmentService {
 			this.testResult = error;
 		} );
 		// .catch( resp => {
-		// 	this.store.dispatch( DimeStatusActions.error( resp.error, this.serviceName ) );
+		// 	this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 		// 	return resp;
 		// } );
 	}
