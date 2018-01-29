@@ -13,6 +13,7 @@ import { DimeStatusActions } from '../../ngstore/applicationstatus';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { DimeStreamActions } from '../dimestream/dimestream.actions';
 import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
+import { ATReadyStatus } from '../../../../shared/enums/generic/readiness';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -120,7 +121,7 @@ export class DimeMapEffects {
 		.ofType( DimeMapActions.ONE.ISREADY.INITIATE )
 		.switchMap( ( action: Action ) => {
 			return this.backend.isready( action.payload )
-				.map( ( resp: { isready: boolean } ) => DimeMapActions.ONE.ISREADY.complete( resp ) )
+				.map( ( resp: { isready: ATReadyStatus } ) => DimeMapActions.ONE.ISREADY.complete( resp ) )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
@@ -135,6 +136,14 @@ export class DimeMapEffects {
 	@Effect() ONE_PREPARETABLES_COMPLETE = this.actions$
 		.ofType( DimeMapActions.ONE.PREPARETABLES.COMPLETE )
 		.switchMap( ( action: Action ) => of( DimeMapActions.ONE.ISREADY.initiate( action.payload ) ) );
+
+	@Effect() ONE_REFRESH_INITIATE = this.actions$
+		.ofType( DimeMapActions.ONE.REFRESH.INITIATE )
+		.switchMap( ( action: Action ) => {
+			return this.backend.mapRefresh( action.payload )
+				.map( ( resp: any[] ) => DimeMapActions.ONE.REFRESH.complete( resp ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
 
 	constructor(
 		private actions$: Actions,

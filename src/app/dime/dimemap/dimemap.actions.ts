@@ -1,5 +1,6 @@
 import { Action as NgRXAction } from '@ngrx/store';
-import { DimeMap } from '../../../../shared/model/dime/map';
+import { DimeMap, DimeMapRefreshPayload } from '../../../../shared/model/dime/map';
+import { ATReadyStatus } from '../../../../shared/enums/generic/readiness';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -56,13 +57,20 @@ export const DimeMapActions = {
 			INITIATE: 'DIME_MAP_ACTIONS_ONE_ISREADY_INITIATE',
 			initiate: ( payload: number ): Action => ( { type: DimeMapActions.ONE.ISREADY.INITIATE, payload } ),
 			COMPLETE: 'DIME_MAP_ACTIONS_ONE_ISREADY_COMPLETE',
-			complete: ( payload: { isready: boolean } ): Action => ( { type: DimeMapActions.ONE.ISREADY.COMPLETE, payload } )
+			complete: ( payload: { isready: ATReadyStatus } ): Action => ( { type: DimeMapActions.ONE.ISREADY.COMPLETE, payload } )
 		},
 		PREPARETABLES: {
 			INITIATE: 'DIME_MAP_ACTIONS_ONE_PREPARETABLES_INITIATE',
 			initiate: ( payload: number ): Action => ( { type: DimeMapActions.ONE.PREPARETABLES.INITIATE, payload } ),
 			COMPLETE: 'DIME_MAP_ACTIONS_ONE_PREPARETABLES_COMPLETE',
 			complete: ( payload: number ): Action => ( { type: DimeMapActions.ONE.PREPARETABLES.COMPLETE, payload } )
-		}
+		},
+		REFRESH:
+			{
+				INITIATE: 'DIME_MAP_ACTIONS_ONE_REFRESH_INITIATE',
+				initiate: ( payload: DimeMapRefreshPayload ): Action => ( { type: DimeMapActions.ONE.REFRESH.INITIATE, payload } ),
+				COMPLETE: 'DIME_MAP_ACTIONS_ONE_REFRESH_COMPLETE',
+				complete: ( payload: any[] ): Action => ( { type: DimeMapActions.ONE.REFRESH.COMPLETE, payload } )
+			}
 	}
 };

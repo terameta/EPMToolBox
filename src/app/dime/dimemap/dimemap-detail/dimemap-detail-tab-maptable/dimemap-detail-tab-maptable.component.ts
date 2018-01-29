@@ -9,6 +9,10 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
 import { DimeMapField } from '../../../../../../shared/model/dime/map';
 import { DimeStatusActions } from '../../../../ngstore/applicationstatus';
+import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
+import { DimeMapActions } from '../../dimemap.actions';
+import { HotRegisterer } from 'angular-handsontable';
+import Handsontable from 'handsontable';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -17,6 +21,7 @@ import { DimeStatusActions } from '../../../../ngstore/applicationstatus';
 	styleUrls: ['./dimemap-detail-tab-maptable.component.css']
 } )
 export class DimemapDetailTabMaptableComponent implements OnInit {
+	public atReadyStatus = ATReadyStatus;
 
 	public numberofRowsinMap: string;
 	public hotTableHeight = 250;
@@ -27,13 +32,13 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public availableSorters = [];
 	public activeSorters = [];
 
-	public mapSettings = {
-		colHeaders: true,
-		rowHeaders: true,
-		stretchH: 'all'
-	};
+	public mapSettings;
 	public mapColumns: any[] = [];
 	public mapData: any[] = [];
+
+	private instance = 'hotInstance';
+	private hotInstance: Handsontable;
+	private invalidRows: number[] = [];
 	// private columns: any[];
 	// private colHeaders: string[];
 	// private options: any;
@@ -55,7 +60,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		public mainService: DimeMapService,
 		private toastr: ToastrService,
 		private streamService: DimeStreamService,
-		private store: Store<AppState>
+		private store: Store<AppState>,
+		private hotRegisterer: HotRegisterer
 	) {
 		this.numberofRowsinMap = '0';
 
@@ -64,32 +70,81 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				this.currentItemID = currentState.curItem.id;
 				this.getReady();
 			}
+			this.mapData = currentState.curItem.mapData;
+			this.numberofRowsinMap = 'Rows: ' + this.mapData.length;
+			this.hotInstance = this.hotRegisterer.getInstance( this.instance );
 		} );
 	}
 
 	ngOnInit() {
 		this.windowResized();
+		this.mapSettings = {
+			colHeaders: true,
+			rowHeaders: true,
+			stretchH: 'all',
+			manualColumnResize: true,
+			manualColumnMove: true,
+			// observeChanges: true,
+			afterChange: this.hotAfterChange,
+			afterValidate: this.hotAfterValidate
+		};
 	}
+	private hotAfterValidate = ( isValid: boolean, value: any, row: number, prop: string | number, source: string ) => {
+		if ( !isValid ) {
+			if ( this.invalidRows.findIndex( element => element === row ) < 0 ) {
+				this.invalidRows.push( row );
+			}
+		} else {
+			const curIndex = this.invalidRows.findIndex( element => element === row );
+			if ( curIndex >= 0 ) {
+				this.invalidRows.splice( curIndex, 1 );
+			}
+		}
+		console.log( 'AfterValidate:', isValid, value, row, prop, source, this.invalidRows );
+	}
+	private hotAfterChange = ( changes: any[], source: string ) => {
+		// console.log( 'AfterChange' );
+		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
+			let changedRowNumber, changedFieldName, changedOldValue, changedNewValue, changedDataIndex, changedDataID, changedDataTuple;
+			changes.forEach( currentChange => {
+				changedRowNumber = currentChange[0];
+				changedFieldName = currentChange[1];
+				changedOldValue = currentChange[2];
+				changedNewValue = currentChange[3].toString().split( '::' );
+				// When we use the getDataAtRow, the first element in array is the ID.
+				changedDataID = this.hotInstance.getDataAtRow( changedRowNumber )[0];
+				changedDataIndex = this.mapData.findIndex( element => element.id === changedDataID );
+				changedDataTuple = this.mapData[changedDataIndex];
+				console.log( this.hotInstance.getDataAtRow( changedRowNumber ) );
+				console.log( changedDataID, changedDataIndex );
+				console.log( source, changedFieldName, changedDataTuple[changedFieldName], changedOldValue, changedNewValue );
+				changedDataTuple[changedFieldName] = changedNewValue[0];
+				if ( changedNewValue[1] ) {
+					console.log( 'There is description' );
+					changedDataTuple[changedFieldName + '_DESC'] = changedNewValue[1];
+				}
 
+				// this.mapData[changedRowNumber].saveresult = '666';
+			} );
+			this.hotInstance.render();
+			// // this.mainService.currentItem.sourcefields.forEach( curField => console.log( curField ) );
+			// // this.mainService.currentItem.targetfields.forEach( curField => console.log( curField ) );
+		}
+	}
 	public windowResized = () => {
 		this.hotTableHeight = window.innerHeight - 320;
+		if ( this.hotTableHeight < 100 ) {
+			this.hotTableHeight = 100;
+		}
 		// console.log( 'Window width:', window.innerWidth, 'Window Height:', window.innerHeight, 'Hot Table Height:', this.hotTableHeight );
 	}
-
 	public refreshMapTable = () => {
 		this.filtersShown = false;
 		this.sortersShown = false;
 		this.numberofRowsinMap = 'Please wait, preparing...';
-		this.mainService.mapRefresh( { id: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ).subscribe( ( result: any[] ) => {
-			this.mapData = result;
-			this.numberofRowsinMap = result.length.toString();
-		}, error => {
-			console.error( 'RefreshMapTable:', error );
-		} );
+		this.store.dispatch( DimeMapActions.ONE.REFRESH.initiate( { id: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ) );
 	}
-
 	private getReady = () => {
-		console.log( 'getReady is called' );
 		this.waitUntilItemIsReady()
 			.then( this.prepareFilters )
 			.then( this.prepareAvailableSorters )
@@ -97,9 +152,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			.then( this.prepareDescriptions )
 			.then( this.prepareDropdowns )
 			.then( this.refreshMapTable )
-			.then( ( result ) => {
-				console.log( 'should be ready' );
-			} ).catch( console.error );
+			.catch( console.error );
 	}
 	private prepareDropdowns = () => {
 		return new Promise( ( resolve, reject ) => {
@@ -118,6 +171,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						this.mapColumns[columnIndex].allowInvalid = true;
 						this.mapColumns[columnIndex].source = [];
 						currentMapField.descriptions.forEach( ( currentDescription ) => {
+							this.mapColumns[columnIndex].source.push( currentDescription.RefField );
 							this.mapColumns[columnIndex].source.push( currentDescription.RefField + '::' + currentDescription.Description );
 						} );
 					}
@@ -156,6 +210,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			this.mapColumns = [];
 			let currentColumn: any;
 			let currentPrefix: string;
+			this.mapColumns.push( { data: 'id', type: 'text', readOnly: true, title: 'ID' } );
 			this.streamService.itemObject[this.mainService.currentItem.source].fieldList
 				.filter( currentStreamField => ( this.mainService.currentItem.sourcefields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
 				.forEach( currentField => {
@@ -379,48 +434,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 					this.toastr.error( 'Map is not ready for data entry' );
 				} );
 		};
-		private hotAfterChange = ( changes: any[], source: string ) => {
-			if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
-				let theUpdates: any[];
-				if ( Array.isArray( changes[0] ) ) {
-					theUpdates = changes;
-				} else {
-					theUpdates = [changes];
-				}
-				let dataChanged = false;
-				let changedRowNumbers: number[]; changedRowNumbers = [];
-				theUpdates.forEach(( currentChange: any[] ) => {
-					const changedRowNumber = currentChange[0];
-					const changedFieldName = currentChange[1];
-					const changedOldValue = currentChange[2];
-					const changedNewValue = currentChange[3];
-					// console.log( 'Changed Row Number', changedRowNumber );
-					// console.log( 'Changed Field Name', changedFieldName );
-					// console.log( 'Changed Old Value', changedOldValue );
-					// console.log( 'Changed New Value', changedNewValue );
-					// console.log( this.dataObject[changedRowNumber] );
-					if ( this.dataObject[changedRowNumber].id === 'Filter' || this.dataObject[changedRowNumber].id === 'Filter Type' ) {
-						this.filterChange();
-					} else {
-						if ( changedFieldName !== 'saveresult' && changedFieldName !== 'id' ) {
-							// this.hotEdited( this.dataObject[changedRowNumber], changedFieldName );
-							dataChanged = true;
-							if ( changedRowNumbers.indexOf( changedRowNumber ) < 0 ) {
-								changedRowNumbers.push( changedRowNumber );
-							}
-						}
-					}
-				} );
-				changedRowNumbers.forEach(( curChangedRow: number ) => {
-					this.hotEdited( this.dataObject[curChangedRow] );
-				} );
-				if ( dataChanged ) {
-					this.applyDescriptions().then(() => {
-						this.hot.loadData( this.dataObject );
-					} );
-				}
-			}
-		};
+
 
 		private filterChange = () => {
 			clearTimeout( this.filterChangeWaiter );
@@ -459,9 +473,5 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				} );
 			}
 		};
-
-		public refreshMapTable = () => {
-			this.getMapTable();
-		}
 		*/
 }

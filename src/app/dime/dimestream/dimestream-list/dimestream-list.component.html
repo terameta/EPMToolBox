@@ -16,7 +16,9 @@
 					<tr *ngIf="shouldListItem(item.id)">
 						<td> {{ item.name }} </td>
 						<td> {{ mainService.getStreamTypeDescription(item.type) }} </td>
-						<td> {{ environmentService.itemObject[item.environment]?.name }} </td>
+						<td>
+							<a routerLink="../../environments/environment-detail/{{ environmentService.itemObject[item.environment]?.id }}">{{ environmentService.itemObject[item.environment]?.name }}</a>
+						</td>
 						<td>{{ item.dbName }}</td>
 						<td>{{ item.tableName }}</td>
 						<td>

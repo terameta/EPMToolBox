@@ -110,10 +110,6 @@ export class DimeMapService {
 		this.filesToUpload = <Array<File>>fileInput.target.files;
 	}
 
-	public mapRefresh = ( payload: DimeMapRefreshPayload ) => {
-		return this.backend.mapRefresh( payload );
-	}
-
 	/*
 
 

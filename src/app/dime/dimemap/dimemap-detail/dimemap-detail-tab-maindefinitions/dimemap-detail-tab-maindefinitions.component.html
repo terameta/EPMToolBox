@@ -28,7 +28,7 @@
 					<i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
 				<button class="btn btn-success btn-xs" type="button" (click)="mainService.rePrepareTables()" *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
 					<i class="fa fa-check-circle"></i> Re-Prepare Map</button>
-				<button class="btn btn-warning btn-xs" type="button" (click)="mainService.prepareTables()" *ngIf="!mainService.currentItem.isready === atReadyStatus.NotReady">
+				<button class="btn btn-warning btn-xs" type="button" (click)="mainService.prepareTables()" *ngIf="mainService.currentItem.isready === atReadyStatus.NotReady">
 					<i class="fa fa-check-circle"></i> Prepare Map</button>
 				<span class="help-block" *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
 					<div class="well well-success well-sm">
