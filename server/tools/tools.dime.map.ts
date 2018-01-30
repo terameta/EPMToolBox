@@ -2,7 +2,6 @@ import { Pool } from 'mysql';
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
 import { Readable } from 'stream';
-// import * as tempy from 'tempy';
 import * as fs from 'fs';
 
 import { MainTools } from './tools.main';
@@ -87,7 +86,7 @@ export class MapTools {
 					delete resMap.isready;
 					delete resMap.sourcefields;
 					delete resMap.targetfields;
-
+					delete resMap.mapData;
 					this.db.query( 'UPDATE maps SET ? WHERE id = ?', [resMap, resMap.id], ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
@@ -133,12 +132,16 @@ export class MapTools {
 					} else {
 						let promises: any[];
 						promises = [];
-						dimeMap.sourcefields.forEach( ( curField ) => {
-							promises.push( this.setFieldsAction( dimeMap.id, 'source', curField.name ) );
-						} );
-						dimeMap.targetfields.forEach( ( curField ) => {
-							promises.push( this.setFieldsAction( dimeMap.id, 'target', curField.name ) );
-						} );
+						if ( dimeMap.sourcefields ) {
+							dimeMap.sourcefields.forEach( ( curField ) => {
+								promises.push( this.setFieldsAction( dimeMap.id, 'source', curField.name ) );
+							} );
+						}
+						if ( dimeMap.targetfields ) {
+							dimeMap.targetfields.forEach( ( curField ) => {
+								promises.push( this.setFieldsAction( dimeMap.id, 'target', curField.name ) );
+							} );
+						}
 						Promise.all( promises ).then( () => resolve( dimeMap ) ).catch( reject );
 					}
 				} );
@@ -447,11 +450,6 @@ export class MapTools {
 								}
 							} );
 						} );
-						// console.log(curMap);
-						// console.log(mapFields);
-						// finalFields.forEach((curField) => {
-						// 	console.log(curField);
-						// });
 						let selectQuery: string; selectQuery = '';
 						selectQuery += 'SELECT MAP' + curMap.id + '_MAPTBL.id, ';
 						selectQuery += finalFields.map( ( curField ) => {
@@ -558,14 +556,7 @@ export class MapTools {
 								reject( err );
 							} else {
 								refObj.map = result;
-								// refObj.mapFields = mapFields;
 								refObj.finalFields = finalFields;
-								// refObj.sourceFields = sourceFields;
-								// refObj.targetFields = targetFields;
-								// refObj.sourceStream = sourceStream;
-								// refObj.targetStream = targetStream;
-								// refObj.sourceEnvironment = sourceEnvironment;
-								// refObj.targetEnvironment = targetEnvironment;
 								resolve( refObj );
 							}
 						} );
@@ -574,7 +565,7 @@ export class MapTools {
 				catch( reject );
 		} );
 	}
-	public saveMapTuple = ( refObj: any ) => {
+	public saveMapTuple = ( refObj: { mapid: number, tuple: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE MAP' + refObj.mapid + '_MAPTBL SET ? WHERE id = ?', [refObj.tuple, refObj.tuple.id], ( err, result, fields ) => {
 				if ( err ) {
@@ -585,45 +576,17 @@ export class MapTools {
 			} );
 		} );
 	}
-	/*public mapImport = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
-			console.log( refObj );
-			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.ReadableStreamBuffer();
-			const fileName = tempy.file( { extension: 'xlsx' } );
-
-			myWritableStreamBuffer.put( refObj.data );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( myWritableStreamBuffer );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			myWritableStreamBuffer.stop();
-			const s = new Readable();
-			s.push( refObj.data );
-			s.push( null );
-			let workbook: any; workbook = new excel.Workbook();
-			workbook.xlsx.read( s ).then(( result: any ) => {
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( result );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+	public deleteMapTuple = ( refObj: { mapid: number, tupleid: number } ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.db.query( 'DELETE FROM MAP' + refObj.mapid + '_MAPTBL WHERE id = ?', refObj.tupleid, ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( { result: 'OK' } );
+				}
 			} );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( fileName );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			fs.writeFileSync( fileName, refObj.data );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( 'file is written' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			reject( 'Not yet' );
 		} );
-
-	};*/
+	}
 	public mapImport = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			// console.log( refObj );
@@ -786,48 +749,16 @@ export class MapTools {
 				sheet.addRow( mapIdentifiers );
 				sheet.lastRow.hidden = true;
 				sheet.addRows( refObj.map );
-				// console.log( refObj.map[0] );
-				// sheet.addRow( ['This is the current result.'] );
 			}
-
 			resolve( workbook );
 		} );
 	}
 	private mapExportSendToUser = ( refBook: any, refUser: any, response: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			// resolve( refBuffer.getContents() );
-			// response.setHeader( 'Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' );
-			// response.setHeader( 'Content-Type', 'application/vnd.ms-excel' );
-			// response.setHeader( 'Content-Disposition', 'attachment; filename=Deneme.xlsx' );
-
-			// let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
-			// refBook.xlsx.write( myWritableStreamBuffer ).
-			// 	then(() => {
-			// 		response.json( myWritableStreamBuffer.getContents() );
-			// 		setTimeout( resolve, 3000 );
-			// 	} ).
-			// 	catch( reject );
-
-
-
-
 			refBook.xlsx.write( response ).then( ( result: any ) => {
 				response.end();
 				resolve();
 			} ).catch( reject );
-			// reject( 'Not Yet' );
-			// return this.mailTool.sendMail( {
-			// 	from: 'admin@epmvirtual.com',
-			// 	to: 'aliriza.dikici@gmail.com',
-			// 	subject: 'Map File',
-			// 	text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\nHyperion Team',
-			// 	attachments: [
-			// 		{
-			// 			filename: 'Map File (' + this.tools.getFormattedDateTime() + ').xlsx',
-			// 			content: myWritableStreamBuffer.getContents()
-			// 		}
-			// 	]
-			// } );
 		} );
 	}
 }

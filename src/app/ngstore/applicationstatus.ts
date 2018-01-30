@@ -36,11 +36,13 @@ export class DimeStatusEffects {
 		.map( ( action: Action ) => {
 			let message = 'No message received';
 			console.log( action );
-			if ( action.payload instanceof Error ) {
-				message = action.payload.message;
-			} else if ( action.payload.error ) {
-				if ( action.payload.error instanceof Error ) {
-					message = action.payload.error.message;
+			if ( action.payload ) {
+				if ( action.payload.message ) {
+					message = action.payload.message;
+				} else if ( action.payload.error ) {
+					if ( action.payload.error.message ) {
+						message = action.payload.error.message;
+					}
 				}
 			}
 			this.toastr.error( message, action.payload.caller );

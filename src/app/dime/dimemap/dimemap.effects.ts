@@ -89,6 +89,7 @@ export class DimeMapEffects {
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
 		.ofType( DimeMapActions.ONE.UPDATE.INITIATE )
 		.switchMap( ( action: Action ) => {
+			delete action.payload.mapData;
 			return this.backend.oneUpdate( action.payload )
 				.map( resp => DimeMapActions.ONE.UPDATE.complete( resp ) )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );

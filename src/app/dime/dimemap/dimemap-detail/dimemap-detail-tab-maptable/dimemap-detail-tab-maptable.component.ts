@@ -71,7 +71,11 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				this.getReady();
 			}
 			this.mapData = currentState.curItem.mapData;
+			if ( !this.mapData ) { this.mapData = []; }
 			this.numberofRowsinMap = 'Rows: ' + this.mapData.length;
+			if ( currentState.curItem.isMapDataRefreshing ) {
+				this.numberofRowsinMap = 'Please wait, refreshing the data...';
+			}
 			this.hotInstance = this.hotRegisterer.getInstance( this.instance );
 		} );
 	}
@@ -80,14 +84,46 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		this.windowResized();
 		this.mapSettings = {
 			colHeaders: true,
-			rowHeaders: true,
+			rowHeaders: false,
 			stretchH: 'all',
 			manualColumnResize: true,
 			manualColumnMove: true,
 			// observeChanges: true,
 			afterChange: this.hotAfterChange,
-			afterValidate: this.hotAfterValidate
+			afterValidate: this.hotAfterValidate,
+			afterOnCellMouseDown: this.hotAfterOnCellMouseDown
 		};
+	}
+	private hotDeleteRenderer = ( instance, td, row, col, prop, value, cellProperties ) => {
+		// console.log( 'Renderer is called', td, row, col, prop, value, cellProperties );
+		td.innerHTML = '<i class="fa fa-trash fa-fw" style="color:red;cursor:pointer;" id="' + value + '"></i>';
+		td.className = 'htCenter';
+	}
+	private hotAfterOnCellMouseDown = ( event, cords, td ) => {
+		// console.log( event, cords, td );
+		if ( event.realTarget.className.toString().indexOf( 'fa-trash' ) >= 0 ) {
+			this.deleteTuple( event.realTarget.id );
+		}
+	}
+	public deleteTuple = ( id: number ) => {
+		setTimeout( () => {
+			this.deleteTupleAction( id );
+		}, 100 );
+	}
+	private deleteTupleAction = ( id: number ) => {
+		const verificationQuestion = 'Are you sure you want to delete ' + id + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.mainService.deleteMapTuple( id ).subscribe( result => {
+				this.toastr.success( 'Map entry is successfully deleted\nRefreshing the data table.' );
+				this.refreshMapTable();
+			}, error => {
+				this.toastr.error( 'Map entry deletion failed:\n' + error.message );
+				console.error( 'Map deletion failed' );
+				console.error( error );
+			} );
+		} else {
+			this.toastr.info( 'Map entry deletion is cancelled: ' + id );
+		}
 	}
 	private hotAfterValidate = ( isValid: boolean, value: any, row: number, prop: string | number, source: string ) => {
 		if ( !isValid ) {
@@ -100,12 +136,11 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				this.invalidRows.splice( curIndex, 1 );
 			}
 		}
-		console.log( 'AfterValidate:', isValid, value, row, prop, source, this.invalidRows );
 	}
 	private hotAfterChange = ( changes: any[], source: string ) => {
 		// console.log( 'AfterChange' );
 		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
-			let changedRowNumber, changedFieldName, changedOldValue, changedNewValue, changedDataIndex, changedDataID, changedDataTuple;
+			let changedRowNumber, changedFieldName, changedOldValue, changedNewValue, changedDataIndex, changedDataID, changedDataTuple, isChangeValid;
 			changes.forEach( currentChange => {
 				changedRowNumber = currentChange[0];
 				changedFieldName = currentChange[1];
@@ -115,21 +150,68 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				changedDataID = this.hotInstance.getDataAtRow( changedRowNumber )[0];
 				changedDataIndex = this.mapData.findIndex( element => element.id === changedDataID );
 				changedDataTuple = this.mapData[changedDataIndex];
-				console.log( this.hotInstance.getDataAtRow( changedRowNumber ) );
-				console.log( changedDataID, changedDataIndex );
-				console.log( source, changedFieldName, changedDataTuple[changedFieldName], changedOldValue, changedNewValue );
+				// console.log( this.hotInstance.getDataAtRow( changedRowNumber ) );
+				// console.log( changedDataID, changedDataIndex );
+				// console.log( source, changedFieldName, changedDataTuple[changedFieldName], changedOldValue, changedNewValue );
 				changedDataTuple[changedFieldName] = changedNewValue[0];
-				if ( changedNewValue[1] ) {
-					console.log( 'There is description' );
-					changedDataTuple[changedFieldName + '_DESC'] = changedNewValue[1];
-				}
+				isChangeValid = ( this.invalidRows.findIndex( element => element === changedRowNumber ) < 0 );
+				if ( isChangeValid ) {
+					// Here we will attempt to show the description in the map table
+					// This description part is only put under if the changed cell is valid.
+					// This is because if the cell is not valid, we are not expecting a description to be found.
+					// Also, while validating, we are already traversing the descriptions list and don't want to repeat it here and take a hit in the performance.
+					if ( changedNewValue[1] ) {
+						// If the user is typing or selecting from the dropdown, hotTable automatically provides the member name and description together
+						// Since we are splitting the string with '::' and assigning it to changedNewValue array, if there is a second element in this array, this second element is the description
+						changedDataTuple[changedFieldName + '_DESC'] = changedNewValue[1];
+					} else {
+						// If the user is copy/pasting from somewhere else or even within the hotTable
+						// Description is not brought forward with the pasted cell.
+						// In this case the changedNewValue array doesn't have a second element.
+						// We should look for the description
+						this.mainService.currentItem.targetfields
+							.filter( currentMapField => ( 'TAR_' + currentMapField.name === changedFieldName ) )
+							.forEach( ( currentMapField ) => {
+								currentMapField.descriptions
+									.filter( currentDescription => ( currentDescription.RefField === changedNewValue[0] ) )
+									.forEach( currentDescription => {
+										changedDataTuple[changedFieldName + '_DESC'] = currentDescription.Description;
+									} );
+							} );
+					}
 
-				// this.mapData[changedRowNumber].saveresult = '666';
+					this.mapData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
+					const toSave: any = Object.assign( {}, changedDataTuple );
+					delete toSave.saveresult;
+					Object.keys( toSave ).forEach( element => {
+						if ( element.substr( -5 ) === '_DESC' ) {
+							delete toSave[element];
+						}
+					} );
+					this.saveMapTuple( toSave, changedRowNumber );
+				} else {
+					this.mapData[changedRowNumber].saveresult = '<i class="fa fa-exclamation-circle fa-fw" style="color:red;"></i>';
+				}
 			} );
 			this.hotInstance.render();
 			// // this.mainService.currentItem.sourcefields.forEach( curField => console.log( curField ) );
 			// // this.mainService.currentItem.targetfields.forEach( curField => console.log( curField ) );
 		}
+	}
+	private saveMapTuple = ( toSave, changedRowNumber ) => {
+		this.mainService.saveMapTuple( toSave ).subscribe( result => {
+			let rowNumberToUpdate = -1;
+			rowNumberToUpdate = changedRowNumber;
+			this.mapData[changedRowNumber].saveresult = '<i class="fa fa-check-circle fa-fw" style="color:green;"></i>';
+			this.hotInstance.render();
+		}, error => {
+			let rowNumberToUpdate = -1;
+			rowNumberToUpdate = changedRowNumber;
+			this.mapData[changedRowNumber].saveresult = '<i class="fa fa-times fa-fw" style="color:red;"></i>';
+			this.hotInstance.render();
+			console.error( 'Failed to save map:', toSave );
+			console.error( error );
+		} );
 	}
 	public windowResized = () => {
 		this.hotTableHeight = window.innerHeight - 320;
@@ -141,7 +223,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public refreshMapTable = () => {
 		this.filtersShown = false;
 		this.sortersShown = false;
-		this.numberofRowsinMap = 'Please wait, preparing...';
+		this.numberofRowsinMap = 'Please wait, refreshing the data...';
+		this.mapData = [];
 		this.store.dispatch( DimeMapActions.ONE.REFRESH.initiate( { id: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ) );
 	}
 	private getReady = () => {
@@ -171,9 +254,18 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						this.mapColumns[columnIndex].allowInvalid = true;
 						this.mapColumns[columnIndex].source = [];
 						currentMapField.descriptions.forEach( ( currentDescription ) => {
-							this.mapColumns[columnIndex].source.push( currentDescription.RefField );
 							this.mapColumns[columnIndex].source.push( currentDescription.RefField + '::' + currentDescription.Description );
 						} );
+						this.mapColumns[columnIndex].validator = ( query, callback ) => {
+							let isValid = false;
+							if ( currentMapField.descriptions.findIndex( element => element.RefField === query ) >= 0 ) {
+								isValid = true;
+							}
+							if ( currentMapField.descriptions.findIndex( element => element.RefField + '::' + element.Description === query ) >= 0 ) {
+								isValid = true;
+							}
+							callback( isValid );
+						};
 					}
 				} );
 			} );
@@ -248,7 +340,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						this.mapColumns.push( currentColumn );
 					}
 				} );
-			this.mapColumns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html', title: 'Save Result' } );
+			this.mapColumns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html', title: '<i class="fa fa-floppy-o fa-fw" title="Save Result"></i>', className: 'htCenter' } );
+			this.mapColumns.push( { data: 'id', type: 'text', readOnly: true, renderer: this.hotDeleteRenderer, title: '<i class="fa fa-trash fa-fw" title="Click to Delete"></i>', className: 'htCenter' } );
 			resolve();
 		} );
 	}

@@ -9,6 +9,7 @@ export interface DimeMap {
 	isready: ATReadyStatus,
 	sourcefields: DimeMapField[],
 	targetfields: DimeMapField[],
+	isMapDataRefreshing: boolean,
 	mapData: any[],
 	tags: any
 }

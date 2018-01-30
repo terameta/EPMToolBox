@@ -31,6 +31,9 @@ export function dimeMapReducer( state: DimeMapState, action: Action ): DimeMapSt
 		case DimeMapActions.ONE.ISREADY.COMPLETE: {
 			return handleOneIsReadyComplete( state, action );
 		}
+		case DimeMapActions.ONE.REFRESH.INITIATE: {
+			return handleOneRefreshInitiate( state, action );
+		}
 		case DimeMapActions.ONE.REFRESH.COMPLETE: {
 			return handleOneRefreshComplete( state, action );
 		}
@@ -83,8 +86,16 @@ const handleOneIsReadyComplete = ( state: DimeMapState, action: Action ): DimeMa
 	return newState;
 };
 
+const handleOneRefreshInitiate = ( state: DimeMapState, action: Action ): DimeMapState => {
+	const newState: DimeMapState = Object.assign( {}, state );
+	newState.curItem.mapData = [];
+	newState.curItem.isMapDataRefreshing = true;
+	return newState;
+};
+
 const handleOneRefreshComplete = ( state: DimeMapState, action: Action ): DimeMapState => {
 	const newState: DimeMapState = Object.assign( {}, state );
 	newState.curItem.mapData = action.payload;
+	newState.curItem.isMapDataRefreshing = false;
 	return newState;
 };

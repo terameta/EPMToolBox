@@ -109,6 +109,8 @@ export class DimeMapService {
 	public mapImportFileChangeEvent = ( fileInput: any ) => {
 		this.filesToUpload = <Array<File>>fileInput.target.files;
 	}
+	public saveMapTuple = ( data ) => this.backend.saveMapTuple( { mapid: this.currentItem.id, tuple: data } );
+	public deleteMapTuple = ( tupleid ) => this.backend.deleteMapTuple( { mapid: this.currentItem.id, tupleid } );
 
 	/*
 
@@ -260,13 +262,6 @@ export class DimeMapService {
 				post( this.baseUrl + '/mapData?i=' + new Date().getTime(), { id: this.curItem.id, filters: currentFilter } ).
 				map( response => response.json() ).
 				catch( error => Observable.throw( error ) );
-		};
-		public saveMapTuple = ( data ) => {
-			return this.authHttp.post( this.baseUrl + '/saveMapTuple', { mapid: this.curItem.id, tuple: data } ).
-				map( response => response.json() ).
-				catch(( error ) => {
-					return Observable.throw( new Error( error ) );
-				} );
 		};
 		*/
 }

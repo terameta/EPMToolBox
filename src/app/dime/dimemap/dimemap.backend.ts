@@ -20,4 +20,6 @@ export class DimeMapBackend {
 	public mapExport = ( id: number ) => this.http.get( this.baseUrl + /mapExport/ + id, { responseType: 'blob' } );
 	public mapImport = ( formData: FormData ) => this.http.post( this.baseUrl + '/mapImport', formData );
 	public mapRefresh = ( payload: DimeMapRefreshPayload ) => this.http.post( this.baseUrl + '/mapRefresh', payload );
+	public saveMapTuple = ( payload: { mapid: number, tuple: any } ) => this.http.post( this.baseUrl + '/saveMapTuple', payload );
+	public deleteMapTuple = ( payload: { mapid: number, tupleid: number } ) => this.http.delete( this.baseUrl + '/deleteMapTuple/' + payload.mapid + '/' + payload.tupleid );
 }
