@@ -1,8 +1,9 @@
 import { Store } from '@ngrx/store';
-import { DimeMatrixOneCreateInitiateAction, DimeMatrixState } from '../dimematrix.ngrx';
 import { Component, OnInit } from '@angular/core';
 
 import { DimeMatrixService } from '../dimematrix.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
 
 @Component( {
 	selector: 'app-dimematrix-toolbar',
@@ -11,13 +12,12 @@ import { DimeMatrixService } from '../dimematrix.service';
 } )
 export class DimeMatrixToolbarComponent implements OnInit {
 
-	constructor( private store: Store<DimeMatrixState> ) { }
+	constructor(
+		public mainService: DimeMatrixService,
+		public tagService: DimeTagService,
+		public uiService: DimeUIService
+	) { }
 
 	ngOnInit() {
 	}
-
-	public create = () => {
-		this.store.dispatch( new DimeMatrixOneCreateInitiateAction() );
-	}
-
 }

@@ -291,6 +291,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			this.streamService.fetchFieldDescriptions( stream, field ).subscribe( ( result: any[] ) => {
 				mapField.descriptions = result;
 				mapField.descriptions.push( { RefField: 'ignore', Description: 'ignore' } );
+				mapField.descriptions.push( { RefField: 'missing', Description: 'missing' } );
 				resolve();
 			}, ( error ) => {
 				reject( error );

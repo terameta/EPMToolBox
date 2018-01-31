@@ -1,4 +1,3 @@
-import { DimeMatrixOneUpdateInitiateAction } from './dimematrix.ngrx';
 import { SortByName } from '../../../../shared/utilities/utilityFunctions';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -7,8 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AppState } from '../../ngstore/models';
 
-import { DimeMatrix } from '../../../../shared/model/dime/matrix';
-import { DimeMatrixDetail } from '../../../../shared/model/dime/matrixDetail';
+import { DimeMatrix, DimeMatrixDetail } from '../../../../shared/model/dime/matrix';
 import { DimeMatrixBackend } from './dimematrix.backend';
 
 import { DimeMapService } from '../dimemap/dimemap.service';
@@ -18,8 +16,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import * as _ from 'lodash';
 import { Store } from '@ngrx/store';
-
-import { DimeMatrixOneDeleteInitiateAction } from './dimematrix.ngrx';
+import { DimeMatrixActions } from './dimematrix.actions';
 
 @Injectable()
 export class DimeMatrixService {
@@ -45,13 +42,13 @@ export class DimeMatrixService {
 	}
 
 	public update = () => {
-		this.store.dispatch( new DimeMatrixOneUpdateInitiateAction( this.currentItem ) );
+		this.store.dispatch( DimeMatrixActions.ONE.UPDATE.initiate( this.currentItem ) );
 	}
 
 	public delete = ( id: number, name?: string ) => {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
-			this.store.dispatch( new DimeMatrixOneDeleteInitiateAction( id ) );
+			this.store.dispatch( DimeMatrixActions.ONE.DELETE.initiate( id ) );
 		}
 	}
 	/*

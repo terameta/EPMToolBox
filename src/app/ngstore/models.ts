@@ -1,12 +1,4 @@
 import { Observable } from 'rxjs/Observable';
-import {
-	DimeMatrixAllLoadInitiateAction,
-	DimeMatrixAllLoadInitiateIfEmptyAction,
-	dimeMatrixInitialState,
-	DimeMatrixOneLoadInitiateAction,
-	dimeMatrixReducer,
-	DimeMatrixState,
-} from '../dime/dimematrix/dimematrix.ngrx';
 
 import {
 	DIME_ASYNC_PROCESS_ACTIONS,
@@ -45,6 +37,12 @@ import { DimeStreamActions } from '../dime/dimestream/dimestream.actions';
 import { DimeMapState, dimeMapInitialState } from '../dime/dimemap/dimemap.state';
 import { dimeMapReducer } from '../dime/dimemap/dimemap.reducer';
 import { DimeMapActions } from '../dime/dimemap/dimemap.actions';
+
+import { DimeMatrixState, dimeMatrixInitialState } from '../dime/dimematrix/dimematrix.state';
+import { dimeMatrixReducer } from '../dime/dimematrix/dimematrix.reducer';
+import { DimeMatrixActions } from '../dime/dimematrix/dimematrix.actions';
+
+
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
@@ -231,10 +229,10 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 				case 'matrices': {
 					switch ( segments[2] ) {
 						case 'matrix-list': {
-							return new DimeMatrixAllLoadInitiateIfEmptyAction();
+							return DimeMatrixActions.ALL.LOAD.initiateifempty();
 						}
 						case 'matrix-detail/:id': {
-							return new DimeMatrixOneLoadInitiateAction( paramset.params.id );
+							return DimeMatrixActions.ONE.LOAD.initiate( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at matrices default' );

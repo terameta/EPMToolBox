@@ -4,7 +4,7 @@ import { DimeStream } from '../../../../../../shared/model/dime/stream';
 import { Subscription } from 'rxjs/Subscription';
 import { AppState } from '../../../../ngstore/models';
 import { Store } from '@ngrx/store';
-import { DimeMatrixDetail } from '../../../../../../shared/model/dime/matrixDetail';
+import { DimeMatrixDetail } from '../../../../../../shared/model/dime/matrix';
 import * as _ from 'lodash';
 
 import { Component, OnDestroy, OnInit } from '@angular/core';

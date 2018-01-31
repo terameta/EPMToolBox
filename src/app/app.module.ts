@@ -1,4 +1,3 @@
-import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.ngrx';
 import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
@@ -64,6 +63,7 @@ import { DimeTagGroupBackend } from './dime/dimetag/dimetaggroup.backend';
 import { DimeTagService } from './dime/dimetag/dimetag.service';
 import { DimeTagEffects } from './dime/dimetag/dimetag.effects';
 import { DimeStatusEffects } from './ngstore/applicationstatus';
+import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.effects';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
