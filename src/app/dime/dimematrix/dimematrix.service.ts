@@ -6,7 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AppState } from '../../ngstore/models';
 
-import { DimeMatrix, DimeMatrixDetail } from '../../../../shared/model/dime/matrix';
+import { DimeMatrix, DimeMatrixObject } from '../../../../shared/model/dime/matrix';
 import { DimeMatrixBackend } from './dimematrix.backend';
 
 import { DimeMapService } from '../dimemap/dimemap.service';
@@ -24,7 +24,8 @@ export class DimeMatrixService {
 	private baseUrl = '/api/dime/matrix';
 
 	public itemList: DimeMatrix[];
-	public currentItem: DimeMatrixDetail;
+	public itemObject: DimeMatrixObject;
+	public currentItem: DimeMatrix;
 
 
 	constructor(
@@ -37,19 +38,32 @@ export class DimeMatrixService {
 	) {
 		this.store.select( 'dimeMatrix' ).subscribe( matrixState => {
 			this.itemList = _.values( matrixState.items ).sort( SortByName );
+			this.itemObject = matrixState.items;
 			this.currentItem = matrixState.curItem;
 		} );
 	}
 
 	public update = () => {
-		this.store.dispatch( DimeMatrixActions.ONE.UPDATE.initiate( this.currentItem ) );
+		this.store.dispatch( DimeMatrixActions.ONE.UPDATE.INITIATE.action( this.currentItem ) );
 	}
 
 	public delete = ( id: number, name?: string ) => {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
-			this.store.dispatch( DimeMatrixActions.ONE.DELETE.initiate( id ) );
+			this.store.dispatch( DimeMatrixActions.ONE.DELETE.INITIATE.action( id ) );
 		}
+	}
+
+	public create = () => {
+
+	}
+
+	public navigateTo = ( $event ) => {
+
+	}
+
+	public prepareMatrixTables = () => {
+		console.log( 'We are now supposed to create the tables' );
 	}
 	/*
 		private resetCurItem = () => {

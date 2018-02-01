@@ -1,21 +1,15 @@
 export interface DimeMatrix {
 	id: number,
 	name: string,
-	stream: number
-}
-
-export interface DimeMatrixDetail extends DimeMatrix {
-	fields: DimeMatrixField[]
-}
-
-export interface DimeMatrixField {
-	id: number,
-	name: string,
-	matrix: number,
-	map: number,
 	stream: number,
-	isDescribed: boolean,
-	streamFieldID: number,
-	isAssigned: boolean,
-	fOrder: number
+	fields: DimeMatrixFieldObject,
+	tags: any
+}
+
+export interface DimeMatrixFieldObject {
+	[key: number]: boolean
+}
+
+export interface DimeMatrixObject {
+	[key: number]: DimeMatrix
 }

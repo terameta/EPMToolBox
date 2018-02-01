@@ -44,5 +44,6 @@
 	"editor.minimap.enabled": false,
 	"emmet.triggerExpansionOnTab": true,
 	"editor.smoothScrolling": true,
-	"editor.showFoldingControls": "always"
+	"editor.showFoldingControls": "always",
+	"terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\sh.exe"
 }

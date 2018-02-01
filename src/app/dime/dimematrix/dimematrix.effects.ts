@@ -2,79 +2,88 @@ import { Injectable } from '@angular/core';
 import { Effect, Actions } from '@ngrx/effects';
 import { DimeMatrixActions } from './dimematrix.actions';
 
-import { Action as NgRXAction, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { AppState } from '../../ngstore/models';
 import { DimeMatrixBackend } from './dimematrix.backend';
 import { Router } from '@angular/router';
 import { of } from 'rxjs/observable/of';
 import { DimeStreamActions } from '../dimestream/dimestream.actions';
 import { DimeMatrix } from '../../../../shared/model/dime/matrix';
-// import { DimeMatrix, DimeMatrixDetail } from '../../../../shared/model/dime/matrix';
-
-export interface Action extends NgRXAction {
-	payload?: any;
-}
-
+import { Action } from '../../ngstore/ngrx.generators';
+import { DimeTagActions } from '../dimetag/dimetag.actions';
+import { DimeStatusActions } from '../../ngstore/applicationstatus';
 
 @Injectable()
 export class DimeMatrixEffects {
+	private serviceName = 'Matrices';
+
 	@Effect() ALL_LOAD_INITIATE$ = this.actions$
-		.ofType( DimeMatrixActions.ALL.LOAD.INITIATE )
+		.ofType( DimeMatrixActions.ALL.LOAD.INITIATE.type )
 		.switchMap( ( action ) => {
 			return this.backend.allLoad()
-				.map( resp => DimeMatrixActions.ALL.LOAD.complete( resp ) );
+				.mergeMap( resp => [
+					DimeMatrixActions.ALL.LOAD.COMPLETE.action( resp ),
+					DimeStreamActions.ALL.LOAD.initiateifempty()
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
-		.ofType( DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY )
+		.ofType( DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.type )
 		.withLatestFrom( this.state$ )
 		.filter( ( [action, state] ) => ( !state.dimeMatrix.items || Object.keys( state.dimeMatrix.items ).length === 0 ) )
 		.map( ( [action, state] ) => action )
-		.switchMap( action => of( DimeMatrixActions.ALL.LOAD.initiate() ) );
+		.switchMap( action => DimeMatrixActions.ALL.LOAD.INITIATE.observableaction() );
+
+	@Effect() ALL_LOAD_COMPLETE$ = this.actions$
+		.ofType( DimeMatrixActions.ALL.LOAD.COMPLETE.type )
+		.map( () => DimeTagActions.ALL.LOAD.initiateifempty() );
 
 	@Effect() ONE_CREATE_INITIATE$ = this.actions$
-		.ofType( DimeMatrixActions.ONE.CREATE.INITIATE )
-		.switchMap( ( action: Action ) => {
+		.ofType( DimeMatrixActions.ONE.CREATE.INITIATE.type )
+		.switchMap( ( action: Action<DimeMatrix> ) => {
 			return this.backend.oneCreate( action.payload )
-				.map( resp => ( DimeMatrixActions.ONE.CREATE.complete( resp ) ) );
+				.map( resp => DimeMatrixActions.ONE.CREATE.COMPLETE.action( resp ) );
 		} );
 
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$
-		.ofType( DimeMatrixActions.ONE.CREATE.COMPLETE )
-		.switchMap( ( action: Action ) => {
+		.ofType( DimeMatrixActions.ONE.CREATE.COMPLETE.type )
+		.switchMap( ( action: Action<DimeMatrix> ) => {
 			this.router.navigateByUrl( 'dime/matrices/matrix-detail/' + action.payload.id );
-			return of( DimeMatrixActions.ALL.LOAD.initiate() );
+			return DimeMatrixActions.ALL.LOAD.INITIATE.observableaction();
 		} );
 	@Effect() ONE_LOAD_INITIATE$ = this.actions$
-		.ofType( DimeMatrixActions.ONE.LOAD.INITIATE )
-		.switchMap( ( action: Action ) => {
+		.ofType( DimeMatrixActions.ONE.LOAD.INITIATE.type )
+		.switchMap( ( action: Action<number> ) => {
 			return this.backend.oneLoad( action.payload )
 				.mergeMap( resp => {
 					return [
-						DimeMatrixActions.ONE.LOAD.complete( resp ),
-						DimeStreamActions.ALL.LOAD.initiateifempty()
+						DimeMatrixActions.ONE.LOAD.COMPLETE.action( resp ),
+						DimeStreamActions.ALL.LOAD.initiateifempty(),
+						DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
 					];
 				} );
 		} );
 
 	@Effect() ONE_DELETE_INITIATE$ = this.actions$
-		.ofType( DimeMatrixActions.ONE.DELETE.INITIATE )
-		.switchMap( ( action: Action ) => {
+		.ofType( DimeMatrixActions.ONE.DELETE.INITIATE.type )
+		.switchMap( ( action: Action<number> ) => {
 			return this.backend.oneDelete( action.payload )
-				.map( resp => ( DimeMatrixActions.ONE.DELETE.complete() ) );
+				.map( resp => DimeMatrixActions.ONE.DELETE.COMPLETE.action() );
 		} );
 
 	@Effect() ONE_DELETE_COMPLETE$ = this.actions$
-		.ofType( DimeMatrixActions.ONE.DELETE.COMPLETE )
-		.map( ( action: Action ) => DimeMatrixActions.ALL.LOAD.initiate() );
+		.ofType( DimeMatrixActions.ONE.DELETE.COMPLETE.type )
+		.map( action => DimeMatrixActions.ALL.LOAD.INITIATE.action() );
 
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
-		.ofType( DimeMatrixActions.ONE.UPDATE.INITIATE )
-		.switchMap( ( action: Action ) => {
+		.ofType( DimeMatrixActions.ONE.UPDATE.INITIATE.type )
+		.switchMap( ( action: Action<DimeMatrix> ) => {
 			return this.backend.oneUpdate( action.payload ).mergeMap( ( resp: DimeMatrix ) => {
 				return [
-					DimeMatrixActions.ONE.UPDATE.complete( resp ),
-					DimeMatrixActions.ALL.LOAD.initiate()
+					DimeMatrixActions.ONE.UPDATE.COMPLETE.action( resp ),
+					DimeMatrixActions.ALL.LOAD.INITIATE.action(),
+					DimeMatrixActions.ONE.LOAD.INITIATE.action( action.payload.id )
 				];
 			} );
 		} );

@@ -8,6 +8,6 @@ export interface DimeMapState {
 
 export const dimeMapInitialState: DimeMapState = {
 	items: {},
-	curItem: <DimeMap>{ id: 0, mapData: [] },
+	curItem: <DimeMap>{ id: 0, mapData: [], tags: {} },
 	curItemClean: false
 };

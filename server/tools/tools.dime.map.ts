@@ -62,6 +62,8 @@ export class MapTools {
 			.then( fields => {
 				dimeMap.sourcefields = fields.filter( curField => curField.srctar === 'source' );
 				dimeMap.targetfields = fields.filter( curField => curField.srctar === 'target' );
+				dimeMap.tags = JSON.parse( dimeMap.tags );
+				if ( !dimeMap.tags ) { dimeMap.tags = {}; }
 				return dimeMap;
 			} );
 	}
@@ -87,6 +89,7 @@ export class MapTools {
 					delete resMap.sourcefields;
 					delete resMap.targetfields;
 					delete resMap.mapData;
+					resMap.tags = JSON.stringify( resMap.tags );
 					this.db.query( 'UPDATE maps SET ? WHERE id = ?', [resMap, resMap.id], ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );

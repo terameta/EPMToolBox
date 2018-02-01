@@ -1,46 +1,30 @@
-import { Action as NgRXAction } from '@ngrx/store';
-import { DimeMatrix, DimeMatrixDetail } from '../../../../shared/model/dime/matrix';
-
-export interface Action extends NgRXAction {
-	payload?: any;
-}
-
+import { DimeMatrix } from '../../../../shared/model/dime/matrix';
+import { Action, actionFactory } from '../../ngstore/ngrx.generators';
 
 export const DimeMatrixActions = {
 	ALL: {
 		LOAD: {
-			INITIATE: 'DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE',
-			initiate: (): Action => ( { type: DimeMatrixActions.ALL.LOAD.INITIATE } ),
-			INITIATEIFEMPTY: 'DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE_IF_EMPTY',
-			initiateifempty: (): Action => ( { type: DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY } ),
-			COMPLETE: 'DIME_MATRIX_ACTIONS_ALL_LOAD_COMPLETE',
-			complete: ( payload: DimeMatrix[] ): Action => ( { type: DimeMatrixActions.ALL.LOAD.COMPLETE, payload } )
+			INITIATE: actionFactory( 'DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATE' ),
+			INITIATEIFEMPTY: actionFactory( 'DIME_MATRIX_ACTIONS_ALL_LOAD_INITIATEIFEMPTY' ),
+			COMPLETE: actionFactory<DimeMatrix[]>( 'DIME_MATRIX_ACTIONS_ALL_LOAD_COMPLETE' )
 		}
 	},
 	ONE: {
 		LOAD: {
-			INITIATE: 'DIME_MATRIX_ACTIONS_ONE_LOAD_INITIATE',
-			initiate: ( payload: number ): Action => ( { type: DimeMatrixActions.ONE.LOAD.INITIATE, payload } ),
-			COMPLETE: 'DIME_MATRIX_ACTIONS_ONE_LOAD_COMPLETE',
-			complete: ( payload: DimeMatrixDetail ): Action => ( { type: DimeMatrixActions.ONE.LOAD.COMPLETE, payload } )
+			INITIATE: actionFactory<number>( 'DIME_MATRIX_ACTIONS_ONE_LOAD_INITIATE' ),
+			COMPLETE: actionFactory<DimeMatrix>( 'DIME_MATRIX_ACTIONS_ONE_LOAD_COMPLETE' )
 		},
 		CREATE: {
-			INITIATE: 'DIME_MATRIX_ACTIONS_ONE_CREATE_INITIATE',
-			initiate: ( payload: DimeMatrix ): Action => ( { type: DimeMatrixActions.ONE.CREATE.INITIATE, payload } ),
-			COMPLETE: 'DIME_MATRIX_ACTIONS_ONE_CREATE_COMPLETE',
-			complete: ( payload: DimeMatrix ): Action => ( { type: DimeMatrixActions.ONE.CREATE.COMPLETE, payload } )
+			INITIATE: actionFactory<DimeMatrix>( 'DIME_MATRIX_ACTIONS_ONE_CREATE_INITIATE' ),
+			COMPLETE: actionFactory<DimeMatrix>( 'DIME_MATRIX_ACTIONS_ONE_CREATE_COMPLETE' )
 		},
 		UPDATE: {
-			INITIATE: 'DIME_MATRIX_ACTIONS_ONE_UPDATE_INITIATE',
-			initiate: ( payload: DimeMatrix ): Action => ( { type: DimeMatrixActions.ONE.UPDATE.INITIATE, payload } ),
-			COMPLETE: 'DIME_MATRIX_ACTIONS_ONE_UPDATE_COMPLETE',
-			complete: ( payload: DimeMatrix ): Action => ( { type: DimeMatrixActions.ONE.UPDATE.COMPLETE, payload } )
+			INITIATE: actionFactory<DimeMatrix>( 'DIME_MATRIX_ACTIONS_ONE_UPDATE_INITIATE' ),
+			COMPLETE: actionFactory<DimeMatrix>( 'DIME_MATRIX_ACTIONS_ONE_UPDATE_COMPLETE' )
 		},
 		DELETE: {
-			INITIATE: 'DIME_MATRIX_ACTIONS_ONE_DELETE_INITIATE',
-			initiate: ( payload: number ): Action => ( { type: DimeMatrixActions.ONE.DELETE.INITIATE, payload } ),
-			COMPLETE: 'DIME_MATRIX_ACTIONS_ONE_DELETE_COMPLETE',
-			complete: (): Action => ( { type: DimeMatrixActions.ONE.DELETE.COMPLETE } )
+			INITIATE: actionFactory<number>( 'DIME_MATRIX_ACTIONS_ONE_DELETE_INITIATE' ),
+			COMPLETE: actionFactory( 'DIME_MATRIX_ACTIONS_ONE_DELETE_COMPLETE' )
 		}
 	}
 };

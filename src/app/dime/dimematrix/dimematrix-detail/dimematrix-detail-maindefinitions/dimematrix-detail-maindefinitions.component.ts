@@ -4,10 +4,11 @@ import { DimeStream } from '../../../../../../shared/model/dime/stream';
 import { Subscription } from 'rxjs/Subscription';
 import { AppState } from '../../../../ngstore/models';
 import { Store } from '@ngrx/store';
-import { DimeMatrixDetail } from '../../../../../../shared/model/dime/matrix';
 import * as _ from 'lodash';
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { DimeStreamService } from '../../../dimestream/dimestream.service';
+import { DimeTagService } from '../../../dimetag/dimetag.service';
 
 @Component( {
 	selector: 'app-dimematrix-detail-maindefinitions',
@@ -15,29 +16,16 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 	styleUrls: ['./dimematrix-detail-maindefinitions.component.css']
 } )
 export class DimematrixDetailMaindefinitionsComponent implements OnInit, OnDestroy {
-	public curItem: DimeMatrixDetail;
-	public streams: DimeStream[];
-	private subscription: Subscription;
-	private streamSubscription: Subscription;
 
 	constructor(
 		private state: Store<AppState>,
-		public mainService: DimeMatrixService
-	) {
-		this.subscription = this.state.select( 'dimeMatrix' ).subscribe( matrixState => {
-			this.curItem = matrixState.curItem;
-		} );
-		this.streamSubscription = this.state.select( 'dimeStream' ).subscribe( streamState => {
-			this.streams = _.values( streamState.items ).sort( SortByName );
-		} );
-	}
+		public mainService: DimeMatrixService,
+		public streamService: DimeStreamService,
+		public tagService: DimeTagService
+	) { }
 
-	ngOnInit() {
-	}
+	ngOnInit() { }
 
-	ngOnDestroy() {
-		this.subscription.unsubscribe();
-		this.streamSubscription.unsubscribe();
-	}
+	ngOnDestroy() { }
 
 }

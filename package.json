@@ -4,12 +4,12 @@
 	"license": "MIT",
 	"scripts": {
 		"ng": "ng",
-		"serve": "ng serve --aot --proxy-config proxy.conf.json",
+		"client": "ng serve --aot --proxy-config proxy.conf.json",
 		"build": "ng build --prod",
 		"test": "ng test",
 		"lint": "ng lint",
 		"e2e": "ng e2e",
-		"serverwatch": "nodemon -w ./server -e ts,json --exec ts-node server/server.ts --type-check",
+		"server": "nodemon -w ./server -e ts,json --exec ts-node server/server.ts --type-check",
 		"serverprod": "ts-node server/server.ts"
 	},
 	"private": true,

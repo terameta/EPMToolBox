@@ -229,10 +229,10 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 				case 'matrices': {
 					switch ( segments[2] ) {
 						case 'matrix-list': {
-							return DimeMatrixActions.ALL.LOAD.initiateifempty();
+							return DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action();
 						}
 						case 'matrix-detail/:id': {
-							return DimeMatrixActions.ONE.LOAD.initiate( paramset.params.id );
+							return DimeMatrixActions.ONE.LOAD.INITIATE.action( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at matrices default' );

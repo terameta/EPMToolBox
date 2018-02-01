@@ -1,4 +1,3 @@
-import { DimeMapService } from '../../../dimemap/dimemap.service';
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMatrixService } from '../../dimematrix.service';
 
@@ -13,8 +12,7 @@ export class DimematrixDetailFieldsComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeMatrixService,
-		private mapService: DimeMapService,
-		private streamService: DimeStreamService
+		public streamService: DimeStreamService
 	) { }
 
 	ngOnInit() {

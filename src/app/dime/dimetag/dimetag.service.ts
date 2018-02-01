@@ -106,4 +106,13 @@ export class DimeTagService {
 		this.store.dispatch( DimeTagGroupActions.ONE.reorder( { id, direction } ) );
 	}
 
+	public decideColWidth = ( numCols: number ) => {
+		let colWidth = 12;
+		if ( numCols > 0 ) {
+			colWidth = Math.floor( colWidth / numCols );
+		}
+		if ( colWidth < 1 ) { colWidth = 1; }
+		return colWidth;
+	}
+
 }

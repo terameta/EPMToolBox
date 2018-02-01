@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { DimeMapService } from '../../dimemap.service';
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
+import { DimeTagService } from '../../../dimetag/dimetag.service';
 
 @Component( {
 	selector: 'app-dimemap-detail-tab-maindefinitions',
@@ -14,10 +15,20 @@ export class DimemapDetailTabMaindefinitionsComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeMapService,
-		public streamService: DimeStreamService
+		public streamService: DimeStreamService,
+		public tagService: DimeTagService
 	) { }
 
 	ngOnInit() {
+	}
+
+	public decideColWidth = ( numCols: number ) => {
+		let colWidth = 12;
+		if ( numCols > 0 ) {
+			colWidth = Math.floor( colWidth / numCols );
+		}
+		if ( colWidth < 1 ) { colWidth = 1; }
+		return colWidth;
 	}
 
 }

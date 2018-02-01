@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 
 import { DimeMatrixService } from '../dimematrix.service';
 import { DimeMapService } from '../../dimemap/dimemap.service';
+import { DimeStreamService } from '../../dimestream/dimestream.service';
 
 @Component( {
 	selector: 'app-dimematrix-list',
@@ -17,7 +18,10 @@ import { DimeMapService } from '../../dimemap/dimemap.service';
 } )
 export class DimeMatrixListComponent implements OnInit, OnDestroy {
 
-	constructor( public mainService: DimeMatrixService ) { }
+	constructor(
+		public mainService: DimeMatrixService,
+		public streamService: DimeStreamService
+	) { }
 
 	ngOnInit() {
 	}

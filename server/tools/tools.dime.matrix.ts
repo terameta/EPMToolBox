@@ -1,10 +1,7 @@
-import { DimeMatrixDetail } from '../../shared/model/dime/matrixDetail';
+import { DimeMatrix } from '../../shared/model/dime/matrix';
 import * as async from 'async';
 import { MainTools } from './tools.main';
 import { Pool } from 'mysql';
-
-import { DimeMatrix } from '../../shared/model/dime/matrix';
-import { DimeMatrixField } from '../../shared/model/dime/matrixfield';
 
 export class DimeMatrixTool {
 
@@ -12,17 +9,17 @@ export class DimeMatrixTool {
 
 	}
 
-	public getAll = () => {
+	public getAll = (): Promise<DimeMatrix[]> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM matrices', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving items has failed' } );
 				} else {
-					resolve( rows );
+					resolve( rows.map( this.prepareMatrixDetails ) );
 				}
 			} );
 		} );
-	};
+	}
 	public create = ( sentItem?: DimeMatrix ) => {
 		if ( sentItem ) { if ( sentItem.id ) { delete sentItem.id; } }
 		const newItem = this.tools.isEmptyObject( sentItem ) ? { name: 'New Item (Please change name)', stream: 0 } : <any>sentItem;
@@ -35,24 +32,34 @@ export class DimeMatrixTool {
 				}
 			} );
 		} );
-	};
+	}
 	public getOne = ( id: number ) => {
-		return this.getItemDetails( <DimeMatrix>{ id: id } );
-	};
-	public getItemDetails = ( refObj: DimeMatrix ): Promise<DimeMatrix> => {
+		return this.getMatrixDetails( <DimeMatrix>{ id: id } );
+	}
+	public getMatrixDetails = ( refObj: DimeMatrix ): Promise<DimeMatrix> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM matrices WHERE id = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
-					reject( { error: err, message: 'Retrieving item with id ' + refObj.id + ' has failed' } );
+					reject( err );
 				} else if ( rows.length !== 1 ) {
-					reject( { error: 'Wrong number of records', message: 'Wrong number of records for item received from the server, 1 expected' } );
+					reject( new Error( 'Wrong number of records@getMatrixDetails' ) );
 				} else {
-					resolve( rows[0] );
+					resolve( this.prepareMatrixDetails( rows[0] ) );
 				}
 			} );
 		} );
 	}
-	public update = ( item: DimeMatrixDetail ) => {
+	private prepareMatrixDetails = ( refObject: any ): DimeMatrix => {
+		refObject.tags = JSON.parse( refObject.tags );
+		refObject.fields = JSON.parse( refObject.fields );
+		if ( !refObject.fields ) { refObject.fields = {}; }
+		if ( !refObject.tags ) { refObject.tags = {}; }
+		return Object.assign( <DimeMatrix>{}, refObject );
+	}
+	public update = ( refMatrix: DimeMatrix ) => {
+		const item: any = Object.assign( {}, refMatrix );
+		item.fields = JSON.stringify( item.fields );
+		item.tags = JSON.stringify( item.tags );
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE matrices SET ? WHERE id = ' + item.id, item, ( err, result, fields ) => {
 				if ( err ) {
@@ -62,7 +69,7 @@ export class DimeMatrixTool {
 				}
 			} );
 		} );
-	};
+	}
 	public delete = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM matrices WHERE id = ?', id, ( err, result, fields ) => {
@@ -73,64 +80,29 @@ export class DimeMatrixTool {
 				}
 			} );
 		} );
-	};
-	public getFields = ( id: number ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM matrixfields WHERE matrix = ?', id, ( err, result, fields ) => {
-				if ( err ) {
-					reject( { error: err, message: 'Failed to fetch fields for the matrix' } );
-				} else {
-					resolve( result );
-				}
-			} );
-		} );
-	};
-	public setFields = ( refObj: { id: number, fields: DimeMatrixField[] } ) => {
-		return new Promise( ( resolve, reject ) => {
-			async.eachOfSeries(
-				refObj.fields,
-				( curField, key, callback ) => {
-					let curQuery: string; curQuery = '';
-					if ( curField.id ) {
-						curQuery += 'UPDATE matrixfields SET ? WHERE id=' + curField.id;
-					} else {
-						curQuery = 'INSERT INTO matrixfields SET ?';
-					}
-					this.db.query( curQuery, curField, ( err, result, fields ) => {
-						if ( err ) {
-							reject( err );
-						} else {
-							callback();
-						}
-					} );
-				}, () => {
-					resolve( { status: 'OK' } );
-				}
-			);
-		} );
-	};
-	public prepareTables = ( id: number ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.dropTables( id ).
-				then( this.getFields ).then( ( fieldList: DimeMatrixField[] ) => {
-					let createQuery: string; createQuery = '';
-					createQuery += 'CREATE TABLE MATRIX' + id + '_MATRIXTBL (';
-					createQuery += 'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, ';
-					createQuery += fieldList.map( curField => curField.name + ' VARCHAR(1024)' ).join( ',' );
-					createQuery += ', PRIMARY KEY (id) )';
-					// console.log( fieldList );
-					console.log( createQuery );
-					this.db.query( createQuery, ( err, result, fields ) => {
-						if ( err ) {
-							reject( err );
-						} else {
-							resolve( { result: 'OK' } );
-						}
-					} );
-				} ).
-				catch( reject );
-		} );
-	};
+	}
+	// public prepareTables = ( id: number ) => {
+	// 	return new Promise( ( resolve, reject ) => {
+	// 		this.dropTables( id ).
+	// 			then( this.getFields ).then( ( fieldList: DimeMatrixField[] ) => {
+	// 				let createQuery: string; createQuery = '';
+	// 				createQuery += 'CREATE TABLE MATRIX' + id + '_MATRIXTBL (';
+	// 				createQuery += 'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, ';
+	// 				createQuery += fieldList.map( curField => curField.name + ' VARCHAR(1024)' ).join( ',' );
+	// 				createQuery += ', PRIMARY KEY (id) )';
+	// 				// console.log( fieldList );
+	// 				console.log( createQuery );
+	// 				this.db.query( createQuery, ( err, result, fields ) => {
+	// 					if ( err ) {
+	// 						reject( err );
+	// 					} else {
+	// 						resolve( { result: 'OK' } );
+	// 					}
+	// 				} );
+	// 			} ).
+	// 			catch( reject );
+	// 	} );
+	// }
 	public dropTables = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DROP TABLE IF EXISTS ??', 'MATRIX' + id + '_MATRIXTBL', ( err, result, fields ) => {
@@ -141,7 +113,7 @@ export class DimeMatrixTool {
 				}
 			} );
 		} );
-	};
+	}
 	public saveMatrixTuple = ( refObj: { id: number, matrixEntry: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			console.log( refObj );
@@ -175,7 +147,7 @@ export class DimeMatrixTool {
 			// console.log( saverFields );
 			// reject( 'Not yet' );
 		} );
-	};
+	}
 	public getMatrixTable = ( refObj: { id: number, filters: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			let selectQuery: string; selectQuery = '';
@@ -184,7 +156,7 @@ export class DimeMatrixTool {
 					reject( err );
 				} else {
 					const matrixTable = 'MATRIX' + refObj.id + '_MATRIXTBL';
-					selectQuery += 'SELECT * FROM ('
+					selectQuery += 'SELECT * FROM (';
 					selectQuery += '\tSELECT \n\t\t' + matrixTable + '.id';
 					result.forEach( ( curTuple: any ) => {
 						const descTable = 'STREAM' + curTuple.stream + '_DESCTBL' + curTuple.streamFieldID;
@@ -236,5 +208,5 @@ export class DimeMatrixTool {
 				}
 			} );
 		} );
-	};
+	}
 }

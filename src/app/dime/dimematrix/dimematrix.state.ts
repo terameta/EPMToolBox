@@ -1,11 +1,11 @@
-import { DimeMatrix, DimeMatrixDetail } from '../../../../shared/model/dime/matrix';
+import { DimeMatrix, DimeMatrixObject } from '../../../../shared/model/dime/matrix';
 
 export interface DimeMatrixState {
-	items: { [key: number]: DimeMatrix }
-	curItem: DimeMatrixDetail
+	items: DimeMatrixObject
+	curItem: DimeMatrix
 }
 
 export const dimeMatrixInitialState: DimeMatrixState = {
-	items: [],
-	curItem: <DimeMatrixDetail>{}
+	items: {},
+	curItem: <DimeMatrix>{ id: 0, fields: {} }
 };

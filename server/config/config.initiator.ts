@@ -46,6 +46,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then( version0048to0049 ).then( version0049to0050 ).
 		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).
 		then( version0055to0056 ).then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).
+		then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -55,6 +56,68 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( clearResidue );
 }
 
+const version0063to0064 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 63;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'matrices', 'tags TEXT NULL AFTER fields' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
+
+const version0062to0063 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 62;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'matrices', 'fields TEXT NULL AFTER stream' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
+
+const version0061to0062 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 61;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'maps', 'tags TEXT NULL AFTER target' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
+
+const version0060to0061 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 60;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'DROP TABLE matrixfields', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
 const version0059to0060 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 59;
@@ -71,7 +134,7 @@ const version0059to0060 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0058to0059 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -89,7 +152,7 @@ const version0058to0059 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0057to0058 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -107,7 +170,7 @@ const version0057to0058 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0056to0057 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -122,7 +185,7 @@ const version0056to0057 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0055to0056 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -137,10 +200,10 @@ const version0055to0056 = ( currentVersion: number ) => {
 				} else {
 					resolve( utils.updateToVersion( nextVersion ) );
 				}
-			} )
+			} );
 		}
 	} );
-}
+};
 
 const version0054to0055 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -155,7 +218,7 @@ const version0054to0055 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0053to0054 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -170,10 +233,10 @@ const version0053to0054 = ( currentVersion: number ) => {
 				} else {
 					resolve( utils.updateToVersion( nextVersion ) );
 				}
-			} )
+			} );
 		}
 	} );
-}
+};
 
 const version0052to0053 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -188,10 +251,10 @@ const version0052to0053 = ( currentVersion: number ) => {
 				} else {
 					resolve( utils.updateToVersion( nextVersion ) );
 				}
-			} )
+			} );
 		}
 	} );
-}
+};
 
 const version0051to0052 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -206,10 +269,10 @@ const version0051to0052 = ( currentVersion: number ) => {
 				} else {
 					resolve( utils.updateToVersion( nextVersion ) );
 				}
-			} )
+			} );
 		}
 	} );
-}
+};
 
 const version0050to0051 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -224,7 +287,7 @@ const version0050to0051 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0049to0050 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -242,7 +305,7 @@ const version0049to0050 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0048to0049 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -260,7 +323,7 @@ const version0048to0049 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0047to0048 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -289,7 +352,7 @@ const version0047to0048 = ( currentVersion: number ) => {
 										} else {
 											iResolve();
 										}
-									} )
+									} );
 								}
 							} );
 						} ) );
@@ -301,7 +364,7 @@ const version0047to0048 = ( currentVersion: number ) => {
 			} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0046to0047 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -316,7 +379,7 @@ const version0046to0047 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0045to0046 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -335,7 +398,7 @@ const version0045to0046 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0044to0045 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -350,7 +413,7 @@ const version0044to0045 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0043to0044 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -365,7 +428,7 @@ const version0043to0044 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0042to0043 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -383,7 +446,7 @@ const version0042to0043 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0041to0042 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -428,7 +491,7 @@ const version0041to0042 = ( currentVersion: number ) => {
 			} );
 		}
 	} );
-}
+};
 
 const version0040to0041 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -443,7 +506,7 @@ const version0040to0041 = ( currentVersion: number ) => {
 				} ).catch( reject );
 		}
 	} );
-}
+};
 
 const version0039to0040 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -459,7 +522,7 @@ const version0039to0040 = ( currentVersion: number ) => {
 				.catch( reject );
 		}
 	} );
-}
+};
 
 const version0038to0039 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -483,7 +546,7 @@ const version0038to0039 = ( currentVersion: number ) => {
 			resolve( utils.checkAndCreateTable( tableDef ).then( () => utils.updateToVersion( nextVersion ) ) );
 		}
 	} );
-}
+};
 
 const version0037to0038 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -504,7 +567,7 @@ const version0037to0038 = ( currentVersion: number ) => {
 			resolve( utils.checkAndCreateTable( tableDef ).then( () => utils.updateToVersion( nextVersion ) ) );
 		}
 	} );
-}
+};
 
 const version0036to0037 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -526,7 +589,7 @@ const version0036to0037 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0035to0036 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -545,7 +608,7 @@ const version0035to0036 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0034to0035 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -564,7 +627,7 @@ const version0034to0035 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0033to0034 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -593,7 +656,7 @@ const version0033to0034 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0032to0033 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -622,7 +685,7 @@ const version0032to0033 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0031to0032 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -651,7 +714,7 @@ const version0031to0032 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0030to0031 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -680,7 +743,7 @@ const version0030to0031 = ( currentVersion: number ) => {
 		}
 	} );
 
-}
+};
 
 const version0029to0030 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -1152,7 +1215,6 @@ const version0012to0013 = ( currentVersion: number ) => {
 			resolve( utils.checkAndCreateTable( tableDef ).then( () => utils.updateToVersion( nextVersion ) ) );
 		}
 	} );
-
 };
 
 const version0011to0012 = ( currentVersion: number ) => {
