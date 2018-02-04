@@ -3,3 +3,8 @@ export enum ATReadyStatus {
 	Ready = 1,
 	Checking = -1
 }
+
+export interface IsReadyPayload {
+	isready: ATReadyStatus,
+	issue?: string
+}

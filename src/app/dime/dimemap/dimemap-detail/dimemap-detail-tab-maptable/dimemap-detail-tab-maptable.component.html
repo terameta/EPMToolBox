@@ -16,8 +16,6 @@
 			<!--<button class="btn btn-default" type="button" title="Zen Mode" (click)="refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>-->
 		</div>
 	</div>
-	<!-- <div id="mapHotTable{{mainService.currentItem.id}}" (window:resize)="windowResized()"></div> -->
-
 	<hot-table [height]="hotTableHeight" fixedColumnsLeft="1" startRows="0" [settings]="mapSettings" [rowHeaders]="false" [colHeaders]="true" [columns]="mapColumns" [data]="mapData" (window:resize)="windowResized()" hotId="hotInstance"></hot-table>
 	<div class="overlay" *ngIf="filtersShown">
 		<form class="form-horizontal" (ngSubmit)="refreshMapTable()">

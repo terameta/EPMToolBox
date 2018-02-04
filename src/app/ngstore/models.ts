@@ -232,7 +232,8 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 							return DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action();
 						}
 						case 'matrix-detail/:id': {
-							return DimeMatrixActions.ONE.LOAD.INITIATE.action( paramset.params.id );
+							paramset.params.id = parseInt( paramset.params.id, 10 );
+							return DimeMatrixActions.ONE.LOAD.INITIATEIFEMPTY.action( paramset.params.id );
 						}
 						default: {
 							console.log( 'We are at matrices default' );

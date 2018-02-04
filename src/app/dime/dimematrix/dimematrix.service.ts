@@ -63,7 +63,7 @@ export class DimeMatrixService {
 	}
 
 	public prepareMatrixTables = () => {
-		console.log( 'We are now supposed to create the tables' );
+		this.store.dispatch( DimeMatrixActions.ONE.PREPARETABLES.action( this.currentItem.id ) );
 	}
 	/*
 		private resetCurItem = () => {

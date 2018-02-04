@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeTagService } from '../../../dimetag/dimetag.service';
+import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
 
 @Component( {
 	selector: 'app-dimematrix-detail-maindefinitions',
@@ -16,6 +17,7 @@ import { DimeTagService } from '../../../dimetag/dimetag.service';
 	styleUrls: ['./dimematrix-detail-maindefinitions.component.css']
 } )
 export class DimematrixDetailMaindefinitionsComponent implements OnInit, OnDestroy {
+	public atReadyStatus = ATReadyStatus;
 
 	constructor(
 		private state: Store<AppState>,

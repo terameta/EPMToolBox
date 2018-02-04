@@ -21,10 +21,11 @@ export class ApiDimeMatrix {
 	}
 
 	private setRoutes = () => {
-		this.apiRoutes.get( '/fields/:id', ( req, res ) => { this.rester.respond( this.matrixTool.getFields, req.params.id, req, res ); } );
-		this.apiRoutes.put( '/fields', ( req, res ) => { this.rester.respond( this.matrixTool.setFields, req.body, req, res ); } );
+		// this.apiRoutes.get( '/fields/:id', ( req, res ) => { this.rester.respond( this.matrixTool.getFields, req.params.id, req, res ); } );
+		// this.apiRoutes.put( '/fields', ( req, res ) => { this.rester.respond( this.matrixTool.setFields, req.body, req, res ); } );
+		this.apiRoutes.get( '/isReady/:id', ( req, res ) => { this.rester.respond( this.matrixTool.isReady, req.params.id, req, res ); } );
 		this.apiRoutes.get( '/prepareTables/:id', ( req, res ) => { this.rester.respond( this.matrixTool.prepareTables, req.params.id, req, res ); } );
 		this.apiRoutes.post( '/getMatrixTable', ( req, res ) => { this.rester.respond( this.matrixTool.getMatrixTable, req.body, req, res ); } );
 		this.apiRoutes.post( '/saveMatrixTuple', ( req, res ) => { this.rester.respond( this.matrixTool.saveMatrixTuple, req.body, req, res ); } );
-	};
+	}
 }

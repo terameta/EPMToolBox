@@ -59,10 +59,35 @@ export class DimeMatrixEffects {
 				.mergeMap( resp => {
 					return [
 						DimeMatrixActions.ONE.LOAD.COMPLETE.action( resp ),
+						DimeMatrixActions.ONE.ISREADY.INITIATE.action( action.payload ),
 						DimeStreamActions.ALL.LOAD.initiateifempty(),
 						DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
 					];
 				} );
+		} );
+
+	@Effect() ONE_LOAD_INITIATEIFEMPTY$ = this.actions$
+		.ofType( DimeMatrixActions.ONE.LOAD.INITIATEIFEMPTY.type )
+		.map( action => Object.assign( <Action<number>>{}, action ) )
+		.withLatestFrom( this.state$ )
+		.filter( ( [action, state] ) => ( !state.dimeMatrix.curItem || state.dimeMatrix.curItem.id === 0 || state.dimeMatrix.curItem.id !== action.payload ) )
+		.map( ( [action, state] ) => action )
+		.switchMap( action => DimeMatrixActions.ONE.LOAD.INITIATE.observableaction( action.payload ) );
+
+	@Effect() ONE_ISREADY_INITIATE$ = this.actions$
+		.ofType( DimeMatrixActions.ONE.ISREADY.INITIATE.type )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.isready( action.payload )
+				.map( resp => DimeMatrixActions.ONE.ISREADY.COMPLETE.action( resp ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_PREPARETABLES_INITIATE$ = this.actions$
+		.ofType( DimeMatrixActions.ONE.PREPARETABLES.type )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.prepareTables( action.payload )
+				.map( resp => DimeMatrixActions.ONE.ISREADY.INITIATE.observableaction( action.payload ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_DELETE_INITIATE$ = this.actions$
@@ -88,5 +113,10 @@ export class DimeMatrixEffects {
 			} );
 		} );
 
-	constructor( private actions$: Actions, private state$: Store<AppState>, private backend: DimeMatrixBackend, private router: Router ) { }
+	constructor(
+		private actions$: Actions,
+		private state$: Store<AppState>,
+		private backend: DimeMatrixBackend,
+		private router: Router
+	) { }
 }

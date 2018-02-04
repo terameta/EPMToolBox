@@ -1,4 +1,5 @@
 import { DimeMatrix, DimeMatrixObject } from '../../../../shared/model/dime/matrix';
+import { ATReadyStatus } from '../../../../shared/enums/generic/readiness';
 
 export interface DimeMatrixState {
 	items: DimeMatrixObject
@@ -7,5 +8,5 @@ export interface DimeMatrixState {
 
 export const dimeMatrixInitialState: DimeMatrixState = {
 	items: {},
-	curItem: <DimeMatrix>{ id: 0, fields: {} }
+	curItem: <DimeMatrix>{ id: 0, fields: {}, tags: {}, isReady: ATReadyStatus.Checking }
 };
