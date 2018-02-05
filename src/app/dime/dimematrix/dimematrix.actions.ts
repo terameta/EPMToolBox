@@ -1,4 +1,4 @@
-import { DimeMatrix } from '../../../../shared/model/dime/matrix';
+import { DimeMatrix, DimeMatrixRefreshPayload } from '../../../../shared/model/dime/matrix';
 import { Action, actionFactory } from '../../ngstore/ngrx.generators';
 import { IsReadyPayload } from '../../../../shared/enums/generic/readiness';
 
@@ -32,6 +32,10 @@ export const DimeMatrixActions = {
 			INITIATE: actionFactory<number>( 'DIME_MATRIX_ACTIONS_ONE_ISREADY_INITIATE' ),
 			COMPLETE: actionFactory<IsReadyPayload>( 'DIME_MATRIX_ACTIONS_ONE_ISREADY_COMPLETE' )
 		},
-		PREPARETABLES: actionFactory<number>( 'DIME_MATRIX_ACTIONS_ONE_PREPARETABLES' )
+		PREPARETABLES: actionFactory<number>( 'DIME_MATRIX_ACTIONS_ONE_PREPARETABLES' ),
+		REFRESH: {
+			INITIATE: actionFactory<DimeMatrixRefreshPayload>( 'DIME_MATRIX_ACTIONS_ONE_REFRESH_INITIATE' ),
+			COMPLETE: actionFactory<any[]>( 'DIME_MATRIX_ACTIONS_ONE_REFRESH_COMPLETE' )
+		}
 	}
 };

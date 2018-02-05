@@ -45,7 +45,6 @@ export class AuthService {
 	}
 
 	get authenticated() {
-		console.log( !this.jwtHelper.isTokenExpired() );
 		return !this.jwtHelper.isTokenExpired();
 	}
 

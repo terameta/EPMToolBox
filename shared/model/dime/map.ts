@@ -1,4 +1,5 @@
 import { ATReadyStatus } from '../../enums/generic/readiness';
+import { DimeFieldDescription } from './fielddescription';
 
 export interface DimeMap {
 	id: number,
@@ -19,7 +20,7 @@ export interface DimeMapField {
 	map: number,
 	srctar: 'source' | 'target',
 	name: string,
-	descriptions: { RefField: string, Description: string }[]
+	descriptions: DimeFieldDescription[]
 }
 
 export interface DimeMapRefreshPayload {

@@ -8,7 +8,7 @@ import { DimeMatrixBackend } from './dimematrix.backend';
 import { Router } from '@angular/router';
 import { of } from 'rxjs/observable/of';
 import { DimeStreamActions } from '../dimestream/dimestream.actions';
-import { DimeMatrix } from '../../../../shared/model/dime/matrix';
+import { DimeMatrix, DimeMatrixRefreshPayload } from '../../../../shared/model/dime/matrix';
 import { Action } from '../../ngstore/ngrx.generators';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
@@ -86,7 +86,7 @@ export class DimeMatrixEffects {
 		.ofType( DimeMatrixActions.ONE.PREPARETABLES.type )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.prepareTables( action.payload )
-				.map( resp => DimeMatrixActions.ONE.ISREADY.INITIATE.observableaction( action.payload ) )
+				.map( resp => DimeMatrixActions.ONE.ISREADY.INITIATE.action( action.payload ) )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
@@ -111,6 +111,14 @@ export class DimeMatrixEffects {
 					DimeMatrixActions.ONE.LOAD.INITIATE.action( action.payload.id )
 				];
 			} );
+		} );
+
+	@Effect() ONE_REFRESH_INITIATE$ = this.actions$
+		.ofType( DimeMatrixActions.ONE.REFRESH.INITIATE.type )
+		.switchMap( ( action: Action<DimeMatrixRefreshPayload> ) => {
+			return this.backend.matrixRefresh( action.payload )
+				.map( ( resp: any[] ) => DimeMatrixActions.ONE.REFRESH.COMPLETE.action( resp ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	constructor(

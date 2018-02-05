@@ -8,5 +8,5 @@ export interface DimeMatrixState {
 
 export const dimeMatrixInitialState: DimeMatrixState = {
 	items: {},
-	curItem: <DimeMatrix>{ id: 0, fields: {}, tags: {}, isReady: ATReadyStatus.Checking }
+	curItem: <DimeMatrix>{ id: 0, fields: {}, fieldDescriptions: {}, tags: {}, isReady: ATReadyStatus.Checking, matrixData: [] }
 };

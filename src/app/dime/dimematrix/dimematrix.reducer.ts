@@ -19,6 +19,12 @@ export function dimeMatrixReducer( state: DimeMatrixState, action: Action<any> )
 		case DimeMatrixActions.ONE.ISREADY.COMPLETE.type: {
 			return handleOneIsReadyComplete( state, action );
 		}
+		case DimeMatrixActions.ONE.REFRESH.INITIATE.type: {
+			return handleOneRefreshInitiate( state, action );
+		}
+		case DimeMatrixActions.ONE.REFRESH.COMPLETE.type: {
+			return handleOneRefreshComplete( state, action );
+		}
 		default: {
 			return state;
 		}
@@ -47,5 +53,19 @@ const handleOneIsReadyComplete = ( state: DimeMatrixState, action: Action<IsRead
 	const newState: DimeMatrixState = Object.assign( {}, state );
 	newState.curItem.isReady = action.payload.isready;
 	newState.curItem.notReadyReason = action.payload.issue;
+	return newState;
+};
+
+const handleOneRefreshInitiate = ( state: DimeMatrixState, action: Action ): DimeMatrixState => {
+	const newState: DimeMatrixState = Object.assign( {}, state );
+	newState.curItem.matrixData = [];
+	newState.curItem.isMatrixDataRefreshing = true;
+	return newState;
+};
+
+const handleOneRefreshComplete = ( state: DimeMatrixState, action: Action<any[]> ): DimeMatrixState => {
+	const newState: DimeMatrixState = Object.assign( {}, state );
+	newState.curItem.matrixData = action.payload;
+	newState.curItem.isMatrixDataRefreshing = false;
 	return newState;
 };

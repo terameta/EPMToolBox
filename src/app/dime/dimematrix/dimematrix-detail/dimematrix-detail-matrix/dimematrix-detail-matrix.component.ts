@@ -1,9 +1,15 @@
 import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMatrixService } from '../../dimematrix.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
-// import * as Handsontable from 'handsontable/dist/handsontable.full.js';
-// import { HotTable } from 'ng2-handsontable';
 import { ToastrService } from 'ngx-toastr';
+import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
+import Handsontable from 'handsontable';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../ngstore/models';
+import { HotRegisterer } from 'angular-handsontable';
+import * as _ from 'lodash';
+import { DimeFieldDescription } from '../../../../../../shared/model/dime/fielddescription';
+import { DimeMatrixActions } from '../../dimematrix.actions';
 
 @Component( {
 	selector: 'app-dimematrix-detail-matrix',
@@ -11,41 +17,221 @@ import { ToastrService } from 'ngx-toastr';
 	styleUrls: ['./dimematrix-detail-matrix.component.css']
 } )
 export class DimematrixDetailMatrixComponent implements OnInit {
+	public atReadyStatus = ATReadyStatus;
 
-	// private columns: any[];
-	// private colHeaders: string[];
-	// private options: any;
-	// private dataObject;
+	public numberofRowsinMatrix: string;
+	public hotTableHeight = 250;
+	public currentItemID = 0;
+	public filtersShown = false;
+	public sortersShown = false;
+	public filters: any[] = [];
+	public availableSorters = [];
+	public activeSorters = [];
 
-	// private hot: Handsontable;
+	public matrixSettings;
+	public matrixColumns: any[] = [];
+	public matrixData: any[] = [];
 
-	// private filterChangeWaiter: any;
-
-	// @ViewChild( HotTable ) hotTableComponent;
-
-
-	// private hotElement;
-	// private hotElementContainer;
-	// private hotSettings;
-	// private hotInstance: any;
-	// private rowHeaders: string[];
-	// private filterOptions: string[];
-	// private fieldDescriptions: any;
+	private instance = 'hotMatrixInstance';
+	private hotInstance: Handsontable;
+	private invalidRows: number[] = [];
 
 	constructor(
 		public mainService: DimeMatrixService,
-		// private toastr: ToastrService,
-		// private streamService: DimeStreamService
+		private toastr: ToastrService,
+		private streamService: DimeStreamService,
+		private store: Store<AppState>,
+		private hotRegisterer: HotRegisterer
 	) {
-		// this.filterOptions = ['Exact Match', 'Contains', 'Begins with', 'Ends with'];
+		this.numberofRowsinMatrix = 'Rows: initiating...';
+
+		this.store.select( 'dimeMatrix' ).subscribe( currentState => {
+			if ( currentState.curItem.id !== this.currentItemID ) {
+				this.currentItemID = currentState.curItem.id;
+				this.getReady();
+			}
+			this.matrixData = currentState.curItem.matrixData;
+			if ( !this.matrixData ) { this.matrixData = []; }
+			this.numberofRowsinMatrix = 'Rows: ' + this.matrixData.length;
+			if ( currentState.curItem.isMatrixDataRefreshing ) {
+				this.numberofRowsinMatrix = 'Please wait, refreshing the data...';
+			}
+			this.hotInstance = this.hotRegisterer.getInstance( this.instance );
+		} );
 	}
 
 	ngOnInit() {
-		// this.getReady();
+		this.windowResized();
+		this.prepareSettings();
 	}
-
 	public windowResized = () => {
-		console.log( 'Window is resized' );
+		this.hotTableHeight = window.innerHeight - 320;
+		if ( this.hotTableHeight < 100 ) {
+			this.hotTableHeight = 100;
+		}
+	}
+	private getReady = () => {
+		this.waitUntilItemIsReady()
+			.then( this.prepareFilters )
+			.then( this.prepareAvailableSorters )
+			.then( this.prepareColumns )
+			.then( this.prepareDescriptions )
+			.then( this.prepareDropdowns )
+			.then( this.prepareSettings )
+			.then( this.refreshMatrixTable )
+			.catch( console.error );
+	}
+	private waitUntilItemIsReady = () => {
+		return new Promise( ( resolve, reject ) => {
+			if ( !this.mainService.currentItem
+				|| _.values( this.mainService.currentItem.fields ).filter( value => value ) === 0
+				|| !this.streamService.itemObject[this.mainService.currentItem.stream]
+			) {
+				setTimeout( () => {
+					resolve( this.waitUntilItemIsReady() );
+				}, 300 );
+			} else {
+				resolve();
+			}
+		} );
+	}
+	private prepareFilters = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.filters = [];
+			this.streamService.itemObject[this.mainService.currentItem.stream].fieldList
+				.filter( currentStreamField => this.mainService.currentItem.fields[currentStreamField.id] )
+				.forEach( currentStreamField => {
+					this.filters.push( { name: currentStreamField.name, type: 'is', value: '', isDescribed: currentStreamField.isDescribed } );
+				} );
+			resolve();
+		} );
+	}
+	private prepareAvailableSorters = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.availableSorters = [];
+			this.activeSorters = [];
+			this.streamService.itemObject[this.mainService.currentItem.stream].fieldList
+				.filter( currentStreamField => this.mainService.currentItem.fields[currentStreamField.id] )
+				.forEach( currentStreamField => {
+					this.availableSorters.push( { name: currentStreamField.name, isAsc: true, label: currentStreamField.name } );
+				} );
+			resolve();
+		} );
+	}
+	private prepareColumns = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.matrixColumns = [];
+			let currentColumn: any;
+			this.matrixColumns.push( { data: 'id', type: 'text', readOnly: true, title: 'ID' } );
+			this.streamService.itemObject[this.mainService.currentItem.stream].fieldList
+				.filter( currentStreamField => this.mainService.currentItem.fields[currentStreamField.id] )
+				.forEach( currentStreamField => {
+					currentColumn = {};
+					currentColumn.data = currentStreamField.name;
+					currentColumn.type = 'text';
+					currentColumn.title = currentStreamField.name;
+					this.matrixColumns.push( currentColumn );
+					if ( currentStreamField.isDescribed ) {
+						currentColumn = {};
+						currentColumn.data = currentStreamField.name + '_DESC';
+						currentColumn.title = currentStreamField.name + ' Description';
+						currentColumn.type = 'text';
+						currentColumn.readOnly = true;
+						this.matrixColumns.push( currentColumn );
+					}
+				} );
+			resolve();
+		} );
+	}
+	private prepareDescriptions = () => {
+		return new Promise( ( resolve, reject ) => {
+			const promises = [];
+			this.streamService.itemObject[this.mainService.currentItem.stream].fieldList
+				.filter( currentStreamField => this.mainService.currentItem.fields[currentStreamField.id] )
+				.forEach( currentStreamField => {
+					promises.push( this.prepareDescriptionsAction( currentStreamField.stream, currentStreamField.id ) );
+				} );
+			Promise.all( promises ).then( resolve ).catch( reject );
+		} );
+	}
+	private prepareDescriptionsAction = ( stream: number, field: number ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.streamService.fetchFieldDescriptions( stream, field ).subscribe( ( result: DimeFieldDescription[] ) => {
+				this.mainService.currentItem.fieldDescriptions[field] = result;
+				this.mainService.currentItem.fieldDescriptions[field].push( { RefField: 'ignore', Description: 'ignore' } );
+				this.mainService.currentItem.fieldDescriptions[field].push( { RefField: 'missing', Description: 'missing' } );
+				resolve();
+			}, ( error ) => {
+				reject( error );
+			} );
+		} );
+	}
+	private prepareDropdowns = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.streamService.itemObject[this.mainService.currentItem.stream].fieldList
+				.filter( currentStreamField => this.mainService.currentItem.fields[currentStreamField.id] )
+				.forEach( currentStreamField => {
+					let columnIndex: number;
+					this.matrixColumns
+						.forEach( ( currentColumn, currentIndex ) => {
+							if ( currentColumn.data === currentStreamField.name ) {
+								columnIndex = currentIndex;
+							}
+						} );
+					this.matrixColumns[columnIndex].type = 'autocomplete';
+					this.matrixColumns[columnIndex].strict = true;
+					this.matrixColumns[columnIndex].allowInvalid = true;
+					this.matrixColumns[columnIndex].source = [];
+					this.mainService.currentItem.fieldDescriptions[currentStreamField.id].forEach( currentDescription => {
+						this.matrixColumns[columnIndex].source.push( currentDescription.RefField + '::' + currentDescription.Description );
+					} );
+					this.matrixColumns[columnIndex].validator = ( query, callback ) => {
+						let isValid = false;
+						if ( this.mainService.currentItem.fieldDescriptions[currentStreamField.id].findIndex( element => element.RefField === query ) >= 0 ) {
+							isValid = true;
+						}
+						if ( this.mainService.currentItem.fieldDescriptions[currentStreamField.id].findIndex( element => element.RefField + '::' + element.Description === query ) >= 0 ) {
+							isValid = true;
+						}
+						callback( isValid );
+					};
+				} );
+			resolve();
+		} );
+	}
+	private prepareSettings = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.matrixSettings = {
+				colHeaders: true,
+				rowHeaders: false,
+				stretchH: 'all',
+				manualColumnResize: true,
+				manualColumnMove: true,
+				fixedColumnsLeft: 1
+				// afterChange: this.hotAfterChange,
+				// afterValidate: this.hotAfterValidate,
+				// afterOnCellMouseDown: this.hotAfterOnCellMouseDown
+			};
+			resolve();
+		} );
+	}
+	public refreshMatrixTable = () => {
+		this.filtersShown = false;
+		this.sortersShown = false;
+		this.numberofRowsinMatrix = 'Please wait, refreshing the data...';
+		this.matrixData = [];
+		this.store.dispatch( DimeMatrixActions.ONE.REFRESH.INITIATE.action( { id: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ) );
+	}
+	public addToActiveSorters = ( index: number ) => {
+		this.activeSorters.push( this.availableSorters.splice( index, 1 )[0] );
+	}
+	public removeFromActiveSorters = ( index: number ) => {
+		this.availableSorters.push( this.activeSorters.splice( index, 1 )[0] );
+	}
+	public swapActiveSorters = ( from: number, to: number ) => {
+		const temp = this.activeSorters[to];
+		this.activeSorters[to] = this.activeSorters[from];
+		this.activeSorters[from] = temp;
 	}
 	/*
 		private getReady = () => {

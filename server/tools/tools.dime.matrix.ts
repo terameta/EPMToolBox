@@ -1,10 +1,11 @@
-import { DimeMatrix } from '../../shared/model/dime/matrix';
+import { DimeMatrix, DimeMatrixRefreshPayload } from '../../shared/model/dime/matrix';
 import * as async from 'async';
 import { MainTools } from './tools.main';
 import { Pool } from 'mysql';
 import { ATReadyStatus, IsReadyPayload } from '../../shared/enums/generic/readiness';
 import * as _ from 'lodash';
 import { StreamTools } from './tools.dime.stream';
+import { DimeStreamField } from '../../shared/model/dime/streamfield';
 
 export class DimeMatrixTool {
 	private streamTool: StreamTools;
@@ -97,16 +98,16 @@ export class DimeMatrixTool {
 					return this.streamTool.getOne( matrix.stream );
 				} )
 				.then( ( stream ) => {
-					console.log( stream );
-					console.log( matrix );
+					// console.log( stream );
+					// console.log( matrix );
 					const fieldsToMatrix = stream.fieldList.filter( field => matrix.fields[field.id] ).map( field => ( { id: field.id, name: field.name } ) );
-					console.log( fieldsToMatrix );
+					// console.log( fieldsToMatrix );
 					let createQuery = '';
 					createQuery += 'CREATE TABLE MATRIX' + id + '_MATRIXTBL (';
 					createQuery += 'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, \n';
 					createQuery += fieldsToMatrix.map( curField => curField.name + ' VARCHAR(1024)' ).join( ', \n' );
 					createQuery += ', PRIMARY KEY (id) )';
-					console.log( createQuery );
+					// console.log( createQuery );
 					this.db.query( createQuery, ( err, result, fields ) => {
 						if ( err ) {
 							reject( err );
@@ -218,65 +219,115 @@ export class DimeMatrixTool {
 			// reject( 'Not yet' );
 		} );
 	}
-	public getMatrixTable = ( refObj: { id: number, filters: any } ) => {
+	public getMatrixTable = ( payload: DimeMatrixRefreshPayload ) => {
+		return this.getMatrixTableAction( payload ).then( ( result ) => result.matrixData );
+	}
+	public getMatrixTableAction = ( payload: DimeMatrixRefreshPayload ): Promise<DimeMatrix> => {
 		return new Promise( ( resolve, reject ) => {
-			let selectQuery: string; selectQuery = '';
-			this.db.query( 'SELECT * FROM matrixfields WHERE matrix = ? AND isAssigned = 1 ORDER BY fOrder', refObj.id, ( err, result, fields ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					const matrixTable = 'MATRIX' + refObj.id + '_MATRIXTBL';
-					selectQuery += 'SELECT * FROM (';
+			let matrix: DimeMatrix;
+			let fields: DimeStreamField[];
+			this.getOne( payload.id )
+				.then( resMatrix => {
+					matrix = resMatrix;
+					return this.streamTool.retrieveFields( matrix.stream );
+				} )
+				.then( ( resFields: DimeStreamField[] ) => {
+					fields = resFields.filter( field => matrix.fields[field.id] );
+					const matrixTable = 'MATRIX' + payload.id + '_MATRIXTBL';
+					let selectQuery: string;
+					selectQuery = 'SELECT * FROM (\n';
 					selectQuery += '\tSELECT \n\t\t' + matrixTable + '.id';
-					result.forEach( ( curTuple: any ) => {
-						const descTable = 'STREAM' + curTuple.stream + '_DESCTBL' + curTuple.streamFieldID;
+					fields.forEach( field => {
+						const descTable = 'STREAM' + field.stream + '_DESCTBL' + field.id;
 						selectQuery += ',\n\t\t';
-						selectQuery += matrixTable + '.' + curTuple.name;
-						if ( curTuple.isDescribed ) {
-							selectQuery += ',\n\t';
-							selectQuery += descTable + '.Description AS ' + curTuple.name + '_DESC';
+						selectQuery += matrixTable + '.' + field.name;
+						if ( field.isDescribed ) {
+							selectQuery += ',\n\t\t';
+							selectQuery += descTable + '.Description AS ' + field.name + '_DESC';
 						}
 					} );
-					selectQuery += '\nFROM \n\tMATRIX' + refObj.id + '_MATRIXTBL';
-					result.forEach( ( curTuple: any ) => {
-						const descTable = 'STREAM' + curTuple.stream + '_DESCTBL' + curTuple.streamFieldID;
+					selectQuery += '\tFROM ' + matrixTable;
+					fields.filter( field => field.isDescribed ).forEach( field => {
+						const descTable = 'STREAM' + field.stream + '_DESCTBL' + field.id;
 						selectQuery += '\n\tLEFT JOIN ' + descTable;
-						selectQuery += ' ON ' + descTable + '.RefField = ' + matrixTable + '.' + curTuple.name;
+						selectQuery += ' ON ' + descTable + '.RefField = ' + matrixTable + '.' + field.name;
 					} );
-					let wherers: string[]; wherers = [];
-					let wherevals: any[]; wherevals = [];
-					Object.keys( refObj.filters ).forEach( ( curFilter ) => {
-						let filterText: string; filterText = curFilter;
-						if ( refObj.filters[curFilter].type === 'Exact Match' ) {
-							filterText += ' = ?';
-							wherevals.push( refObj.filters[curFilter].value );
-						} else if ( refObj.filters[curFilter].type === 'Contains' ) {
-							filterText += ' LIKE ?';
-							wherevals.push( '%' + refObj.filters[curFilter].value + '%' );
-						} else if ( refObj.filters[curFilter].type === 'Begins with' ) {
-							filterText += ' LIKE ?';
-							wherevals.push( refObj.filters[curFilter].value + '%' );
-						} else if ( refObj.filters[curFilter].type === 'Ends with' ) {
-							filterText += ' LIKE ?';
-							wherevals.push( '%' + refObj.filters[curFilter].value );
+					selectQuery += '\n) AS FSQMATRIXDESCRIBED';
+					const wherers: string[] = [];
+					const wherevals: any[] = [];
+					if ( payload.filters ) {
+						payload.filters.forEach( filter => {
+							if ( filter.value ) {
+								switch ( filter.type ) {
+									case 'is': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.name + ' = ? OR ' + filter.name + '_DESC = ?)' );
+											wherevals.push( filter.value );
+											wherevals.push( filter.value );
+										} else {
+											wherers.push( filter.name + ' = ?' );
+											wherevals.push( filter.value );
+										}
+										break;
+									}
+									case 'co': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
+											wherevals.push( filter.value );
+											wherevals.push( filter.value );
+										} else {
+											wherers.push( filter.name + ' LIKE ?' );
+											wherevals.push( '%' + filter.value + '%' );
+										}
+										break;
+									}
+									case 'bw': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
+											wherevals.push( filter.value );
+											wherevals.push( filter.value );
+										} else {
+											wherers.push( filter.name + ' LIKE ?' );
+											wherevals.push( filter.value + '%' );
+										}
+										break;
+									}
+									case 'ew': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
+											wherevals.push( filter.value );
+											wherevals.push( filter.value );
+										} else {
+											wherers.push( filter.name + ' LIKE ?' );
+											wherevals.push( '%' + filter.value );
+										}
+										break;
+									}
+								}
+							}
+						} );
+					}
+					if ( wherers.length > 0 ) {
+						selectQuery += ' \nWHERE\n\t';
+						selectQuery += wherers.join( '\n\tAND ' );
+					}
+					if ( payload.sorters ) {
+						if ( payload.sorters.length > 0 ) {
+							selectQuery += ' \nORDER BY';
+							selectQuery += payload.sorters
+								.map( sorter => ( '\n\t' + sorter.name + ' ' + ( sorter.isAsc ? 'ASC' : 'DESC' ) ) )
+								.join( ', ' );
 						}
-						wherers.push( filterText );
-
-					} );
-					selectQuery += '\n) MATRIXDESCRIBED WHERE 1 = 1';
-					wherers.forEach( ( curWhere: string ) => {
-						selectQuery += '\n\tAND ';
-						selectQuery += curWhere;
-					} );
-					this.db.query( selectQuery, wherevals, ( mErr, mResult, mFields ) => {
-						if ( mErr ) {
-							reject( mErr );
+					}
+					this.db.query( selectQuery, wherevals, ( err, rows, resfields ) => {
+						if ( err ) {
+							reject( err );
 						} else {
-							resolve( mResult );
+							matrix.matrixData = rows;
+							resolve( matrix );
 						}
 					} );
-				}
-			} );
+				} );
 		} );
 	}
 }

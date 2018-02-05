@@ -39,22 +39,6 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	private instance = 'hotInstance';
 	private hotInstance: Handsontable;
 	private invalidRows: number[] = [];
-	// private columns: any[];
-	// private colHeaders: string[];
-	// private options: any;
-	// private dataObject;
-
-	// private hot: Handsontable;
-
-	// private filterChangeWaiter: any;
-
-	// private hotElement;
-	// private hotElementContainer;
-	// private hotSettings;
-	// private hotInstance: any;
-	// private rowHeaders: string[];
-	// private filterOptions: string[];
-	// private fieldDescriptions: any;
 
 	constructor(
 		public mainService: DimeMapService,
@@ -63,7 +47,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		private store: Store<AppState>,
 		private hotRegisterer: HotRegisterer
 	) {
-		this.numberofRowsinMap = '0';
+		this.numberofRowsinMap = 'Rows: initiating...';
 
 		this.store.select( 'dimeMap' ).subscribe( currentState => {
 			if ( currentState.curItem.id !== this.currentItemID ) {
@@ -354,7 +338,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				|| !this.mainService.currentItem.targetfields || this.mainService.currentItem.targetfields.length === 0
 				|| !this.streamService.itemObject[this.mainService.currentItem.target]
 			) {
-				setTimeout( () => { resolve( this.waitUntilItemIsReady() ); }, 1000 );
+				setTimeout( () => { resolve( this.waitUntilItemIsReady() ); }, 300 );
 			} else {
 				resolve();
 			}
@@ -366,12 +350,12 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			this.streamService.itemObject[this.mainService.currentItem.source].fieldList
 				.filter( currentStreamField => ( this.mainService.currentItem.sourcefields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
 				.forEach( currentStreamField => {
-					this.filters.source.push( { name: currentStreamField.name, type: 'is', value: '' } );
+					this.filters.source.push( { name: currentStreamField.name, type: 'is', value: '', isDescribed: currentStreamField.isDescribed } );
 				} );
 			this.streamService.itemObject[this.mainService.currentItem.target].fieldList
 				.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
 				.forEach( currentStreamField => {
-					this.filters.target.push( { name: currentStreamField.name, type: 'is', value: '' } );
+					this.filters.target.push( { name: currentStreamField.name, type: 'is', value: '', isDescribed: currentStreamField.isDescribed } );
 				} );
 			resolve();
 		} );

@@ -1,5 +1,5 @@
 import { of } from 'rxjs/observable/of';
-import { DimeMatrix } from '../../../../shared/model/dime/matrix';
+import { DimeMatrix, DimeMatrixRefreshPayload } from '../../../../shared/model/dime/matrix';
 import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -18,4 +18,5 @@ export class DimeMatrixBackend {
 	public oneUpdate = ( refObj: DimeMatrix ) => this.http.put( this.baseUrl, refObj );
 	public prepareTables = ( id: number ) => this.http.get( this.baseUrl + '/prepareTables/' + id );
 	public isready = ( id: number ) => this.http.get<IsReadyPayload>( this.baseUrl + '/isReady/' + id );
+	public matrixRefresh = ( payload: DimeMatrixRefreshPayload ) => this.http.post( this.baseUrl + '/matrixRefresh', payload );
 }

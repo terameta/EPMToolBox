@@ -1,3 +1,129 @@
-<!-- <div id="matrixHotTable{{mainService.curItem.id}}" (window:resize)="windowResized()"></div> -->
-We are here but the prepare tables doesn't work properly.
-<br> also we should have re-prepare button in place.
+<ng-container class="help-block" *ngIf="mainService.currentItem.isReady === atReadyStatus.Ready">
+	<div class="btn-toolbar" role="toolbar" style="margin-bottom: 2px;">
+		<div class="btn-group btn-group-xs" role="group">
+			<button class="btn btn-default" type="button">{{numberofRowsinMatrix}}</button>
+		</div>
+		<div class="btn-group btn-group-xs pull-right" role="group">
+			<button class="btn btn-default" type="button" title="Show/Hide Filters" (click)="filtersShown= !filtersShown">
+				<i class="fa fa-filter fa-fw"></i> Filters
+			</button>
+			<button class="btn btn-default" type="button" title="Show/Hide Sorters" (click)="sortersShown= !sortersShown">
+				<i class="fa fa-sort fa-fw"></i> Sort Orders
+			</button>
+			<button class="btn btn-default" type="button" title="Refresh Matrix" (click)="refreshMatrixTable()">
+				<i class="fa fa-refresh fa-fw"></i> Refresh
+			</button>
+		</div>
+	</div>
+	<hot-table [height]="hotTableHeight" [settings]="matrixSettings" [columns]="matrixColumns" [data]="matrixData" (window:resize)="windowResized()" hotId="hotMatrixInstance"></hot-table>
+	<div class="overlay" *ngIf="filtersShown">
+		<form class="form-horizontal" (ngSubmit)="refreshMatrixTable()">
+			<div class="box box-primary box-solid">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						<i class="fa fa-filter"></i> Filters
+					</h3>
+				</div>
+				<div class="box-body">
+					<div class="input-group" *ngFor="let field of filters">
+						<span class="input-group-addon" style="min-width:100px;max-width:100px;width:100px;text-align:left;">{{field.name}}</span>
+						<select name="fieldSRC{{field.name}}Type" id="fieldSRC{{field.name}}Type" [(ngModel)]="field.type" class="form-control">
+							<option value="is">is</option>
+							<option value="co">contains</option>
+							<option value="bw">begins with</option>
+							<option value="ew">ends with</option>
+						</select>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+						<input type="text" class="form-control" id="fieldSRC{{field.name}}Value" name="fieldSRC{{field.name}}Value" [(ngModel)]="field.value">
+					</div>
+				</div>
+				<div class="box-footer">
+					<button class="btn btn-success btn-xs" type="submit">
+						<i class="fa fa-save fa-fw"></i> Apply
+					</button>
+					<button class="btn btn-danger btn-xs" type="button" (click)="prepareFilters()">
+						<i class="fa fa-eraser fa-fw"></i> Clear Filters
+					</button>
+					<button class="btn btn-info btn-xs" type="button" (click)="filtersShown=false;">
+						<i class="fa fa-times fa-fw"></i> Cancel
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="overlay" *ngIf="sortersShown">
+		<form class="form-horizontal" (ngSubmit)="refreshMatrixTable()">
+			<div class="box box-primary box-solid">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						<i class="fa fa-sort"></i> Map Table Sort Orders
+					</h3>
+				</div>
+				<div class="box-body">
+					<div class="row">
+						<div class="col-xs-6">
+							<b>Available Sorter Fields</b>
+							<hr>
+							<ng-container *ngFor="let field of availableSorters; let i = index">
+								<div class="btn-group btn-group-xs" style="margin:4px 0;">
+									<button type="button" class="btn btn-default" (click)="addToActiveSorters(i)" style="width:200px;">Add {{field.label}}</button>
+								</div>
+								<br>
+							</ng-container>
+						</div>
+						<div class="col-xs-6">
+							<b>Active Sorter Fields</b>
+							<hr>
+							<ng-container *ngFor="let field of activeSorters; let i = index; let first = first; let last = last;">
+								<div class="btn-group btn-group-xs" style="margin:4px 0;">
+									<button type="button" class="btn btn-default" style="width:200px;">{{field.label}}</button>
+									<button type="button" class="btn btn-default" (click)="field.isAsc = !field.isAsc" *ngIf="field.isAsc">
+										<i class="fa fa-sort-amount-asc fa-fw"></i>
+									</button>
+									<button type="button" class="btn btn-default" (click)="field.isAsc = !field.isAsc" *ngIf="!field.isAsc">
+										<i class="fa fa-sort-amount-desc fa-fw"></i>
+									</button>
+									<button type="button" class="btn btn-default" *ngIf="!first" (click)="swapActiveSorters(i, i-1)">
+										<i class="fa fa-caret-up fa-fw"></i>
+									</button>
+									<button type="button" class="btn btn-default" *ngIf="first||last">
+										<i class="fa fa-fw"></i>
+									</button>
+									<button type="button" class="btn btn-default" *ngIf="!last" (click)="swapActiveSorters(i, i+1)">
+										<i class="fa fa-caret-down fa-fw"></i>
+									</button>
+									<button type="button" class="btn btn-default" (click)="removeFromActiveSorters(i)">
+										<i class="fa fa-times fa-fw"></i>
+									</button>
+								</div>
+								<br>
+							</ng-container>
+						</div>
+					</div>
+				</div>
+				<div class="box-footer">
+					<button class="btn btn-success btn-xs" type="submit">
+						<i class="fa fa-save fa-fw"></i> Apply
+					</button>
+					<button class="btn btn-danger btn-xs" type="button">
+						<i class="fa fa-eraser fa-fw"></i> Clear Sort Orders
+					</button>
+					<button class="btn btn-info btn-xs" type="button" (click)="sortersShown=false;">
+						<i class="fa fa-times fa-fw"></i> Cancel
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</ng-container>
+<span class="help-block" *ngIf="mainService.currentItem.isReady === atReadyStatus.Checking">
+	<div class="well well-warning well-sm">
+		Please wait, system is checking if the matrix is ready...
+	</div>
+</span>
+<span class="help-block" *ngIf="mainService.currentItem.isReady === atReadyStatus.NotReady">
+	<div class="alert alert-danger" role="alert">
+		This matrix definition is not ready for data entry.
+		<br> Issue: {{mainService.currentItem.notReadyReason}}
+	</div>
+</span>
