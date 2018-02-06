@@ -24,9 +24,15 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	public currentItemID = 0;
 	public filtersShown = false;
 	public sortersShown = false;
+	public addEntryShown = false;
 	public filters: any[] = [];
 	public availableSorters = [];
 	public activeSorters = [];
+
+	public newMatrixEntry: any = {};
+	public newMatrixEntryIssue = '';
+	public isNewMatrixEntryValid = false;
+	public isNewMatrixEntrySaving = false;
 
 	public matrixSettings;
 	public matrixColumns: any[] = [];
@@ -140,8 +146,41 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 						this.matrixColumns.push( currentColumn );
 					}
 				} );
+			this.matrixColumns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html', title: '<i class="fa fa-floppy-o fa-fw" title="Save Result"></i>', className: 'htCenter' } );
+			this.matrixColumns.push( { data: 'id', type: 'text', readOnly: true, renderer: this.hotDeleteRenderer, title: '<i class="fa fa-trash fa-fw" title="Click to Delete"></i>', className: 'htCenter' } );
 			resolve();
 		} );
+	}
+	private hotDeleteRenderer = ( instance, td, row, col, prop, value, cellProperties ) => {
+		// console.log( 'Renderer is called', td, row, col, prop, value, cellProperties );
+		td.innerHTML = '<i class="fa fa-trash fa-fw" style="color:red;cursor:pointer;" id="' + value + '"></i>';
+		td.className = 'htCenter';
+	}
+	private hotAfterOnCellMouseDown = ( event, cords, td ) => {
+		// console.log( event, cords, td );
+		if ( event.realTarget.className.toString().indexOf( 'fa-trash' ) >= 0 ) {
+			this.deleteTuple( event.realTarget.id );
+		}
+	}
+	public deleteTuple = ( id: number ) => {
+		setTimeout( () => {
+			this.deleteTupleAction( id );
+		}, 100 );
+	}
+	private deleteTupleAction = ( id: number ) => {
+		const verificationQuestion = 'Are you sure you want to delete ' + id + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.mainService.deleteMatrixTuple( id ).subscribe( result => {
+				this.toastr.success( 'Matrix entry is successfully deleted\nRefreshing the data table.' );
+				this.refreshMatrixTable();
+			}, error => {
+				this.toastr.error( 'Map entry deletion failed:\n' + error.message );
+				console.error( 'Map deletion failed' );
+				console.error( error );
+			} );
+		} else {
+			this.toastr.info( 'Matrix entry deletion is cancelled: ' + id );
+		}
 	}
 	private prepareDescriptions = () => {
 		return new Promise( ( resolve, reject ) => {
@@ -207,10 +246,11 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 				stretchH: 'all',
 				manualColumnResize: true,
 				manualColumnMove: true,
-				fixedColumnsLeft: 1
-				// afterChange: this.hotAfterChange,
-				// afterValidate: this.hotAfterValidate,
-				// afterOnCellMouseDown: this.hotAfterOnCellMouseDown
+				minSpareRows: 0,
+				fixedColumnsLeft: 1,
+				afterChange: this.hotAfterChange,
+				afterValidate: this.hotAfterValidate,
+				afterOnCellMouseDown: this.hotAfterOnCellMouseDown
 			};
 			resolve();
 		} );
@@ -232,6 +272,144 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 		const temp = this.activeSorters[to];
 		this.activeSorters[to] = this.activeSorters[from];
 		this.activeSorters[from] = temp;
+	}
+	private hotAfterValidate = ( isValid: boolean, value: any, row: number, prop: string | number, source: string ) => {
+		if ( !isValid ) {
+			if ( this.invalidRows.findIndex( element => element === row ) < 0 ) {
+				this.invalidRows.push( row );
+			}
+		} else {
+			const curIndex = this.invalidRows.findIndex( element => element === row );
+			if ( curIndex >= 0 ) {
+				this.invalidRows.splice( curIndex, 1 );
+			}
+		}
+	}
+	private hotAfterChange = ( changes: any[], source: string ) => {
+		// console.log( 'AfterChange' );
+		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
+			let changedRowNumber, changedFieldName, changedOldValue, changedNewValue, changedDataIndex, changedDataID, changedDataTuple, isChangeValid, changedFieldID;
+			changes.forEach( currentChange => {
+				changedRowNumber = currentChange[0];
+				changedFieldName = currentChange[1];
+				changedOldValue = currentChange[2];
+				changedNewValue = currentChange[3].toString().split( '::' );
+				// When we use the getDataAtRow, the first element in array is the ID.
+				changedDataID = this.hotInstance.getDataAtRow( changedRowNumber )[0];
+				changedDataIndex = this.matrixData.findIndex( element => element.id === changedDataID );
+				changedDataTuple = this.matrixData[changedDataIndex];
+				changedDataTuple[changedFieldName] = changedNewValue[0];
+				isChangeValid = ( this.invalidRows.findIndex( element => element === changedRowNumber ) < 0 );
+				if ( isChangeValid ) {
+					// Here we will attempt to show the description in the map table
+					// This description part is only put under if the changed cell is valid.
+					// This is because if the cell is not valid, we are not expecting a description to be found.
+					// Also, while validating, we are already traversing the descriptions list and don't want to repeat it here and take a hit in the performance.
+					if ( changedNewValue[1] ) {
+						// If the user is typing or selecting from the dropdown, hotTable automatically provides the member name and description together
+						// Since we are splitting the string with '::' and assigning it to changedNewValue array, if there is a second element in this array, this second element is the description
+						changedDataTuple[changedFieldName + '_DESC'] = changedNewValue[1];
+					} else {
+						// If the user is copy/pasting from somewhere else or even within the hotTable
+						// Description is not brought forward with the pasted cell.
+						// In this case the changedNewValue array doesn't have a second element.
+						// We should look for the description
+						this.streamService.itemObject[this.mainService.currentItem.stream].fieldList.filter( field => field.name === changedFieldName ).forEach( field => changedFieldID = field.id );
+						if ( changedFieldID ) {
+							if ( this.mainService.currentItem.fieldDescriptions[changedFieldID] ) {
+								this.mainService.currentItem.fieldDescriptions[changedFieldID]
+									.filter( currentDescription => currentDescription.RefField === changedNewValue[0] )
+									.forEach( currentDescription => {
+										changedDataTuple[changedFieldName + '_DESC'] = currentDescription.Description;
+									} );
+							}
+						}
+					}
+
+					this.matrixData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
+					const toSave: any = Object.assign( {}, changedDataTuple );
+					delete toSave.saveresult;
+					Object.keys( toSave ).forEach( element => {
+						if ( element.substr( -5 ) === '_DESC' ) {
+							delete toSave[element];
+						}
+					} );
+					this.saveMatrixTuple( toSave, changedRowNumber );
+
+				} else {
+					this.matrixData[changedRowNumber].saveresult = '<i class="fa fa-exclamation-circle fa-fw" style="color:red;"></i>';
+				}
+			} );
+			this.hotInstance.render();
+		}
+	}
+	public checkNewMatrixEntry = () => {
+		const columns = this.matrixColumns.filter( column => column.source );
+		this.isNewMatrixEntryValid = true;
+		const validityObject: any = {};
+		this.newMatrixEntryIssue = '';
+		columns.forEach( column => {
+			if ( this.newMatrixEntry[column.data] ) {
+				validityObject[column.data] = this.newMatrixEntry[column.data].split( '::' )[0];
+			}
+			if ( !validityObject[column.data] ) {
+				this.newMatrixEntryIssue += '\n' + column.data + ' is not yet identified.';
+				this.isNewMatrixEntryValid = false;
+			}
+		} );
+		this.newMatrixEntryIssue = this.newMatrixEntryIssue.trim();
+		if ( this.isNewMatrixEntryValid ) {
+			return validityObject;
+		} else {
+			return false;
+		}
+	}
+	public newMatrixEntryCancel = () => {
+		this.newMatrixEntry = {};
+		this.newMatrixEntryIssue = '';
+		this.addEntryShown = false;
+	}
+	public submitNewMatrixEntryAndStay = () => {
+		return new Promise( ( resolve, reject ) => {
+			const tuple = this.checkNewMatrixEntry();
+			if ( tuple ) {
+				this.isNewMatrixEntrySaving = true;
+				this.mainService.saveMatrixTuple( tuple ).subscribe( result => {
+					this.isNewMatrixEntrySaving = false;
+					this.toastr.info( 'New entry is saved' );
+					this.refreshMatrixTable();
+					resolve();
+				}, error => {
+					this.isNewMatrixEntrySaving = false;
+					this.toastr.error( error.message );
+					this.refreshMatrixTable();
+					console.error( error );
+					reject();
+				} );
+			} else {
+				reject();
+			}
+		} );
+	}
+	public submitNewMatrixEntryAndLeave = () => {
+		this.submitNewMatrixEntryAndStay().then( () => {
+			this.addEntryShown = false;
+		} );
+	}
+	private saveMatrixTuple = ( toSave, changedRowNumber ) => {
+		this.mainService.saveMatrixTuple( toSave ).subscribe( result => {
+			let rowNumberToUpdate = -1;
+			rowNumberToUpdate = changedRowNumber;
+			this.matrixData[changedRowNumber].saveresult = '<i class="fa fa-check-circle fa-fw" style="color:green;"></i>';
+			this.hotInstance.render();
+		}, error => {
+			let rowNumberToUpdate = -1;
+			rowNumberToUpdate = changedRowNumber;
+			this.matrixData[changedRowNumber].saveresult = '<i class="fa fa-times fa-fw" style="color:red;"></i>';
+			this.hotInstance.render();
+			console.error( 'Failed to save map:', toSave );
+			console.error( error );
+		} );
 	}
 	/*
 		private getReady = () => {

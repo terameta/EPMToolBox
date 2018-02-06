@@ -19,4 +19,8 @@ export class DimeMatrixBackend {
 	public prepareTables = ( id: number ) => this.http.get( this.baseUrl + '/prepareTables/' + id );
 	public isready = ( id: number ) => this.http.get<IsReadyPayload>( this.baseUrl + '/isReady/' + id );
 	public matrixRefresh = ( payload: DimeMatrixRefreshPayload ) => this.http.post( this.baseUrl + '/matrixRefresh', payload );
+	public saveMatrixTuple = ( payload: { matrixid: number, tuple: any } ) => this.http.post( this.baseUrl + '/saveMatrixTuple', payload );
+	public deleteMatrixTuple = ( payload: { matrixid: number, tupleid: number } ) => this.http.delete( this.baseUrl + '/deleteMatrixTuple/' + payload.matrixid + '/' + payload.tupleid );
+	public matrixExport = ( id: number ) => this.http.get( this.baseUrl + /matrixExport/ + id, { responseType: 'blob' } );
+	public matrixImport = ( formData: FormData ) => this.http.post( this.baseUrl + '/matrixImport', formData );
 }

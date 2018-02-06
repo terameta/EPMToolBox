@@ -119,28 +119,6 @@ export class DimeMatrixTool {
 				.catch( reject );
 		} );
 	}
-	// public prepareTables = ( id: number ) => {
-	// 	return new Promise( ( resolve, reject ) => {
-	// 		this.dropTables( id ).
-	// 			then( this.getFields ).then( ( fieldList: DimeMatrixField[] ) => {
-	// 				let createQuery: string; createQuery = '';
-	// 				createQuery += 'CREATE TABLE MATRIX' + id + '_MATRIXTBL (';
-	// 				createQuery += 'id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, ';
-	// 				createQuery += fieldList.map( curField => curField.name + ' VARCHAR(1024)' ).join( ',' );
-	// 				createQuery += ', PRIMARY KEY (id) )';
-	// 				// console.log( fieldList );
-	// 				console.log( createQuery );
-	// 				this.db.query( createQuery, ( err, result, fields ) => {
-	// 					if ( err ) {
-	// 						reject( err );
-	// 					} else {
-	// 						resolve( { result: 'OK' } );
-	// 					}
-	// 				} );
-	// 			} ).
-	// 			catch( reject );
-	// 	} );
-	// }
 	public isReady = ( id: number ): Promise<IsReadyPayload> => {
 		return new Promise( ( resolve, reject ) => {
 			this.getOne( id )
@@ -185,17 +163,17 @@ export class DimeMatrixTool {
 			} );
 		} );
 	}
-	public saveMatrixTuple = ( refObj: { id: number, matrixEntry: any } ) => {
+	public saveMatrixTuple = ( payload: { matrixid: number, tuple: any } ) => {
 		return new Promise( ( resolve, reject ) => {
-			console.log( refObj );
+			// console.log( payload );
 			let saveQuery: string; saveQuery = '';
-			if ( refObj.matrixEntry.id ) {
-				saveQuery += 'UPDATE MATRIX' + refObj.id + '_MATRIXTBL SET ? WHERE id=' + refObj.matrixEntry.id;
+			if ( payload.tuple.id ) {
+				saveQuery += 'UPDATE MATRIX' + payload.matrixid + '_MATRIXTBL SET ? WHERE id=' + payload.tuple.id;
 			} else {
-				saveQuery += 'INSERT INTO MATRIX' + refObj.id + '_MATRIXTBL SET ?';
+				saveQuery += 'INSERT INTO MATRIX' + payload.matrixid + '_MATRIXTBL SET ?';
 			}
-			let saverFields: any; saverFields = {};
-			Object.keys( refObj.matrixEntry ).forEach( ( curFieldName ) => {
+			const saverFields: any = {};
+			Object.keys( payload.tuple ).forEach( ( curFieldName ) => {
 				if ( curFieldName === 'id' ) {
 
 				} else if ( curFieldName.substr( -5 ) === '_DESC' ) {
@@ -203,7 +181,7 @@ export class DimeMatrixTool {
 				} else if ( curFieldName === 'saveresult' ) {
 
 				} else {
-					saverFields[curFieldName] = refObj.matrixEntry[curFieldName];
+					saverFields[curFieldName] = payload.tuple[curFieldName];
 				}
 			} );
 			this.db.query( saveQuery, saverFields, ( err, result, fields ) => {
@@ -213,10 +191,17 @@ export class DimeMatrixTool {
 					resolve( result );
 				}
 			} );
-			// console.log( refObj );
-			// console.log( saveQuery );
-			// console.log( saverFields );
-			// reject( 'Not yet' );
+		} );
+	}
+	public deleteMatrixTuple = ( payload: { matrixid: number, tupleid: number } ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.db.query( 'DELETE FROM MATRIX' + payload.matrixid + '_MATRIXTBL WHERE id = ?', payload.tupleid, ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( { result: 'OK' } );
+				}
+			} );
 		} );
 	}
 	public getMatrixTable = ( payload: DimeMatrixRefreshPayload ) => {
@@ -246,7 +231,7 @@ export class DimeMatrixTool {
 							selectQuery += descTable + '.Description AS ' + field.name + '_DESC';
 						}
 					} );
-					selectQuery += '\tFROM ' + matrixTable;
+					selectQuery += '\n\tFROM ' + matrixTable;
 					fields.filter( field => field.isDescribed ).forEach( field => {
 						const descTable = 'STREAM' + field.stream + '_DESCTBL' + field.id;
 						selectQuery += '\n\tLEFT JOIN ' + descTable;
@@ -273,8 +258,8 @@ export class DimeMatrixTool {
 									case 'co': {
 										if ( filter.isDescribed ) {
 											wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
-											wherevals.push( filter.value );
-											wherevals.push( filter.value );
+											wherevals.push( '%' + filter.value + '%' );
+											wherevals.push( '%' + filter.value + '%' );
 										} else {
 											wherers.push( filter.name + ' LIKE ?' );
 											wherevals.push( '%' + filter.value + '%' );
@@ -284,8 +269,8 @@ export class DimeMatrixTool {
 									case 'bw': {
 										if ( filter.isDescribed ) {
 											wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
-											wherevals.push( filter.value );
-											wherevals.push( filter.value );
+											wherevals.push( filter.value + '%' );
+											wherevals.push( filter.value + '%' );
 										} else {
 											wherers.push( filter.name + ' LIKE ?' );
 											wherevals.push( filter.value + '%' );
@@ -295,8 +280,8 @@ export class DimeMatrixTool {
 									case 'ew': {
 										if ( filter.isDescribed ) {
 											wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
-											wherevals.push( filter.value );
-											wherevals.push( filter.value );
+											wherevals.push( '%' + filter.value );
+											wherevals.push( '%' + filter.value );
 										} else {
 											wherers.push( filter.name + ' LIKE ?' );
 											wherevals.push( '%' + filter.value );
@@ -328,6 +313,16 @@ export class DimeMatrixTool {
 						}
 					} );
 				} );
+		} );
+	}
+	public matrixExport = ( payload: { id: number, requser: any, res: any } ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.getMatrixTableAction( payload.id )
+				.then( resMatrix => {
+
+					reject( new Error( 'Not Yet' ) );
+				} )
+				.catch( reject );
 		} );
 	}
 }

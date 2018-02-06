@@ -109,7 +109,7 @@ export class DimeMapService {
 	public mapImportFileChangeEvent = ( fileInput: any ) => {
 		this.filesToUpload = <Array<File>>fileInput.target.files;
 	}
-	public saveMapTuple = ( data ) => this.backend.saveMapTuple( { mapid: this.currentItem.id, tuple: data } );
+	public saveMapTuple = ( tuple ) => this.backend.saveMapTuple( { mapid: this.currentItem.id, tuple } );
 	public deleteMapTuple = ( tupleid ) => this.backend.deleteMapTuple( { mapid: this.currentItem.id, tupleid } );
 
 	/*

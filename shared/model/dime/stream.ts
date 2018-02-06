@@ -1,4 +1,4 @@
-import { DimeStreamFieldDetail } from "./streamfield";
+import { DimeStreamFieldDetail } from './streamfield';
 
 export interface DimeStream {
 	id: number,

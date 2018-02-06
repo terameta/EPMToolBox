@@ -3,5 +3,14 @@
 	position: fixed;
 	left: 100px;
 	right: 100px;
-	top: 10px;
+	top: 3%;
+	max-height: 94%;
+	overflow-y: auto;
+}
+
+.fix-width {
+	min-width:150px;
+	max-width:150px;
+	width:150px;
+	text-align:left;
 }

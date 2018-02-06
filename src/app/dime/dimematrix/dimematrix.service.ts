@@ -1,4 +1,4 @@
-import { SortByName } from '../../../../shared/utilities/utilityFunctions';
+import { SortByName, getFormattedDate } from '../../../../shared/utilities/utilityFunctions';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
@@ -64,6 +64,28 @@ export class DimeMatrixService {
 
 	public prepareMatrixTables = () => {
 		this.store.dispatch( DimeMatrixActions.ONE.PREPARETABLES.action( this.currentItem.id ) );
+	}
+	public saveMatrixTuple = ( tuple ) => this.backend.saveMatrixTuple( { matrixid: this.currentItem.id, tuple } );
+	public deleteMatrixTuple = ( tupleid ) => this.backend.deleteMatrixTuple( { matrixid: this.currentItem.id, tupleid } );
+	public matrixExport = () => {
+		this.backend.matrixExport( this.currentItem.id )
+			.subscribe( response => {
+				this.matrixExportDownload( response );
+			}, error => {
+				this.toastr.error( 'Failed to export the matrix. Please contact system administrator.' );
+				console.error( error );
+			} );
+	}
+	private matrixExportDownload = ( response: any ) => {
+		let blob: any; blob = new Blob( [response], { type: 'application/vnd.ms-excel' } );
+		const url = window.URL.createObjectURL( blob, { oneTimeOnly: true } );
+		const a = document.createElement( 'a' );
+		a.href = url;
+		a.download = this.currentItem.name + ' ' + getFormattedDate() + '.xlsx';
+		window.document.body.appendChild( a );
+		a.click();
+		window.document.body.removeChild( a );
+		window.URL.revokeObjectURL( url );
 	}
 	/*
 		private resetCurItem = () => {
