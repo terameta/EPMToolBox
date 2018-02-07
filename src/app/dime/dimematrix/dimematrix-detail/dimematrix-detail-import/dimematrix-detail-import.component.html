@@ -1,3 +1,2 @@
-<p>
-  dimematrix-detail-import works!
-</p>
+<input type="file" id="matriximportfile" name="file" (change)="mainService.matrixImportFileChangeEvent($event)">
+<button type="button" class="btn btn-default btn-xs" (click)="mainService.matrixImport()">Import</button>

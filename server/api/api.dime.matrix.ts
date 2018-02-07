@@ -28,7 +28,7 @@ export class ApiDimeMatrix {
 		this.apiRoutes.post( '/matrixRefresh', ( req, res ) => { this.rester.respond( this.matrixTool.getMatrixTable, req.body, req, res ); } );
 		this.apiRoutes.post( '/saveMatrixTuple', ( req, res ) => { this.rester.respond( this.matrixTool.saveMatrixTuple, req.body, req, res ); } );
 		this.apiRoutes.delete( '/deleteMatrixTuple/:matrixid/:tupleid', ( req, res ) => { this.rester.respond( this.matrixTool.deleteMatrixTuple, { matrixid: req.params.matrixid, tupleid: req.params.tupleid }, req, res ); } );
-		this.apiRoutes.get( '/mapExport/:id', ( req, res ) => { this.rester.respond( this.matrixTool.matrixExport, { id: req.params.id, requser: req.user, res: res }, req, res ); } );
-		this.apiRoutes.post( '/mapImport', ( req, res ) => { this.rester.respond( this.matrixTool.matrixImport, { body: req.body, files: req.files }, req, res ); } );
+		this.apiRoutes.get( '/matrixExport/:id', ( req, res ) => { this.rester.respond( this.matrixTool.matrixExport, { id: req.params.id, requser: req.user, res: res }, req, res ); } );
+		this.apiRoutes.post( '/matrixImport', ( req, res ) => { this.rester.respond( this.matrixTool.matrixImport, { body: req.body, files: req.files }, req, res ); } );
 	}
 }

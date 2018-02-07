@@ -55,6 +55,7 @@
 		"@angular/cli": "^1.6.7",
 		"@angular/compiler-cli": "^5.2.3",
 		"@angular/language-service": "^5.2.3",
+		"@types/exceljs": "^0.5.2",
 		"@types/jasmine": "^2.8.6",
 		"@types/jasminewd2": "~2.0.2",
 		"@types/node": "^9.4.0",

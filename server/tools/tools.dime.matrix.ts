@@ -2,10 +2,13 @@ import { DimeMatrix, DimeMatrixRefreshPayload } from '../../shared/model/dime/ma
 import * as async from 'async';
 import { MainTools } from './tools.main';
 import { Pool } from 'mysql';
+import * as excel from 'exceljs';
+const streamBuffers = require( 'stream-buffers' );
 import { ATReadyStatus, IsReadyPayload } from '../../shared/enums/generic/readiness';
 import * as _ from 'lodash';
 import { StreamTools } from './tools.dime.stream';
 import { DimeStreamField } from '../../shared/model/dime/streamfield';
+import { DimeStreamDetail } from '../../shared/model/dime/stream';
 
 export class DimeMatrixTool {
 	private streamTool: StreamTools;
@@ -312,17 +315,187 @@ export class DimeMatrixTool {
 							resolve( matrix );
 						}
 					} );
-				} );
+				} ).catch( reject );
 		} );
 	}
 	public matrixExport = ( payload: { id: number, requser: any, res: any } ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.getMatrixTableAction( payload.id )
-				.then( resMatrix => {
-
-					reject( new Error( 'Not Yet' ) );
+			this.getMatrixTableAction( { id: payload.id, filters: [], sorters: [] } )
+				.then( this.matrixExportGetStreamDetails )
+				.then( this.matrixExportConvertToExcel )
+				.then( ( workbook: excel.Workbook ) => {
+					return this.matrixExportSendToUser( workbook, payload.requser, payload.res );
 				} )
+				.then( resolve )
 				.catch( reject );
+		} );
+	}
+	private matrixExportGetStreamDetails = ( matrix: DimeMatrix ): Promise<{ matrix, stream }> => {
+		return new Promise( ( resolve, reject ) => {
+			this.streamTool.getOne( matrix.stream )
+				.then( stream => {
+					resolve( { matrix, stream } );
+				} ).catch( reject );
+		} );
+	}
+	private matrixExportConvertToExcel = ( payload: { matrix: DimeMatrix, stream: DimeStreamDetail } ) => {
+		return new Promise( ( resolve, reject ) => {
+
+			const workbook = new excel.Workbook();
+			workbook.creator = 'EPM ToolBox';
+			workbook.lastModifiedBy = 'EPM ToolBox';
+			workbook.created = new Date();
+			workbook.modified = new Date();
+
+			const sheet = workbook.addWorksheet( payload.matrix.name, { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] } );
+			if ( !payload.matrix.matrixData ) {
+				sheet.addRow( ['There is no matrix data produced. If in doubt, please contact system admin!'] );
+			} else if ( payload.matrix.matrixData.length === 0 ) {
+				sheet.addRow( ['There is no matrix data produced. If in doubt, please contact system admin.'] );
+			} else {
+				const columns: excel.Column[] = [{ header: 'id', key: 'id' }];
+				const identifiers: any = { id: 1 };
+				let column: string;
+				let identifier: number;
+				payload.stream.fieldList
+					.filter( field => payload.matrix.fields[field.id] )
+					.forEach( field => {
+						column = field.name;
+						identifier = 2;
+						columns.push( { header: column, key: column } );
+						identifiers[column] = identifier;
+						if ( field.isDescribed ) {
+							column = field.name + '_DESC';
+							identifier = 0;
+							columns.push( { header: column, key: column } );
+							identifiers[column] = identifier;
+						}
+					} );
+				sheet.columns = columns;
+				sheet.addRow( identifiers );
+				sheet.lastRow.hidden = true;
+				sheet.addRows( payload.matrix.matrixData );
+			}
+			resolve( workbook );
+		} );
+	}
+	private matrixExportSendToUser = ( refBook: excel.Workbook, refUser: any, response: any ) => {
+		return new Promise( ( resolve, reject ) => {
+			refBook.xlsx.write( response ).then( ( result: any ) => {
+				response.end();
+				resolve();
+			} ).catch( reject );
+		} );
+	}
+	public matrixImport = ( payload: { body: any, files: any[] } ) => {
+		return new Promise( ( resolve, reject ) => {
+			console.log( payload.body );
+			console.log( payload.files.length );
+			if ( !payload ) {
+				reject( new Error( 'No data is provided' ) );
+			} else if ( !payload.body ) {
+				reject( new Error( 'No body is provided' ) );
+			} else if ( !payload.body.id ) {
+				reject( new Error( 'No matrix id is provided' ) );
+			} else if ( !payload.files ) {
+				reject( new Error( 'No files are uploaded' ) );
+			} else if ( !Array.isArray( payload.files ) ) {
+				reject( new Error( 'File list is not proper' ) );
+			} else if ( payload.files.length !== 1 ) {
+				reject( new Error( 'System is expecting exactly one file. Wrong number of files are received.' ) );
+			} else {
+				const workbook: any = new excel.Workbook();
+				const buffer = new streamBuffers.ReadableStreamBuffer();
+				buffer.put( payload.files[0].buffer );
+				buffer.stop();
+				let toInsert: any[];
+				workbook.xlsx.read( buffer )
+					.then( this.matrixImportGetExcelData )
+					.then( ( tuples: any[] ) => {
+						toInsert = tuples;
+						return this.clearMatrixTable( payload.body.id );
+					} )
+					.then( () => {
+						return this.populateMatrixTable( payload.body.id, toInsert );
+					} )
+					.then( result => {
+						resolve( { result: 'OK' } );
+					} )
+					.catch( reject );
+			}
+		} );
+	}
+	private matrixImportGetExcelData = ( workbook: excel.Workbook ) => {
+		return new Promise( ( resolve, reject ) => {
+			const colHeaders: string[] = [];
+			const colTypes: number[] = [];
+			const tuples: any[] = [];
+			let curTuple: any;
+			let curIndex: number;
+			if ( workbook.worksheets.length !== 1 ) {
+				reject( new Error( 'System is expecting exactly one sheet in the workbook. Wrong number of sheets are received.' ) );
+			} else if ( workbook.worksheets[0].rowCount < 3 ) {
+				reject( new Error( 'System is expecting at least 3 rows in the excel sheet. Wrong number of rows are received.' ) );
+			} else {
+				workbook.eachSheet( ( worksheet: any, sheetId: any ) => {
+					worksheet.eachRow( ( row: any, rowNumber: number ) => {
+						curTuple = {};
+						if ( rowNumber === 1 ) {
+							row.eachCell( ( cell: any, colNumber: number ) => {
+								colHeaders.push( cell.value );
+							} );
+						} else if ( rowNumber === 2 ) {
+							row.eachCell( ( cell: any, colNumber: number ) => {
+								colTypes.push( cell.value );
+							} );
+						} else {
+							row.eachCell( ( cell: any, colNumber: number ) => {
+								curIndex = colNumber - 1;
+								if ( colTypes[curIndex] === 2 ) {
+									curTuple[colHeaders[curIndex]] = cell.value;
+								}
+							} );
+							tuples.push( curTuple );
+						}
+					} );
+				} );
+				if ( tuples.length === 0 ) {
+					reject( new Error( 'No map data is found.' ) );
+				} else {
+					resolve( tuples );
+				}
+			}
+		} );
+	}
+	private clearMatrixTable = ( id: number ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.db.query( 'TRUNCATE MATRIX' + id + '_MATRIXTBL', ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve();
+				}
+			} );
+		} );
+	}
+	private populateMatrixTable = ( id: number, tuples: any[] ) => {
+		return new Promise( ( resolve, reject ) => {
+			const curKeys = Object.keys( tuples[0] );
+			let curArray: any[];
+			tuples.forEach( ( curResult, curItem ) => {
+				curArray = [];
+				curKeys.forEach( curKey => {
+					curArray.push( curResult[curKey] );
+				} );
+				tuples[curItem] = curArray;
+			} );
+			this.db.query( 'INSERT INTO MATRIX' + id + '_MATRIXTBL (' + curKeys.join( ', ' ) + ') VALUES ?', [tuples], ( err, result, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( id );
+				}
+			} );
 		} );
 	}
 }

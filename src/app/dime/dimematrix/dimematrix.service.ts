@@ -27,6 +27,7 @@ export class DimeMatrixService {
 	public itemObject: DimeMatrixObject;
 	public currentItem: DimeMatrix;
 
+	private filesToUpload: File[] = [];
 
 	constructor(
 		private store: Store<AppState>,
@@ -86,6 +87,21 @@ export class DimeMatrixService {
 		a.click();
 		window.document.body.removeChild( a );
 		window.URL.revokeObjectURL( url );
+	}
+	public matrixImport = () => {
+		const formData = new FormData();
+		const files: File[] = this.filesToUpload;
+
+		formData.append( 'uploads[]', files[0], files[0].name );
+		formData.append( 'id', this.currentItem.id.toString() );
+		this.backend.matrixImport( formData ).subscribe( response => {
+			this.toastr.info( 'Matrix is now updated.', this.serviceName );
+		}, error => {
+			this.toastr.error( 'Failed to import matrix.', this.serviceName );
+		} );
+	}
+	public matrixImportFileChangeEvent = ( fileInput: any ) => {
+		this.filesToUpload = fileInput.target.files;
 	}
 	/*
 		private resetCurItem = () => {
