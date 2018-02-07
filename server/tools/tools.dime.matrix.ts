@@ -389,8 +389,6 @@ export class DimeMatrixTool {
 	}
 	public matrixImport = ( payload: { body: any, files: any[] } ) => {
 		return new Promise( ( resolve, reject ) => {
-			console.log( payload.body );
-			console.log( payload.files.length );
 			if ( !payload ) {
 				reject( new Error( 'No data is provided' ) );
 			} else if ( !payload.body ) {

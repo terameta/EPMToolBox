@@ -90,7 +90,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	private waitUntilItemIsReady = () => {
 		return new Promise( ( resolve, reject ) => {
 			if ( !this.mainService.currentItem
-				|| _.values( this.mainService.currentItem.fields ).filter( value => value ) === 0
+				|| _.values( this.mainService.currentItem.fields ).filter( value => value ).length === 0
 				|| !this.streamService.itemObject[this.mainService.currentItem.stream]
 			) {
 				setTimeout( () => {

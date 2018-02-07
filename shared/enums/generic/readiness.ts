@@ -6,5 +6,10 @@ export enum ATReadyStatus {
 
 export interface IsReadyPayload {
 	isready: ATReadyStatus,
-	issue?: string
+	issue?: string,
+}
+
+export interface IsPreparedPayload {
+	isPrepared: ATReadyStatus,
+	issueList?: string[]
 }

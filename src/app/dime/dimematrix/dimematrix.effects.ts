@@ -30,7 +30,7 @@ export class DimeMatrixEffects {
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
 		.ofType( DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.type )
-		.withLatestFrom( this.state$ )
+		.withLatestFrom( this.store$ )
 		.filter( ( [action, state] ) => ( !state.dimeMatrix.items || Object.keys( state.dimeMatrix.items ).length === 0 ) )
 		.map( ( [action, state] ) => action )
 		.switchMap( action => DimeMatrixActions.ALL.LOAD.INITIATE.observableaction() );
@@ -63,13 +63,14 @@ export class DimeMatrixEffects {
 						DimeStreamActions.ALL.LOAD.initiateifempty(),
 						DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
 					];
-				} );
+				} )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_LOAD_INITIATEIFEMPTY$ = this.actions$
 		.ofType( DimeMatrixActions.ONE.LOAD.INITIATEIFEMPTY.type )
 		.map( action => Object.assign( <Action<number>>{}, action ) )
-		.withLatestFrom( this.state$ )
+		.withLatestFrom( this.store$ )
 		.filter( ( [action, state] ) => ( !state.dimeMatrix.curItem || state.dimeMatrix.curItem.id === 0 || state.dimeMatrix.curItem.id !== action.payload ) )
 		.map( ( [action, state] ) => action )
 		.switchMap( action => DimeMatrixActions.ONE.LOAD.INITIATE.observableaction( action.payload ) );
@@ -123,7 +124,7 @@ export class DimeMatrixEffects {
 
 	constructor(
 		private actions$: Actions,
-		private state$: Store<AppState>,
+		private store$: Store<AppState>,
 		private backend: DimeMatrixBackend,
 		private router: Router
 	) { }

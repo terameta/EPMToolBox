@@ -23,15 +23,25 @@ import { DimeprocessDetailTabFiltersdatafileComponent } from './dimeprocess-deta
 const dimeProcessRoutes: Routes = [
 	{ path: 'dime/processes', pathMatch: 'prefix', redirectTo: 'dime/processes/process-list' },
 	{ path: 'process-list', component: DimeprocessListComponent },
-	{ path: 'process-detail/:id', component: DimeprocessDetailComponent },
+	{
+		path: 'process-detail/:id', component: DimeprocessDetailComponent, children: [
+			{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
+			{ path: 'definitions', component: DimeprocessDetailTabMaindefinitionsComponent },
+			{ path: 'run', component: DimeprocessDetailTabRunComponent },
+			{ path: 'steps', component: DimeprocessDetailTabStepsComponent },
+			{ path: 'defaulttargets', component: DimeprocessDetailTabDefaulttargetsComponent },
+			{ path: 'filters', component: DimeprocessDetailTabFiltersComponent },
+			{ path: 'filtersdatafile', component: DimeprocessDetailTabFiltersdatafileComponent }
+		]
+	},
 	{ path: 'process-step-detail/:id', component: DimeprocessStepDetailComponent }
 ];
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild(dimeProcessRoutes),
+		RouterModule.forChild( dimeProcessRoutes ),
 		AuthModule
 	],
 	exports: [
@@ -54,5 +64,5 @@ const dimeProcessRoutes: Routes = [
 		DimeProcessFilterPipe,
 		DimeprocessDetailTabFiltersdatafileComponent
 	]
-})
+} )
 export class DimeprocessModule { }

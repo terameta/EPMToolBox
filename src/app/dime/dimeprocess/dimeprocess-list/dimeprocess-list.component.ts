@@ -12,7 +12,7 @@ export class DimeprocessListComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeProcessService,
-		private environmentService: DimeEnvironmentService
+		public environmentService: DimeEnvironmentService
 	) { }
 
 	ngOnInit() {

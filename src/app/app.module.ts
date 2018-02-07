@@ -1,4 +1,3 @@
-import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
 import { HttpClientModule } from '@angular/common/http';
 import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
 import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';
@@ -43,8 +42,15 @@ import { DimeMapEffects } from './dime/dimemap/dimemap.effects';
 import { DimeMapBackend } from './dime/dimemap/dimemap.backend';
 
 import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
+import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.effects';
+import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
+
 import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
+import { DimeProcessEffects } from './dime/dimeprocess/dimeprocess.effects';
+import { DimeProcessBackend } from './dime/dimeprocess/dimeprocess.backend';
+
 import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
+
 import { DimeAsyncProcessService } from './dime/dimeasyncprocess/dimeasyncprocess.service';
 
 // Access Management Services
@@ -63,7 +69,6 @@ import { DimeTagGroupBackend } from './dime/dimetag/dimetaggroup.backend';
 import { DimeTagService } from './dime/dimetag/dimetag.service';
 import { DimeTagEffects } from './dime/dimetag/dimetag.effects';
 import { DimeStatusEffects } from './ngstore/applicationstatus';
-import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.effects';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -108,7 +113,8 @@ export function tokenGetter() {
 			DimeEnvironmentEffects,
 			DimeStreamEffects,
 			DimeMapEffects,
-			DimeMatrixEffects
+			DimeMatrixEffects,
+			DimeProcessEffects
 		] ),
 		StoreRouterConnectingModule,
 		// StoreDevtoolsModule.instrument( {
@@ -132,14 +138,15 @@ export function tokenGetter() {
 		DimeMapService,
 		DimeMapBackend,
 		DimeMatrixService,
+		DimeMatrixBackend,
 		DimeProcessService,
+		DimeProcessBackend,
 		DimeScheduleService,
 		DimeAsyncProcessService,
+		DimeAsyncProcessBackend,
 		AcmServerService,
 		AcmUserService,
-		EndUserService,
-		DimeAsyncProcessBackend,
-		DimeMatrixBackend
+		EndUserService
 	],
 	bootstrap: [AppComponent]
 } )

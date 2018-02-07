@@ -48,7 +48,7 @@ export class DimeMapService {
 		delete this.currentItem.targetfields;
 		this.router.navigateByUrl( this.router.routerState.snapshot.url
 			.split( '/' )
-			.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )	// This part replaces the stream ID to the target stream's ID
+			.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )	// This part replaces the map ID to the target stream's ID
 			.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )						// If we are at the field descriptions part, this will take us to parent and companent will handle redirecting
 			.join( '/' )
 		);

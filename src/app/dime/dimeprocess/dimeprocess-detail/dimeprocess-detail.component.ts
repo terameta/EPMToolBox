@@ -1,6 +1,3 @@
-import { Subscription } from 'rxjs/Subscription';
-import { DimeProcessService } from '../dimeprocess.service';
-import { ActivatedRoute, Params } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
 @Component( {
@@ -9,21 +6,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 	styleUrls: ['./dimeprocess-detail.component.css']
 } )
 export class DimeprocessDetailComponent implements OnInit, OnDestroy {
-	paramSubscription: Subscription;
 
 	constructor(
-		private route: ActivatedRoute,
-		public mainService: DimeProcessService
 	) { }
 
 	ngOnInit() {
-		// this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
-		// 	this.mainService.getOne( params['id'] );
-		// } );
 	}
 
 	ngOnDestroy() {
-		// this.paramSubscription = undefined;
 	}
 
 }

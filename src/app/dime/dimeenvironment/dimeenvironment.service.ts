@@ -20,14 +20,6 @@ import { DimeStatusActions } from '../../ngstore/applicationstatus';
 
 @Injectable()
 export class DimeEnvironmentService {
-	// items: Observable<DimeEnvironment[]>;
-	// curItem: DimeEnvironment;
-	// typeList: DimeEnvironmentType[];
-	// private _items: BehaviorSubject<DimeEnvironment[]>;
-	// private baseUrl: string;
-	// private dataStore: {
-	// 	items: DimeEnvironment[]
-	// };
 	private serviceName = 'Environments';
 
 	public itemList: DimeEnvironment[];

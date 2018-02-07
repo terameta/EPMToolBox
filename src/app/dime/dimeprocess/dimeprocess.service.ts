@@ -1,23 +1,69 @@
-import { ActivatedRoute, Router } from '@angular/router';
-// import { Headers, Http, Response } from '@angular/http';
+import * as _ from 'lodash';
 import { Injectable } from '@angular/core';
-
-import { ToastrService } from 'ngx-toastr';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-// import { AuthHttp } from 'angular2-jwt';
-
-import { DimeProcess } from '../../../../shared/model/dime/process';
-import { DimeProcessStep } from '../../../../shared/model/dime/processstep';
-import { DimeProcessStepType } from '../../../../shared/model/dime/processsteptype';
-import { DimeStream } from '../../../../shared/model/dime/stream';
-
-import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
-import { DimeStreamService } from '../dimestream/dimestream.service';
+import { DimeProcess, DimeProcessObject } from '../../../../shared/model/dime/process';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../ngstore/models';
 import { HttpClient } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
+import { DimeProcessBackend } from './dimeprocess.backend';
+import { Router } from '@angular/router';
+import { DimeMapService } from '../dimemap/dimemap.service';
+import { DimeMatrixService } from '../dimematrix/dimematrix.service';
+import { DimeStreamService } from '../dimestream/dimestream.service';
+import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
+import { DimeProcessActions } from './dimeprocess.actions';
 
 @Injectable()
 export class DimeProcessService {
+	private serviceName = 'Processes';
+	private baseUrl = '/api/dime/process';
+
+	public itemids: number[];
+	public items: DimeProcessObject;
+	public currentItem: DimeProcess;
+
+	constructor(
+		private store: Store<AppState>,
+		private http: HttpClient,
+		private toastr: ToastrService,
+		private backend: DimeProcessBackend,
+		private router: Router,
+		public mapService: DimeMapService,
+		public matrixService: DimeMatrixService,
+		public streamService: DimeStreamService,
+		public environmentService: DimeEnvironmentService
+	) {
+		this.store.select( 'dimeProcess' ).subscribe( processState => {
+			this.itemids = processState.ids;
+			this.items = processState.items;
+			this.currentItem = processState.curItem;
+		}, error => {
+			console.error( error );
+		} );
+	}
+
+	public create = () => this.store.dispatch( DimeProcessActions.ONE.CREATE.INITIATE.action( <DimeProcess>{} ) );
+	public update = () => this.store.dispatch( DimeProcessActions.ONE.UPDATE.INITIATE.action( this.currentItem ) );
+	public delete = ( id: number, name?: string ) => {
+		if ( !name ) { name = this.items[id].name; }
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.store.dispatch( DimeProcessActions.ONE.DELETE.INITIATE.action( id ) );
+		}
+	}
+	public navigateTo = ( id: number ) => {
+		this.router.navigateByUrl(
+			this.router.routerState.snapshot.url
+				.split( '/' )
+				.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )
+				.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )
+				.join( '/' )
+		);
+	}
+}
+
+
+/* *
 	items: Observable<DimeProcess[]>;
 	curItem: DimeProcess;
 	curItemIsPrepared: boolean;
@@ -65,9 +111,9 @@ export class DimeProcessService {
 		this.serviceName = 'Processes';
 		this.resetCurItem();
 		this.stepFetchTypes();
-		*/
+
 	}
-	/*
+
 		getAll = () => {
 			this.fetchAll().
 				subscribe(( data ) => {
@@ -751,4 +797,3 @@ export class DimeProcessService {
 					console.error( error );
 				} );
 		}*/
-}

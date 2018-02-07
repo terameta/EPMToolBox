@@ -42,7 +42,9 @@ import { DimeMatrixState, dimeMatrixInitialState } from '../dime/dimematrix/dime
 import { dimeMatrixReducer } from '../dime/dimematrix/dimematrix.reducer';
 import { DimeMatrixActions } from '../dime/dimematrix/dimematrix.actions';
 
-
+import { DimeProcessState, dimeProcessInitialState } from '../dime/dimeprocess/dimeprocess.state';
+import { dimeProcessReducer } from '../dime/dimeprocess/dimeprocess.reducer';
+import { DimeProcessActions } from '../dime/dimeprocess/dimeprocess.actions';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
@@ -55,7 +57,8 @@ export interface AppState {
 	dimeEnvironment: DimeEnvironmentState,
 	dimeStream: DimeStreamState,
 	dimeMap: DimeMapState,
-	dimeMatrix: DimeMatrixState
+	dimeMatrix: DimeMatrixState,
+	dimeProcess: DimeProcessState
 }
 
 export const appInitialState: AppState = {
@@ -68,7 +71,8 @@ export const appInitialState: AppState = {
 	dimeEnvironment: dimeEnvironmentInitialState,
 	dimeStream: dimeStreamInitialState,
 	dimeMap: dimeMapInitialState,
-	dimeMatrix: dimeMatrixInitialState
+	dimeMatrix: dimeMatrixInitialState,
+	dimeProcess: dimeProcessInitialState
 };
 
 export class DoNothingAction implements Action {
@@ -112,7 +116,8 @@ export const reducers = {
 	dimeEnvironment: dimeEnvironmentReducer,
 	dimeStream: dimeStreamReducer,
 	dimeMap: dimeMapReducer,
-	dimeMatrix: dimeMatrixReducer
+	dimeMatrix: dimeMatrixReducer,
+	dimeProcess: dimeProcessReducer
 };
 
 @Injectable()
@@ -189,6 +194,7 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 							return DimeStreamActions.ALL.LOAD.initiateifempty();
 						}
 						case 'stream-detail/:id': {
+							paramset.params.id = parseInt( paramset.params.id, 10 );
 							return DimeStreamActions.ONE.LOAD.initiateifempty( paramset.params.id );
 						}
 						default: {
@@ -203,6 +209,7 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 							return DimeMapActions.ALL.LOAD.initiateifempty();
 						}
 						case 'map-detail/:id': {
+							paramset.params.id = parseInt( paramset.params.id, 10 );
 							return DimeMapActions.ONE.LOAD.initiateifempty( paramset.params.id );
 						}
 						default: {
@@ -212,8 +219,19 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 					}
 				}
 				case 'processes': {
-					console.log( 'We are at processes' );
-					return new DoNothingAction();
+					switch ( segments[2] ) {
+						case 'process-list': {
+							return DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action();
+						}
+						case 'process-detail/:id': {
+							paramset.params.id = parseInt( paramset.params.id, 10 );
+							return DimeProcessActions.ONE.LOAD.INITIATEIFEMPTY.action( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at processes default' );
+							return new DoNothingAction();
+						}
+					}
 				}
 				case 'asyncprocesses': {
 					switch ( segments[2] ) {

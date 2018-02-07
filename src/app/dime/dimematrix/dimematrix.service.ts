@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs/Subscription';
 import * as _ from 'lodash';
 import { Store } from '@ngrx/store';
 import { DimeMatrixActions } from './dimematrix.actions';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class DimeMatrixService {
@@ -35,7 +36,8 @@ export class DimeMatrixService {
 		private toastr: ToastrService,
 		public mapService: DimeMapService,
 		public streamService: DimeStreamService,
-		public backend: DimeMatrixBackend
+		public backend: DimeMatrixBackend,
+		private router: Router
 	) {
 		this.store.select( 'dimeMatrix' ).subscribe( matrixState => {
 			this.itemList = _.values( matrixState.items ).sort( SortByName );
@@ -44,23 +46,22 @@ export class DimeMatrixService {
 		} );
 	}
 
-	public update = () => {
-		this.store.dispatch( DimeMatrixActions.ONE.UPDATE.INITIATE.action( this.currentItem ) );
-	}
-
+	public create = () => this.store.dispatch( DimeMatrixActions.ONE.CREATE.INITIATE.action( <DimeMatrix>{} ) );
+	public update = () => this.store.dispatch( DimeMatrixActions.ONE.UPDATE.INITIATE.action( this.currentItem ) );
 	public delete = ( id: number, name?: string ) => {
 		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
 		if ( confirm( verificationQuestion ) ) {
 			this.store.dispatch( DimeMatrixActions.ONE.DELETE.INITIATE.action( id ) );
 		}
 	}
-
-	public create = () => {
-
-	}
-
-	public navigateTo = ( $event ) => {
-
+	public navigateTo = ( id: number ) => {
+		this.router.navigateByUrl(
+			this.router.routerState.snapshot.url
+				.split( '/' )
+				.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )
+				.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )
+				.join( '/' )
+		);
 	}
 
 	public prepareMatrixTables = () => {

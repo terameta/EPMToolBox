@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { DimeProcessService } from '../../dimeprocess.service';
 import { DimeEnvironmentService } from '../../../dimeenvironment/dimeenvironment.service';
+import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
 
 @Component( {
 	selector: 'app-dimeprocess-detail-tab-maindefinitions',
@@ -9,6 +10,7 @@ import { DimeEnvironmentService } from '../../../dimeenvironment/dimeenvironment
 	styleUrls: ['./dimeprocess-detail-tab-maindefinitions.component.css']
 } )
 export class DimeprocessDetailTabMaindefinitionsComponent implements OnInit {
+	public atReadyStatus = ATReadyStatus;
 
 	constructor(
 		public mainService: DimeProcessService,
