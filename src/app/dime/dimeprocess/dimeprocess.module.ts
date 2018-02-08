@@ -19,6 +19,7 @@ import { DimeprocessStepDetailComponent } from './dimeprocess-step-detail/dimepr
 
 import { DimeProcessFilterPipe } from './dimeprocess.filter.pipe';
 import { DimeprocessDetailTabFiltersdatafileComponent } from './dimeprocess-detail/dimeprocess-detail-tab-filtersdatafile/dimeprocess-detail-tab-filtersdatafile.component';
+import { DimeprocessStepListComponent } from './dimeprocess-step-list/dimeprocess-step-list.component';
 
 const dimeProcessRoutes: Routes = [
 	{ path: 'dime/processes', pathMatch: 'prefix', redirectTo: 'dime/processes/process-list' },
@@ -28,7 +29,13 @@ const dimeProcessRoutes: Routes = [
 			{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
 			{ path: 'definitions', component: DimeprocessDetailTabMaindefinitionsComponent },
 			{ path: 'run', component: DimeprocessDetailTabRunComponent },
-			{ path: 'steps', component: DimeprocessDetailTabStepsComponent },
+			{
+				path: 'steps', component: DimeprocessDetailTabStepsComponent, children: [
+					{ path: '', pathMatch: 'prefix', redirectTo: 'list' },
+					{ path: 'list', component: DimeprocessStepListComponent },
+					{ path: ':stepid', component: DimeprocessStepDetailComponent }
+				]
+			},
 			{ path: 'defaulttargets', component: DimeprocessDetailTabDefaulttargetsComponent },
 			{ path: 'filters', component: DimeprocessDetailTabFiltersComponent },
 			{ path: 'filtersdatafile', component: DimeprocessDetailTabFiltersdatafileComponent }
@@ -62,7 +69,8 @@ const dimeProcessRoutes: Routes = [
 		DimeprocessDetailTabFiltersComponent,
 		DimeprocessStepDetailComponent,
 		DimeProcessFilterPipe,
-		DimeprocessDetailTabFiltersdatafileComponent
+		DimeprocessDetailTabFiltersdatafileComponent,
+		DimeprocessStepListComponent
 	]
 } )
 export class DimeprocessModule { }

@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 import { DimeProcessState, dimeProcessInitialState } from './dimeprocess.state';
 import { Action } from '../../ngstore/ngrx.generators';
-import { DimeProcess } from '../../../../shared/model/dime/process';
-import { SortByName } from '../../../../shared/utilities/utilityFunctions';
+import { DimeProcess, DimeProcessStep } from '../../../../shared/model/dime/process';
+import { SortByName, SortByPosition } from '../../../../shared/utilities/utilityFunctions';
 import { DimeProcessActions } from './dimeprocess.actions';
 import { ATReadyStatus, IsPreparedPayload } from '../../../../shared/enums/generic/readiness';
 
@@ -19,6 +19,9 @@ export function dimeProcessReducer( state: DimeProcessState, action: Action<any>
 		}
 		case DimeProcessActions.ONE.ISPREPARED.COMPLETE.type: {
 			return handleOneIsPreparedComplete( state, action );
+		}
+		case DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.type: {
+			return handleOneStepLoadAllComplete( state, action );
 		}
 		default: {
 			return state;
@@ -49,5 +52,11 @@ const handleOneIsPreparedComplete = ( state: DimeProcessState, action: Action<Is
 	const newState: DimeProcessState = Object.assign( {}, state );
 	newState.curItem.isPrepared = action.payload.isPrepared;
 	newState.curItem.issueList = action.payload.issueList;
+	return newState;
+};
+
+const handleOneStepLoadAllComplete = ( state: DimeProcessState, action: Action<DimeProcessStep[]> ): DimeProcessState => {
+	const newState: DimeProcessState = Object.assign( {}, state );
+	newState.curItem.steps = action.payload.sort( SortByPosition );
 	return newState;
 };

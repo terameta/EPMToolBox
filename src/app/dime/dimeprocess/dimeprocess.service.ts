@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Injectable } from '@angular/core';
-import { DimeProcess, DimeProcessObject } from '../../../../shared/model/dime/process';
+import { DimeProcess, DimeProcessObject, DimeProcessStep } from '../../../../shared/model/dime/process';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../ngstore/models';
 import { HttpClient } from '@angular/common/http';
@@ -60,6 +60,12 @@ export class DimeProcessService {
 				.join( '/' )
 		);
 	}
+
+	public stepLoadAll = () => this.store.dispatch( DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( this.currentItem.id ) );
+	public stepUpdateAll = () => this.store.dispatch( DimeProcessActions.ONE.STEP.UPDATEALL.INITIATE.action( this.currentItem.steps ) );
+	public stepCreate = () => this.store.dispatch( DimeProcessActions.ONE.STEP.CREATE.INITIATE.action( <DimeProcessStep>{} ) );
+	public stepUpdate = ( payload: DimeProcessStep ) => this.store.dispatch( DimeProcessActions.ONE.STEP.UPDATE.INITIATE.action( payload ) );
+	public stepDelete = ( id: number ) => this.store.dispatch( DimeProcessActions.ONE.STEP.DELETE.INITIATE.action( id ) );
 }
 
 

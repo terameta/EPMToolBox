@@ -592,9 +592,11 @@ export class MapTools {
 				catch( reject );
 		} );
 	}
-	public saveMapTuple = ( refObj: { mapid: number, tuple: any } ) => {
+	public saveMapTuple = ( payload: { mapid: number, tuple: any } ) => {
+		delete payload.tuple.matrixresult;
+		delete payload.tuple.saveresult;
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'UPDATE MAP' + refObj.mapid + '_MAPTBL SET ? WHERE id = ?', [refObj.tuple, refObj.tuple.id], ( err, result, fields ) => {
+			this.db.query( 'UPDATE MAP' + payload.mapid + '_MAPTBL SET ? WHERE id = ?', [payload.tuple, payload.tuple.id], ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {

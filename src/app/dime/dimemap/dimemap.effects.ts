@@ -14,6 +14,7 @@ import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { DimeStreamActions } from '../dimestream/dimestream.actions';
 import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
 import { ATReadyStatus } from '../../../../shared/enums/generic/readiness';
+import { DimeMatrixActions } from '../dimematrix/dimematrix.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -68,7 +69,8 @@ export class DimeMapEffects {
 				.mergeMap( resp => [
 					DimeMapActions.ONE.LOAD.complete( resp ),
 					DimeStreamActions.ALL.LOAD.initiateifempty(),
-					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
+					DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
+					DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
 				.finally( () => { this.store$.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() ); } );

@@ -63,7 +63,8 @@ export class DimeProcessEffects {
 				.mergeMap( resp => [
 					DimeProcessActions.ONE.LOAD.COMPLETE.action( resp ),
 					DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action(),
-					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload )
+					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload ),
+					DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
@@ -105,6 +106,14 @@ export class DimeProcessEffects {
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.isPrepared( action.payload )
 				.map( resp => DimeProcessActions.ONE.ISPREPARED.COMPLETE.action( resp ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_STEP_LOADALL_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.LOADALL.INITIATE.type )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.stepLoadAll( action.payload )
+				.map( resp => DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.action( resp ) )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 

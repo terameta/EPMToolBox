@@ -10,6 +10,7 @@ export interface DimeProcess {
 	target: number,
 	status: string,
 	erroremail: string,
+	steps: DimeProcessStep[],
 	isPrepared: ATReadyStatus,
 	issueList: string[]
 }
@@ -47,25 +48,57 @@ export interface DimeProcessRunning {
 export interface DimeProcessStep {
 	id: number,
 	process: number,
-	type?: string,
-	referedid?: number,
-	details?: string,
-	sOrder?: number
+	type: string,
+	referedid: number,
+	details: string,
+	position: number
 }
 
 export interface DimeProcessStepRunning extends DimeProcessStep {
 	type: string,
 	referedid: number,
 	details: string,
-	sOrder: number,
 	isPending: boolean
 }
 
-export interface DimeProcessStepType {
-	name: string,
-	value: string,
-	tOrder: number
+// export interface DimeProcessStepType {
+// 	name: string,
+// 	value: string,
+// 	tOrder: number
+// }
+
+export enum DimeProcessStepType {
+	SourceProcedure = 'srcprocedure',
+	PullData = 'pulldata',
+	MapData = 'mapdata',
+	TransformData = 'manipulate',
+	PushData = 'pushdata',
+	TargetProcedure = 'tarprocedure',
+	SendLogs = 'sendlogs',
+	SendData = 'senddata',
+	SendMissingMaps = 'sendmissing'
 }
+
+export function getDimeProcessStepTypeNames() {
+	const toReturn: any = {};
+	Object.keys( DimeProcessStepType ).forEach( currentType => {
+		toReturn[DimeProcessStepType[currentType]] = currentType.split( '' ).map( character => ( character.toLowerCase() === character ? character : ' ' + character ) ).join( '' ).trim();
+	} );
+	return toReturn;
+}
+
+export const dimeProcessStepTypeName = {
+	srcprocedure: 'Source Procedure',
+	pulldata: 'Pull Data',
+	mapdata: 'Map Data',
+	transform: 'Transform Data',
+	validate: 'Validate Data',
+	pushdata: 'Push Data',
+	tarprocedure: 'Target Procedure',
+	sendlogs: 'Send Logs',
+	senddata: 'Send Data',
+	sendmissing: 'Send Missing Maps'
+};
 
 export interface DimeProcessDefaultTarget {
 	id: number,

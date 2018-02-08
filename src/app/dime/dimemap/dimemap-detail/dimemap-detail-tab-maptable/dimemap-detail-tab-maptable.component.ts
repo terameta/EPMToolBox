@@ -13,6 +13,8 @@ import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness'
 import { DimeMapActions } from '../../dimemap.actions';
 import { HotRegisterer } from 'angular-handsontable';
 import Handsontable from 'handsontable';
+import { DimeMatrixService } from '../../../dimematrix/dimematrix.service';
+import { DimeMatrixBackend } from '../../../dimematrix/dimematrix.backend';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -36,6 +38,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public mapColumns: any[] = [];
 	public mapData: any[] = [];
 
+	private matrixObject: { targets: string[], matrixData: string[] } = { targets: [], matrixData: [] };
+
 	private instance = 'hotInstance';
 	private hotInstance: Handsontable;
 	private invalidRows: number[] = [];
@@ -44,6 +48,8 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		public mainService: DimeMapService,
 		private toastr: ToastrService,
 		private streamService: DimeStreamService,
+		public matrixService: DimeMatrixService,
+		private matrixBackend: DimeMatrixBackend,
 		private store: Store<AppState>,
 		private hotRegisterer: HotRegisterer
 	) {
@@ -164,15 +170,25 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 							} );
 					}
 
-					this.mapData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
-					const toSave: any = Object.assign( {}, changedDataTuple );
-					delete toSave.saveresult;
-					Object.keys( toSave ).forEach( element => {
-						if ( element.substr( -5 ) === '_DESC' ) {
-							delete toSave[element];
-						}
-					} );
-					this.saveMapTuple( toSave, changedRowNumber );
+
+					const toCheck = this.matrixObject.targets.map( field => changedDataTuple['TAR_' + field] ).join( '|||' );
+					const foundIndex = this.matrixObject.matrixData.findIndex( element => element === toCheck );
+					const isValidAgainstMatrix = ( foundIndex >= 0 );
+					if ( isValidAgainstMatrix ) {
+						this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-check-circle fa-fw" style="color:green;"></i>';
+						this.mapData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
+						const toSave: any = Object.assign( {}, changedDataTuple );
+						delete toSave.saveresult;
+						delete toSave.matrixresult;
+						Object.keys( toSave ).forEach( element => {
+							if ( element.substr( -5 ) === '_DESC' ) {
+								delete toSave[element];
+							}
+						} );
+						this.saveMapTuple( toSave, changedRowNumber );
+					} else {
+						this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-times fa-fw" style="color:red;"></i>';
+					}
 				} else {
 					this.mapData[changedRowNumber].saveresult = '<i class="fa fa-exclamation-circle fa-fw" style="color:red;"></i>';
 				}
@@ -218,8 +234,34 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			.then( this.prepareColumns )
 			.then( this.prepareDescriptions )
 			.then( this.prepareDropdowns )
+			.then( this.prepareMatrix )
 			.then( this.refreshMapTable )
 			.catch( console.error );
+	}
+	private prepareMatrix = () => {
+		return new Promise( ( resolve, reject ) => {
+			this.matrixBackend.matrixRefresh( { id: this.mainService.currentItem.matrix, filters: [], sorters: [] } ).subscribe( ( result: any[] ) => {
+				// const targets = this.mainService.currentItem.targetfields.map( field => field.name );
+				this.matrixObject.targets = [];
+				this.streamService.itemObject[this.mainService.currentItem.target].fieldList
+					.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+					.forEach( currentField => {
+						this.matrixObject.targets.push( currentField.name );
+					} );
+				this.matrixObject.matrixData = result.map( tuple => {
+					const toStructure: any[] = [];
+					this.matrixObject.targets.forEach( field => {
+						toStructure.push( tuple[field] );
+					} );
+					return toStructure.join( '|||' );
+				} );
+				resolve();
+			}, error => {
+				this.store.dispatch( DimeStatusActions.error( error, 'Matrices' ) );
+				console.log( error );
+				reject();
+			} );
+		} );
 	}
 	private prepareDropdowns = () => {
 		return new Promise( ( resolve, reject ) => {
@@ -325,6 +367,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 						this.mapColumns.push( currentColumn );
 					}
 				} );
+			if ( this.mainService.currentItem.matrix > 0 ) {
+				this.mapColumns.push( { data: 'matrixresult', type: 'text', readOnly: true, renderer: 'html', title: '<i class="fa fa-th fa-fw" title="Matrix Result"></i>', className: 'htCenter' } );
+			}
 			this.mapColumns.push( { data: 'saveresult', type: 'text', readOnly: true, renderer: 'html', title: '<i class="fa fa-floppy-o fa-fw" title="Save Result"></i>', className: 'htCenter' } );
 			this.mapColumns.push( { data: 'id', type: 'text', readOnly: true, renderer: this.hotDeleteRenderer, title: '<i class="fa fa-trash fa-fw" title="Click to Delete"></i>', className: 'htCenter' } );
 			resolve();

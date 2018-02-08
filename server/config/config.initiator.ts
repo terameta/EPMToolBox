@@ -46,7 +46,8 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then( version0048to0049 ).then( version0049to0050 ).
 		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).
 		then( version0055to0056 ).then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).
-		then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).
+		then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).then( version0064to0065 ).
+		then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -56,6 +57,71 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( clearResidue );
 }
 
+const version0067to0068 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 67;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'UPDATE processsteps SET type= ? WHERE type = ?', ['transform', 'manipulate'], ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
+const version0066to0067 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 66;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE processsteps CHANGE sOrder position INT( 10 ) UNSIGNED NULL DEFAULT NULL AFTER details', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
+const version0065to0066 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 65;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'DROP TABLE processsteptypes', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
+const version0064to0065 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 64;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'maps', 'matrix BIGINT UNSIGNED NULL AFTER target' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
 const version0063to0064 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 63;
@@ -70,7 +136,6 @@ const version0063to0064 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
 const version0062to0063 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 62;
@@ -85,7 +150,6 @@ const version0062to0063 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
 const version0061to0062 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 61;
@@ -100,7 +164,6 @@ const version0061to0062 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
 const version0060to0061 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 60;
@@ -204,7 +267,6 @@ const version0055to0056 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
 const version0054to0055 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 54;
@@ -219,7 +281,6 @@ const version0054to0055 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
 const version0053to0054 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 53;
@@ -237,7 +298,6 @@ const version0053to0054 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
 const version0052to0053 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 52;

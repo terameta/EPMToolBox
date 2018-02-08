@@ -7,6 +7,7 @@ export interface DimeMap {
 	type: number,
 	source: number,
 	target: number,
+	matrix: number,
 	isready: ATReadyStatus,
 	sourcefields: DimeMapField[],
 	targetfields: DimeMapField[],
