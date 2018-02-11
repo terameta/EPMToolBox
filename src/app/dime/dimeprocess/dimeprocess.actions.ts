@@ -38,7 +38,7 @@ export const DimeProcessActions = {
 				COMPLETE: actionFactory<DimeProcessStep[]>( 'DIME_PROCESS_ACTIONS_ONE_STEP_LOADALL_COMPLETE' )
 			},
 			UPDATEALL: {
-				INITIATE: actionFactory<DimeProcessStep[]>( 'DIME_PROCESS_ACTIONS_ONE_STEP_UPDATEALL_INITIATE' ),
+				INITIATE: actionFactory<{ id: number, steps: DimeProcessStep[] }>( 'DIME_PROCESS_ACTIONS_ONE_STEP_UPDATEALL_INITIATE' ),
 				COMPLETE: actionFactory( 'DIME_PROCESS_ACTIONS_ONE_STEP_UPDATEALL_COMPLETE' )
 			},
 			CREATE: {

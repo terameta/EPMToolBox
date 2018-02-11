@@ -24,6 +24,7 @@ import { SettingsTool } from './tools.settings';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { ATReadyStatus } from '../../shared/enums/generic/readiness';
+import { isNumeric } from '../../shared/utilities/utilityFunctions';
 
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
@@ -150,8 +151,7 @@ export class ProcessTools {
 					reject( 'Step is not found' );
 				} else {
 					rows.map( ( curStep ) => {
-						if ( curStep.details ) { curStep.details = curStep.details.toString(); }
-						return curStep;
+						return this.stepPrepareToGet( curStep );
 					} );
 					resolve( rows[0] );
 				}
@@ -167,7 +167,7 @@ export class ProcessTools {
 							reject( err );
 						} else {
 							rows.map( ( curStep, curIndex ) => {
-								if ( curStep.details ) { curStep.details = curStep.details.toString(); }
+								curStep = this.stepPrepareToGet( curStep );
 								curStep.position = curIndex + 1;
 								if ( curStep.type === DimeProcessStepType.SourceProcedure && !curStep.referedid ) { curStep.referedid = process.source; }
 								if ( curStep.type === DimeProcessStepType.TargetProcedure && !curStep.referedid ) { curStep.referedid = process.target; }
@@ -179,6 +179,20 @@ export class ProcessTools {
 				} )
 				.catch( reject );
 		} );
+	}
+	private stepPrepareToGet = ( step: DimeProcessStep ): DimeProcessStep => {
+		if ( step.details ) { step.details = step.details.toString(); }
+		try {
+			step.detailsObject = JSON.parse( step.details );
+		} catch ( error ) {
+			step.detailsObject = null;
+		}
+		return step;
+	}
+	private stepPrepareToSave = ( step: DimeProcessStep ): DimeProcessStep => {
+		if ( step.detailsObject ) { step.details = JSON.stringify( step.detailsObject ); }
+		delete step.detailsObject;
+		return step;
 	}
 	public stepUpdateAll = ( refObj: { processID: number, steps: any[] } ) => {
 		let promises: any[]; promises = [];
@@ -242,19 +256,17 @@ export class ProcessTools {
 			} );
 		} );
 	}
-	public stepUpdate = ( theStep: DimeProcessStep ): Promise<DimeProcessStep> => {
+	public stepUpdate = ( step: DimeProcessStep ): Promise<DimeProcessStep> => {
 		return new Promise( ( resolve, reject ) => {
-			if ( !theStep ) {
+			if ( !step ) {
 				reject( 'Empty body is not accepted' );
 			} else {
-				const curId = theStep.id;
-				delete theStep.id;
-				this.db.query( 'UPDATE processsteps SET ? WHERE id = ?', [theStep, curId], ( err, rows, fields ) => {
+				step = this.stepPrepareToSave( step );
+				this.db.query( 'UPDATE processsteps SET ? WHERE id = ?', [step, step.id], ( err, rows, fields ) => {
 					if ( err ) {
 						reject( err );
 					} else {
-						theStep.id = curId;
-						resolve( theStep );
+						resolve( step );
 					}
 				} );
 			}
@@ -1478,7 +1490,7 @@ export class ProcessTools {
 										rows[curKey].sorter = 0;
 									} else if ( curRow.DVALUE === 'CBL' ) {
 										rows[curKey].sorter = 13;
-									} else if ( this.isNumeric( curRow.DVALUE ) ) {
+									} else if ( isNumeric( curRow.DVALUE ) ) {
 										rows[curKey].sorter = parseFloat( curRow.DVALUE );
 									} else {
 										rows[curKey].sorter = curRow.DVALUE;
@@ -1826,7 +1838,7 @@ export class ProcessTools {
 								if ( curManipulation.fieldToManipulate.type !== 'number' ) {
 									shouldReject = true;
 									rejectReason = 'Non-number type fields can not be multiplied.';
-								} else if ( !this.isNumeric( curManipulation.operator ) ) {
+								} else if ( !isNumeric( curManipulation.operator ) ) {
 									shouldReject = true;
 									rejectReason = 'Operator field is not numeric';
 								} else {
@@ -1838,7 +1850,7 @@ export class ProcessTools {
 								if ( curManipulation.fieldToManipulate.type !== 'number' ) {
 									shouldReject = true;
 									rejectReason = 'Non-number type fields can not be divided.';
-								} else if ( !this.isNumeric( curManipulation.operator ) ) {
+								} else if ( !isNumeric( curManipulation.operator ) ) {
 									shouldReject = true;
 									rejectReason = 'Operator field is not numeric';
 								} else {
@@ -1850,7 +1862,7 @@ export class ProcessTools {
 								if ( curManipulation.fieldToManipulate.type !== 'number' ) {
 									shouldReject = true;
 									rejectReason = 'Non-number type fields can not be added.';
-								} else if ( !this.isNumeric( curManipulation.operator ) ) {
+								} else if ( !isNumeric( curManipulation.operator ) ) {
 									shouldReject = true;
 									rejectReason = 'Operator field is not numeric';
 								} else {
@@ -1862,7 +1874,7 @@ export class ProcessTools {
 								if ( curManipulation.fieldToManipulate.type !== 'number' ) {
 									shouldReject = true;
 									rejectReason = 'Non-number type fields can not be subtracted.';
-								} else if ( !this.isNumeric( curManipulation.operator ) ) {
+								} else if ( !isNumeric( curManipulation.operator ) ) {
 									shouldReject = true;
 									rejectReason = 'Operator field is not numeric';
 								} else {
@@ -2597,12 +2609,13 @@ export class ProcessTools {
 			this.stepLoadAll( refProcess.id ).
 				then( ( steps: DimeProcessStep[] ) => {
 					steps.forEach( ( curStep, curKey ) => {
-						refProcess.steps.push( {
+						refProcess.steps.push( <DimeProcessStepRunning>{
 							id: curStep.id,
 							process: curStep.process,
 							type: curStep.type || '',
 							referedid: curStep.referedid || 0,
 							details: curStep.details || '',
+							detailsObject: curStep.detailsObject,
 							position: curStep.position || ( curKey + 1 ),
 							isPending: true
 						} );
@@ -2643,9 +2656,9 @@ export class ProcessTools {
 				catch( reject );
 		} );
 	}
-	private isNumeric = ( n: any ) => {
-		return !isNaN( parseFloat( n ) ) && isFinite( n );
-	}
+	// private isNumeric = ( n: any ) => {
+	// 	return !isNaN( parseFloat( n ) ) && isFinite( n );
+	// }
 	public sendDataFile = ( refObj: { id: number, requser: any } ) => {
 		const id = refObj.id;
 		const requser = refObj.requser;
@@ -2663,7 +2676,7 @@ export class ProcessTools {
 					topProcess = innerProcess;
 					topProcess.status = logID;
 					topProcess.recepients = requser.email;
-					topStep = { id: 0, process: id, type: '', referedid: id, details: '', position: 1, isPending: false };
+					topStep = <DimeProcessStepRunning>{ id: 0, process: id, referedid: id };
 					return this.sendDataCreateFile( topProcess, topStep, { cartesianArray: [] } );
 				} ).
 				then( ( result ) => {

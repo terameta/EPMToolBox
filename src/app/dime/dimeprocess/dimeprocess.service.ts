@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Injectable } from '@angular/core';
-import { DimeProcess, DimeProcessObject, DimeProcessStep } from '../../../../shared/model/dime/process';
+import { DimeProcess, DimeProcessObject, DimeProcessStep, DimeProcessStepType } from '../../../../shared/model/dime/process';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../ngstore/models';
 import { HttpClient } from '@angular/common/http';
@@ -12,6 +12,7 @@ import { DimeMatrixService } from '../dimematrix/dimematrix.service';
 import { DimeStreamService } from '../dimestream/dimestream.service';
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';
 import { DimeProcessActions } from './dimeprocess.actions';
+import { SortByPosition } from '../../../../shared/utilities/utilityFunctions';
 
 @Injectable()
 export class DimeProcessService {
@@ -21,6 +22,8 @@ export class DimeProcessService {
 	public itemids: number[];
 	public items: DimeProcessObject;
 	public currentItem: DimeProcess;
+
+	private dimeProcessStepType = DimeProcessStepType;
 
 	constructor(
 		private store: Store<AppState>,
@@ -62,10 +65,58 @@ export class DimeProcessService {
 	}
 
 	public stepLoadAll = () => this.store.dispatch( DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( this.currentItem.id ) );
-	public stepUpdateAll = () => this.store.dispatch( DimeProcessActions.ONE.STEP.UPDATEALL.INITIATE.action( this.currentItem.steps ) );
-	public stepCreate = () => this.store.dispatch( DimeProcessActions.ONE.STEP.CREATE.INITIATE.action( <DimeProcessStep>{} ) );
+	public stepUpdateAll = () => this.store.dispatch( DimeProcessActions.ONE.STEP.UPDATEALL.INITIATE.action( { id: this.currentItem.id, steps: this.currentItem.steps } ) );
+	public stepCreate = ( payload: DimeProcessStepType ) => this.store.dispatch( DimeProcessActions.ONE.STEP.CREATE.INITIATE.action( <DimeProcessStep>{ type: payload, process: this.currentItem.id } ) );
 	public stepUpdate = ( payload: DimeProcessStep ) => this.store.dispatch( DimeProcessActions.ONE.STEP.UPDATE.INITIATE.action( payload ) );
-	public stepDelete = ( id: number ) => this.store.dispatch( DimeProcessActions.ONE.STEP.DELETE.INITIATE.action( id ) );
+	public stepDelete = ( id: number ) => {
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete step?';
+		if ( confirm( verificationQuestion ) ) {
+			this.store.dispatch( DimeProcessActions.ONE.STEP.DELETE.INITIATE.action( id ) );
+		}
+	}
+
+	public stepDetailPresenter = ( detail: string, type: DimeProcessStepType ): string => {
+		if ( detail ) {
+			switch ( type ) {
+				case DimeProcessStepType.SendMissingMaps:
+				case DimeProcessStepType.SendData:
+				case DimeProcessStepType.SendLogs: {
+					const recepientList: { address: string }[] = JSON.parse( detail );
+					return recepientList.map( curRecepient => curRecepient.address ).join( '; ' );
+				}
+				case DimeProcessStepType.TargetProcedure: {
+					const procedureDetails = JSON.parse( detail );
+					return procedureDetails.name;
+				}
+				case DimeProcessStepType.TransformData: {
+					const transformations = JSON.parse( detail );
+					return transformations.length + ' transformations.';
+				}
+				case DimeProcessStepType.PushData: {
+					return 'Data push to the target stream.';
+				}
+				case DimeProcessStepType.PullData: {
+					return 'Data pull from the source stream.';
+				}
+				case DimeProcessStepType.SourceProcedure: {
+					let toReturn = detail.toString().substr( 0, 30 );
+					if ( detail.toString().length > 30 ) { toReturn += '...'; }
+					return toReturn;
+				}
+				case DimeProcessStepType.MapData: {
+					return 'Data map between streams.';
+				}
+				case DimeProcessStepType.ValidateData: {
+					return 'Validate data against the matrix.';
+				}
+				default: {
+					return 'Missing step definition. Please complete the definition for each step.';
+				}
+			}
+		} else {
+			return 'Missing step detail. Please complete the definition for each step.';
+		}
+	}
 }
 
 
@@ -429,41 +480,6 @@ export class DimeProcessService {
 					console.error( error );
 				} );
 		};
-		public stepManipulationAdd = () => {
-			this.curStepManipulations.push( { mOrder: this.curStepManipulations.length } );
-			this.stepManipulationSort();
-		};
-		public stepManipulationMove = ( curManipulation: any, direction: string ) => {
-			const curOrder = curManipulation.mOrder;
-			const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );
-			this.curStepManipulations.forEach( function ( curField ) {
-				if ( curField.mOrder === nextOrder ) {
-					curField.mOrder = curOrder;
-				}
-			} );
-			curManipulation.mOrder = nextOrder;
-			this.stepManipulationSort();
-		};
-		public stepManipulationDelete = ( curManipulation: any, index: number ) => {
-			if ( index !== undefined ) {
-				this.curStepManipulations.splice( index, 1 );
-			}
-			this.stepManipulationSort();
-		};
-		public stepManipulationSort = () => {
-			this.curStepManipulations.sort(( e1, e2 ) => {
-				if ( e1.mOrder > e2.mOrder ) {
-					return 1;
-				} else if ( e1.mOrder < e2.mOrder ) {
-					return -1;
-				} else {
-					return 0;
-				}
-			} );
-			this.curStepManipulations.forEach(( curManip, curKey ) => {
-				curManip.mOrder = curKey;
-			} )
-		};
 		public stepListProcedures = ( numTry?: number ) => {
 			if ( numTry === undefined ) { numTry = 0; }
 			if ( this.curItem.target && this.curItemTargetStream.id ) {
@@ -532,31 +548,6 @@ export class DimeProcessService {
 				console.log( curList.splice( index, 1 ) );
 			}
 		};
-		public stepDetailPresenter = ( detail: string, type: string ): string => {
-			let toReturn: string; toReturn = '';
-			if ( ( type === 'sendmissing' || type === 'senddata' || type === 'sendlogs' ) && detail ) {
-				const recepientList: { address: string }[] = JSON.parse( detail );
-				toReturn = recepientList.map( curRecepient => curRecepient.address ).join( '; ' );
-			} else if ( type === 'tarprocedure' && detail ) {
-				const procedureDetails = JSON.parse( detail );
-				toReturn = procedureDetails.name;
-			} else if ( type === 'manipulate' && detail ) {
-				const manipulations = JSON.parse( detail );
-				toReturn = manipulations.length + ' transformations.';
-			} else if ( type === 'pushdata' ) {
-				toReturn = 'Data push to the target stream.';
-			} else if ( type === 'pulldata' ) {
-				toReturn = 'Data pull from the source stream.';
-			} else if ( type === 'srcprocedure' ) {
-				toReturn = detail.toString().substr( 0, 30 );
-				if ( detail.toString().length > 30 ) { toReturn += '...'; }
-			} else if ( type === 'mapdata' ) {
-				toReturn = 'Data map between streams.';
-			} else {
-				console.log( 'Missing step definition. Please complete the definition for each step.' );
-			}
-			return toReturn;
-		}
 		public stepMoveOrder = ( curStep: any, direction: string ) => {
 			const curOrder = curStep.sOrder;
 			const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );

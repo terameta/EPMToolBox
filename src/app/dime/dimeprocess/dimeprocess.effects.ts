@@ -13,7 +13,7 @@ import { DimeStreamActions } from '../dimestream/dimestream.actions';
 import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
 import { DimeMapActions } from '../dimemap/dimemap.actions';
 import { DimeMatrixActions } from '../dimematrix/dimematrix.actions';
-import { DimeProcess } from '../../../../shared/model/dime/process';
+import { DimeProcess, DimeProcessStep } from '../../../../shared/model/dime/process';
 
 @Injectable()
 export class DimeProcessEffects {
@@ -116,6 +116,53 @@ export class DimeProcessEffects {
 				.map( resp => DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.action( resp ) )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
+
+	@Effect() ONE_STEP_UPDATEALL_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.UPDATEALL.INITIATE.type )
+		.switchMap( ( action: Action<{ id: number, steps: DimeProcessStep[] }> ) => {
+			return this.backend.stepUpdateAll( action.payload.id, action.payload.steps )
+				.map( resp => DimeProcessActions.ONE.STEP.UPDATEALL.COMPLETE.action() )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_STEP_UPDATEALL_COMPLETE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.UPDATEALL.COMPLETE.type )
+		.withLatestFrom( this.store$ )
+		.map( ( [action, state] ) => DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( state.dimeProcess.curItem.id ) );
+
+	@Effect() ONE_STEP_CREATE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.CREATE.INITIATE.type )
+		.switchMap( ( action: Action<DimeProcessStep> ) => {
+			return this.backend.stepCreate( action.payload )
+				.map( resp => DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload.process ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_STEP_UPDATE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.UPDATE.INITIATE.type )
+		.switchMap( ( action: Action<DimeProcessStep> ) => {
+			return this.backend.stepUpdate( action.payload )
+				.map( resp => DimeProcessActions.ONE.STEP.UPDATE.COMPLETE.action() )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_STEP_UPDATE_COMPLETE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.UPDATE.COMPLETE.type )
+		.withLatestFrom( this.store$ )
+		.map( ( [action, state] ) => DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( state.dimeProcess.curItem.id ) );
+
+	@Effect() ONE_STEP_DELETE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.DELETE.INITIATE.type )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.stepDelete( action.payload )
+				.map( resp => DimeProcessActions.ONE.STEP.DELETE.COMPLETE.action() )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_STEP_DELETE_COMPLETE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.STEP.DELETE.COMPLETE.type )
+		.withLatestFrom( this.store$ )
+		.map( ( [action, state] ) => DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( state.dimeProcess.curItem.id ) );
 
 	constructor(
 		private actions$: Actions,

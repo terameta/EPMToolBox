@@ -1,0 +1,8 @@
+<div class="form-group">
+	<label for="stepmapdata{{currentStep.id}}" class="control-label">Map:</label>
+	<select name="stepmapdata{{currentStep.id}}" id="stepmapdata{{currentStep.id}}" class="form-control" [(ngModel)]="currentStep.referedid">
+		<option *ngFor="let map of mapService.itemList" [value]=" map.id ">
+			{{ map.name }}
+		</option>
+	</select>
+</div>

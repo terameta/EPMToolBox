@@ -1,0 +1,8 @@
+<div class="form-group">
+	<label for="steppushdata" class=" control-label">Target Stream:</label>
+	<div>
+		<select name="steppushdata" id="steppushdata" class="form-control" [(ngModel)]="currentStep.referedid">
+			<option *ngFor="let stream of streamService.itemList" [value]="stream.id"> {{ stream.name }} </option>
+		</select>
+	</div>
+</div>

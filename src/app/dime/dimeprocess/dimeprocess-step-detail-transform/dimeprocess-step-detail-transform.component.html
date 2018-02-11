@@ -1,0 +1,91 @@
+<div class="form-group">
+	<label for="steptransform" class=" control-label">Definition:</label>
+	<div>
+		<button type="button" class="btn btn-xs btn-default" (click)="stepTransformationAdd();">
+			<i class="fa fa-plus fa-fw"></i> New Transformation
+		</button>
+		<hr>
+		<div *ngFor="let transformation of currentStep.detailsObject; let i = index;let last = last; let first = first">
+			<form class="form-inline">
+				<div class="input-group">
+					<span class="input-group-addon">When</span>
+					<select name="transformation{{i}}when" class="form-control" [(ngModel)]="transformation.when" (change)="transformation.field = ''">
+						<option value="SRC">Source Field</option>
+						<option value="TAR">Target Field</option>
+					</select>
+
+					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+					<select name="transformation{{i}}field" class="form-control" *ngIf="transformation.when == 'SRC'" [(ngModel)]="transformation.field">
+						<option *ngFor="let field of sourceFields" [value]="field.name">{{field.name}}</option>
+					</select>
+					<select name="transformation{{i}}field" class="form-control" *ngIf="transformation.when == 'TAR'" [(ngModel)]="transformation.field">
+						<option *ngFor="let field of targetFields" [value]="field.name">{{field.name}}</option>
+					</select>
+
+					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-3">
+		<pre>{{ currentStep | json }}</pre>
+	</div>
+	<div class="col-xs-3">
+		<pre>{{ mainService.currentItem | json }}</pre>
+	</div>
+	<div class="col-xs-3">
+		<pre>{{ sourceFields | json }}</pre>
+	</div>
+	<div class="col-xs-3">
+		<pre>{{ targetFields | json }}</pre>
+	</div>
+</div>
+
+<!--
+	<select name="transformation{{i}}comparer" class="form-control" [(ngModel)]="transformation.comparer">
+		<option value="like">is like</option>
+		<option value="equals">is equal to</option>
+	</select>
+
+	<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+	<input type="text" name="transformation{{i}}comparison" class="form-control" size="6" [(ngModel)]="transformation.comparison">
+
+	<span class="input-group-addon">then edit</span>
+	<select name="transformation{{i}}whichfield" class="form-control" [(ngModel)]="transformation.whichField">
+		<option value="current">Current Field</option>
+		<option value="data">Data Field</option>
+	</select>
+
+	<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+	<select name="transformation{{i}}operation" class="form-control" [(ngModel)]="transformation.operation" (change)="transformation.operator = ''">
+		<option value="set">by setting to</option>
+		<option value="multiply">by multiplying with</option>
+		<option value="divide">by dividing with</option>
+		<option value="add">by adding</option>
+		<option value="subtract">by subtracting</option>
+	</select>
+
+	<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+
+	<input type="text" name="transformation{{i}}operator" class="form-control" size="6" [(ngModel)]="transformation.operator">
+
+	<span class="input-group-addon" style="padding:0 2px">
+		<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.stepTransformationMove(transformation, 'down')">
+			<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
+		</button>
+		<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!">
+			<i class="fa fa-fw" aria-hidden="true"></i>
+		</button>
+		<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.stepTransformationMove(transformation, 'up')">
+			<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
+		</button>
+		<button type="button" class="btn btn-xs btn-danger" (click)="mainService.stepTransformationDelete(transformation, i)">
+			<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+		</button>
+	</span>
+-->

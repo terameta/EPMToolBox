@@ -20,6 +20,16 @@ import { DimeprocessStepDetailComponent } from './dimeprocess-step-detail/dimepr
 import { DimeProcessFilterPipe } from './dimeprocess.filter.pipe';
 import { DimeprocessDetailTabFiltersdatafileComponent } from './dimeprocess-detail/dimeprocess-detail-tab-filtersdatafile/dimeprocess-detail-tab-filtersdatafile.component';
 import { DimeprocessStepListComponent } from './dimeprocess-step-list/dimeprocess-step-list.component';
+import { DimeprocessStepDetailSrcprocedureComponent } from './dimeprocess-step-detail-srcprocedure/dimeprocess-step-detail-srcprocedure.component';
+import { DimeprocessStepDetailPulldataComponent } from './dimeprocess-step-detail-pulldata/dimeprocess-step-detail-pulldata.component';
+import { DimeprocessStepDetailMapdataComponent } from './dimeprocess-step-detail-mapdata/dimeprocess-step-detail-mapdata.component';
+import { DimeprocessStepDetailTransformComponent } from './dimeprocess-step-detail-transform/dimeprocess-step-detail-transform.component';
+import { DimeprocessStepDetailValidateComponent } from './dimeprocess-step-detail-validate/dimeprocess-step-detail-validate.component';
+import { DimeprocessStepDetailPushdataComponent } from './dimeprocess-step-detail-pushdata/dimeprocess-step-detail-pushdata.component';
+import { DimeprocessStepDetailTarprocedureComponent } from './dimeprocess-step-detail-tarprocedure/dimeprocess-step-detail-tarprocedure.component';
+import { DimeprocessStepDetailSenddataComponent } from './dimeprocess-step-detail-senddata/dimeprocess-step-detail-senddata.component';
+import { DimeprocessStepDetailSendmissingComponent } from './dimeprocess-step-detail-sendmissing/dimeprocess-step-detail-sendmissing.component';
+import { DimeprocessStepDetailSendlogsComponent } from './dimeprocess-step-detail-sendlogs/dimeprocess-step-detail-sendlogs.component';
 
 const dimeProcessRoutes: Routes = [
 	{ path: 'dime/processes', pathMatch: 'prefix', redirectTo: 'dime/processes/process-list' },
@@ -70,7 +80,17 @@ const dimeProcessRoutes: Routes = [
 		DimeprocessStepDetailComponent,
 		DimeProcessFilterPipe,
 		DimeprocessDetailTabFiltersdatafileComponent,
-		DimeprocessStepListComponent
+		DimeprocessStepListComponent,
+		DimeprocessStepDetailSrcprocedureComponent,
+		DimeprocessStepDetailPulldataComponent,
+		DimeprocessStepDetailMapdataComponent,
+		DimeprocessStepDetailTransformComponent,
+		DimeprocessStepDetailValidateComponent,
+		DimeprocessStepDetailPushdataComponent,
+		DimeprocessStepDetailTarprocedureComponent,
+		DimeprocessStepDetailSenddataComponent,
+		DimeprocessStepDetailSendmissingComponent,
+		DimeprocessStepDetailSendlogsComponent
 	]
 } )
 export class DimeprocessModule { }

@@ -48,16 +48,14 @@ export interface DimeProcessRunning {
 export interface DimeProcessStep {
 	id: number,
 	process: number,
-	type: string,
+	type: DimeProcessStepType,
 	referedid: number,
 	details: string,
+	detailsObject: any,
 	position: number
 }
 
 export interface DimeProcessStepRunning extends DimeProcessStep {
-	type: string,
-	referedid: number,
-	details: string,
 	isPending: boolean
 }
 
@@ -71,12 +69,13 @@ export enum DimeProcessStepType {
 	SourceProcedure = 'srcprocedure',
 	PullData = 'pulldata',
 	MapData = 'mapdata',
-	TransformData = 'manipulate',
+	TransformData = 'transform',
+	ValidateData = 'validate',
 	PushData = 'pushdata',
 	TargetProcedure = 'tarprocedure',
-	SendLogs = 'sendlogs',
 	SendData = 'senddata',
-	SendMissingMaps = 'sendmissing'
+	SendMissingMaps = 'sendmissing',
+	SendLogs = 'sendlogs'
 }
 
 export function getDimeProcessStepTypeNames() {
@@ -86,19 +85,6 @@ export function getDimeProcessStepTypeNames() {
 	} );
 	return toReturn;
 }
-
-export const dimeProcessStepTypeName = {
-	srcprocedure: 'Source Procedure',
-	pulldata: 'Pull Data',
-	mapdata: 'Map Data',
-	transform: 'Transform Data',
-	validate: 'Validate Data',
-	pushdata: 'Push Data',
-	tarprocedure: 'Target Procedure',
-	sendlogs: 'Send Logs',
-	senddata: 'Send Data',
-	sendmissing: 'Send Missing Maps'
-};
 
 export interface DimeProcessDefaultTarget {
 	id: number,
