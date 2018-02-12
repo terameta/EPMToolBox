@@ -222,7 +222,7 @@ export class EnvironmentTools {
 				}
 			} );
 		} );
-	};
+	}
 
 	public create = () => {
 		const newEnv = { name: 'New Environment', type: 0, server: '', port: '' };
@@ -235,7 +235,7 @@ export class EnvironmentTools {
 				}
 			} );
 		} );
-	};
+	}
 
 	public update = ( refItem: DimeEnvironment ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -289,7 +289,7 @@ export class EnvironmentTools {
 				}
 			} );
 		} );
-	};
+	}
 
 	public listDatabases = ( refObj: DimeEnvironmentDetail ) => {
 		// console.log('Environment list databases');
@@ -369,7 +369,7 @@ export class EnvironmentTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 
 	public listProcedureDetails = ( refObj: { stream: DimeStream, procedure: any } ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -383,7 +383,7 @@ export class EnvironmentTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	public runProcedure = ( refObj: { stream: DimeStream, procedure: any } ) => {
 		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
@@ -407,7 +407,7 @@ export class EnvironmentTools {
 					catch( reject );
 			}
 		} );
-	};
+	}
 	public getDescriptions = ( refStream: DimeStream, refField: DimeStreamField ) => {
 		return new Promise( ( resolve, reject ) => {
 			if ( !refStream.environment ) {
@@ -425,7 +425,7 @@ export class EnvironmentTools {
 					catch( reject );
 			}
 		} );
-	};
+	}
 	public writeData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.id }, true ).
@@ -441,7 +441,7 @@ export class EnvironmentTools {
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	// public listTypes = () => {
 	// 	return new Promise( ( resolve, reject ) => {
 	// 		this.db.query( 'SELECT * FROM environmenttypes', function ( err, rows, fields ) {

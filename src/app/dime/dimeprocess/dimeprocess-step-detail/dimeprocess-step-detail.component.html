@@ -31,48 +31,6 @@
 	</div>
 	<div class="box-body">
 		<form (ngSubmit)="mainService.stepUpdate()" #f="ngForm" class="form-horizontal" *ngIf="mainService.curStep">
-				<div class="form-group" *ngIf="mainService.curStep.type == 'tarprocedure'">
-					<label for="steptarprocedure" class=" control-label">Definition:</label>
-					<div >
-						<span *ngIf="mainService.curItemTargetProcedures.length == 0"><i class="fa fa-circle-o-notch fa-spin fa-fw"></i> Please wait, retrieving items...</span>
-						<form *ngIf="mainService.curItemTargetProcedures.length > 0" class="form-horizontal">
-							<span *ngFor="let curProcedure of mainService.curItemTargetProcedures;let i = index">
-								<label>
-									<input
-										type="radio"
-										name="steptarprocedure{{i}}selection"
-										[checked]="mainService.curItemSelectedProcedure.name == curProcedure.name"
-										[value]="curProcedure"
-										(change)="mainService.stepProcedureSelected(curProcedure)">
-										{{curProcedure.name}}
-								</label><br>
-								<span *ngIf="curProcedure.name == mainService.curItemSelectedProcedure.name">
-									<button class="btn btn-xs btn-primary" (click)='mainService.stepPBCSProcedureVariableAdd()' *ngIf="mainService.curStepIsPBCS">Add Variable</button>
-									<hr *ngIf="mainService.curStepIsPBCS">
-									<span *ngFor="let curVariable of mainService.curItemSelectedProcedure.variables; let index = index;">
-										<div class="input-group">
-											<span class="input-group-addon" style="width:200px;text-align:left" *ngIf="!mainService.curStepIsPBCS">{{curVariable.description}}</span>
-											<input type="text" name="variablename{{index}}" class="form-control" [(ngModel)]="curVariable.name" placeholder="Variable Name" *ngIf="mainService.curStepIsPBCS">
-											<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;" *ngIf="mainService.curStepIsPBCS"></span>
-											<input type="text" name="variabledimension{{index}}" class="form-control" [(ngModel)]="curVariable.dimension" placeholder="Variable Dimension" *ngIf="mainService.curStepIsPBCS">
-											<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;" *ngIf="mainService.curStepIsPBCS"></span>
-											<select name="valuetype{{index}}" class="form-control" [(ngModel)]="curVariable.valuetype">
-												<option value="filteredvalues">Filtered Distinct Values of</option>
-												<option value="allvalues">All Distinct Values of</option>
-												<option value="manualvalue">Assign Value:</option>
-											</select>
-											<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
-											<select name="variable{{index}}field" class="form-control" [(ngModel)]="curVariable.value" *ngIf="curVariable.valuetype!='manualvalue'" style="width:150px">
-												<option *ngFor="let field of mainService.curItemTargetFields" [value]="field.name">{{field.name}}</option>
-											</select>
-											<input type="text" class="form-control" [(ngModel)]="curVariable.value" name="variable{{index}}field" *ngIf="curVariable.valuetype=='manualvalue'" style="width:150px">
-										</div>
-									</span>
-								</span>
-							</span>
-						</form>
-					</div>
-				</div>
 				<div class="form-group" *ngIf="mainService.curStep.type == 'sendlogs'">
 					<label for="stepsendlogs" class=" control-label">Recepients:</label>
 					<div >

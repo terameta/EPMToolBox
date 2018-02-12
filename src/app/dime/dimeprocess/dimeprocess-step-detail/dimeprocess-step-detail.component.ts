@@ -37,7 +37,7 @@ export class DimeprocessStepDetailComponent implements OnInit, OnDestroy {
 		} ) );
 	}
 	ngOnDestroy() {
-
+		this.subscriptions.forEach( sub => sub.unsubscribe() );
 	}
 
 	private findCurrentStep = () => {

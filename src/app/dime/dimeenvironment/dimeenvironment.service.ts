@@ -17,6 +17,7 @@ import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../..
 import { DimeEnvironmentActions } from './dimeenvironment.actions';
 import { DimeEnvironmentBackend } from './dimeenvironment.backend';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
+import { DimeStream } from '../../../../shared/model/dime/stream';
 
 @Injectable()
 export class DimeEnvironmentService {
@@ -100,34 +101,8 @@ export class DimeEnvironmentService {
 		}, error => {
 			this.testResult = error;
 		} );
-		// .catch( resp => {
-		// 	this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
-		// 	return resp;
-		// } );
 	}
 
-	/*
-
-
-
-
-		public listProcedures = ( environmentID: number, curStream: DimeStream ) => {
-			return this.authHttp.post( this.baseUrl + '/listProcedures/' + environmentID, curStream, { headers: this.headers } ).
-				map( ( response: Response ) => {
-					return response.json();
-				} ).
-				catch( ( error: Response ) => {
-					this.toastr.error( 'Failed to list procedures for environment ' + environmentID + '.', this.serviceName );
-					console.log( error );
-					return Observable.throw( error );
-				} )
-		}
-		public listProcedureDetails = ( environmentID: number, details: any ) => {
-			return this.authHttp.post( this.baseUrl + '/listProcedureDetails/' + environmentID, details, { headers: this.headers } ).
-				map( response => response.json() ).
-				catch( ( error ) => {
-					return Observable.throw( error );
-				} );
-		}
-	*/
+	public listProcedures = ( environmentID: number, stream: DimeStream ) => this.backend.listProcedures( environmentID, stream );
+	public listProcedureDetails = ( environmentID: number, details: any ) => this.backend.listProcedureDetails( environmentID, details );
 }

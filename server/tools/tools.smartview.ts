@@ -3,6 +3,7 @@ import * as xml2js from 'xml2js';
 import * as request from 'request';
 import * as url from 'url';
 import * as cheerio from 'cheerio';
+import { CheerioStatic } from 'cheerio';
 
 import { MainTools } from './tools.main';
 import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSmartView';
@@ -16,6 +17,42 @@ export class SmartViewTools {
 	constructor( public db: Pool, public tools: MainTools ) {
 		this.xmlBuilder = new xml2js.Builder();
 		this.xmlParser = new xml2js.Parser();
+	}
+	public listBusinessRuleDetails = ( environment: DimeEnvironmentSmartView ) => {
+		return this.smartviewListBusinessRuleDetails( environment );
+	}
+	private smartviewListBusinessRuleDetails = ( environment: DimeEnvironmentSmartView ) => {
+		return this.smartviewOpenCube( environment )
+			.then( resEnv => {
+				const body = '<req_EnumRunTimePrompts><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube ><rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule><ODL_ECID>0000</ODL_ECID></req_EnumRunTimePrompts>';
+				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } )
+			} )
+			.then( response => {
+				console.log( response.body );
+				response.$( 'rtp' ).toArray().forEach( rtp => {
+					// response.$(rtp).child
+				} )
+			} );
+	}
+	public listBusinessRules = ( environment: DimeEnvironmentSmartView ) => {
+		return this.smartviewListBusinessRules( environment );
+	}
+	private smartviewListBusinessRules = ( environment: DimeEnvironmentSmartView ) => {
+		return this.smartviewOpenCube( environment )
+			.then( resEnv => {
+				// console.log( resEnv );
+				const body = '<req_EnumBusinessRules><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube><runOnSave>0</runOnSave><ODL_ECID>0000</ODL_ECID></req_EnumBusinessRules>';
+				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+			} )
+			.then( response => {
+				const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_enumbusinessrules' ) ).length > 0;
+				if ( isSuccessful ) {
+					const ruleList: any[] = response.$( 'rule' ).toArray().map( rule => ( { name: response.$( rule ).text(), hasRTP: rule.attribs.rtp, type: rule.attribs.type } ) );
+					return Promise.resolve( ruleList );
+				} else {
+					return Promise.reject( new Error( 'Failure to list business rules ' + environment.name + '@smartviewListBusinessRules' ) );
+				}
+			} );
 	}
 	public getDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ) => {
 		return this.smartviewGetDescriptions( refObj, refField ).then( result => result.memberList );

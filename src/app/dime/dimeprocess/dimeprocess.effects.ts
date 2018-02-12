@@ -21,6 +21,7 @@ export class DimeProcessEffects {
 
 	@Effect() ALL_LOAD_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ALL.LOAD.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading all processes...', this.serviceName ) ); return action; } )
 		.switchMap( ( action ) => {
 			return this.backend.allLoad()
 				.mergeMap( resp => [
@@ -29,7 +30,8 @@ export class DimeProcessEffects {
 					DimeStreamActions.ALL.LOAD.initiateifempty(),
 					DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
 					DimeMapActions.ALL.LOAD.initiateifempty(),
-					DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
+					DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action(),
+					DimeStatusActions.success( 'All processes are now loaded.', this.serviceName )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
@@ -43,9 +45,13 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_CREATE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.CREATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Creating new process...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<DimeProcess> ) => {
 			return this.backend.oneCreate( action.payload )
-				.map( resp => DimeProcessActions.ONE.CREATE.COMPLETE.action( resp ) )
+				.mergeMap( resp => [
+					DimeStatusActions.info( 'New process is created.', this.serviceName ),
+					DimeProcessActions.ONE.CREATE.COMPLETE.action( resp )
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
@@ -58,13 +64,15 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_LOAD_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.LOAD.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading the process...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.oneLoad( action.payload )
 				.mergeMap( resp => [
 					DimeProcessActions.ONE.LOAD.COMPLETE.action( resp ),
 					DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action(),
 					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload ),
-					DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload )
+					DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload ),
+					DimeStatusActions.success( 'The process is loaded.', this.serviceName )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
@@ -79,30 +87,34 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.UPDATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving the process...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<DimeProcess> ) => {
 			return this.backend.oneUpdate( action.payload )
 				.mergeMap( ( resp: DimeProcess ) => [
+					DimeStatusActions.success( 'The process is saved.', this.serviceName ),
 					DimeProcessActions.ONE.UPDATE.COMPLETE.action( resp ),
-					DimeProcessActions.ALL.LOAD.INITIATE.action(),
-					DimeProcessActions.ONE.LOAD.INITIATE.action( action.payload.id )
+					DimeProcessActions.ONE.LOAD.INITIATE.action( action.payload.id ),
+					DimeProcessActions.ALL.LOAD.INITIATE.action()
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_DELETE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.DELETE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Deleting the process...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.oneDelete( action.payload )
-				.map( resp => DimeProcessActions.ONE.DELETE.COMPLETE.action() )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'The process is deleted.', this.serviceName ),
+					DimeProcessActions.ONE.DELETE.COMPLETE.action(),
+					DimeProcessActions.ALL.LOAD.INITIATE.action()
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
-	@Effect() ONE_DELETE_COMPLETE$ = this.actions$
-		.ofType( DimeProcessActions.ONE.DELETE.COMPLETE.type )
-		.map( action => DimeProcessActions.ALL.LOAD.INITIATE.action() );
-
 	@Effect() ONE_ISPREPARED_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.ISPREPARED.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Checking the process readiness...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.isPrepared( action.payload )
 				.map( resp => DimeProcessActions.ONE.ISPREPARED.COMPLETE.action( resp ) )
@@ -111,17 +123,26 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_STEP_LOADALL_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.STEP.LOADALL.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading process steps...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.stepLoadAll( action.payload )
-				.map( resp => DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.action( resp ) )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process steps are loaded.', this.serviceName ),
+					DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.action( resp ),
+					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload )
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_STEP_UPDATEALL_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.STEP.UPDATEALL.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving all process steps...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<{ id: number, steps: DimeProcessStep[] }> ) => {
 			return this.backend.stepUpdateAll( action.payload.id, action.payload.steps )
-				.map( resp => DimeProcessActions.ONE.STEP.UPDATEALL.COMPLETE.action() )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'All process steps are saved.', this.serviceName ),
+					DimeProcessActions.ONE.STEP.UPDATEALL.COMPLETE.action()
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
@@ -132,17 +153,25 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_STEP_CREATE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.STEP.CREATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Creating new process step...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<DimeProcessStep> ) => {
 			return this.backend.stepCreate( action.payload )
-				.map( resp => DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload.process ) )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'New procses step is created.', this.serviceName ),
+					DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload.process )
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	@Effect() ONE_STEP_UPDATE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.STEP.UPDATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving the process step...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<DimeProcessStep> ) => {
 			return this.backend.stepUpdate( action.payload )
-				.map( resp => DimeProcessActions.ONE.STEP.UPDATE.COMPLETE.action() )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process procses step is saved.', this.serviceName ),
+					DimeProcessActions.ONE.STEP.UPDATE.COMPLETE.action()
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
@@ -153,9 +182,13 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_STEP_DELETE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.STEP.DELETE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Deleting the process step...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.stepDelete( action.payload )
-				.map( resp => DimeProcessActions.ONE.STEP.DELETE.COMPLETE.action() )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process procses step is deleted.', this.serviceName ),
+					DimeProcessActions.ONE.STEP.DELETE.COMPLETE.action()
+				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 

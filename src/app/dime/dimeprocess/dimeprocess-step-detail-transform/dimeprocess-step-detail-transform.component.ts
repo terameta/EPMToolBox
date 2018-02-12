@@ -66,8 +66,8 @@ export class DimeprocessStepDetailTransformComponent implements OnInit, OnDestro
 			} else if ( !this.streamService.itemObject[sourceStream].fieldList || !this.streamService.itemObject[targetStream].fieldList ) {
 				this.currentTimeout = setTimeout( this.stepPrepareFields, this.toDelay );
 			} else {
-				this.sourceFields = this.streamService.itemObject[sourceStream].fieldList;
-				this.targetFields = this.streamService.itemObject[targetStream].fieldList;
+				this.sourceFields = this.streamService.itemObject[sourceStream].fieldList.map( field => ( <DimeStreamFieldDetail>{ id: field.id, name: field.name } ) );
+				this.targetFields = this.streamService.itemObject[targetStream].fieldList.map( field => ( <DimeStreamFieldDetail>{ id: field.id, name: field.name } ) );
 			}
 		}
 	}

@@ -38,6 +38,12 @@ export class PBCSTools {
 	public getDescriptions = ( refObj: DimeEnvironmentPBCS, refField: DimeStreamFieldDetail ) => {
 		return this.smartview.getDescriptions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ), refField );
 	}
+	public listProcedures = ( refObj: DimeEnvironmentPBCS ) => {
+		return this.smartview.listBusinessRules( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public listProcedureDetails = ( refObj: DimeEnvironmentPBCS ) => {
+		return this.smartview.listBusinessRuleDetails( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
 	/*
 		private staticVerify = ( refObj: DimeEnvironmentPBCS ) => {
 			return new Promise( ( resolve, reject ) => {

@@ -1,3 +1,9 @@
-<p>
-  dimeprocess-step-detail-validate works!
-</p>
+<div class="form-group">
+	<label for="stepvalidatedata{{currentStep.id}}" class="control-label">Matrix:</label>
+	<select name="stepvalidatedata{{currentStep.id}}" id="stepvalidatedata{{currentStep.id}}" class="form-control" [(ngModel)]="currentStep.referedid">
+		<option *ngFor="let matrix of matrixService.itemList" [value]="matrix.id">
+			{{ matrix.name }}
+		</option>
+	</select>
+</div>
+<pre>{{ currentStep | json }}</pre>

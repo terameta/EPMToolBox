@@ -480,60 +480,11 @@ export class DimeProcessService {
 					console.error( error );
 				} );
 		};
-		public stepListProcedures = ( numTry?: number ) => {
-			if ( numTry === undefined ) { numTry = 0; }
-			if ( this.curItem.target && this.curItemTargetStream.id ) {
-				this.environmentService.listProcedures( this.curItem.target, this.curItemTargetStream ).
-					subscribe(( data ) => {
-						this.curItemTargetProcedures = data;
-						this.toastr.info( 'Received procedure list' );
-					}, ( error ) => {
-						this.toastr.error( 'Failed to list procedures.', this.serviceName );
-						console.error( error );
-					} );
-			} else if ( numTry < 100 ) {
-				setTimeout(() => {
-					// console.log('Environment: ' + this.curItem.source + ', Target Stream: ' + this.curItemTargetStream.id + ' we will retry.', numTry);
-					this.stepListProcedures( ++numTry );
-				}, 1000 );
-			} else {
-				this.toastr.error( 'Failed to list procedures.', this.serviceName );
-			}
-		}
 		public stepPBCSProcedureVariableAdd = () => {
 			if ( !this.curItemSelectedProcedure.variables ) {
 				this.curItemSelectedProcedure.variables = [];
 			}
 			this.curItemSelectedProcedure.variables.push( { description: '' } );
-		}
-		public stepProcedureSelected = ( selectedProcedure: any, numTry?: number ) => {
-			if ( selectedProcedure !== undefined ) {
-				this.curItemSelectedProcedure = selectedProcedure;
-			}
-			if ( numTry === undefined ) { numTry = 0; }
-			if ( this.curItem.target && this.curItemTargetStream.id ) {
-				this.environmentService.listProcedureDetails( this.curItem.target, { stream: this.curItemTargetStream, procedure: selectedProcedure } ).
-					subscribe(( data ) => {
-						if ( Array.isArray( data ) ) {
-							this.curItemSelectedProcedure.variables = data;
-							this.toastr.info( 'Received procedure details' );
-						} else if ( data.environmentType === 'PBCS' ) {
-							this.curStepIsPBCS = true;
-							this.toastr.info( 'Received procedure details' );
-						} else {
-							this.toastr.error( 'We could not receive a proper definition for the procedure.' );
-						}
-					}, ( error ) => {
-						this.toastr.error( 'Failed to receive procedure details.', this.serviceName );
-						console.log( error );
-					} )
-			} else if ( numTry < 100 ) {
-				setTimeout(() => {
-					this.stepProcedureSelected( selectedProcedure, ++numTry );
-				}, 1000 );
-			} else {
-				this.toastr.error( 'Failed to fetch procedure details.', this.serviceName );
-			}
 		}
 		public stepRecepientAdd = ( curList: any[] ) => {
 			if ( !curList ) {

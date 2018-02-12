@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { DimeEnvironment } from '../../../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../../../shared/model/dime/environmentDetail';
+import { DimeStream } from '../../../../shared/model/dime/stream';
 
 @Injectable()
 export class DimeEnvironmentBackend {
@@ -20,6 +21,9 @@ export class DimeEnvironmentBackend {
 	public listDatabases = ( id: number ) => this.http.get( this.baseUrl + '/listDatabases/' + id );
 	public listTables = ( id: number, db: string ) => this.http.get( this.baseUrl + '/listTables/' + id + '/' + db );
 	public listDescriptiveTables = ( id: number, db: string, cube: string ) => this.http.get( this.baseUrl + '/listDescriptiveTables/' + id + '/' + db + '/' + cube );
+
+	public listProcedures = ( id: number, stream: DimeStream ) => this.http.post( this.baseUrl + '/listProcedures/' + id, stream );
+	public listProcedureDetails = ( id: number, details: any ) => this.http.post( this.baseUrl + '/listProcedureDetails/' + id, details );
 
 	public testAll = () => this.http.get( this.baseUrl + '/testall' );
 

@@ -1,5 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DimeProcessStep } from '../../../../../shared/model/dime/process';
+import { DimeMatrixService } from '../../dimematrix/dimematrix.service';
+import { DimeProcessService } from '../dimeprocess.service';
 
 @Component( {
 	selector: 'app-dimeprocess-step-detail-validate',
@@ -9,7 +11,10 @@ import { DimeProcessStep } from '../../../../../shared/model/dime/process';
 export class DimeprocessStepDetailValidateComponent implements OnInit {
 	@Input() currentStep: DimeProcessStep;
 
-	constructor() { }
+	constructor(
+		public mainService: DimeProcessService,
+		public matrixService: DimeMatrixService
+	) { }
 
 	ngOnInit() {
 	}

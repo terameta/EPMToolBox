@@ -22,7 +22,9 @@ export const DimeStatusActions = {
 	ERROR: 'DIME_ERROR',
 	error: ( error: Error, caller: string ): Action => ( { type: DimeStatusActions.ERROR, payload: { error, caller } } ),
 	SUCCESS: 'DIME_SUCCESS',
-	success: ( message: string, caller: string ): Action => ( { type: DimeStatusActions.SUCCESS, payload: { message, caller } } )
+	success: ( message: string, caller: string ): Action => ( { type: DimeStatusActions.SUCCESS, payload: { message, caller } } ),
+	INFO: 'DIME_INFO',
+	info: ( message: string, caller: string ): Action => ( { type: DimeStatusActions.INFO, payload: { message, caller } } )
 };
 
 export function dimeStatusReducer( state: DimeStatusState, action: Action ): DimeStatusState {
@@ -51,6 +53,12 @@ export class DimeStatusEffects {
 		.ofType( DimeStatusActions.SUCCESS )
 		.map( ( action: Action ) => {
 			this.toastr.success( action.payload.message, action.payload.caller );
+		} );
+
+	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_INFO$ = this.actions$
+		.ofType( DimeStatusActions.INFO )
+		.map( ( action: Action ) => {
+			this.toastr.info( action.payload.message, action.payload.caller );
 		} );
 
 	constructor( private actions$: Actions, private store$: Store<AppState>, private router$: Router, private toastr: ToastrService ) { }

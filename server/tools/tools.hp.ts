@@ -35,6 +35,12 @@ export class HPTools {
 	public getDescriptions = ( refObj: DimeEnvironmentHP, refField: DimeStreamFieldDetail ) => {
 		return this.smartview.getDescriptions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ), refField );
 	}
+	public listProcedures = ( refObj: DimeEnvironmentHP ) => {
+		return this.smartview.listBusinessRules( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
+	public listProcedureDetails = ( refObj: DimeEnvironmentHP ) => {
+		return this.smartview.listBusinessRuleDetails( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
+	}
 	// Old Step0100
 	/* private hpEstablishConnection = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -448,70 +454,6 @@ export class HPTools {
 				} ).
 				catch( reject );
 		} );
-	}
-	public listProcedures = ( refObj: DimeEnvironmentHP ) => {
-		return this.hpListRules( refObj );
-	}
-	private hpListRules = ( refObj: DimeEnvironmentHP ) => {
-		return new Promise( ( resolve, reject ) => {
-			this.hpOpenCube( refObj ).
-				then( ( innerObj: DimeEnvironmentHP ) => {
-					request.post( {
-						url: innerObj.planningurl || '',
-						body: '<req_EnumBusinessRules><sID>' + innerObj.sID + '</sID><cube>' + innerObj.table + '</cube><runOnSave>0</runOnSave><ODL_ECID>0000</ODL_ECID></req_EnumBusinessRules>',
-						headers: { 'Content-Type': 'application/xml' }
-					}, ( err, response, body ) => {
-						if ( err ) {
-							reject( err );
-						} else {
-							this.xmlParser( body, ( pErr: any, result: any ) => {
-								if ( pErr ) {
-									reject( pErr );
-								} else if ( !result ) {
-									reject( 'No result at step hpListRules' );
-								} else {
-									if ( !result ) {
-										reject( 'No result returned' );
-									} else if ( !result.res_EnumBusinessRules ) {
-										reject( 'No rules are enumarated' );
-									} else if ( !result.res_EnumBusinessRules.rules ) {
-										reject( 'No rules parent is lister under enumaration' );
-									} else if ( !Array.isArray( result.res_EnumBusinessRules.rules ) ) {
-										reject( 'Rules enumeration is not an array' );
-									} else if ( result.res_EnumBusinessRules.rules.length < 1 ) {
-										reject( 'Rules enumeration is an array, but the length is less than 1' );
-									} else if ( !result.res_EnumBusinessRules.rules[0] ) {
-										resolve( [] );
-									} else if ( !result.res_EnumBusinessRules.rules[0].rule ) {
-										reject( 'Rules list parent doesn\'t exist' );
-									} else if ( !Array.isArray( result.res_EnumBusinessRules.rules[0].rule ) ) {
-										reject( 'Rules list is not an array' );
-									} else {
-										let rulesList: any[]; rulesList = [];
-										const curList = result.res_EnumBusinessRules.rules[0].rule;
-										let ruleToPush: any;
-										curList.forEach( function ( curRule: any ) {
-											ruleToPush = {};
-											if ( curRule._ ) { ruleToPush.name = curRule._; }
-											if ( curRule.$ ) {
-												if ( curRule.$.rtp ) { ruleToPush.hasRTP = curRule.$.rtp; }
-												if ( curRule.$.type ) { ruleToPush.type = curRule.$.type; }
-											}
-											rulesList.push( ruleToPush );
-										} );
-
-										resolve( rulesList );
-									}
-								}
-							} );
-						}
-					} );
-				} ).
-				catch( reject );
-		} );
-	}
-	public listProcedureDetails = ( refObj: DimeEnvironmentHP ) => {
-		return this.hpListRuleDetails( refObj );
 	}
 	private hpListRuleDetails = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {

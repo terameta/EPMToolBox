@@ -72,16 +72,21 @@ export class ProcessTools {
 		} );
 	}
 	public update = ( dimeProcess: DimeProcess ) => {
-		delete dimeProcess.isPrepared;
-		delete dimeProcess.issueList;
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'UPDATE processes SET ? WHERE id = ?', [dimeProcess, dimeProcess.id], ( err, rows, fields ) => {
-				if ( err ) {
-					reject( { error: err, message: 'Failed to update the process.' } );
-				} else {
-					resolve( dimeProcess );
-				}
-			} );
+			this.stepUpdateAll( { processID: dimeProcess.id, steps: dimeProcess.steps } )
+				.then( () => {
+					delete dimeProcess.isPrepared;
+					delete dimeProcess.issueList;
+					delete dimeProcess.steps;
+					this.db.query( 'UPDATE processes SET ? WHERE id = ?', [dimeProcess, dimeProcess.id], ( err, rows, fields ) => {
+						if ( err ) {
+							reject( err );
+						} else {
+							resolve( dimeProcess );
+						}
+					} );
+				} )
+				.catch( reject );
 		} );
 	}
 	public delete = ( id: number ) => {
@@ -144,11 +149,11 @@ export class ProcessTools {
 	}
 	public stepGetOne = ( id: number ): Promise<DimeProcessStep> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM processsteps WHERE id = ?', id, function ( err, rows: DimeProcessStep[], fields ) {
+			this.db.query( 'SELECT * FROM processsteps WHERE id = ?', id, ( err, rows: DimeProcessStep[], fields ) => {
 				if ( err ) {
 					reject( err );
 				} else if ( rows.length !== 1 ) {
-					reject( 'Step is not found' );
+					reject( new Error( 'Step is not found' ) );
 				} else {
 					rows.map( ( curStep ) => {
 						return this.stepPrepareToGet( curStep );
@@ -284,13 +289,13 @@ export class ProcessTools {
 				} ).
 				then( ( stepList ) => {
 					let srcprocedureOrder = 0, pulldataOrder = 0, mapdataOrder = 0, pushdataOrder = 0;
-					let manipulateOrder = 0, tarprocedureOrder = 0, sendlogsOrder = 0, senddataOrder = 0, sendmissingOrder = 0;
+					let transformOrder = 0, tarprocedureOrder = 0, sendlogsOrder = 0, senddataOrder = 0, sendmissingOrder = 0;
 					stepList.forEach( ( curStep ) => {
 						if ( curStep.type === 'srcprocedure' && curStep.position ) { srcprocedureOrder = curStep.position; }
 						if ( curStep.type === 'pulldata' && curStep.position ) { pulldataOrder = curStep.position; }
 						if ( curStep.type === 'mapdata' && curStep.position ) { mapdataOrder = curStep.position; }
 						if ( curStep.type === 'pushdata' && curStep.position ) { pushdataOrder = curStep.position; }
-						if ( curStep.type === 'transform' && curStep.position ) { manipulateOrder = curStep.position; }
+						if ( curStep.type === 'transform' && curStep.position ) { transformOrder = curStep.position; }
 						if ( curStep.type === 'tarprocedure' && curStep.position ) { tarprocedureOrder = curStep.position; }
 						if ( curStep.type === 'sendlogs' && curStep.position ) { sendlogsOrder = curStep.position; }
 						if ( curStep.type === 'senddata' && curStep.position ) { senddataOrder = curStep.position; }
@@ -299,7 +304,7 @@ export class ProcessTools {
 
 					if ( pulldataOrder >= mapdataOrder ) { isPrepared = ATReadyStatus.NotReady; issueArray.push( 'Please re-order the steps. Pull Data step should be assigned before map data.' ); }
 					if ( mapdataOrder >= pushdataOrder ) { isPrepared = ATReadyStatus.NotReady; issueArray.push( 'Please re-order the steps. Map Data step should be assigned before push data.' ); }
-					if ( manipulateOrder >= pushdataOrder ) { isPrepared = ATReadyStatus.NotReady; issueArray.push( 'Please re-order the steps. Transform Data step should be assigned before push data.' ); }
+					if ( transformOrder >= pushdataOrder ) { isPrepared = ATReadyStatus.NotReady; issueArray.push( 'Please re-order the steps. Transform Data step should be assigned before push data.' ); }
 
 					resolve( { isPrepared: isPrepared, issueList: issueArray } );
 				} ).

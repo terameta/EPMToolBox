@@ -1,3 +1,44 @@
-<p>
-  dimeprocess-step-detail-tarprocedure works!
-</p>
+<div class="form-group">
+	<label for="steptarprocedure" class="control-label">Definition:</label>
+	<hr>
+	<div>
+		<span *ngIf="proceduresAll.length == 0">
+			<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> Please wait, retrieving items...
+		</span>
+		<div class="row">
+			<div class="col-xs-6">
+				<span *ngIf="proceduresAll.length > 0">
+					<label for="procedureFilter" class="control-label">Filter:</label>
+					<input type="text" name="procedureFilter" id="procedureFilter" [(ngModel)]="filter" (keyup)="applyFilter()" class="form-control">
+					<ng-container *ngFor="let procedure of procedures;let i = index">
+						<label>
+							<input type="radio" name="steptarprocedure{{i}}selection" [checked]="currentStep.detailsObject.name == procedure.name" [value]="procedure" (change)="stepProcedureSelected(procedure)"> {{procedure.name}}
+						</label>
+						<br>
+					</ng-container>
+				</span>
+			</div>
+			<div class="col-xs-6">
+				<span *ngIf="currentStep.detailsObject?.name">
+					<label class="control-label">{{currentStep.detailsObject.name}}:</label>
+					<span *ngFor="let curVariable of currentStep.detailsObject.variables; let index = index;">
+						<div class="input-group">
+							<select name="valuetype{{index}}" class="form-control" [(ngModel)]="curVariable.valuetype">
+								<option value="filteredvalues">Filtered Distinct Values of</option>
+								<option value="allvalues">All Distinct Values of</option>
+								<option value="manualvalue">Assign Value:</option>
+							</select>
+							<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+							<select name="variable{{index}}field" class="form-control" [(ngModel)]="curVariable.value" *ngIf="curVariable.valuetype!='manualvalue'" style="width:150px">
+								<option *ngFor="let field of mainService.curItemTargetFields" [value]="field.name">{{field.name}}</option>
+							</select>
+							<input type="text" class="form-control" [(ngModel)]="curVariable.value" name="variable{{index}}field" *ngIf="curVariable.valuetype=='manualvalue'" style="width:150px">
+						</div>
+					</span>
+				</span>
+				<hr>
+				<pre>{{currentStep | json}}</pre>
+			</div>
+		</div>
+	</div>
+</div>

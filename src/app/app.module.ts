@@ -75,6 +75,16 @@ const appRoutes: Routes = [
 	{ path: '', pathMatch: 'full', redirectTo: 'welcome' }
 ];
 
+const toastrOptions = {
+	positionClass: 'toast-bottom-full-width',
+	preventDuplicates: true,
+	showMethod: 'slideUp',
+	closeMethod: 'slideDown',
+	newestOnTop: true,
+	progressBar: true,
+	timeOut: 2500
+};
+
 export function tokenGetter() {
 	return localStorage.getItem( 'token' );
 }
@@ -99,8 +109,8 @@ export function tokenGetter() {
 		AccessManagementModule,
 		EndUserModule,
 		RouterModule.forRoot( appRoutes ),
-		ToastrModule.forRoot(),
 		BrowserAnimationsModule,
+		ToastrModule.forRoot( toastrOptions ),
 		AuthModule,
 		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
 		EffectsModule.forRoot( [
