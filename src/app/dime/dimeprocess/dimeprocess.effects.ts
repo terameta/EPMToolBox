@@ -157,7 +157,7 @@ export class DimeProcessEffects {
 		.switchMap( ( action: Action<DimeProcessStep> ) => {
 			return this.backend.stepCreate( action.payload )
 				.mergeMap( resp => [
-					DimeStatusActions.success( 'New procses step is created.', this.serviceName ),
+					DimeStatusActions.success( 'New process step is created.', this.serviceName ),
 					DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload.process )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
@@ -169,7 +169,7 @@ export class DimeProcessEffects {
 		.switchMap( ( action: Action<DimeProcessStep> ) => {
 			return this.backend.stepUpdate( action.payload )
 				.mergeMap( resp => [
-					DimeStatusActions.success( 'Process procses step is saved.', this.serviceName ),
+					DimeStatusActions.success( 'Process step is saved.', this.serviceName ),
 					DimeProcessActions.ONE.STEP.UPDATE.COMPLETE.action()
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
@@ -186,7 +186,7 @@ export class DimeProcessEffects {
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.stepDelete( action.payload )
 				.mergeMap( resp => [
-					DimeStatusActions.success( 'Process procses step is deleted.', this.serviceName ),
+					DimeStatusActions.success( 'Process step is deleted.', this.serviceName ),
 					DimeProcessActions.ONE.STEP.DELETE.COMPLETE.action()
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
@@ -196,6 +196,26 @@ export class DimeProcessEffects {
 		.ofType( DimeProcessActions.ONE.STEP.DELETE.COMPLETE.type )
 		.withLatestFrom( this.store$ )
 		.map( ( [action, state] ) => DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( state.dimeProcess.curItem.id ) );
+
+	@Effect() ONE_DEFAULTTARGETS_LOAD_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.DEFAULTTARGETS.LOAD.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Fetching process default targets...', this.serviceName ) ); return action; } )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.defaultTargetsLoad( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process default targets are fetched.', this.serviceName ),
+					DimeProcessActions.ONE.DEFAULTTARGETS.LOAD.COMPLETE.action( resp )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_DEFAULTTARGETS_UPDATE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.DEFAULTTARGETS.UPDATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving process default targets...', this.serviceName ) ); return <Action<any[]>>action; } )
+		.withLatestFrom( this.store$ )
+		.switchMap( ( [action, state] ) => {
+			return this.backend.defaultTargetsUpdate( state.dimeProcess.curItem.id, action.payload );
+		} );
 
 	constructor(
 		private actions$: Actions,

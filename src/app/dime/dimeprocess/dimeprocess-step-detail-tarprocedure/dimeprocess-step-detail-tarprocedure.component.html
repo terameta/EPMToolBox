@@ -1,6 +1,6 @@
 <div class="form-group">
 	<label for="steptarprocedure" class="control-label">Definition:</label>
-	<hr>
+	<hr style="margin: 5px 0;">
 	<div>
 		<span *ngIf="proceduresAll.length == 0">
 			<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> Please wait, retrieving items...
@@ -9,10 +9,21 @@
 			<div class="col-xs-6">
 				<span *ngIf="proceduresAll.length > 0">
 					<label for="procedureFilter" class="control-label">Filter:</label>
-					<input type="text" name="procedureFilter" id="procedureFilter" [(ngModel)]="filter" (keyup)="applyFilter()" class="form-control">
+					<div class="input-group">
+						<input type="text" name="procedureFilter" id="procedureFilter" [(ngModel)]="filter" (keyup)="applyFilter()" class="form-control">
+						<span class="input-group-addon">
+							Showing {{procedures.length}}/{{proceduresAll.length}}
+						</span>
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" (click)="filter='';applyFilter();">
+								<i class="fa fa-eraser fw"></i> Clear
+							</button>
+						</span>
+					</div>
+					<hr>
 					<ng-container *ngFor="let procedure of procedures;let i = index">
 						<label>
-							<input type="radio" name="steptarprocedure{{i}}selection" [checked]="currentStep.detailsObject.name == procedure.name" [value]="procedure" (change)="stepProcedureSelected(procedure)"> {{procedure.name}}
+							<input type="radio" name="steptarprocedure{{i}}selection" [checked]="currentStep.detailsObject?.name == procedure.name" [value]="procedure" (change)="stepProcedureSelected(procedure)"> {{procedure.name}}
 						</label>
 						<br>
 					</ng-container>
@@ -21,23 +32,30 @@
 			<div class="col-xs-6">
 				<span *ngIf="currentStep.detailsObject?.name">
 					<label class="control-label">{{currentStep.detailsObject.name}}:</label>
-					<span *ngFor="let curVariable of currentStep.detailsObject.variables; let index = index;">
-						<div class="input-group">
-							<select name="valuetype{{index}}" class="form-control" [(ngModel)]="curVariable.valuetype">
-								<option value="filteredvalues">Filtered Distinct Values of</option>
-								<option value="allvalues">All Distinct Values of</option>
-								<option value="manualvalue">Assign Value:</option>
-							</select>
-							<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
-							<select name="variable{{index}}field" class="form-control" [(ngModel)]="curVariable.value" *ngIf="curVariable.valuetype!='manualvalue'" style="width:150px">
-								<option *ngFor="let field of mainService.curItemTargetFields" [value]="field.name">{{field.name}}</option>
-							</select>
-							<input type="text" class="form-control" [(ngModel)]="curVariable.value" name="variable{{index}}field" *ngIf="curVariable.valuetype=='manualvalue'" style="width:150px">
-						</div>
+					<br>
+					<span *ngIf="isRefreshingProcedureDetails">
+						<i class="fa fa-circle-o-notch fa-spin fa-fw"></i> Please wait, refreshing details...
 					</span>
+					<ng-container *ngIf="!isRefreshingProcedureDetails">
+						<span *ngFor="let curVariable of currentStep.detailsObject.variables; let index = index;">
+							<div class="input-group">
+								<span class="input-group-addon" style="width:200px;max-width:200px;text-align:left;">
+									{{curVariable.description}}
+								</span>
+								<select name="valuetype{{index}}" class="form-control" [(ngModel)]="curVariable.valuetype" (change)="variableTypeChange(curVariable)">
+									<option value="filteredvalues">Filtered Distinct Values of</option>
+									<option value="allvalues">All Distinct Values of</option>
+									<option value="manualvalue">Assign Value:</option>
+								</select>
+								<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+								<select name="variable{{index}}field" class="form-control" [(ngModel)]="curVariable.value" *ngIf="curVariable.valuetype!='manualvalue'" style="width:150px" disabled>
+									<option *ngFor="let field of streamService.itemObject[this.targetStreamID]?.fieldList" [value]="field.name">{{field.name}}</option>
+								</select>
+								<input type="text" class="form-control" [(ngModel)]="curVariable.value" name="variable{{index}}field" *ngIf="curVariable.valuetype=='manualvalue'" style="width:150px">
+							</div>
+						</span>
+					</ng-container>
 				</span>
-				<hr>
-				<pre>{{currentStep | json}}</pre>
 			</div>
 		</div>
 	</div>

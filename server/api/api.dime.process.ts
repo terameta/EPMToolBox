@@ -29,9 +29,9 @@ export class ApiDimeProcess {
 		this.apiRoutes.post( '/step', ( req, res ) => { this.rester.respond( this.processTools.stepCreate, req.body, req, res ); } );
 		this.apiRoutes.put( '/step', ( req, res ) => { this.rester.respond( this.processTools.stepUpdate, req.body, req, res ); } );
 		this.apiRoutes.delete( '/step/:id', ( req, res ) => { this.rester.respond( this.processTools.stepDelete, req.params.id, req, res ); } );
+		this.apiRoutes.get( '/defaultTargets/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchDefaults, req.params.id, req, res ); } );
+		this.apiRoutes.put( '/defaultTargets/:id', ( req, res ) => { this.rester.respond( this.processTools.applyDefaults, { processID: req.params.id, defaults: req.body }, req, res ); } );
 
-		// this.apiRoutes.get( '/defaults/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchDefaults, req.params.id, req, res ); } );
-		// this.apiRoutes.put( '/defaults/:id', ( req, res ) => { this.rester.respond( this.processTools.applyDefaults, { processID: req.params.id, defaults: req.body }, req, res ); } );
 		// this.apiRoutes.get( '/filters/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchFilters, req.params.id, req, res ); } );
 		// this.apiRoutes.put( '/filters/:id', ( req, res ) => { this.rester.respond( this.processTools.applyFilters, req.body, req, res ); } );
 		// this.apiRoutes.get( '/filtersdatafile/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchFiltersDataFile, req.params.id, req, res ); } );

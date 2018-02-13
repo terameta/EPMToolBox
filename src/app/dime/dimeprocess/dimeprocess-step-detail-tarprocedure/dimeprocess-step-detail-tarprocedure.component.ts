@@ -6,7 +6,7 @@ import { DimeStreamService } from '../../dimestream/dimestream.service';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs/Subscription';
 import { ActivatedRoute, Params } from '@angular/router';
-import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { SortByName, SortByDescription } from '../../../../../shared/utilities/utilityFunctions';
 
 @Component( {
 	selector: 'app-dimeprocess-step-detail-tarprocedure',
@@ -18,10 +18,12 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 	private numberofListProceduresTry = 0;
 	public procedures: any[] = [];
 	public proceduresAll: any[] = [];
-	public filter: string = '';
+	public filter = '';
 	private subscriptions: Subscription[] = [];
 	private stepid = 0;
-	private targetStreamID: number;
+	public targetStreamID: number;
+	public isRefreshingProcedureDetails = false;
+	private numberofListProcedureDetailsTry = 0;
 
 	constructor(
 		private route: ActivatedRoute,
@@ -45,8 +47,32 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 	}
 
 	private initiateAll = () => {
-		this.initiateStep();
-		this.listProcedures();
+		this.waitForStepChange().then( () => {
+			if ( !this.currentStep.detailsObject ) {
+				this.currentStep.detailsObject = {};
+			}
+			if ( this.currentStep.detailsObject.name ) {
+				this.filter = this.currentStep.detailsObject.name;
+				this.stepProcedureSelected();
+			} else {
+				this.filter = '';
+			}
+			this.applyFilter();
+			this.initiateStep();
+			this.listProcedures();
+		} );
+	}
+
+	private waitForStepChange = () => {
+		return new Promise( ( resolve, reject ) => {
+			if ( this.currentStep.id === this.stepid ) {
+				resolve();
+			} else {
+				setTimeout( () => {
+					resolve( this.waitForStepChange() );
+				}, 250 );
+			}
+		} );
 	}
 
 	private initiateStep = () => {
@@ -63,40 +89,84 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 		}
 	}
 
-	public stepProcedureSelected = ( selectedProcedure: any, numTry?: number ) => {
-		if ( selectedProcedure !== undefined ) {
-			this.currentStep.detailsObject.name = selectedProcedure.name;
-			this.currentStep.detailsObject.hasRTP = selectedProcedure.hasRTP;
+	public stepProcedureSelected = ( selectedProcedure?: any ) => {
+		if ( !this.mainService.currentItem ) {
+			setTimeout( () => { this.stepProcedureSelected( selectedProcedure ); }, 500 );
+		} else if ( !this.mainService.currentItem.target ) {
+			setTimeout( () => { this.stepProcedureSelected( selectedProcedure ); }, 500 );
+		} else if ( !this.targetStreamID ) {
+			setTimeout( () => { this.stepProcedureSelected( selectedProcedure ); }, 500 );
+		} else if ( !this.streamService.itemObject[this.targetStreamID] ) {
+			setTimeout( () => { this.stepProcedureSelected( selectedProcedure ); }, 500 );
+		} else {
+			if ( selectedProcedure ) {
+				this.currentStep.detailsObject = {};
+				this.currentStep.detailsObject.name = selectedProcedure.name;
+				this.currentStep.detailsObject.hasRTP = selectedProcedure.hasRTP;
+				this.currentStep.detailsObject.type = selectedProcedure.type;
+			} else {
+				selectedProcedure = Object.assign( {}, this.currentStep.detailsObject );
+			}
+			this.stepProcedureSelectedAction( selectedProcedure );
 		}
-		this.toastr.info( 'Retrieving procedure details...' );
+	}
+
+	public variableTypeChange = ( variable ) => {
+		if ( variable.valuetype === 'manualvalue' ) {
+			variable.value = '';
+		} else {
+			variable.value = variable.dimension;
+		}
+	}
+
+	public stepProcedureSelectedAction = ( selectedProcedure: any ) => {
+		this.isRefreshingProcedureDetails = true;
 		this.environmentService.listProcedureDetails( this.mainService.currentItem.target, { stream: this.streamService.itemObject[this.targetStreamID], procedure: selectedProcedure } ).
-			subscribe( ( data ) => {
-				if ( Array.isArray( data ) ) {
-					this.currentStep.detailsObject.variables = data;
+			subscribe( ( response ) => {
+				this.isRefreshingProcedureDetails = false;
+				if ( Array.isArray( response ) ) {
+					if ( !this.currentStep.detailsObject.variables ) {
+						this.currentStep.detailsObject.variables = [];
+					}
+					this.currentStep.detailsObject.variables.forEach( curVariable => {
+						const currentIndex = response.findIndex( element => element.name === curVariable.name );
+						if ( currentIndex >= 0 ) {
+							response[currentIndex] = Object.assign( response[currentIndex], curVariable );
+						}
+					} );
+					response.forEach( curResponse => {
+						if ( curResponse.dimension ) {
+							curResponse.value = curResponse.dimension;
+						}
+					} );
+					this.currentStep.detailsObject.variables = response;
 					this.toastr.info( 'Received procedure details' );
 				} else {
 					this.toastr.error( 'We could not receive a proper definition for the procedure.' );
 				}
 			}, ( error ) => {
+				this.isRefreshingProcedureDetails = false;
 				this.toastr.error( 'Failed to receive procedure details.' );
-				console.log( error );
+				console.error( error );
 			} );
 	}
 	public listProcedures = () => {
 		this.targetStreamID = this.mainService.currentItem.steps.filter( step => step.type === DimeProcessStepType.PushData ).map( step => step.referedid )[0];
-
-		if ( this.mainService.currentItem.target && this.targetStreamID && this.streamService.itemObject[this.targetStreamID] ) {
-			const targetStreamName = this.streamService.itemObject[this.targetStreamID].name;
-			this.environmentService.listProcedures( this.mainService.currentItem.target, this.streamService.itemObject[this.targetStreamID] ).subscribe( ( result: any[] ) => {
-				this.proceduresAll = result.sort( SortByName );
-				this.applyFilter();
-			}, error => {
-				console.error( error );
-			} );
-		} else if ( this.numberofListProceduresTry++ < 500 ) {
-			setTimeout( this.listProcedures, 250 );
-		} else {
-			this.toastr.error( 'Failed to list procedures. Process is not ready yet.' );
+		if ( this.proceduresAll.length === 0 ) {
+			if ( this.mainService.currentItem.target && this.targetStreamID && this.streamService.itemObject[this.targetStreamID] ) {
+				// const targetStreamName = this.streamService.itemObject[this.targetStreamID].name;
+				// console.log( 'Target:', this.mainService.currentItem.target, 'StreamName:', this.streamService.itemObject[this.targetStreamID].name );
+				this.environmentService.listProcedures( this.mainService.currentItem.target, this.streamService.itemObject[this.targetStreamID] ).subscribe( ( result: any[] ) => {
+					this.proceduresAll = result.sort( SortByName );
+					this.applyFilter();
+				}, error => {
+					console.error( error );
+				} );
+			} else if ( this.numberofListProceduresTry++ < 500 ) {
+				setTimeout( this.listProcedures, 250 );
+			} else {
+				this.toastr.error( 'Failed to list procedures. Process is not ready yet.' );
+			}
 		}
 	}
 

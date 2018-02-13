@@ -25,13 +25,27 @@ export class SmartViewTools {
 		return this.smartviewOpenCube( environment )
 			.then( resEnv => {
 				const body = '<req_EnumRunTimePrompts><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube ><rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule><ODL_ECID>0000</ODL_ECID></req_EnumRunTimePrompts>';
-				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } )
+				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 			} )
 			.then( response => {
-				console.log( response.body );
+				const rtps: any[] = [];
 				response.$( 'rtp' ).toArray().forEach( rtp => {
-					// response.$(rtp).child
-				} )
+					const toPush: any = {};
+					toPush.name = response.$( rtp ).find( 'name' ).text();
+					toPush.description = response.$( rtp ).find( 'description' ).text();
+					toPush.dimension = response.$( rtp ).find( 'member' ).toArray()[0].attribs.dim;
+					toPush.memberselect = response.$( rtp ).find( 'member' ).toArray()[0].attribs.mbrselect;
+					if ( toPush.memberselect === '0' ) {
+						toPush.memberselect = false;
+					} else {
+						toPush.memberselect = true;
+					}
+					toPush.choice = response.$( rtp ).find( 'member' ).toArray()[0].attribs.choice;
+					toPush.defaultmember = response.$( rtp ).find( 'member' ).find( 'default' ).text();
+					toPush.allowmissing = response.$( rtp ).find( 'allowMissing' ).text();
+					rtps.push( toPush );
+				} );
+				return Promise.resolve( rtps );
 			} );
 	}
 	public listBusinessRules = ( environment: DimeEnvironmentSmartView ) => {

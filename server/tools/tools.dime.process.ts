@@ -190,7 +190,13 @@ export class ProcessTools {
 		try {
 			step.detailsObject = JSON.parse( step.details );
 		} catch ( error ) {
-			step.detailsObject = null;
+			step.detailsObject = {};
+		}
+		if ( !step.detailsObject ) {
+			step.detailsObject = {};
+			if ( step.type === DimeProcessStepType.SendData ) { step.detailsObject = []; }
+			if ( step.type === DimeProcessStepType.SendLogs ) { step.detailsObject = []; }
+			if ( step.type === DimeProcessStepType.SendMissingMaps ) { step.detailsObject = []; }
 		}
 		return step;
 	}

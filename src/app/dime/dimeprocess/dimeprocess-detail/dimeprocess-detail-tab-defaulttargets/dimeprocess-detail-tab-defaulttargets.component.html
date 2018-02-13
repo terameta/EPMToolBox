@@ -1,4 +1,4 @@
-<!-- <form class="form" (ngSubmit)="mainService.applyDefaultTargets()" #f="ngForm" class="form-horizontal">
+<form class="form" (ngSubmit)="mainService.applyDefaultTargets()" #f="ngForm" class="form-horizontal">
 	<div class="form-group" *ngFor="let field of mainService.curItemTargetFields">
 		<div class="input-group">
 			<div class="input-group-addon" style="min-width:150px; text-align:left;">{{field.name}}:</div>
@@ -6,6 +6,10 @@
 		</div>
 	</div>
 	<div class="form-group">
-		<button type="submit" class="btn btn-xs btn-success"><i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes</button>
+		<button type="submit" class="btn btn-xs btn-success">
+			<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes</button>
 	</div>
-</form> -->
+</form>
+
+<hr>
+<pre>{{ mainService.currentItem | json }}</pre>

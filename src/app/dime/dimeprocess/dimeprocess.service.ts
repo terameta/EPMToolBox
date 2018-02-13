@@ -486,19 +486,7 @@ export class DimeProcessService {
 			}
 			this.curItemSelectedProcedure.variables.push( { description: '' } );
 		}
-		public stepRecepientAdd = ( curList: any[] ) => {
-			if ( !curList ) {
-				this.toastr.error( 'There is no list assigned to add recepient. Please consult system admin about this issue.' );
-			} else {
-				curList.push( { address: '' } );
-			}
-		}
-		public stepRecepientDelete = ( curList: any[], index: number ) => {
-			console.log( index, curList[index] );
-			if ( index !== undefined ) {
-				console.log( curList.splice( index, 1 ) );
-			}
-		};
+
 		public stepMoveOrder = ( curStep: any, direction: string ) => {
 			const curOrder = curStep.sOrder;
 			const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );

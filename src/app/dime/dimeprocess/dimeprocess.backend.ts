@@ -20,5 +20,7 @@ export class DimeProcessBackend {
 	public stepCreate = ( step: DimeProcessStep ) => this.http.post( this.baseUrl + '/step', step );
 	public stepUpdate = ( step: DimeProcessStep ) => this.http.put( this.baseUrl + '/step', step );
 	public stepDelete = ( id: number ) => this.http.delete( this.baseUrl + '/step/' + id );
+	public defaultTargetsLoad = ( id: number ) => this.http.get<any[]>( this.baseUrl + '/defaultTargets/' + id );
+	public defaultTargetsUpdate = ( id: number, payload: any[] ) => this.http.put( this.baseUrl + '/defaultTargets/' + id, payload );
 
 }

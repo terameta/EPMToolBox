@@ -1,3 +1,20 @@
-<p>
-  dimeprocess-step-detail-senddata works!
-</p>
+<div class="form-group">
+	<label for="stepsenddata" class=" control-label">Recepients:</label>
+	<div>
+		<button class="btn btn-xs btn-default" (click)="recepientAdd()" type="button">Add Recepient</button>
+		<hr>
+		<span *ngFor="let recepient of currentStep.detailsObject; let i = index;">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon">{{i+1}}</span>
+					<input type="text" class="form-control" [(ngModel)]="recepient.address" name="stepsenddatarecepient{{i}}">
+					<span class="input-group-btn">
+						<button type="button" class="btn btn-danger" (click)="recepientDelete(i)">
+							<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+						</button>
+					</span>
+				</div>
+			</div>
+		</span>
+	</div>
+</div>
