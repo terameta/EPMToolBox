@@ -29,6 +29,9 @@ export function dimeProcessReducer( state: DimeProcessState, action: Action<any>
 		case DimeProcessActions.ONE.FILTERS.LOAD.COMPLETE.type: {
 			return handleOneFiltersLoadComplete( state, action );
 		}
+		case DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.COMPLETE.type: {
+			return handleOneFiltersDataFileLoadComplete( state, action );
+		}
 		default: {
 			return state;
 		}
@@ -78,6 +81,17 @@ const handleOneFiltersLoadComplete = ( state: DimeProcessState, action: Action<a
 	} );
 	action.payload.forEach( filter => {
 		newState.curItem.filters[filter.field] = filter;
+	} );
+	return newState;
+};
+const handleOneFiltersDataFileLoadComplete = ( state: DimeProcessState, action: Action<any[]> ): DimeProcessState => {
+	const newState = Object.assign( {}, state );
+	// With the below one, if a filter is erased id will be erased from here as well
+	Object.keys( newState.curItem.filtersDataFile ).forEach( item => {
+		delete newState.curItem.filtersDataFile[item].id;
+	} );
+	action.payload.forEach( filter => {
+		newState.curItem.filtersDataFile[filter.field] = filter;
 	} );
 	return newState;
 };

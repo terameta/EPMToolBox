@@ -79,6 +79,8 @@ export class DimeProcessService {
 
 	public filtersUpdate = () => this.store.dispatch( DimeProcessActions.ONE.FILTERS.UPDATE.INITIATE.action( { id: this.currentItem.id, filters: this.currentItem.filters } ) );
 
+	public filtersDataFileUpdate = () => this.store.dispatch( DimeProcessActions.ONE.FILTERSDATAFILE.UPDATE.INITIATE.action( { id: this.currentItem.id, filters: this.currentItem.filtersDataFile } ) );
+
 	public stepDetailPresenter = ( detail: string, type: DimeProcessStepType ): string => {
 		if ( detail ) {
 			switch ( type ) {

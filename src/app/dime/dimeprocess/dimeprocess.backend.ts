@@ -24,5 +24,7 @@ export class DimeProcessBackend {
 	public defaultTargetsUpdate = ( payload: { id: number, targets: any[] } ) => this.http.put( this.baseUrl + '/defaultTargets/' + payload.id, payload.targets );
 	public filtersLoad = ( id: number ) => this.http.get<any[]>( this.baseUrl + '/filters/' + id );
 	public filtersUpdate = ( payload: { id: number, filters: any[] } ) => this.http.put( this.baseUrl + '/filters/' + payload.id, payload );
+	public filtersDataFileLoad = ( id: number ) => this.http.get<any[]>( this.baseUrl + '/filtersdatafile/' + id );
+	public filtersDataFileUpdate = ( payload: { id: number, filters: any[] } ) => this.http.put( this.baseUrl + '/filtersdatafile/' + payload.id, payload );
 
 }

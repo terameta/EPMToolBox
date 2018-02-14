@@ -34,20 +34,15 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 	console.log( '===============================================' );
 
 	return checkVersion().
-		then( version0000to0001 ).then( version0001to0002 ).then( version0002to0003 ).then( version0003to0004 ).then( version0004to0005 ).
-		then( version0005to0006 ).then( version0006to0007 ).then( version0007to0008 ).then( version0008to0009 ).then( version0009to0010 ).
-		then( version0010to0011 ).then( version0011to0012 ).then( version0012to0013 ).then( version0013to0014 ).then( version0014to0015 ).
-		then( version0015to0016 ).then( version0016to0017 ).then( version0017to0018 ).then( version0018to0019 ).then( version0019to0020 ).
-		then( version0020to0021 ).then( version0021to0022 ).then( version0022to0023 ).then( version0023to0024 ).then( version0024to0025 ).
-		then( version0025to0026 ).then( version0026to0027 ).then( version0027to0028 ).then( version0028to0029 ).then( version0029to0030 ).
-		then( version0030to0031 ).then( version0031to0032 ).then( version0032to0033 ).then( version0033to0034 ).then( version0034to0035 ).
-		then( version0035to0036 ).then( version0036to0037 ).then( version0037to0038 ).then( version0038to0039 ).then( version0039to0040 ).
-		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).
-		then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).then( version0048to0049 ).then( version0049to0050 ).
-		then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).
-		then( version0055to0056 ).then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).
-		then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).then( version0064to0065 ).
-		then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).
+		then( version0000to0001 ).then( version0001to0002 ).then( version0002to0003 ).then( version0003to0004 ).then( version0004to0005 ).then( version0005to0006 ).then( version0006to0007 ).then( version0007to0008 ).
+		then( version0008to0009 ).then( version0009to0010 ).then( version0010to0011 ).then( version0011to0012 ).then( version0012to0013 ).then( version0013to0014 ).then( version0014to0015 ).then( version0015to0016 ).
+		then( version0016to0017 ).then( version0017to0018 ).then( version0018to0019 ).then( version0019to0020 ).then( version0020to0021 ).then( version0021to0022 ).then( version0022to0023 ).then( version0023to0024 ).
+		then( version0024to0025 ).then( version0025to0026 ).then( version0026to0027 ).then( version0027to0028 ).then( version0028to0029 ).then( version0029to0030 ).then( version0030to0031 ).then( version0031to0032 ).
+		then( version0032to0033 ).then( version0033to0034 ).then( version0034to0035 ).then( version0035to0036 ).then( version0036to0037 ).then( version0037to0038 ).then( version0038to0039 ).then( version0039to0040 ).
+		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).
+		then( version0048to0049 ).then( version0049to0050 ).then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).then( version0055to0056 ).
+		then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).
+		then( version0064to0065 ).then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).then( version0068to0069 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -57,6 +52,20 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( clearResidue );
 }
 
+const version0068to0069 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 68;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'processes', 'tags TEXT NULL AFTER erroremail' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
 const version0067to0068 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 67;

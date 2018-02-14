@@ -14,6 +14,7 @@ export interface DimeStreamFieldDetail extends DimeStreamField {
 	fDateFormat: string,
 	shouldIgnoreCrossTab: boolean,
 	isFilter: boolean,
+	isCrossTabFilter: boolean,
 	isCrossTab: boolean,
 	isMonth: boolean,
 	isData: boolean,

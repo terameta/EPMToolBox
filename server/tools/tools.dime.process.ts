@@ -53,6 +53,7 @@ export class ProcessTools {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to get processes.' } );
 				} else {
+					rows = rows.map( row => this.prepareOne( row ) );
 					resolve( rows );
 				}
 			} );
@@ -66,10 +67,19 @@ export class ProcessTools {
 				} else if ( rows.length !== 1 ) {
 					reject( { error: 'Wrong number of records', message: 'Wrong number of records for process received from the server, 1 expected' } );
 				} else {
+					rows = rows.map( row => this.prepareOne( row ) );
 					resolve( rows[0] );
 				}
 			} );
 		} );
+	}
+	private prepareOne = ( payload: DimeProcess ) => {
+		if ( payload.tags ) {
+			payload.tags = JSON.parse( payload.tags );
+		} else {
+			payload.tags = {};
+		}
+		return payload;
 	}
 	public update = ( dimeProcess: DimeProcess ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -78,6 +88,10 @@ export class ProcessTools {
 					delete dimeProcess.isPrepared;
 					delete dimeProcess.issueList;
 					delete dimeProcess.steps;
+					delete dimeProcess.defaultTargets;
+					delete dimeProcess.filters;
+					delete dimeProcess.filtersDataFile;
+					dimeProcess.tags = JSON.stringify( dimeProcess.tags );
 					this.db.query( 'UPDATE processes SET ? WHERE id = ?', [dimeProcess, dimeProcess.id], ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );

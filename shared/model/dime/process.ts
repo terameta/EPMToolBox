@@ -13,8 +13,10 @@ export interface DimeProcess {
 	steps: DimeProcessStep[],
 	defaultTargets: any,
 	filters: any,
+	filtersDataFile: any,
 	isPrepared: ATReadyStatus,
-	issueList: string[]
+	issueList: string[],
+	tags: any
 }
 
 export interface DimeProcessObject {

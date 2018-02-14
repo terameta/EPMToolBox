@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 
 import { DimeProcessService } from '../dimeprocess.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
 
 @Component( {
 	selector: 'app-dimeprocess-list',
@@ -12,9 +14,23 @@ export class DimeprocessListComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeProcessService,
-		public environmentService: DimeEnvironmentService
+		public environmentService: DimeEnvironmentService,
+		public tagService: DimeTagService,
+		public uiService: DimeUIService
 	) { }
 
 	ngOnInit() {
+	}
+
+	public shouldListItem = ( itemid: number ) => {
+		let shouldShow = true;
+		this.tagService.groupList.forEach( ( curGroup ) => {
+			if ( parseInt( this.uiService.uiState.selectedTags[curGroup.id], 10 ) > 0 ) {
+				if ( !this.mainService.items[itemid].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
+					shouldShow = false;
+				}
+			}
+		} );
+		return shouldShow;
 	}
 }

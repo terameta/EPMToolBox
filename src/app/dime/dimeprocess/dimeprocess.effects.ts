@@ -72,6 +72,9 @@ export class DimeProcessEffects {
 					DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action(),
 					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload ),
 					DimeProcessActions.ONE.STEP.LOADALL.INITIATE.action( action.payload ),
+					DimeProcessActions.ONE.DEFAULTTARGETS.LOAD.INITIATE.action( action.payload ),
+					DimeProcessActions.ONE.FILTERS.LOAD.INITIATE.action( action.payload ),
+					DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.INITIATE.action( action.payload ),
 					DimeStatusActions.success( 'The process is loaded.', this.serviceName )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
@@ -129,9 +132,7 @@ export class DimeProcessEffects {
 				.mergeMap( resp => [
 					DimeStatusActions.success( 'Process steps are loaded.', this.serviceName ),
 					DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.action( resp ),
-					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload ),
-					DimeProcessActions.ONE.DEFAULTTARGETS.LOAD.INITIATE.action( action.payload ),
-					DimeProcessActions.ONE.FILTERS.LOAD.INITIATE.action( action.payload )
+					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
@@ -244,6 +245,31 @@ export class DimeProcessEffects {
 					DimeStatusActions.success( 'Process filters are saved.', this.serviceName ),
 					DimeProcessActions.ONE.FILTERS.UPDATE.COMPLETE.action(),
 					DimeProcessActions.ONE.FILTERS.LOAD.INITIATE.action( action.payload.id )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_FILTERSDATAFILE_LOAD_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Fetching process filters for data file...', this.serviceName ) ); return action; } )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.filtersDataFileLoad( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process filters for data file are fetched.', this.serviceName ),
+					DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.COMPLETE.action( resp )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_FILTERSDATAFILE_UPDATE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.FILTERSDATAFILE.UPDATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving process filters for data file...', this.serviceName ) ); return action; } )
+		.switchMap( ( action: Action<{ id: number, filters: any }> ) => {
+			return this.backend.filtersDataFileUpdate( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process filters for data file are saved.', this.serviceName ),
+					DimeProcessActions.ONE.FILTERSDATAFILE.UPDATE.COMPLETE.action(),
+					DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.INITIATE.action( action.payload.id )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
