@@ -75,6 +75,10 @@ export class DimeProcessService {
 		}
 	}
 
+	public defaultTargetsUpdate = () => this.store.dispatch( DimeProcessActions.ONE.DEFAULTTARGETS.UPDATE.INITIATE.action( { id: this.currentItem.id, targets: this.currentItem.defaultTargets } ) );
+
+	public filtersUpdate = () => this.store.dispatch( DimeProcessActions.ONE.FILTERS.UPDATE.INITIATE.action( { id: this.currentItem.id, filters: this.currentItem.filters } ) );
+
 	public stepDetailPresenter = ( detail: string, type: DimeProcessStepType ): string => {
 		if ( detail ) {
 			switch ( type ) {
@@ -140,7 +144,6 @@ export class DimeProcessService {
 	curStepManipulations: any[];
 	curStepIsPBCS: boolean;
 	curItemDefaultTargets: any;
-	curItemFilters: any;
 	curItemFiltersDataFile: any;
 	currentLog: any;
 	stepTypes: DimeProcessStepType[];
@@ -209,10 +212,6 @@ export class DimeProcessService {
 					if ( this.curItem.status === null ) { this.curItem.status = 'ready'; }
 					if ( this.curItem.status !== 'ready' ) { this.checkLog( parseInt( this.curItem.status || '0', 10 ) ); }
 					this.curItemClean = true;
-					this.isPrepared( this.curItem.id );
-					this.stepGetAll( this.curItem.id );
-					this.fetchDefaultTargets( this.curItem.id );
-					this.fetchFilters( this.curItem.id );
 					this.fetchFiltersDataFile( this.curItem.id );
 				}, ( error ) => {
 					this.toastr.error( 'Failed to get the item.', this.serviceName );
@@ -297,7 +296,6 @@ export class DimeProcessService {
 			this.curItemDataRecepients = [];
 			this.curItemMissingMapRecepients = [];
 			this.curItemDefaultTargets = {};
-			this.curItemFilters = {};
 			this.curItemFiltersDataFile = {};
 			this.curStepIsPBCS = false;
 		};
@@ -510,60 +508,7 @@ export class DimeProcessService {
 				curManip.sOrder = curKey + 1;
 			} )
 		};
-		public applyDefaultTargets = () => {
-			this.authHttp.put( this.baseUrl + '/defaults/' + this.curItem.id, this.curItemDefaultTargets, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.toastr.info( 'Default targets are saved', this.serviceName );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to save default targets.', this.serviceName );
-					console.error( error );
-				} );
-		};
-		public fetchDefaultTargets = ( id?: number ) => {
-			if ( !id ) { id = this.curItem.id; }
-			this.authHttp.get( this.baseUrl + '/defaults/' + id ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					result.forEach(( curDefault ) => {
-						this.curItemDefaultTargets[curDefault.field] = curDefault.value;
-					} );
-					// this.curItemDefaultTargets = result;
-				}, ( error ) => {
-					this.toastr.error( 'Failed to receive default targets.', this.serviceName );
-					console.error( error );
-				} );
-		}
-		public applyFilters = () => {
-			let toSend: any; toSend = {};
-			toSend.process = this.curItem.id;
-			toSend.stream = this.curItemSourceStream.id;
-			toSend.filters = [];
-			Object.keys( this.curItemFilters ).forEach(( curKey ) => {
-				let toPush: any; toPush = {};
-				this.curItemSourceFields.forEach(( curField ) => {
 
-					if ( curField.name === curKey ) {
-						toPush.field = curField.id;
-					} else {
-					}
-				} );
-				toPush.filterfrom = this.curItemFilters[curKey].filterfrom;
-				toPush.filterto = this.curItemFilters[curKey].filterto;
-				toPush.filtertext = this.curItemFilters[curKey].filtertext;
-				toPush.filterbeq = this.curItemFilters[curKey].filterbeq;
-				toPush.filterseq = this.curItemFilters[curKey].filterseq;
-				toSend.filters.push( toPush );
-			} );
-			this.authHttp.put( this.baseUrl + '/filters/' + this.curItem.id, toSend, { headers: this.headers } ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.toastr.info( 'Successfully applied filters.', this.serviceName );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to apply filters.', this.serviceName );
-					console.error( error );
-				} );
-		};
 		public applyFiltersDataFile = () => {
 			let toSend: any; toSend = {};
 			toSend.process = this.curItem.id;
@@ -609,21 +554,7 @@ export class DimeProcessService {
 				map( response => response.json() ).
 				catch( error => Observable.throw( error ) );
 		};
-		public fetchFilters = ( id?: number ) => {
-			if ( !id ) { id = this.curItem.id; }
-			this.fetchFiltersFetch( id ).
-				subscribe(( result ) => {
-					this.prepareFilters( result );
-				}, ( error ) => {
-					this.toastr.error( '', this.serviceName );
-					console.error( error );
-				} );
-		};
-		public fetchFiltersFetch = ( id: number ) => {
-			return this.authHttp.get( this.baseUrl + '/filters/' + id ).
-				map( response => response.json() ).
-				catch( error => Observable.throw( error ) );
-		};
+
 		private prepareFiltersDataFile = ( filterArray: any[], numTry?: number ) => {
 			if ( numTry === undefined ) { numTry = 0; }
 			if ( this.curItemSourceFields.length > 0 ) {
@@ -653,35 +584,7 @@ export class DimeProcessService {
 				this.toastr.error( 'Failed to prepare filters data file.', this.serviceName );
 			}
 		};
-		private prepareFilters = ( filterArray: any[], numTry?: number ) => {
-			if ( numTry === undefined ) { numTry = 0; }
-			if ( this.curItemSourceFields.length > 0 ) {
-				this.curItemSourceFields.forEach(( curField ) => {
-					if ( curField.isFilter === 1 ) {
-						this.curItemFilters[curField.name] = {};
-					}
-				} );
-				filterArray.forEach(( curFilter ) => {
-					this.curItemSourceFields.forEach(( curField ) => {
-						if ( curField.id === curFilter.field ) { curFilter.fieldname = curField.name; }
-					} );
-					if ( curFilter.stream === this.curItemSourceStream.id && curFilter.field ) {
-						const theDate = new Date( curFilter.filterfrom );
-						if ( curFilter.filterfrom ) { this.curItemFilters[curFilter.fieldname].filterfrom = curFilter.filterfrom; }
-						if ( curFilter.filterto ) { this.curItemFilters[curFilter.fieldname].filterto = curFilter.filterto; }
-						if ( curFilter.filtertext ) { this.curItemFilters[curFilter.fieldname].filtertext = curFilter.filtertext; }
-						if ( curFilter.filterbeq ) { this.curItemFilters[curFilter.fieldname].filterbeq = curFilter.filterbeq; }
-						if ( curFilter.filterseq ) { this.curItemFilters[curFilter.fieldname].filterseq = curFilter.filterseq; }
-					}
-				} );
-			} else if ( numTry < 100 ) {
-				setTimeout(() => {
-					this.prepareFilters( filterArray, ++numTry );
-				}, 1000 );
-			} else {
-				this.toastr.error( 'Failed to prepare filters.', this.serviceName );
-			}
-		};
+
 		public processRun = () => {
 			this.authHttp.get( this.baseUrl + '/run/' + this.curItem.id ).
 				map( response => response.json() ).

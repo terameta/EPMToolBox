@@ -11,6 +11,8 @@ export interface DimeProcess {
 	status: string,
 	erroremail: string,
 	steps: DimeProcessStep[],
+	defaultTargets: any,
+	filters: any,
 	isPrepared: ATReadyStatus,
 	issueList: string[]
 }

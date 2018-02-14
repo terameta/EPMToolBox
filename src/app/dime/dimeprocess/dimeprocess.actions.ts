@@ -60,8 +60,18 @@ export const DimeProcessActions = {
 				COMPLETE: actionFactory<any[]>( 'DIME_PROCESS_ACTIONS_ONE_DEFAULTTARGETS_LOAD_COMPLETE' )
 			},
 			UPDATE: {
-				INITIATE: actionFactory<{ id: number, targets: any[] }>( 'DIME_PROCESS_ACTIONS_ONE_DEFAULTTARGETS_UPDATE_INITIATE' ),
+				INITIATE: actionFactory<{ id: number, targets: any }>( 'DIME_PROCESS_ACTIONS_ONE_DEFAULTTARGETS_UPDATE_INITIATE' ),
 				COMPLETE: actionFactory( 'DIME_PROCESS_ACTIONS_ONE_DEFAULTTARGETS_UPDATE_COMPLETE' )
+			}
+		},
+		FILTERS: {
+			LOAD: {
+				INITIATE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_FILTERS_LOAD_INITIATE' ),
+				COMPLETE: actionFactory<any[]>( 'DIME_PROCESS_ACTIONS_ONE_FILTERS_LOAD_COMPLETE' )
+			},
+			UPDATE: {
+				INITIATE: actionFactory<{ id: number, filters: any }>( 'DIME_PROCESS_ACTIONS_ONE_FILTERS_UPDATE_INITIATE' ),
+				COMPLETE: actionFactory( 'DIME_PROCESS_ACTIONS_ONE_FILTERS_UPDATE_COMPLETE' )
 			}
 		}
 	}

@@ -24,16 +24,19 @@ export class ApiDimeProcess {
 
 	private setRoutes = () => {
 		this.apiRoutes.get( '/isPrepared/:id', ( req, res ) => { this.rester.respond( this.processTools.isPrepared, req.params.id, req, res ); } );
+
 		this.apiRoutes.get( '/steps/:id', ( req, res ) => { this.rester.respond( this.processTools.stepLoadAll, req.params.id, req, res ); } );
 		this.apiRoutes.put( '/steps/:id', ( req, res ) => { this.rester.respond( this.processTools.stepUpdateAll, { processID: req.params.id, steps: req.body }, req, res ); } );
 		this.apiRoutes.post( '/step', ( req, res ) => { this.rester.respond( this.processTools.stepCreate, req.body, req, res ); } );
 		this.apiRoutes.put( '/step', ( req, res ) => { this.rester.respond( this.processTools.stepUpdate, req.body, req, res ); } );
 		this.apiRoutes.delete( '/step/:id', ( req, res ) => { this.rester.respond( this.processTools.stepDelete, req.params.id, req, res ); } );
+
 		this.apiRoutes.get( '/defaultTargets/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchDefaults, req.params.id, req, res ); } );
 		this.apiRoutes.put( '/defaultTargets/:id', ( req, res ) => { this.rester.respond( this.processTools.applyDefaults, { processID: req.params.id, defaults: req.body }, req, res ); } );
 
-		// this.apiRoutes.get( '/filters/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchFilters, req.params.id, req, res ); } );
-		// this.apiRoutes.put( '/filters/:id', ( req, res ) => { this.rester.respond( this.processTools.applyFilters, req.body, req, res ); } );
+		this.apiRoutes.get( '/filters/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchFilters, req.params.id, req, res ); } );
+		this.apiRoutes.put( '/filters/:id', ( req, res ) => { this.rester.respond( this.processTools.applyFilters, req.body, req, res ); } );
+
 		// this.apiRoutes.get( '/filtersdatafile/:id', ( req, res ) => { this.rester.respond( this.processTools.fetchFiltersDataFile, req.params.id, req, res ); } );
 		// this.apiRoutes.put( '/filtersdatafile/:id', ( req, res ) => { this.rester.respond( this.processTools.applyFiltersDataFile, req.body, req, res ); } );
 		// this.apiRoutes.get( '/run/:id', ( req, res ) => { this.rester.respond( this.processTools.run, req.params.id, req, res ); } );

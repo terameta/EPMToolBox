@@ -129,7 +129,9 @@ export class DimeProcessEffects {
 				.mergeMap( resp => [
 					DimeStatusActions.success( 'Process steps are loaded.', this.serviceName ),
 					DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.action( resp ),
-					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload )
+					DimeProcessActions.ONE.ISPREPARED.INITIATE.action( action.payload ),
+					DimeProcessActions.ONE.DEFAULTTARGETS.LOAD.INITIATE.action( action.payload ),
+					DimeProcessActions.ONE.FILTERS.LOAD.INITIATE.action( action.payload )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
@@ -211,10 +213,39 @@ export class DimeProcessEffects {
 
 	@Effect() ONE_DEFAULTTARGETS_UPDATE_INITIATE$ = this.actions$
 		.ofType( DimeProcessActions.ONE.DEFAULTTARGETS.UPDATE.INITIATE.type )
-		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving process default targets...', this.serviceName ) ); return <Action<any[]>>action; } )
-		.withLatestFrom( this.store$ )
-		.switchMap( ( [action, state] ) => {
-			return this.backend.defaultTargetsUpdate( state.dimeProcess.curItem.id, action.payload );
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving process default targets...', this.serviceName ) ); return action; } )
+		.switchMap( ( action: Action<{ id: number, targets: any[] }> ) => {
+			return this.backend.defaultTargetsUpdate( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process default targets are saved.', this.serviceName ),
+					DimeProcessActions.ONE.DEFAULTTARGETS.UPDATE.COMPLETE.action()
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_FILTERS_LOAD_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.FILTERS.LOAD.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Fetching process filters...', this.serviceName ) ); return action; } )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.filtersLoad( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process filters are fetched.', this.serviceName ),
+					DimeProcessActions.ONE.FILTERS.LOAD.COMPLETE.action( resp )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_FILTERS_UPDATE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.FILTERS.UPDATE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving process filters...', this.serviceName ) ); return action; } )
+		.switchMap( ( action: Action<{ id: number, filters: any }> ) => {
+			return this.backend.filtersUpdate( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process filters are saved.', this.serviceName ),
+					DimeProcessActions.ONE.FILTERS.UPDATE.COMPLETE.action(),
+					DimeProcessActions.ONE.FILTERS.LOAD.INITIATE.action( action.payload.id )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	constructor(

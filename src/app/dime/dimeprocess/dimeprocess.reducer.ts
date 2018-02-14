@@ -23,6 +23,12 @@ export function dimeProcessReducer( state: DimeProcessState, action: Action<any>
 		case DimeProcessActions.ONE.STEP.LOADALL.COMPLETE.type: {
 			return handleOneStepLoadAllComplete( state, action );
 		}
+		case DimeProcessActions.ONE.DEFAULTTARGETS.LOAD.COMPLETE.type: {
+			return handleOneDefaultTargetsLoadComplete( state, action );
+		}
+		case DimeProcessActions.ONE.FILTERS.LOAD.COMPLETE.type: {
+			return handleOneFiltersLoadComplete( state, action );
+		}
 		default: {
 			return state;
 		}
@@ -35,28 +41,43 @@ const handleAllLoadComplete = ( state: DimeProcessState, action: Action<DimeProc
 	newState.ids = action.payload.sort( SortByName ).map( process => process.id );
 	return newState;
 };
-
 const handleOneLoadComplete = ( state: DimeProcessState, action: Action<DimeProcess> ): DimeProcessState => {
 	const newState: DimeProcessState = Object.assign( {}, state );
 	newState.curItem = Object.assign( dimeProcessInitialState.curItem, action.payload );
 	return newState;
 };
-
 const handleOneIsPreparedInitiate = ( state: DimeProcessState, action: Action<number> ): DimeProcessState => {
 	const newState: DimeProcessState = Object.assign( {}, state );
 	newState.curItem.isPrepared = ATReadyStatus.Checking;
 	return newState;
 };
-
 const handleOneIsPreparedComplete = ( state: DimeProcessState, action: Action<IsPreparedPayload> ): DimeProcessState => {
 	const newState: DimeProcessState = Object.assign( {}, state );
 	newState.curItem.isPrepared = action.payload.isPrepared;
 	newState.curItem.issueList = action.payload.issueList;
 	return newState;
 };
-
 const handleOneStepLoadAllComplete = ( state: DimeProcessState, action: Action<DimeProcessStep[]> ): DimeProcessState => {
 	const newState: DimeProcessState = Object.assign( {}, state );
 	newState.curItem.steps = action.payload.sort( SortByPosition );
+	return newState;
+};
+const handleOneDefaultTargetsLoadComplete = ( state: DimeProcessState, action: Action<any[]> ): DimeProcessState => {
+	const newState = Object.assign( {}, state );
+	newState.curItem.defaultTargets = {};
+	action.payload.forEach( target => {
+		newState.curItem.defaultTargets[target.field] = target.value;
+	} );
+	return newState;
+};
+const handleOneFiltersLoadComplete = ( state: DimeProcessState, action: Action<any[]> ): DimeProcessState => {
+	const newState = Object.assign( {}, state );
+	// With the below one, if a filter is erased id will be erased from here as well
+	Object.keys( newState.curItem.filters ).forEach( item => {
+		delete newState.curItem.filters[item].id;
+	} );
+	action.payload.forEach( filter => {
+		newState.curItem.filters[filter.field] = filter;
+	} );
 	return newState;
 };

@@ -328,14 +328,14 @@ export class ProcessTools {
 			} );
 		} );
 	}
-	public applyDefaults = ( refObj: { processID: number, defaults: any } ) => {
+	public applyDefaults = ( payload: { processID: number, defaults: any } ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.clearDefaults( refObj.processID ).
+			this.clearDefaults( payload.processID ).
 				then( this.getOne ).
 				then( ( innerObj: DimeProcess ) => {
 					let promises: any[]; promises = [];
-					Object.keys( refObj.defaults ).forEach( ( curKey ) => {
-						promises.push( this.applyDefault( { process: refObj.processID, field: curKey, value: refObj.defaults[curKey] } ) );
+					Object.keys( payload.defaults ).forEach( ( curKey ) => {
+						promises.push( this.applyDefault( { process: payload.processID, field: curKey, value: payload.defaults[curKey] } ) );
 					} );
 					return Promise.all( promises );
 				} ).
@@ -370,30 +370,27 @@ export class ProcessTools {
 			} );
 		} );
 	}
-	public applyFilters = ( refObj: any ) => {
+	public applyFilters = ( payload: { id: number, filters: any } ) => {
 		return new Promise( ( resolve, reject ) => {
-			if ( !refObj ) {
-				reject( 'Object does not exist' );
-			} else if ( !refObj.process ) {
-				reject( 'Object does not provide process id.' );
-			} else if ( !refObj.stream ) {
-				reject( 'Object does not provide stream id.' );
-			} else if ( !refObj.filters ) {
-				reject( 'Object does not provide filter list.' );
-			} else if ( !Array.isArray( refObj.filters ) ) {
-				reject( 'Object filter list is malformed.' );
+			if ( !payload ) {
+				reject( new Error( 'Object does not exist' ) );
+			} else if ( !payload.id ) {
+				reject( new Error( 'Object does not provide process id.' ) );
+			} else if ( !payload.filters ) {
+				reject( new Error( 'Object does not provide filter list.' ) );
 			} else {
-				refObj.filters.forEach( ( curFilter: any ) => {
-					curFilter.process = refObj.process;
-					curFilter.stream = refObj.stream;
+				Object.keys( payload.filters ).forEach( filter => {
+					payload.filters[filter].process = payload.id;
 				} );
-				this.clearFilters( refObj.process ).
+				let filters: any[] = Object.keys( payload.filters ).map( item => payload.filters[item] );
+				filters = filters.filter( item => ( item.filterfrom || item.filterto || item.filtertext || item.filterbeq || item.filterseq ) );
+				const idsToKeep = filters.map( item => item.id ).filter( item => item );
+
+				this.clearFilters( payload.id, idsToKeep ).
 					then( () => {
 						let promises: any[]; promises = [];
-						refObj.filters.forEach( ( curFilter: any ) => {
-							if ( curFilter.filterfrom || curFilter.filterto || curFilter.filtertext || curFilter.filterbeq || curFilter.filterseq ) {
-								promises.push( this.applyFilter( curFilter ) );
-							}
+						filters.forEach( ( curFilter: any ) => {
+							promises.push( this.applyFilter( curFilter ) );
 						} );
 						return Promise.all( promises );
 					} ).
@@ -404,7 +401,13 @@ export class ProcessTools {
 	}
 	public applyFilter = ( curFilter: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO processfilters SET ?', curFilter, ( err, rows, fields ) => {
+			let query = '';
+			if ( curFilter.id ) {
+				query = 'UPDATE processfilters SET ? WHERE id = ' + curFilter.id;
+			} else {
+				query = 'INSERT INTO processfilters SET ?';
+			}
+			this.db.query( query, curFilter, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
@@ -413,9 +416,9 @@ export class ProcessTools {
 			} );
 		} );
 	}
-	public clearFilters = ( id: number ) => {
+	public clearFilters = ( id: number, listToExclude: number[] ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'DELETE FROM processfilters WHERE process = ?', id, ( err, rows, fields ) => {
+			this.db.query( 'DELETE FROM processfilters WHERE process = ? AND id NOT IN (' + listToExclude.join( ',' ) + ')', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
