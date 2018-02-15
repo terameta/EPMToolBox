@@ -431,6 +431,8 @@ export class ProcessTools {
 		} );
 	}
 	public clearFilters = ( id: number, listToExclude: number[] ) => {
+		// If an empty list is received, we don't fail this way
+		listToExclude.push( 0 );
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM processfilters WHERE process = ? AND id NOT IN (' + listToExclude.join( ',' ) + ')', id, ( err, rows, fields ) => {
 				if ( err ) {
@@ -441,30 +443,24 @@ export class ProcessTools {
 			} );
 		} );
 	}
-	public applyFiltersDataFile = ( refObj: any ) => {
+	public applyFiltersDataFile = ( payload: { id: number, filters: any } ) => {
 		return new Promise( ( resolve, reject ) => {
-			if ( !refObj ) {
+			if ( !payload ) {
 				reject( 'Object does not exist' );
-			} else if ( !refObj.process ) {
+			} else if ( !payload.id ) {
 				reject( 'Object does not provide process id.' );
-			} else if ( !refObj.stream ) {
-				reject( 'Object does not provide stream id.' );
-			} else if ( !refObj.filters ) {
+			} else if ( !payload.filters ) {
 				reject( 'Object does not provide filter list.' );
-			} else if ( !Array.isArray( refObj.filters ) ) {
-				reject( 'Object filter list is malformed.' );
 			} else {
-				refObj.filters.forEach( ( curFilter: any ) => {
-					curFilter.process = refObj.process;
-					curFilter.stream = refObj.stream;
-				} );
-				this.clearFiltersDataFile( refObj.process ).
+				const filters: any[] = Object.keys( payload.filters )
+					.map( item => ( { process: payload.id, ...payload.filters[item] } ) )
+					.filter( item => ( item.filterfrom || item.filterto || item.filtertext || item.filterbeq || item.filterseq ) );
+				const idsToKeep = filters.map( item => item.id ).filter( item => item );
+				this.clearFiltersDataFile( payload.id, idsToKeep ).
 					then( () => {
 						let promises: any[]; promises = [];
-						refObj.filters.forEach( ( curFilter: any ) => {
-							if ( curFilter.filterfrom || curFilter.filterto || curFilter.filtertext || curFilter.filterbeq || curFilter.filterseq ) {
-								promises.push( this.applyFilterDataFile( curFilter ) );
-							}
+						filters.forEach( ( curFilter: any ) => {
+							promises.push( this.applyFilterDataFile( curFilter ) );
 						} );
 						return Promise.all( promises );
 					} ).
@@ -475,7 +471,13 @@ export class ProcessTools {
 	}
 	public applyFilterDataFile = ( curFilter: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO processfiltersdatafile SET ?', curFilter, ( err, rows, fields ) => {
+			let query = '';
+			if ( curFilter.id ) {
+				query = 'UPDATE processfiltersdatafile SET ? WHERE id = ' + curFilter.id;
+			} else {
+				query = 'INSERT INTO processfiltersdatafile SET ?';
+			}
+			this.db.query( query, curFilter, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
@@ -484,9 +486,11 @@ export class ProcessTools {
 			} );
 		} );
 	}
-	public clearFiltersDataFile = ( id: number ) => {
+	public clearFiltersDataFile = ( id: number, listToExclude: number[] ) => {
+		// If an empty list is received, we don't fail this way
+		listToExclude.push( 0 );
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'DELETE FROM processfiltersdatafile WHERE process = ?', id, ( err, rows, fields ) => {
+			this.db.query( 'DELETE FROM processfiltersdatafile WHERE process = ? AND id NOT IN (' + listToExclude.join( ',' ) + ')', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {

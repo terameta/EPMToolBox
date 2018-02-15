@@ -46,7 +46,7 @@ const handleAllLoadComplete = ( state: DimeProcessState, action: Action<DimeProc
 };
 const handleOneLoadComplete = ( state: DimeProcessState, action: Action<DimeProcess> ): DimeProcessState => {
 	const newState: DimeProcessState = Object.assign( {}, state );
-	newState.curItem = Object.assign( dimeProcessInitialState.curItem, action.payload );
+	newState.curItem = Object.assign( <DimeProcess>JSON.parse( JSON.stringify( dimeProcessInitialState.curItem ) ), action.payload );
 	return newState;
 };
 const handleOneIsPreparedInitiate = ( state: DimeProcessState, action: Action<number> ): DimeProcessState => {
