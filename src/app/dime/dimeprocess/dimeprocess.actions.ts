@@ -1,6 +1,7 @@
 import { actionFactory } from '../../ngstore/ngrx.generators';
 import { DimeProcess, DimeProcessStep } from '../../../../shared/model/dime/process';
 import { IsReadyPayload } from '../../../../shared/enums/generic/readiness';
+import { DimeLog } from '../../../../shared/model/dime/log';
 
 export const DimeProcessActions = {
 	ALL: {
@@ -83,6 +84,23 @@ export const DimeProcessActions = {
 				INITIATE: actionFactory<{ id: number, filters: any }>( 'DIME_PROCESS_ACTIONS_ONE_FILTERSDATAFILE_UPDATE_INITIATE' ),
 				COMPLETE: actionFactory( 'DIME_PROCESS_ACTIONS_ONE_FILTERSDATAFILE_UPDATE_COMPLETE' )
 			}
+		},
+		RUN: {
+			INITIATE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_RUN_INITIATE' ),
+			COMPLETE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_RUN_COMPLETE' )
+		},
+		UNLOCK: {
+			INITIATE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_UNLOCK_INITIATE' ),
+			COMPLETE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_UNLOCK_COMPLETE' )
+		},
+		SENDDATAFILE: {
+			INITIATE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_SENDDATAFILE_INITIATE' ),
+			COMPLETE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_SENDDATAFILE_COMPLETE' )
+		},
+		CHECKLOG: {
+			INITIATE: actionFactory<number>( 'DIME_PROCESS_ACTIONS_ONE_CHECKLOG_INITIATE' ),
+			COMPLETE: actionFactory<DimeLog>( 'DIME_PROCESS_ACTIONS_ONE_CHECKLOG_COMPLETE' )
 		}
+
 	}
 };

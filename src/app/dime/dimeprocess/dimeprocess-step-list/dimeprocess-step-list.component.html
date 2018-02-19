@@ -71,7 +71,7 @@
 			<td width="130">
 				<div class="btn-toolbar" role="toolbar" aria-label="Process Steps Actions">
 					<div class="btn-group btn-group-xs">
-						<button type="button" class="btn btn-default" [routerLink]="['../../process-step-detail', step.id]" title="Edit Step">
+						<button type="button" class="btn btn-default" [routerLink]="['../', step.id]" title="Edit Step">
 							<i class="fa fa-pencil fa-fw"></i>
 						</button>
 						<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="stepMove(step, 'down')">

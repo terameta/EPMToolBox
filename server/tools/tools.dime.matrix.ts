@@ -70,6 +70,8 @@ export class DimeMatrixTool {
 		item.tags = JSON.stringify( item.tags );
 		delete item.isReady;
 		delete item.notReadyReason;
+		delete item.fieldDescriptions;
+		delete item.matrixData;
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE matrices SET ? WHERE id = ' + item.id, item, ( err, result, fields ) => {
 				if ( err ) {

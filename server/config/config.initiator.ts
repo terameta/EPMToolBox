@@ -42,7 +42,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).
 		then( version0048to0049 ).then( version0049to0050 ).then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).then( version0055to0056 ).
 		then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).
-		then( version0064to0065 ).then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).then( version0068to0069 ).
+		then( version0064to0065 ).then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).then( version0068to0069 ).then( version0069to0070 ).then( version0070to0071 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -51,7 +51,37 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
-
+const version0070to0071 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 70;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'processes', 'currentlog BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER tags' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
+const version0069to0070 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 69;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE processes CHANGE status status TINYINT NULL DEFAULT 0', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
 const version0068to0069 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 68;

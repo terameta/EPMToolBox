@@ -173,7 +173,10 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 
 					const toCheck = this.matrixObject.targets.map( field => changedDataTuple['TAR_' + field] ).join( '|||' );
 					const foundIndex = this.matrixObject.matrixData.findIndex( element => element === toCheck );
-					const isValidAgainstMatrix = ( foundIndex >= 0 );
+					let isValidAgainstMatrix = ( foundIndex >= 0 );
+					if ( !this.mainService.currentItem.matrix ) {
+						isValidAgainstMatrix = true;
+					}
 					if ( isValidAgainstMatrix ) {
 						this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-check-circle fa-fw" style="color:green;"></i>';
 						this.mapData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
@@ -240,27 +243,31 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	}
 	private prepareMatrix = () => {
 		return new Promise( ( resolve, reject ) => {
-			this.matrixBackend.matrixRefresh( { id: this.mainService.currentItem.matrix, filters: [], sorters: [] } ).subscribe( ( result: any[] ) => {
-				// const targets = this.mainService.currentItem.targetfields.map( field => field.name );
-				this.matrixObject.targets = [];
-				this.streamService.itemObject[this.mainService.currentItem.target].fieldList
-					.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
-					.forEach( currentField => {
-						this.matrixObject.targets.push( currentField.name );
+			if ( this.mainService.currentItem.matrix ) {
+				this.matrixBackend.matrixRefresh( { id: this.mainService.currentItem.matrix, filters: [], sorters: [] } ).subscribe( ( result: any[] ) => {
+					// const targets = this.mainService.currentItem.targetfields.map( field => field.name );
+					this.matrixObject.targets = [];
+					this.streamService.itemObject[this.mainService.currentItem.target].fieldList
+						.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+						.forEach( currentField => {
+							this.matrixObject.targets.push( currentField.name );
+						} );
+					this.matrixObject.matrixData = result.map( tuple => {
+						const toStructure: any[] = [];
+						this.matrixObject.targets.forEach( field => {
+							toStructure.push( tuple[field] );
+						} );
+						return toStructure.join( '|||' );
 					} );
-				this.matrixObject.matrixData = result.map( tuple => {
-					const toStructure: any[] = [];
-					this.matrixObject.targets.forEach( field => {
-						toStructure.push( tuple[field] );
-					} );
-					return toStructure.join( '|||' );
+					resolve();
+				}, error => {
+					this.store.dispatch( DimeStatusActions.error( error, 'Matrices' ) );
+					console.log( error );
+					reject();
 				} );
+			} else {
 				resolve();
-			}, error => {
-				this.store.dispatch( DimeStatusActions.error( error, 'Matrices' ) );
-				console.log( error );
-				reject();
-			} );
+			}
 		} );
 	}
 	private prepareDropdowns = () => {

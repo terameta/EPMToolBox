@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
 import { DimeProcessState, dimeProcessInitialState } from './dimeprocess.state';
 import { Action } from '../../ngstore/ngrx.generators';
-import { DimeProcess, DimeProcessStep } from '../../../../shared/model/dime/process';
-import { SortByName, SortByPosition } from '../../../../shared/utilities/utilityFunctions';
+import { DimeProcess, DimeProcessStep, DimeProcessStatus } from '../../../../shared/model/dime/process';
+import { SortByName, SortByPosition, SortByDateDesc } from '../../../../shared/utilities/utilityFunctions';
 import { DimeProcessActions } from './dimeprocess.actions';
 import { ATReadyStatus, IsPreparedPayload } from '../../../../shared/enums/generic/readiness';
+import { DimeLog } from '../../../../shared/model/dime/log';
 
 export function dimeProcessReducer( state: DimeProcessState, action: Action<any> ): DimeProcessState {
 	switch ( action.type ) {
@@ -31,6 +32,9 @@ export function dimeProcessReducer( state: DimeProcessState, action: Action<any>
 		}
 		case DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.COMPLETE.type: {
 			return handleOneFiltersDataFileLoadComplete( state, action );
+		}
+		case DimeProcessActions.ONE.CHECKLOG.COMPLETE.type: {
+			return handleOneChecklogComplete( state, action );
 		}
 		default: {
 			return state;
@@ -93,5 +97,21 @@ const handleOneFiltersDataFileLoadComplete = ( state: DimeProcessState, action: 
 	action.payload.forEach( filter => {
 		newState.curItem.filtersDataFile[filter.field] = filter;
 	} );
+	return newState;
+};
+const handleOneChecklogComplete = ( state: DimeProcessState, action: Action<DimeLog> ): DimeProcessState => {
+	const newState = Object.assign( {}, state );
+	// newState.currentLog = action.payload.details
+	// 	.split( '\n' )
+	// 	.map( log => log.split( ':' ) )
+	// 	.map( log => [log.splice( 0, 3 ).join( ':' ), log.join( ':' )] )
+	// 	.map( log => ( { date: log[0], log: log[1] } ) )
+	// 	.sort( SortByDateDesc )
+	// 	.map( log => log.date + ':' + log.log )
+	// 	.join( '\n' );
+	newState.currentLog = action.payload.details.split( '\n' ).reverse().join( '\n' );
+	if ( action.payload.start !== action.payload.end ) {
+		newState.curItem.status = DimeProcessStatus.Ready;
+	}
 	return newState;
 };

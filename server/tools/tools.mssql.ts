@@ -23,8 +23,8 @@ export class MSSQLTools {
 				connectionTimeout: 300000,
 				requestTimeout: 6000000,
 			};
-			if ( refObj.port ) { dbConfig.port = refObj.port };
-			if ( refObj.database ) { dbConfig.database = refObj.database };
+			if ( refObj.port ) { dbConfig.port = refObj.port; }
+			if ( refObj.database ) { dbConfig.database = refObj.database; }
 			if ( refObj.server ) {
 				if ( refObj.server.split( '\\' ).length === 2 ) {
 					dbConfig.server = refObj.server.split( '\\' )[0];
@@ -41,7 +41,7 @@ export class MSSQLTools {
 				}
 			} );
 
-		} )
+		} );
 	}
 
 	public listDatabases = ( refObj: DimeEnvironmentDetail ) => {
@@ -130,7 +130,7 @@ export class MSSQLTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	public listAliasTables = ( refObj: DimeEnvironmentDetail ) => {
 		return Promise.resolve( ['default'] );
 	}
@@ -138,7 +138,7 @@ export class MSSQLTools {
 		return new Promise( ( resolve, reject ) => {
 			this.connect( refEnvironment ).
 				then( ( innerObj: DimeEnvironmentDetail ) => {
-					innerObj.connection.request().query( procedure, ( err: any, result: any ) => {
+					innerObj.connection.request().query( refEnvironment.procedure, ( err: any, result: any ) => {
 						if ( err ) {
 							reject( err );
 						} else {
@@ -148,14 +148,14 @@ export class MSSQLTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	public getDescriptions = ( refObj: any, refField: DimeStreamFieldDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.connect( refObj ).
 				then( ( innerObj: any ) => {
 					let selectQuery = '';
 					selectQuery += 'SELECT DISTINCT ' + refField.drfName + ' AS RefField, ' + refField.ddfName + ' AS Description ';
-					selectQuery += 'FROM '
+					selectQuery += 'FROM ';
 					if ( refField.descriptiveTable === 'Custom Query' ) {
 						selectQuery += '(' + refField.descriptiveQuery + ') AS TCQ';
 					} else {
@@ -172,7 +172,7 @@ export class MSSQLTools {
 				} ).
 				catch( reject );
 		} );
-	};
+	}
 	public writeData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			console.log( '!!!!!!!!!!!!' );
@@ -180,5 +180,5 @@ export class MSSQLTools {
 			console.log( '!!!!!!!!!!!!' );
 			reject( 'Update this part of the tools.mssql.ts file' );
 		} );
-	};
+	}
 }

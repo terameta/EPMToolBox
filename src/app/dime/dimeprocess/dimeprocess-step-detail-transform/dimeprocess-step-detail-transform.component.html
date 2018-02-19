@@ -55,16 +55,16 @@
 					<input type="text" name="transformation{{i}}operator" class="form-control" size="6" [(ngModel)]="transformation.operator">
 
 					<span class="input-group-addon" style="padding:0 2px">
-						<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="mainService.stepTransformationMove(transformation, 'down')">
+						<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="stepTransformationMove(transformation, 'down')">
 							<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
 						</button>
 						<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!">
 							<i class="fa fa-fw" aria-hidden="true"></i>
 						</button>
-						<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="mainService.stepTransformationMove(transformation, 'up')">
+						<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="stepTransformationMove(transformation, 'up')">
 							<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
 						</button>
-						<button type="button" class="btn btn-xs btn-danger" (click)="mainService.stepTransformationDelete(transformation, i)">
+						<button type="button" class="btn btn-xs btn-danger" (click)="stepTransformationDelete(transformation, i)">
 							<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
 						</button>
 					</span>

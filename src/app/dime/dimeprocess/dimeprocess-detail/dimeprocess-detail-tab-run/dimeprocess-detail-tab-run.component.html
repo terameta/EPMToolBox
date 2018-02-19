@@ -1,5 +1,8 @@
-Finish the other ones and comeback here
-<!-- <button type="button" class="btn btn-success btn-xs" (click)="mainService.processRun()" title="Initiate Process"><i class="fa fa-space-shuttle fa-fw" aria-hidden="true"></i> Initiate Process</button>
-<button type="button" class="btn btn-danger btn-xs" (click)="mainService.processUnlock()" title="Unlock Process"><i class="fa fa-unlock fa-fw" aria-hidden="true"></i> Unlock Process</button>
-<hr *ngIf="mainService.curItem.status != 'ready'">
-<pre *ngIf="mainService.curItem.status != 'ready'">{{mainService.currentLog}}</pre> -->
+<button type="button" class="btn btn-success btn-xs" (click)="mainService.run()" title="Initiate Process" [disabled]="mainService.currentItem.status == dimeProcessStatus.Running">
+	<i class="fa fa-space-shuttle fa-fw" aria-hidden="true"></i> Initiate Process
+</button>
+<button type="button" class="btn btn-danger btn-xs" (click)="mainService.unlock()" title="Unlock Process" [disabled]="mainService.currentItem.status == dimeProcessStatus.Ready">
+	<i class="fa fa-unlock fa-fw" aria-hidden="true"></i> Unlock Process
+</button>
+<hr *ngIf="mainService.currentItem.status == dimeProcessStatus.Running || mainService.currentLog">
+<pre *ngIf="mainService.currentItem.status == dimeProcessStatus.Running || mainService.currentLog">{{mainService.currentLog}}</pre>

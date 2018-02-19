@@ -5,6 +5,7 @@ export interface DimeEnvironmentDetail extends DimeEnvironment {
 	table: string,
 	connection: any,
 	query: string,
+	procedure: string,
 	username: string,
 	password: string
 }

@@ -89,6 +89,7 @@ export class MapTools {
 					delete resMap.sourcefields;
 					delete resMap.targetfields;
 					delete resMap.mapData;
+					delete resMap.isMapDataRefreshing;
 					resMap.tags = JSON.stringify( resMap.tags );
 					this.db.query( 'UPDATE maps SET ? WHERE id = ?', [resMap, resMap.id], ( err, rows, fields ) => {
 						if ( err ) {

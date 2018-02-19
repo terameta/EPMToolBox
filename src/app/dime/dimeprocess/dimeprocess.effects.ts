@@ -13,7 +13,8 @@ import { DimeStreamActions } from '../dimestream/dimestream.actions';
 import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
 import { DimeMapActions } from '../dimemap/dimemap.actions';
 import { DimeMatrixActions } from '../dimematrix/dimematrix.actions';
-import { DimeProcess, DimeProcessStep } from '../../../../shared/model/dime/process';
+import { DimeProcess, DimeProcessStep, DimeProcessLogPayload, DimeProcessStatus } from '../../../../shared/model/dime/process';
+import { DimeLog } from '../../../../shared/model/dime/log';
 
 @Injectable()
 export class DimeProcessEffects {
@@ -67,6 +68,12 @@ export class DimeProcessEffects {
 		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading the process...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.oneLoad( action.payload )
+				.map( resp => {
+					if ( resp.status === DimeProcessStatus.Running ) {
+						this.store$.dispatch( DimeProcessActions.ONE.CHECKLOG.INITIATE.action( resp.currentlog ) );
+					}
+					return resp;
+				} )
 				.mergeMap( resp => [
 					DimeProcessActions.ONE.LOAD.COMPLETE.action( resp ),
 					DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action(),
@@ -272,6 +279,53 @@ export class DimeProcessEffects {
 					DimeProcessActions.ONE.FILTERSDATAFILE.LOAD.INITIATE.action( action.payload.id )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_UNLOCK_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.UNLOCK.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Unlocking the process', this.serviceName ) ); return <Action<number>>action; } )
+		.switchMap( action => {
+			return this.backend.unlock( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process is unlocked', this.serviceName ),
+					DimeProcessActions.ONE.UNLOCK.COMPLETE.action( action.payload ),
+					DimeProcessActions.ONE.LOAD.INITIATE.action( action.payload )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_RUN_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.RUN.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Initiating the process', this.serviceName ) ); return <Action<number>>action; } )
+		.switchMap( action => {
+			return this.backend.run( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Process is initiated.', this.serviceName ),
+					DimeProcessActions.ONE.CHECKLOG.INITIATE.action( resp.currentlog ),
+					DimeProcessActions.ONE.LOAD.INITIATE.action( action.payload )
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect() ONE_CHECKLOG_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.CHECKLOG.INITIATE.type )
+		.switchMap( ( action: Action<number> ) => {
+			return this.backend.checkLog( action.payload )
+				.map( resp => DimeProcessActions.ONE.CHECKLOG.COMPLETE.action( resp ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+
+	@Effect( { dispatch: false } ) ONE_CHECKLOG_COMPLETE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.CHECKLOG.COMPLETE.type )
+		.withLatestFrom( this.store$ )
+		.filter( ( [action, state] ) => ( state.dimeProcess.curItem.status === DimeProcessStatus.Running ) )
+		.map( ( [action, state] ) => action )
+		.map( ( action: Action<DimeLog> ) => {
+			if ( action.payload.start === action.payload.end ) {
+				setTimeout( () => {
+					this.store$.dispatch( DimeProcessActions.ONE.CHECKLOG.INITIATE.action( action.payload.id ) );
+				}, 3000 );
+			}
 		} );
 
 	constructor(

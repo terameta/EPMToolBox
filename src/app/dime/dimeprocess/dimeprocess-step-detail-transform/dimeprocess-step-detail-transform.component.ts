@@ -36,23 +36,26 @@ export class DimeprocessStepDetailTransformComponent implements OnInit, OnDestro
 		this.currentStep.detailsObject.push( { position: this.currentStep.detailsObject.length } );
 		this.currentStep.detailsObject.sort( SortByPosition );
 	}
-	// public stepTransformationMove = ( curManipulation: any, direction: string ) => {
-	// 	const curOrder = curManipulation.position;
-	// 	const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );
-	// 	this.curStepTransformations.forEach( function ( curField ) {
-	// 		if ( curField.position === nextOrder ) {
-	// 			curField.position = curOrder;
-	// 		}
-	// 	} );
-	// 	curManipulation.position = nextOrder;
-	// 	this.stepTransformationSort();
-	// };
-	// public stepTransformationDelete = ( curManipulation: any, index: number ) => {
-	// 	if ( index !== undefined ) {
-	// 		this.curStepTransformations.splice( index, 1 );
-	// 	}
-	// 	this.stepTransformationSort();
-	// };
+	public stepTransformationMove = ( curManipulation: any, direction: string ) => {
+		const curOrder = curManipulation.position;
+		const nextOrder = parseInt( curOrder, 10 ) + ( direction === 'down' ? 1 : -1 );
+		this.currentStep.detailsObject.forEach( ( curField ) => {
+			if ( curField.position === nextOrder ) {
+				curField.position = curOrder;
+			}
+		} );
+		curManipulation.position = nextOrder;
+		this.currentStep.detailsObject.sort( SortByPosition );
+	}
+	public stepTransformationDelete = ( curManipulation: any, index: number ) => {
+		if ( index !== undefined ) {
+			this.currentStep.detailsObject.splice( index, 1 );
+		}
+		this.currentStep.detailsObject.forEach( ( item, position ) => {
+			item.position = position;
+		} );
+		this.currentStep.detailsObject.sort( SortByPosition );
+	}
 
 	private stepPrepareFields = () => {
 		this.toDelay += 500;

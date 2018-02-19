@@ -2,13 +2,15 @@ import { ATReadyStatus } from '../../enums/generic/readiness';
 import { DimeStream } from './stream';
 import { DimeStreamFieldDetail } from './streamfield';
 import { DimeEnvironmentDetail } from './environmentDetail';
+import { DimeLog } from './log';
 
 export interface DimeProcess {
 	id: number,
 	name: string,
 	source: number,
 	target: number,
-	status: string,
+	status: DimeProcessStatus,
+	currentlog: number,
 	erroremail: string,
 	steps: DimeProcessStep[],
 	defaultTargets: any,
@@ -23,13 +25,7 @@ export interface DimeProcessObject {
 	[key: number]: DimeProcess
 }
 
-export interface DimeProcessRunning {
-	id: number,
-	name: string,
-	source: number,
-	target: number,
-	status: number,
-	erroremail: string,
+export interface DimeProcessRunning extends DimeProcess {
 	steps: DimeProcessStepRunning[],
 	sourceEnvironment: DimeEnvironmentDetail,
 	sourceStream: DimeStream,
@@ -62,12 +58,6 @@ export interface DimeProcessStep {
 export interface DimeProcessStepRunning extends DimeProcessStep {
 	isPending: boolean
 }
-
-// export interface DimeProcessStepType {
-// 	name: string,
-// 	value: string,
-// 	tOrder: number
-// }
 
 export enum DimeProcessStepType {
 	SourceProcedure = 'srcprocedure',
@@ -105,6 +95,16 @@ export interface DimeProcessTransformation {
 	whichField: string,
 	operation: string,
 	operator: string,
-	mOrder: number,
+	position: number,
 	fieldToManipulate: any
+}
+
+export enum DimeProcessStatus {
+	Ready = 0,
+	Running = 1
+}
+
+export interface DimeProcessLogPayload {
+	id: number,
+	log: DimeLog
 }

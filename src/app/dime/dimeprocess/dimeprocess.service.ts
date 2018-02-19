@@ -22,6 +22,7 @@ export class DimeProcessService {
 	public itemids: number[];
 	public items: DimeProcessObject;
 	public currentItem: DimeProcess;
+	public currentLog: string;
 
 	private dimeProcessStepType = DimeProcessStepType;
 
@@ -40,6 +41,7 @@ export class DimeProcessService {
 			this.itemids = processState.ids;
 			this.items = processState.items;
 			this.currentItem = processState.curItem;
+			this.currentLog = processState.currentLog;
 		}, error => {
 			console.error( error );
 		} );
@@ -80,6 +82,16 @@ export class DimeProcessService {
 	public filtersUpdate = () => this.store.dispatch( DimeProcessActions.ONE.FILTERS.UPDATE.INITIATE.action( { id: this.currentItem.id, filters: this.currentItem.filters } ) );
 
 	public filtersDataFileUpdate = () => this.store.dispatch( DimeProcessActions.ONE.FILTERSDATAFILE.UPDATE.INITIATE.action( { id: this.currentItem.id, filters: this.currentItem.filtersDataFile } ) );
+
+	public run = () => this.store.dispatch( DimeProcessActions.ONE.RUN.INITIATE.action( this.currentItem.id ) );
+	public sendDataFile = () => this.store.dispatch( DimeProcessActions.ONE.SENDDATAFILE.INITIATE.action( this.currentItem.id ) );
+	public unlock = () => {
+		if ( confirm( 'Are you sure you want to unlock the process? This does not cancel the running process.' ) ) {
+			this.store.dispatch( DimeProcessActions.ONE.UNLOCK.INITIATE.action( this.currentItem.id ) );
+		} else {
+			this.toastr.info( 'Unlock of process cancelled.', this.serviceName );
+		}
+	}
 
 	public stepDetailPresenter = ( detail: string, type: DimeProcessStepType ): string => {
 		if ( detail ) {
@@ -586,55 +598,4 @@ export class DimeProcessService {
 				this.toastr.error( 'Failed to prepare filters data file.', this.serviceName );
 			}
 		};
-
-		public processRun = () => {
-			this.authHttp.get( this.baseUrl + '/run/' + this.curItem.id ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.curItem.status = result.status;
-					this.checkLog( result.status );
-				}, ( error ) => {
-					this.toastr.error( '', this.serviceName );
-					console.error( error );
-				} );
-		}
-		public checkLog = ( id: number ) => {
-			this.authHttp.get( '/api/log/' + id ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.currentLog = result.details;
-					if ( result.start === result.end ) {
-						setTimeout(() => {
-							this.checkLog( id );
-						}, 2000 );
-					}
-
-				}, ( error ) => {
-					this.toastr.error( 'Failed to retrieve log records.', this.serviceName );
-					console.error( error );
-				} );
-		};
-		public processUnlock = () => {
-			if ( confirm( 'Are you sure you want to unlock the process? This does not cancel the running process.' ) ) {
-				this.authHttp.get( this.baseUrl + '/unlock/' + this.curItem.id ).
-					map( response => response.json() ).
-					subscribe(( result ) => {
-						this.toastr.info( 'Process unlocked successfully.', this.serviceName );
-					}, ( error ) => {
-						this.toastr.error( 'Unlocking process failed.', this.serviceName );
-						console.error( error );
-					} );
-			} else {
-				this.toastr.info( 'Unlock of process cancelled.', this.serviceName );
-			}
-		};
-		public sendDataFile = ( id: number ) => {
-			this.authHttp.get( this.baseUrl + '/sendDataFile/' + id ).
-				map( response => response.json() ).
-				subscribe(( result ) => {
-					this.toastr.info( 'Process data file will be sent to your inbox.' );
-				}, ( error ) => {
-					this.toastr.error( 'Process file can not be send.', this.serviceName );
-					console.error( error );
-				} );
-		}*/
+*/
