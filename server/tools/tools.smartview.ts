@@ -18,6 +18,119 @@ export class SmartViewTools {
 		this.xmlBuilder = new xml2js.Builder();
 		this.xmlParser = new xml2js.Parser();
 	}
+	public runBusinessRule = ( payload ) => {
+		return this.smartviewRunBusinessRule( payload );
+	}
+	private smartviewRunBusinessRule = ( payload ) => {
+		return this.smartviewOpenCube( payload ).then( resEnv => {
+			let body = '';
+			body += '<req_LaunchBusinessRule>';
+			body += '<sID>' + resEnv.SID + '</sID>';
+			body += '<cube>' + resEnv.table + '</cube>';
+			body += '<rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule>';
+			body += '<prompts>';
+			resEnv.procedure.variables.forEach( ( curRTP: any ) => {
+				body += '<rtp>';
+				body += '<name>' + curRTP.name + '</name>';
+				body += '<val>' + curRTP.value + '</val>';
+				body += '</rtp>';
+			} );
+			body += '</prompts>';
+			body += '<ODL_ECID>0000</ODL_ECID>';
+			body += '</req_LaunchBusinessRule>';
+			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+		} ).then( response => {
+			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_launchbusinessrule' ) ).length > 0;
+			if ( isSuccessful ) {
+				return Promise.resolve();
+			} else {
+				return Promise.reject( new Error( 'There is an issue with running business rule' ) );
+			}
+		} );
+	}
+	public writeData = ( payload ) => {
+		return this.smartviewWriteData( payload );
+	}
+	private smartviewWriteData = ( payload ) => {
+		return this.smartviewOpenCube( payload ).then( resEnv => {
+			let body = '';
+			body += '<req_WriteBack>';
+			body += '<sID>' + resEnv.SID + '</sID>';
+			body += '<preferences />';
+			body += '<grid>';
+			body += '<cube>' + resEnv.table + '</cube>';
+			body += '<dims>';
+			payload.sparseDims.forEach( function ( curDim: string, curKey: number ) {
+				body += '<dim id="' + curKey + '" name="' + curDim + '" row="' + curKey + '" hidden="0" />';
+			} );
+			body += '<dim id="' + payload.sparseDims.length + '" name="' + payload.denseDim + '" col="0" hidden="0" />';
+			body += '</dims>';
+			body += '<slices>';
+			body += '<slice rows="' + ( payload.data.length + 1 ) + '" cols="' + Object.keys( payload.data[0] ).length + '">';
+			body += '<data>';
+			const rangeEnd = ( payload.data.length + 1 ) * Object.keys( payload.data[0] ).length;
+			const dirtyCells: any[] = [];
+			let i = Object.keys( payload.data[0] ).length - 1;
+			const numSparseDims = payload.sparseDims.length;
+			payload.data.forEach( ( curTuple: any ) => {
+				Object.keys( curTuple ).forEach( ( curCell, curKey ) => {
+					i++;
+					if ( curKey >= numSparseDims ) { dirtyCells.push( i.toString( 10 ) ); }
+				} );
+			} );
+			body += '<dirtyCells>' + dirtyCells.join( '|' ) + '</dirtyCells>';
+			body += '<range start="0" end="' + ( rangeEnd - 1 ) + '">';
+			const vals: any[] = [];
+			const typs: any[] = [];
+			const stts: any[] = [];
+			Object.keys( payload.data[0] ).forEach( ( curHeader, curKey ) => {
+				if ( curKey < numSparseDims ) {
+					vals.push( '' );
+					typs.push( '7' );
+					stts.push( '' );
+				} else {
+					vals.push( curHeader );
+					typs.push( '0' );
+					stts.push( '0' );
+				}
+			} );
+			payload.data.forEach( ( curTuple: any ) => {
+				Object.keys( curTuple ).forEach( ( curHeader, curKey ) => {
+					if ( curKey < numSparseDims ) {
+						vals.push( curTuple[curHeader].toString() );
+						typs.push( '0' );
+						stts.push( '0' );
+					} else {
+						typs.push( '2' );
+						if ( curTuple[curHeader] ) {
+							stts.push( '258' );
+							vals.push( parseFloat( curTuple[curHeader] ).toString() );
+						} else {
+							stts.push( '8193' );
+							vals.push( '' );
+						}
+					}
+				} );
+			} );
+			body += '<vals>' + vals.join( '|' ) + '</vals>';
+			body += '<types>' + typs.join( '|' ) + '</types>';
+			body += '<status>' + stts.join( '|' ) + '</status>';
+			body += '</range>';
+			body += '</data>';
+			body += '</slice>';
+			body += '</slices>';
+			body += '</grid>';
+			body += '</req_WriteBack>';
+			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+		} ).then( response => {
+			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_writeback' ) ).length > 0;
+			if ( isSuccessful ) {
+				return Promise.resolve( 'Data is pushed to Hyperion Planning' );
+			} else {
+				return Promise.reject( new Error( 'Failed to write data' ) );
+			}
+		} );
+	}
 	public listBusinessRuleDetails = ( environment: DimeEnvironmentSmartView ) => {
 		return this.smartviewListBusinessRuleDetails( environment );
 	}
@@ -54,7 +167,6 @@ export class SmartViewTools {
 	private smartviewListBusinessRules = ( environment: DimeEnvironmentSmartView ) => {
 		return this.smartviewOpenCube( environment )
 			.then( resEnv => {
-				// console.log( resEnv );
 				const body = '<req_EnumBusinessRules><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube><runOnSave>0</runOnSave><ODL_ECID>0000</ODL_ECID></req_EnumBusinessRules>';
 				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 			} )

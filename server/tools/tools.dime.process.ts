@@ -24,7 +24,7 @@ import { SettingsTool } from './tools.settings';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { ATReadyStatus } from '../../shared/enums/generic/readiness';
-import { isNumeric, SortByPosition } from '../../shared/utilities/utilityFunctions';
+import { isNumeric, SortByPosition, getMonthSorterValue } from '../../shared/utilities/utilityFunctions';
 import { DimeMatrixTool } from './tools.dime.matrix';
 import { DimeMatrix } from '../../shared/model/dime/matrix';
 import * as _ from 'lodash';
@@ -628,6 +628,7 @@ export class ProcessTools {
 				then( this.identifyEnvironments ).
 				then( this.isReady ).
 				then( this.createTables ).
+				then( this.fetchFiltersToRefProcess ).
 				then( this.runSteps ).
 				then( this.setCompleted ).
 				then( resolve ).
@@ -709,11 +710,17 @@ export class ProcessTools {
 								}
 								case DimeProcessStepType.ValidateData: {
 									this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PushData: {
-									this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									reject( new Error( 'We should push data 1000 at a time' ) );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									break;
+								}
+								case DimeProcessStepType.TargetProcedure: {
+									this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 									// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 									break;
 								}
@@ -722,10 +729,7 @@ export class ProcessTools {
 								}
 							}
 							/*
-							else if ( curStep.type === 'tarprocedure' ) {
-								this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
-							} else if ( curStep.type === 'senddata' ) {
+							else if ( curStep.type === 'senddata' ) {
 								this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 							} else if ( curStep.type === 'sendmissing' ) {
@@ -1454,12 +1458,8 @@ export class ProcessTools {
 	private runTargetProcedure = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Run target procedure.' ).
-				then( () => {
-					return this.runTargetProcedurePrepareCombinations( refProcess, refStep );
-				} ).
-				then( ( result ) => {
-					return this.runTargetProcedureRunProcedures( refProcess, refStep, result );
-				} ).
+				then( () => this.runTargetProcedurePrepareCombinations( refProcess, refStep ) ).
+				then( ( result: any[] ) => this.runTargetProcedureRunProcedures( refProcess, refStep, result ) ).
 				then( resolve ).
 				catch( reject );
 		} );
@@ -1468,181 +1468,290 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Run Target Procedure: Preparing combinations.' ).
 				then( () => {
-					let stepDetails: any; stepDetails = JSON.parse( refStep.details );
-					/*
-						We should order the variables in the dimension order as defined in the stream definition.
-						This way users will be able to edit the order of the business rules running.
-					*/
-					stepDetails.variables.forEach( ( curVariable: any ) => {
-						if ( curVariable.valuetype !== 'manualvalue' ) {
-							refProcess.targetStreamFields.forEach( ( curField ) => {
-								if ( curField.name === curVariable.value ) { curVariable.vOrder = curField.position; }
+					const promises: any[] = [];
+					promises.push(
+						this.getDataTableDistinctFields(
+							refProcess,
+							refStep.detailsObject.variables.filter( variable => variable.valuetype === 'filteredvalues' ).map( variable => ( { name: variable.dimension, varname: variable.name } ) ),
+							'target',
+							true,
+							refStep,
+							false
+						)
+					);
+					promises.push(
+						this.getDataTableDistinctFields(
+							refProcess,
+							refStep.detailsObject.variables.filter( variable => variable.valuetype === 'allvalues' ).map( variable => ( { name: variable.dimension, varname: variable.name } ) ),
+							'target',
+							false,
+							refStep,
+							false
+						)
+					);
+					refStep.detailsObject.variables
+						.filter( variable => variable.valuetype === 'manualvalue' )
+						.map( variable => { const toReturn: any = {}; toReturn[variable.name] = variable.value; return toReturn; } )
+						.forEach( variable => {
+							promises.push( [variable] );
+						} );
+					Promise.all( promises ).then( result => {
+						let cartesianArray: any[] = [{}];
+						result.forEach( subjects => {
+							const currentCartesian: any[] = [];
+							subjects.forEach( subject => {
+								cartesianArray.forEach( currentPass => {
+									currentCartesian.push( Object.assign( JSON.parse( JSON.stringify( currentPass ) ), JSON.parse( JSON.stringify( subject ) ) ) );
+								} );
 							} );
-						} else {
-							curVariable.vOrder = 0;
+							if ( currentCartesian.length > 0 ) {
+								cartesianArray = currentCartesian;
+							}
+						} );
+
+						const fieldList: any[] = [];
+
+						const variableObject = _.keyBy( refStep.detailsObject.variables, 'name' );
+						if ( cartesianArray.length > 0 ) {
+							refProcess.targetStreamFields.forEach( field => {
+								Object.keys( cartesianArray[0] ).forEach( variable => {
+									if ( variableObject[variable].dimension === field.name ) {
+										fieldList.push( { name: field.name, isMonth: field.isMonth, type: field.type, maxlength: 0, varname: variable } );
+									}
+								} );
+							} );
 						}
-					} );
-					stepDetails.variables.sort( ( a: any, b: any ) => { if ( a.vOrder > b.vOrder ) { return 1; } if ( a.vOrder < b.vOrder ) { return -1; } return 0; } );
-					let promises: any[]; promises = [];
-					stepDetails.variables.forEach( ( curVariable: any ) => {
-						promises.push( new Promise( ( iResolve, iReject ) => {
-							if ( curVariable.valuetype !== 'manualvalue' ) {
-								this.getDataTableDistinctFields( refProcess, { name: curVariable.dimension }, 'target', curVariable.valuetype === 'filteredvalues', refStep, false ).
-									then( ( currentDistinctList: any ) => {
-										currentDistinctList.name = curVariable.name;
-										iResolve( currentDistinctList );
-									} ).catch( iReject );
-							} else {
-								iResolve( { name: curVariable.name, rows: [{ DVALUE: curVariable.value, sorter: curVariable.value }] } );
-							}
-						} ) );
-					} );
-					Promise.all( promises ).then( function ( results ) {
-						let cartesianFields: string[]; cartesianFields = [];
-						results.forEach( ( curResult ) => {
-							cartesianFields.push( curResult.name );
+
+						fieldList.forEach( field => {
+							cartesianArray.forEach( subject => {
+								if ( subject[field.varname] ) {
+									if ( subject[field.varname].length > field.maxlength ) {
+										field.maxlength = subject[field.varname].length;
+									}
+								}
+							} );
 						} );
-						let cartesianArray: any[]; cartesianArray = [];
-						results.forEach( ( curField ) => {
-							if ( cartesianArray.length === 0 ) {
-								curField.rows.forEach( ( curDVALUE: any ) => {
-									if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { cartesianArray.push( curDVALUE.DVALUE ); }
-								} );
+						cartesianArray.forEach( subject => {
+							subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 = '';
+							fieldList.forEach( field => {
+								// Folks, cross your fingers
+								if ( field.isMonth || field.type === 'Time' ) {
+									subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 += getMonthSorterValue( subject[field.varname] );
+								} else {
+									subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 += subject[field.varname].padEnd( field.maxlength );
+								}
+							} );
+						} );
+						cartesianArray.sort( ( e1, e2 ) => {
+							if ( e1.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 > e2.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 ) {
+								return 1;
+							} else if ( e1.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 < e2.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 ) {
+								return -1;
 							} else {
-								let tempCartesian: any[]; tempCartesian = [];
-								cartesianArray.forEach( ( curCartesian ) => {
-									curField.rows.forEach( ( curDVALUE: any ) => {
-										if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { tempCartesian.push( curCartesian + '-|-' + curDVALUE.DVALUE ); }
-									} );
-								} );
-								cartesianArray = tempCartesian;
+								return 0;
 							}
 						} );
-						let toReturn: any;
-						toReturn = {
-							cartesianArray: cartesianArray,
-							cartesianFields: cartesianFields,
-							processDetails: stepDetails
-						};
-						resolve( toReturn );
+						cartesianArray.forEach( subject => {
+							delete subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929;
+						} );
+						resolve( cartesianArray );
 					} ).catch( reject );
-				} ).
-				catch( reject );
+					// let stepDetails: any; stepDetails = JSON.parse( refStep.details );
+					// /*
+					// 	We should order the variables in the dimension order as defined in the stream definition.
+					// 	This way users will be able to edit the order of the business rules running.
+					// */
+					// stepDetails.variables.forEach( ( curVariable: any ) => {
+					// 	if ( curVariable.valuetype !== 'manualvalue' ) {
+					// 		refProcess.targetStreamFields.forEach( ( curField ) => {
+					// 			if ( curField.name === curVariable.value ) { curVariable.vOrder = curField.position; }
+					// 		} );
+					// 	} else {
+					// 		curVariable.vOrder = 0;
+					// 	}
+					// } );
+					// stepDetails.variables.sort( ( a: any, b: any ) => { if ( a.vOrder > b.vOrder ) { return 1; } if ( a.vOrder < b.vOrder ) { return -1; } return 0; } );
+					// let promises: any[]; promises = [];
+					// stepDetails.variables.forEach( ( curVariable: any ) => {
+					// 	promises.push( new Promise( ( iResolve, iReject ) => {
+					// 		if ( curVariable.valuetype !== 'manualvalue' ) {
+					// 			this.getDataTableDistinctFields( refProcess, <DimeStreamField>{ name: curVariable.dimension }, 'target', curVariable.valuetype === 'filteredvalues', refStep, false ).
+					// 				then( ( currentDistinctList: any ) => {
+					// 					currentDistinctList.name = curVariable.name;
+					// 					iResolve( currentDistinctList );
+					// 				} ).catch( iReject );
+					// 		} else {
+					// 			iResolve( { name: curVariable.name, rows: [{ DVALUE: curVariable.value, sorter: curVariable.value }] } );
+					// 		}
+					// 	} ) );
+					// } );
+					// Promise.all( promises ).then( function ( results ) {
+					// 	let cartesianFields: string[]; cartesianFields = [];
+					// 	results.forEach( ( curResult ) => {
+					// 		cartesianFields.push( curResult.name );
+					// 	} );
+					// 	let cartesianArray: any[]; cartesianArray = [];
+					// 	results.forEach( ( curField ) => {
+					// 		if ( cartesianArray.length === 0 ) {
+					// 			curField.rows.forEach( ( curDVALUE: any ) => {
+					// 				if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { cartesianArray.push( curDVALUE.DVALUE ); }
+					// 			} );
+					// 		} else {
+					// 			let tempCartesian: any[]; tempCartesian = [];
+					// 			cartesianArray.forEach( ( curCartesian ) => {
+					// 				curField.rows.forEach( ( curDVALUE: any ) => {
+					// 					if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { tempCartesian.push( curCartesian + '-|-' + curDVALUE.DVALUE ); }
+					// 				} );
+					// 			} );
+					// 			cartesianArray = tempCartesian;
+					// 		}
+					// 	} );
+					// 	let toReturn: any;
+					// 	toReturn = {
+					// 		cartesianArray: cartesianArray,
+					// 		cartesianFields: cartesianFields,
+					// 		processDetails: stepDetails
+					// 	};
+					// 	resolve( toReturn );
+					// } ).catch( reject );
+				} ).catch( reject );
 		} );
 	}
-	private getDataTableDistinctFields = ( refProcess: DimeProcessRunning, curField: any, srctar: string, shouldFilter: boolean, refStep: DimeProcessStepRunning, isForDataFile: boolean ) => {
+	private getDataTableDistinctFields = ( refProcess: DimeProcessRunning, fieldList: { name: string, varname: string }[], srctar: 'source' | 'target', shouldFilter: boolean, refStep: DimeProcessStepRunning, isForDataFile: boolean ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Run Target Procedure: Getting distinct values for field - ' + curField.name + '.' ).
-				then( () => {
-					let selector: string; selector = '';
-					if ( srctar === 'source' ) { selector = 'SRC_'; }
-					if ( srctar === 'target' ) { selector = 'TAR_'; }
-					let wherers: string[]; wherers = [];
-					let wherePart: string; wherePart = '';
+			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Run Target Procedure: Getting distinct values for field(s) - ' + fieldList.map( field => field.name ).join( ' - ' ) + '.' ).then( () => {
+				if ( fieldList && fieldList.length > 0 ) {
+
+					const selector: string = srctar === 'source' ? 'SRC_' : 'TAR_';
+					let localWherers: string[] = [];
+
 					if ( shouldFilter || isForDataFile ) {
-						let curFilterList: any[];
-						if ( isForDataFile ) {
-							curFilterList = refProcess.filtersDataFile;
-						} else {
-							curFilterList = refProcess.filters;
-						}
-						curFilterList.forEach( ( curFilter ) => {
-							refProcess.sourceStreamFields.forEach( ( theField: any ) => {
-								if ( theField.id === curFilter.field ) { curFilter.fieldName = theField.name; }
-							} );
-							if ( curFilter.filterfrom ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
-							if ( curFilter.filterto ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
-							if ( curFilter.filtertext ) { wherers.push( 'SRC_' + curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
-							if ( curFilter.filterbeq ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=' + curFilter.filterbeq ); }
-							if ( curFilter.filterseq ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=' + curFilter.filterseq ); }
-						} );
-						if ( wherers.length > 0 ) {
-							wherePart += ' WHERE ' + wherers.join( ' AND ' );
-						}
+						localWherers = localWherers.concat( refProcess.wherersWithSrc );
 					}
-					selector += curField.name;
-					const selectQuery = 'SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
+					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'missing\'' ) );
+					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'missing:missing\'' ) );
+					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'missing::missing\'' ) );
+					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'ignore\'' ) );
+					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'ignore:ignore\'' ) );
+					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'ignore::ignore\'' ) );
+
+					const wherePart = ' WHERE ' + localWherers.join( ' AND ' );
+
+					const selectQuery = 'SELECT DISTINCT ' + fieldList.map( field => selector + field.name + ' AS ' + field.varname ).join( ', ' ) + ' FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
 					this.db.query( selectQuery, ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
 						} else {
-							if ( curField.isMonth === 0 ) {
-								rows.forEach( ( curRow: any, curKey: number ) => {
-									rows[curKey].sorter = curRow.DVALUE;
-								} );
-							} else {
-								rows.forEach( ( curRow: any, curKey: number ) => {
-									if ( curRow.DVALUE === 'Jan' || curRow.DVALUE === 'January' ) {
-										rows[curKey].sorter = 1;
-									} else if ( curRow.DVALUE === 'Feb' || curRow.DVALUE === 'February' ) {
-										rows[curKey].sorter = 2;
-									} else if ( curRow.DVALUE === 'Mar' || curRow.DVALUE === 'March' ) {
-										rows[curKey].sorter = 3;
-									} else if ( curRow.DVALUE === 'Apr' || curRow.DVALUE === 'April' ) {
-										rows[curKey].sorter = 4;
-									} else if ( curRow.DVALUE === 'May' ) {
-										rows[curKey].sorter = 5;
-									} else if ( curRow.DVALUE === 'Jun' || curRow.DVALUE === 'June' ) {
-										rows[curKey].sorter = 6;
-									} else if ( curRow.DVALUE === 'Jul' || curRow.DVALUE === 'July' ) {
-										rows[curKey].sorter = 7;
-									} else if ( curRow.DVALUE === 'Aug' || curRow.DVALUE === 'August' ) {
-										rows[curKey].sorter = 8;
-									} else if ( curRow.DVALUE === 'Sep' || curRow.DVALUE === 'September' ) {
-										rows[curKey].sorter = 9;
-									} else if ( curRow.DVALUE === 'Oct' || curRow.DVALUE === 'October' ) {
-										rows[curKey].sorter = 10;
-									} else if ( curRow.DVALUE === 'Nov' || curRow.DVALUE === 'November' ) {
-										rows[curKey].sorter = 11;
-									} else if ( curRow.DVALUE === 'Dec' || curRow.DVALUE === 'December' ) {
-										rows[curKey].sorter = 12;
-									} else if ( curRow.DVALUE === 'BegBalance' ) {
-										rows[curKey].sorter = 0;
-									} else if ( curRow.DVALUE === 'OBL' ) {
-										rows[curKey].sorter = 0;
-									} else if ( curRow.DVALUE === 'CBL' ) {
-										rows[curKey].sorter = 13;
-									} else if ( isNumeric( curRow.DVALUE ) ) {
-										rows[curKey].sorter = parseFloat( curRow.DVALUE );
-									} else {
-										rows[curKey].sorter = curRow.DVALUE;
-									}
-								} );
-							}
-							rows.sort( function ( a: any, b: any ) {
-								if ( a.sorter > b.sorter ) { return 1; }
-								if ( a.sorter < b.sorter ) { return -1; }
-								return 0;
-							} );
-							resolve( { name: curField.name, rows: rows } );
+							resolve( rows );
 						}
 					} );
-				} ).
+				} else {
+					resolve( [] );
+				}
+				// let selector: string; selector = '';
+				// if ( srctar === 'source' ) { selector = 'SRC_'; }
+				// if ( srctar === 'target' ) { selector = 'TAR_'; }
+				// let wherers: string[]; wherers = [];
+				// let wherePart: string; wherePart = '';
+				// if ( shouldFilter || isForDataFile ) {
+				// 	let curFilterList: any[];
+				// 	if ( isForDataFile ) {
+				// 		curFilterList = refProcess.filtersDataFile;
+				// 	} else {
+				// 		curFilterList = refProcess.filters;
+				// 	}
+				// 	curFilterList.forEach( ( curFilter ) => {
+				// 		refProcess.sourceStreamFields.forEach( ( theField: any ) => {
+				// 			if ( theField.id === curFilter.field ) { curFilter.fieldName = theField.name; }
+				// 		} );
+				// 		if ( curFilter.filterfrom ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
+				// 		if ( curFilter.filterto ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
+				// 		if ( curFilter.filtertext ) { wherers.push( 'SRC_' + curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
+				// 		if ( curFilter.filterbeq ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=' + curFilter.filterbeq ); }
+				// 		if ( curFilter.filterseq ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=' + curFilter.filterseq ); }
+				// 	} );
+				// 	if ( wherers.length > 0 ) {
+				// 		wherePart += ' WHERE ' + wherers.join( ' AND ' );
+				// 	}
+				// }
+				// selector += curField.name;
+				// const selectQuery = 'SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
+				// this.db.query( selectQuery, ( err, rows, fields ) => {
+				// 	if ( err ) {
+				// 		reject( err );
+				// 	} else {
+				// 		if ( curField.isMonth === 0 ) {
+				// 			rows.forEach( ( curRow: any, curKey: number ) => {
+				// 				rows[curKey].sorter = curRow.DVALUE;
+				// 			} );
+				// 		} else {
+				// 			rows.forEach( ( curRow: any, curKey: number ) => {
+				// 				if ( curRow.DVALUE === 'Jan' || curRow.DVALUE === 'January' ) {
+				// 					rows[curKey].sorter = 1;
+				// 				} else if ( curRow.DVALUE === 'Feb' || curRow.DVALUE === 'February' ) {
+				// 					rows[curKey].sorter = 2;
+				// 				} else if ( curRow.DVALUE === 'Mar' || curRow.DVALUE === 'March' ) {
+				// 					rows[curKey].sorter = 3;
+				// 				} else if ( curRow.DVALUE === 'Apr' || curRow.DVALUE === 'April' ) {
+				// 					rows[curKey].sorter = 4;
+				// 				} else if ( curRow.DVALUE === 'May' ) {
+				// 					rows[curKey].sorter = 5;
+				// 				} else if ( curRow.DVALUE === 'Jun' || curRow.DVALUE === 'June' ) {
+				// 					rows[curKey].sorter = 6;
+				// 				} else if ( curRow.DVALUE === 'Jul' || curRow.DVALUE === 'July' ) {
+				// 					rows[curKey].sorter = 7;
+				// 				} else if ( curRow.DVALUE === 'Aug' || curRow.DVALUE === 'August' ) {
+				// 					rows[curKey].sorter = 8;
+				// 				} else if ( curRow.DVALUE === 'Sep' || curRow.DVALUE === 'September' ) {
+				// 					rows[curKey].sorter = 9;
+				// 				} else if ( curRow.DVALUE === 'Oct' || curRow.DVALUE === 'October' ) {
+				// 					rows[curKey].sorter = 10;
+				// 				} else if ( curRow.DVALUE === 'Nov' || curRow.DVALUE === 'November' ) {
+				// 					rows[curKey].sorter = 11;
+				// 				} else if ( curRow.DVALUE === 'Dec' || curRow.DVALUE === 'December' ) {
+				// 					rows[curKey].sorter = 12;
+				// 				} else if ( curRow.DVALUE === 'BegBalance' ) {
+				// 					rows[curKey].sorter = 0;
+				// 				} else if ( curRow.DVALUE === 'OBL' ) {
+				// 					rows[curKey].sorter = 0;
+				// 				} else if ( curRow.DVALUE === 'CBL' ) {
+				// 					rows[curKey].sorter = 13;
+				// 				} else if ( isNumeric( curRow.DVALUE ) ) {
+				// 					rows[curKey].sorter = parseFloat( curRow.DVALUE );
+				// 				} else {
+				// 					rows[curKey].sorter = curRow.DVALUE;
+				// 				}
+				// 			} );
+				// 		}
+				// 		rows.sort( function ( a: any, b: any ) {
+				// 			if ( a.sorter > b.sorter ) { return 1; }
+				// 			if ( a.sorter < b.sorter ) { return -1; }
+				// 			return 0;
+				// 		} );
+				// 		resolve( { name: curField.name, rows: rows } );
+				// 	}
+				// } );
+			} ).
 				catch( reject );
 		} );
 	}
-	private runTargetProcedureRunProcedures = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
+	// private runTargetProcedureRunProcedures = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
+	private runTargetProcedureRunProcedures = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, cartesianArray: any[] ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Run Target Procedure: Running procedures.' ).
 				then( () => {
-					asynclib.eachOfSeries( refDefinitions.cartesianArray, ( item, key, callback ) => {
-						let currentProcedure: any; currentProcedure = {};
+					asynclib.eachOfSeries( cartesianArray, ( item, key, callback ) => {
+						const currentProcedure: any = {};
 						currentProcedure.stream = refProcess.targetStream;
 						currentProcedure.procedure = {
-							name: refDefinitions.processDetails.name,
-							hasRTP: refDefinitions.processDetails.hasRTP,
-							type: refDefinitions.processDetails.type,
-							variables: []
+							name: refStep.detailsObject.name,
+							hasRTP: refStep.detailsObject.hasRTP,
+							type: refStep.detailsObject.type,
+							variables: Object.keys( item ).map( itemkey => ( { name: itemkey, value: item[itemkey] } ) )
 						};
 						currentProcedure.dbName = refProcess.targetStream.dbName;
 						currentProcedure.tableName = refProcess.targetStream.tableName;
-						item.toString().split( '-|-' ).forEach( ( curVar: any, curKey: number ) => {
-							currentProcedure.procedure.variables.push( {
-								name: refDefinitions.cartesianFields[curKey],
-								value: curVar
-							} );
-						} );
-						this.runTargetProcedureRunProcedureAction( currentProcedure, refProcess.status ).then( ( result ) => {
+						this.runTargetProcedureRunProcedureAction( currentProcedure, refProcess.currentlog ).then( result => {
 							callback();
 						} ).catch( callback );
 					}, ( err ) => {
@@ -1652,8 +1761,34 @@ export class ProcessTools {
 							resolve( refProcess );
 						}
 					} );
-				} ).
-				catch( reject );
+					// asynclib.eachOfSeries( refDefinitions.cartesianArray, ( item, key, callback ) => {
+					// 	let currentProcedure: any; currentProcedure = {};
+					// 	currentProcedure.stream = refProcess.targetStream;
+					// 	currentProcedure.procedure = {
+					// 		name: refDefinitions.processDetails.name,
+					// 		hasRTP: refDefinitions.processDetails.hasRTP,
+					// 		type: refDefinitions.processDetails.type,
+					// 		variables: []
+					// 	};
+					// 	currentProcedure.dbName = refProcess.targetStream.dbName;
+					// 	currentProcedure.tableName = refProcess.targetStream.tableName;
+					// 	item.toString().split( '-|-' ).forEach( ( curVar: any, curKey: number ) => {
+					// 		currentProcedure.procedure.variables.push( {
+					// 			name: refDefinitions.cartesianFields[curKey],
+					// 			value: curVar
+					// 		} );
+					// 	} );
+					// 	this.runTargetProcedureRunProcedureAction( currentProcedure, refProcess.status ).then( ( result ) => {
+					// 		callback();
+					// 	} ).catch( callback );
+					// }, ( err ) => {
+					// 	if ( err ) {
+					// 		reject( err );
+					// 	} else {
+					// 		resolve( refProcess );
+					// 	}
+					// } );
+				} ).catch( reject );
 		} );
 	}
 	private runTargetProcedureRunProcedureAction = ( currentProcedure: any, tracker: number ) => {
@@ -1737,22 +1872,20 @@ export class ProcessTools {
 					insList.push( 'SUMMARIZEDRESULT' );
 					insertQuery += insList.join( ', ' );
 					insertQuery += ') \n';
-					insertQuery += 'SELECT ';
-					insertQuery += selList.join( ', ' );
-					insertQuery += ' FROM PROCESS' + refProcess.id + '_DATATBL';
+					insertQuery += 'SELECT \n\t';
+					insertQuery += selList.join( ', \n\t' );
+					insertQuery += ' \nFROM \n\tPROCESS' + refProcess.id + '_DATATBL';
 
-					if ( refProcess.wherersWithSrc.length > 0 ) {
-						insertQuery += '\n WHERE \n' + refProcess.wherersWithSrc.join( '\n\t AND ' );
+					const insertWherers: string[] = [];
+
+					refProcess.steps.filter( step => step.type === DimeProcessStepType.ValidateData ).forEach( step => { insertWherers.push( 'Matrix_' + step.referedid + '_Result = \'valid\'' ); } );
+					refProcess.wherersWithSrc.forEach( wherer => { insertWherers.push( wherer ); } );
+
+					if ( insertWherers.length > 0 ) {
+						insertQuery += ' \nWHERE \n\t' + insertWherers.join( ' \n\tAND ' );
 					}
 
-					if ( shouldGroup ) { insertQuery += ' GROUP BY ' + grpList.join( ', ' ); }
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( insertQuery );
-					console.log( '===========================================' );
-					console.log( refProcess.wherersWithSrc );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
+					if ( shouldGroup ) { insertQuery += ' \nGROUP BY \n\t' + grpList.join( ', \n\t' ); }
 					this.db.query( insertQuery, ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
@@ -1780,7 +1913,10 @@ export class ProcessTools {
 							}
 							let concaters: string[]; concaters = [];
 							rows.forEach( ( curTuple: any ) => {
-								if ( curTuple[denseField] !== 'ignore' && curTuple[denseField] !== 'ignore:ignore' && curTuple[denseField] !== 'ignore::ignore' && curTuple[denseField] !== 'missing' ) {
+								if (
+									curTuple[denseField] !== 'ignore' && curTuple[denseField] !== 'ignore:ignore' && curTuple[denseField] !== 'ignore::ignore' &&
+									curTuple[denseField] !== 'missing' && curTuple[denseField] !== 'missing:missing' && curTuple[denseField] !== 'missing::missing'
+								) {
 									concaters.push( 'GROUP_CONCAT((CASE ' + denseField + ' WHEN \'' + curTuple[denseField] + '\' THEN SUMMARIZEDRESULT ELSE NULL END)) AS \'' + curTuple[denseField] + '\'' );
 								}
 							} );
@@ -1794,8 +1930,11 @@ export class ProcessTools {
 							let wherers: string[]; wherers = [];
 							selecters.forEach( function ( curField ) {
 								wherers.push( curField + ' <> \'missing\'' );
+								wherers.push( curField + ' <> \'missing:missing\'' );
+								wherers.push( curField + ' <> \'missing::missing\'' );
 								wherers.push( curField + ' <> \'ignore\'' );
 								wherers.push( curField + ' <> \'ignore:ignore\'' );
+								wherers.push( curField + ' <> \'ignore::ignore\'' );
 								wherers.push( curField + ' IS NOT NULL' );
 							} );
 							wherers.push( 'SUMMARIZEDRESULT <> 0' );
@@ -1806,13 +1945,6 @@ export class ProcessTools {
 								if ( serr ) {
 									reject( serr );
 								} else {
-									// srows.forEach((curRow: any) => {
-									// 	rows.forEach(( curDenseRow: any ) => {
-									// 		if ( !curRow[curDenseRow[denseField]] ) {
-
-									// 		}
-									// 	} );
-									// } );
 									resolve( srows );
 								}
 							} );
@@ -1824,44 +1956,35 @@ export class ProcessTools {
 	}
 	private pushDataAction = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, finalData: any[] ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: Pushing data to the target.' ).
-				then( () => {
-					if ( !finalData ) {
-						this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
-					} else if ( finalData.length === 0 ) {
-						this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
-					} else {
-						let sparseDims: string[]; sparseDims = [];
-						for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
-							sparseDims.push( refProcess.targetStreamFields[i].name );
-						}
-						this.environmentTool.writeData( {
-							id: refProcess.targetStream.environment,
-							data: finalData,
-							db: refProcess.targetStream.dbName,
-							table: refProcess.targetStream.tableName,
-							sparseDims: sparseDims,
-							denseDim: refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name
-						} ).
-							then( resolve ).
-							catch( ( issue: any ) => {
-								reject( JSON.stringify( issue ) );
-							} );
+			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: Pushing data to the target.' ).then( () => {
+				if ( !finalData ) {
+					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
+				} else if ( finalData.length === 0 ) {
+					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
+				} else {
+					let sparseDims: string[]; sparseDims = [];
+					for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
+						sparseDims.push( refProcess.targetStreamFields[i].name );
 					}
-				} ).
-				catch( reject );
+					this.environmentTool.writeData( {
+						id: refProcess.targetStream.environment,
+						data: finalData,
+						db: refProcess.targetStream.dbName,
+						table: refProcess.targetStream.tableName,
+						sparseDims: sparseDims,
+						denseDim: refProcess.targetStreamFields[refProcess.targetStreamFields.length - 1].name
+					} ).then( resolve ).catch( reject );
+				}
+			} ).catch( reject );
 		} );
 	}
 	private runTransformations = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Transform data is initiating.' ).
-				then( () => {
-					let transformations: DimeProcessTransformation[];
-					transformations = JSON.parse( refStep.details ).sort( SortByPosition );
-					return this.runTransformationsAction( refProcess, transformations, refStep );
-				} ).
-				then( resolve ).
-				catch( reject );
+			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Transform data is initiating.' ).then( () => {
+				let transformations: DimeProcessTransformation[];
+				transformations = JSON.parse( refStep.details ).sort( SortByPosition );
+				return this.runTransformationsAction( refProcess, transformations, refStep );
+			} ).then( resolve ).catch( reject );
 		} );
 	}
 	private runTransformationsAction = ( refProcess: DimeProcessRunning, transformations: DimeProcessTransformation[], refStep: DimeProcessStepRunning ) => {
@@ -2144,9 +2267,9 @@ export class ProcessTools {
 	private runPullData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Pull Data is initiating.' ).
-				then( () => {
-					return this.fetchFiltersToRefProcess( refProcess );
-				} ).
+				// then( () => {
+				// 	return this.fetchFiltersToRefProcess( refProcess );
+				// } ).
 				then( this.clearStaging ).
 				then( this.pullFromSource ).
 				then( this.insertToStaging ).

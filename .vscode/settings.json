@@ -27,7 +27,7 @@
 	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
 	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": true,
 	"tslint.exclude": "**/node_modules/**/*.ts",
-	"tslint.autoFixOnSave": true,
+	"tslint.autoFixOnSave": false,
 	"workbench.editor.enablePreview": false,
 	"explorer.openEditors.visible": 0,
 	"editor.tabCompletion": true,

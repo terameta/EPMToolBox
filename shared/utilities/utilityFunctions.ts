@@ -26,3 +26,44 @@ export const getFormattedDate = () => {
 const padDatePart = ( curPart: string | number ) => {
 	return ( '0' + curPart ).substr( -2 );
 };
+export const getMonthSorterValue = ( month: string ): string => {
+	month = month.trim();
+	let sorter = '';
+	if ( month === 'Jan' || month === 'January' ) {
+		sorter = '1';
+	} else if ( month === 'Feb' || month === 'February' ) {
+		sorter = '2';
+	} else if ( month === 'Mar' || month === 'March' ) {
+		sorter = '3';
+	} else if ( month === 'Apr' || month === 'April' ) {
+		sorter = '4';
+	} else if ( month === 'May' ) {
+		sorter = '5';
+	} else if ( month === 'Jun' || month === 'June' ) {
+		sorter = '6';
+	} else if ( month === 'Jul' || month === 'July' ) {
+		sorter = '7';
+	} else if ( month === 'Aug' || month === 'August' ) {
+		sorter = '8';
+	} else if ( month === 'Sep' || month === 'September' ) {
+		sorter = '9';
+	} else if ( month === 'Oct' || month === 'October' ) {
+		sorter = '10';
+	} else if ( month === 'Nov' || month === 'November' ) {
+		sorter = '11';
+	} else if ( month === 'Dec' || month === 'December' ) {
+		sorter = '12';
+	} else if ( month === 'BegBalance' ) {
+		sorter = '0';
+	} else if ( month === 'OBL' ) {
+		sorter = '0';
+	} else if ( month === 'CBL' ) {
+		sorter = '13';
+	} else if ( isNumeric( month ) ) {
+		sorter = parseFloat( month ).toString();
+	} else {
+		sorter = month;
+	}
+	sorter = sorter.substr( 0, 8 ).padStart( 8, '0' );
+	return sorter;
+};

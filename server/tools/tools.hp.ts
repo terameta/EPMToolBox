@@ -41,6 +41,12 @@ export class HPTools {
 	public listProcedureDetails = ( refObj: DimeEnvironmentHP ) => {
 		return this.smartview.listBusinessRuleDetails( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
+	public writeData = ( refObj ) => {
+		return this.smartview.writeData( refObj );
+	}
+	public runProcedure = ( refObj ) => {
+		return this.smartview.runBusinessRule( refObj );
+	}
 	// Old Step0100
 	/* private hpEstablishConnection = ( refObj: DimeEnvironmentHP ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -761,109 +767,7 @@ export class HPTools {
 	}; */
 	/* private hpWriteData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			let theBody: string; theBody = '';
-			theBody += '<req_WriteBack>';
-			theBody += '<sID>' + refObj.sID + '</sID>';
-			theBody += '<preferences />';
-			theBody += '<grid>';
-			theBody += '<cube>' + refObj.table + '</cube>';
-			theBody += '<dims>';
-			refObj.sparseDims.forEach( function ( curDim: string, curKey: number ) {
-				theBody += '<dim id="' + curKey + '" name="' + curDim + '" row="' + curKey + '" hidden="0" />';
-			} );
-			theBody += '<dim id="' + refObj.sparseDims.length + '" name="' + refObj.denseDim + '" col="0" hidden="0" />';
-			theBody += '</dims>';
-			theBody += '<slices>';
-			theBody += '<slice rows="' + ( refObj.data.length + 1 ) + '" cols="' + Object.keys( refObj.data[0] ).length + '">';
-			theBody += '<data>';
-			const rangeEnd = ( refObj.data.length + 1 ) * Object.keys( refObj.data[0] ).length;
-			let dirtyCells: any[]; dirtyCells = [];
-			let i = Object.keys( refObj.data[0] ).length - 1;
-			const numSparseDims = refObj.sparseDims.length;
-			refObj.data.forEach( ( curTuple: any ) => {
-				Object.keys( curTuple ).forEach( ( curCell, curKey ) => {
-					i++;
-					if ( curKey >= numSparseDims ) { dirtyCells.push( i.toString( 10 ) ); }
-				} );
-			} );
-			theBody += '<dirtyCells>' + dirtyCells.join( '|' ) + '</dirtyCells>';
-			theBody += '<range start="0" end="' + ( rangeEnd - 1 ) + '">';
-			let vals: any[]; vals = [];
-			let typs: any[]; typs = [];
-			let stts: any[]; stts = [];
-			Object.keys( refObj.data[0] ).forEach( ( curHeader, curKey ) => {
-				if ( curKey < numSparseDims ) {
-					vals.push( '' );
-					typs.push( '7' );
-					stts.push( '' );
-				} else {
-					vals.push( curHeader );
-					typs.push( '0' );
-					stts.push( '0' );
-				}
-			} );
-			refObj.data.forEach( ( curTuple: any ) => {
-				Object.keys( curTuple ).forEach( ( curHeader, curKey ) => {
-					if ( curKey < numSparseDims ) {
-						vals.push( curTuple[curHeader].toString() );
-						typs.push( '0' );
-						stts.push( '0' );
-					} else {
-						typs.push( '2' );
-						if ( curTuple[curHeader] ) {
-							stts.push( '258' );
-							vals.push( parseFloat( curTuple[curHeader] ).toString() );
-						} else {
-							stts.push( '8193' );
-							vals.push( '' );
-						}
-					}
-				} );
-			} );
-			theBody += '<vals>' + vals.join( '|' ) + '</vals>';
-			theBody += '<types>' + typs.join( '|' ) + '</types>';
-			theBody += '<status>' + stts.join( '|' ) + '</status>';
-			theBody += '</range>';
-			theBody += '</data>';
-			theBody += '</slice>';
-			theBody += '</slices>';
-			theBody += '</grid>';
-			theBody += '</req_WriteBack>';
-			request.post( {
-				url: refObj.planningurl || '',
-				body: theBody,
-				headers: { 'Content-Type': 'application/xml' },
-				timeout: 60000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					this.xmlParser( body, ( pErr: any, result: any ) => {
-						if ( pErr ) {
-							reject( pErr );
-						} else {
-							if ( !result ) {
-								reject( 'No result received' );
-							} else if ( result.exception ) {
-								let issue: string; issue = 'Failed to write data to the cube';
-								if ( result.exception.desc && Array.isArray( result.exception.desc ) ) {
-									issue = '';
-									result.exception.desc.forEach( ( curDesc: any ) => {
-										issue += curDesc + '\n';
-									} );
-								}
-								if ( result.exception.$ ) {
-									if ( result.exception.$.errcode ) { issue += 'Error Code: ' + result.exception.$.errcode + '\n'; }
-									if ( result.exception.$.type ) { issue += 'Error Type: ' + result.exception.$.type + '\n'; }
-								}
-								reject( issue );
-							} else {
-								resolve( 'Data is pushed to Hyperion Planning' );
-							}
-						}
-					} );
-				}
-			} );
+
 		} );
 	}; */
 }

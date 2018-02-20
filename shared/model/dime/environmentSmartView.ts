@@ -9,7 +9,7 @@ export interface DimeEnvironmentSmartView extends DimeEnvironmentDetail {
 	dimensions: any[],
 	aliastables: any[],
 	memberList: any[],
-	procedure: { name: string, type: string, hasRTP: string },
+	procedure: { name: string, type: string, hasRTP: string, variables: any[] },
 	cookies: string
 }
 

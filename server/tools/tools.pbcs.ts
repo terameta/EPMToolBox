@@ -44,6 +44,12 @@ export class PBCSTools {
 	public listProcedureDetails = ( refObj: DimeEnvironmentPBCS ) => {
 		return this.smartview.listBusinessRuleDetails( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
+	public writeData = ( refObj ) => {
+		return this.smartview.writeData( refObj );
+	}
+	public runProcedure = ( refObj ) => {
+		return this.smartview.runBusinessRule( refObj );
+	}
 	/*
 		private staticVerify = ( refObj: DimeEnvironmentPBCS ) => {
 			return new Promise( ( resolve, reject ) => {

@@ -136,7 +136,9 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 					} );
 					response.forEach( curResponse => {
 						if ( curResponse.dimension ) {
-							curResponse.value = curResponse.dimension;
+							if ( curResponse.valuetype !== 'manualvalue' ) {
+								curResponse.value = curResponse.dimension;
+							}
 						}
 					} );
 					this.currentStep.detailsObject.variables = response;
