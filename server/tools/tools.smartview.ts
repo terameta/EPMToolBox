@@ -3,6 +3,7 @@ import * as xml2js from 'xml2js';
 import * as request from 'request';
 import * as url from 'url';
 import * as cheerio from 'cheerio';
+import * as asynclib from 'async';
 import { CheerioStatic } from 'cheerio';
 
 import { MainTools } from './tools.main';
@@ -52,6 +53,51 @@ export class SmartViewTools {
 		return this.smartviewWriteData( payload );
 	}
 	private smartviewWriteData = ( payload ) => {
+		return new Promise( ( resolve, reject ) => {
+			payload.issueList = [];
+			payload.cellsTotalCount = 0;
+			payload.cellsValidCount = 0;
+			payload.cellsInvalidCount = 0;
+			const pushLimit = 1000;
+			const wholeData = payload.data;
+			let numberofRowsPerChunk = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
+			if ( numberofRowsPerChunk < 1 ) {
+				numberofRowsPerChunk = 1;
+			}
+			const chunkedData: any[] = [];
+			while ( wholeData.length > 0 ) {
+				chunkedData.push( wholeData.splice( 0, numberofRowsPerChunk ) );
+			}
+			this.smartviewWriteDataSendChuncks( payload, chunkedData ).then( () => { resolve( payload ); } ).catch( reject );
+		} );
+	}
+	private smartviewWriteDataSendChuncks = ( payload, chunks: any[] ) => {
+		return new Promise( ( resolve, reject ) => {
+			asynclib.eachOfSeries( chunks, ( chunk, key, callback ) => {
+				payload.data = chunk;
+				this.smartviewWriteDataTry( payload, 0 ).then( result => { callback(); } ).catch( callback );
+			}, ( err ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve();
+				}
+			} );
+		} );
+	}
+	private smartviewWriteDataTry = ( payload, retrycount = 0 ) => {
+		const maxRetry = 10;
+		return new Promise( ( resolve, reject ) => {
+			this.smartviewWriteDataAction( payload ).then( resolve ).catch( issue => {
+				if ( retrycount < maxRetry ) {
+					this.smartviewWriteDataTry( payload, ++retrycount );
+				} else {
+					reject( issue );
+				}
+			} );
+		} );
+	}
+	private smartviewWriteDataAction = ( payload ) => {
 		return this.smartviewOpenCube( payload ).then( resEnv => {
 			let body = '';
 			body += '<req_WriteBack>';
@@ -75,7 +121,7 @@ export class SmartViewTools {
 			payload.data.forEach( ( curTuple: any ) => {
 				Object.keys( curTuple ).forEach( ( curCell, curKey ) => {
 					i++;
-					if ( curKey >= numSparseDims ) { dirtyCells.push( i.toString( 10 ) ); }
+					if ( curKey >= numSparseDims ) { dirtyCells.push( curTuple[curCell] ? i.toString( 10 ) : '' ); }
 				} );
 			} );
 			body += '<dirtyCells>' + dirtyCells.join( '|' ) + '</dirtyCells>';
@@ -114,7 +160,7 @@ export class SmartViewTools {
 			} );
 			body += '<vals>' + vals.join( '|' ) + '</vals>';
 			body += '<types>' + typs.join( '|' ) + '</types>';
-			body += '<status>' + stts.join( '|' ) + '</status>';
+			body += '<status enc="0">' + stts.join( '|' ) + '</status>';
 			body += '</range>';
 			body += '</data>';
 			body += '</slice>';
@@ -123,6 +169,67 @@ export class SmartViewTools {
 			body += '</req_WriteBack>';
 			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 		} ).then( response => {
+			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
+			const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
+			const vals = response.$( 'vals' ).text().split( '|' );
+			const stts = response.$( 'status' ).text().split( '|' );
+			const headers = Object.keys( payload.data[0] );
+			const cellsToSkip = headers.length - rangeStart;
+			vals.splice( 0, cellsToSkip );
+			stts.splice( 0, cellsToSkip );
+			const results: any[] = [];
+			while ( vals.length > 0 ) {
+				const sparsePart: any = {};
+				// Prepare the sparse part
+				headers.forEach( ( header, index ) => {
+					if ( index < payload.sparseDims.length ) {
+						// sparsePart[header] = {
+						// 	value: vals.splice( 0, 1 )[0],
+						// 	status: stts.splice( 0, 1 )[0]
+						// };
+						sparsePart[vals.splice( 0, 1 )[0]] = stts.splice( 0, 1 )[0];
+					}
+				} );
+
+				headers.forEach( ( header, index ) => {
+					if ( index >= payload.sparseDims.length ) {
+						const result = JSON.parse( JSON.stringify( sparsePart ) );
+						result[header] = vals.splice( 0, 1 )[0];
+						result.writestatus = stts.splice( 0, 1 )[0];
+						results.push( result );
+					}
+				} );
+
+			}
+			results.forEach( result => {
+				result.finalStatus = '';
+				Object.keys( result ).forEach( ( header, index ) => {
+					if ( index < payload.sparseDims.length ) {
+						if ( result[header] === '' ) {
+							result.finalStatus += '\'' + header + '\' doesn\'t exist in the database;';
+						} else if ( result[header] === '2' ) {
+							result.finalStatus += '\'' + header + '\' is a parent member in the database;';
+						} else if ( result[header] === '0' ) {
+							// this is a valid entry
+						} else {
+							result.finalStatus += '\'' + header + '\' has an unknown issue;';
+						}
+					}
+				} );
+				if ( result.writestatus === '1' && result.finalStatus === '' ) {
+					result.finalStatus += 'This intersection is read-only;';
+				}
+				if ( result.writestatus === '8193' && result.finalStatus === '' ) {
+					result.finalStatus += 'This intersection is read-only;';
+				}
+				payload.cellsTotalCount++;
+				if ( result.finalStatus !== '' ) {
+					payload.cellsInvalidCount++;
+					payload.issueList.push( Object.keys( result ).filter( ( element, index ) => index <= payload.sparseDims.length ).join( '|' ) + ' => ' + result.finalStatus );
+				} else {
+					payload.cellsValidCount++;
+				}
+			} );
 			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_writeback' ) ).length > 0;
 			if ( isSuccessful ) {
 				return Promise.resolve( 'Data is pushed to Hyperion Planning' );

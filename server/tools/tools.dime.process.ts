@@ -714,14 +714,13 @@ export class ProcessTools {
 									break;
 								}
 								case DimeProcessStepType.PushData: {
-									// this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									reject( new Error( 'We should push data 1000 at a time' ) );
+									this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.TargetProcedure: {
 									this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								default: {
@@ -1806,14 +1805,28 @@ export class ProcessTools {
 	}
 	private runPushData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
+			let cellsTotalCount = 0;
+			let cellsValidCount = 0;
+			let cellsInvalidCount = 0;
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Push data is initiating.' ).
 				then( () => this.populateTargetStreamDescriptions( refProcess ) ).
 				then( () => this.clearSummaryTable( refProcess, refStep ) ).
 				then( () => this.summarizeData( refProcess, refStep ) ).
 				then( () => this.fetchSummarizedData( refProcess, refStep ) ).
 				then( ( result: any[] ) => this.pushDataAction( refProcess, refStep, result ) ).
-				then( ( result: any ) => this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': ' + JSON.stringify( result ) ) ).
-				then( ( result: any ) => this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Push data is completed.' ) ).
+				then( ( result: any ) => {
+					cellsTotalCount = result.cellsTotalCount;
+					cellsValidCount = result.cellsValidCount;
+					cellsInvalidCount = result.cellsInvalidCount;
+					if ( result.issueList.length > 0 ) {
+						return this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': There are issues with data push\n' + result.issueList.join( '\n' ) );
+					} else {
+						return this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Data push is completed successfully' );
+					}
+				} ).
+				then( ( result: any ) => this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Total number of cell write attempts: ' + cellsTotalCount ) ).
+				then( ( result: any ) => this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Number of valid cells: ' + cellsValidCount ) ).
+				then( ( result: any ) => this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Number of invalid cells: ' + cellsInvalidCount ) ).
 				then( resolve ).
 				catch( reject );
 		} );
@@ -2270,7 +2283,7 @@ export class ProcessTools {
 				// then( () => {
 				// 	return this.fetchFiltersToRefProcess( refProcess );
 				// } ).
-				then( this.clearStaging ).
+				then( () => this.clearStaging( refProcess ) ).
 				then( this.pullFromSource ).
 				then( this.insertToStaging ).
 				then( this.assignDefaults ).
@@ -2492,7 +2505,7 @@ export class ProcessTools {
 	}
 	private fetchFiltersToRefProcess = ( refProcess: DimeProcessRunning ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refProcess.curStep + ' - Pull Data: Fetching filters.' ).
+			this.logTool.appendLog( refProcess.currentlog, 'Fetching filters.' ).
 				then( () => {
 					return this.fetchFilters( refProcess.id );
 				} ).
