@@ -46,6 +46,10 @@ import { DimeProcessState, dimeProcessInitialState } from '../dime/dimeprocess/d
 import { dimeProcessReducer } from '../dime/dimeprocess/dimeprocess.reducer';
 import { DimeProcessActions } from '../dime/dimeprocess/dimeprocess.actions';
 
+import { DimeSettingsState, dimeSettingsInitialState } from '../dime/dimesettings/dimesettings.state';
+import { dimeSettingsReducer } from '../dime/dimesettings/dimesettings.reducer';
+import { DimeSettingsActions } from '../dime/dimesettings/dimesettings.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
@@ -58,7 +62,8 @@ export interface AppState {
 	dimeStream: DimeStreamState,
 	dimeMap: DimeMapState,
 	dimeMatrix: DimeMatrixState,
-	dimeProcess: DimeProcessState
+	dimeProcess: DimeProcessState,
+	dimeSettings: DimeSettingsState
 }
 
 export const appInitialState: AppState = {
@@ -72,7 +77,8 @@ export const appInitialState: AppState = {
 	dimeStream: dimeStreamInitialState,
 	dimeMap: dimeMapInitialState,
 	dimeMatrix: dimeMatrixInitialState,
-	dimeProcess: dimeProcessInitialState
+	dimeProcess: dimeProcessInitialState,
+	dimeSettings: dimeSettingsInitialState
 };
 
 export class DoNothingAction implements Action {
@@ -117,7 +123,8 @@ export const reducers = {
 	dimeStream: dimeStreamReducer,
 	dimeMap: dimeMapReducer,
 	dimeMatrix: dimeMatrixReducer,
-	dimeProcess: dimeProcessReducer
+	dimeProcess: dimeProcessReducer,
+	dimeSettings: dimeSettingsReducer
 };
 
 @Injectable()
@@ -258,6 +265,9 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 							return new DoNothingAction();
 						}
 					}
+				}
+				case 'settings': {
+					return DimeSettingsActions.ALL.LOAD.INITIATEIFEMPTY.action();
 				}
 				default: {
 					return new DoNothingAction();

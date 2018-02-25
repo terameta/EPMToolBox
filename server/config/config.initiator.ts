@@ -9,6 +9,7 @@ import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { MainTools } from '../tools/tools.main';
 import { DimeCredential } from '../../shared/model/dime/credential';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
+import { DimeEmailServerSettings } from '../../shared/model/dime/settings';
 
 interface TableDefiner {
 	name: string;
@@ -42,7 +43,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).
 		then( version0048to0049 ).then( version0049to0050 ).then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).then( version0055to0056 ).
 		then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).
-		then( version0064to0065 ).then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).then( version0068to0069 ).then( version0069to0070 ).then( version0070to0071 ).
+		then( version0064to0065 ).then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).then( version0068to0069 ).then( version0069to0070 ).then( version0070to0071 ).then( version0071to0072 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -51,6 +52,65 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+const version0081to0082 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 81;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'SELECT * FROM settings', ( err, rows: { id: number, name: string, value: string }[], fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					const newSetting: DimeEmailServerSettings = { host: '', port: 25 };
+					const rowsToDelete: number[] = [];
+					rows.forEach( row => {
+						if ( row.name === 'emailserverhost' ) {
+							newSetting.host = row.value;
+							rowsToDelete.push( row.id );
+						} else if ( row.name === 'emailserverport' ) {
+							newSetting.port = parseInt( row.value, 10 );
+							rowsToDelete.push( row.id );
+						}
+					} );
+					db.query( 'INSERT INTO settings (name, value) VALUES (?, ?)', ['emailserversettings', JSON.stringify( newSetting )], ( err2, result2 ) => {
+						if ( err2 ) {
+							reject( err2 );
+						} else {
+							db.query( 'DELETE FROM settings WHERE id IN ?', rowsToDelete, ( err3, result3 ) => {
+								if ( err3 ) {
+									reject( err3 );
+								} else {
+									resolve( this.updateToVersion( nextVersion ) );
+								}
+							} );
+						}
+					} );
+				}
+			} );
+		}
+	} );
+};
+// Below already exists and we should reshape.
+// const version0071to0072 = ( currentVersion: number ) => {
+// 	return new Promise( ( resolve, reject ) => {
+// 		const expectedCurrentVersion = 71;
+// 		const nextVersion = expectedCurrentVersion + 1;
+// 		if ( currentVersion > expectedCurrentVersion ) {
+// 			resolve( currentVersion );
+// 		} else {
+// 			const tableDef: TableDefiner = {
+// 				name: 'settings',
+// 				fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
+// 					'name varchar(1024) NULL',
+// 					'value varchar(2048) NULL'],
+// 				primaryKey: 'id'
+// 			};
+// 			resolve( utils.checkAndCreateTable( tableDef ).then( () => utils.updateToVersion( nextVersion ) ) );
+// 		}
+// 	} );
+// };
 const version0070to0071 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 70;
