@@ -9,6 +9,11 @@ export function SortByNothing( e1: any, e2: any ) { return 0; }
 export function isNumeric( n: any ) { return !isNaN( parseFloat( n ) ) && isFinite( n ); }
 export function isInt( n: any ) { return isNumeric( n ) && n % 1 === 0; }
 
+export const verylongelementname = 'weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929';
+export const SortByVeryLongElementName = ( e1: any, e2: any ) => {
+	if ( e1[verylongelementname] > e2[verylongelementname] ) { return 1; } else if ( e1[verylongelementname] < e2[verylongelementname] ) { return -1; } else { return 0; }
+};
+
 export const EnumToArray = ( curEnum: any, shouldSort?: boolean ) => {
 	return Object.keys( curEnum ).filter( isNumeric ).map( ( item, index ) => ( { value: parseInt( item, 10 ), label: curEnum[item] } ) ).sort( shouldSort ? SortByName : SortByNothing );
 };

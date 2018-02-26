@@ -2,6 +2,7 @@ import { DimeSettingsState } from './dimesettings.state';
 import { Action } from '../../ngstore/ngrx.generators';
 import { DimeSetting } from '../../../../shared/model/dime/settings';
 import { DimeSettingsActions } from './dimesettings.actions';
+import * as _ from 'lodash';
 
 export function dimeSettingsReducer( state: DimeSettingsState, action: Action<any> ): DimeSettingsState {
 	switch ( action.type ) {
@@ -14,9 +15,9 @@ export function dimeSettingsReducer( state: DimeSettingsState, action: Action<an
 	}
 }
 
-
 const handleAllLoadComplete = ( state: DimeSettingsState, action: Action<DimeSetting[]> ): DimeSettingsState => {
 	const newState: DimeSettingsState = Object.assign( {}, state );
-	console.log( action.payload );
+	newState.items = _.keyBy( action.payload, 'name' );
+	newState.isLoaded = true;
 	return newState;
 };

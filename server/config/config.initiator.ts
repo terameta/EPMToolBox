@@ -9,7 +9,7 @@ import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { MainTools } from '../tools/tools.main';
 import { DimeCredential } from '../../shared/model/dime/credential';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
-import { DimeEmailServerSettings } from '../../shared/model/dime/settings';
+import { DimeEmailServerSettings, DimeSystemAdminSettings } from '../../shared/model/dime/settings';
 
 interface TableDefiner {
 	name: string;
@@ -35,15 +35,12 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 	console.log( '===============================================' );
 
 	return checkVersion().
-		then( version0000to0001 ).then( version0001to0002 ).then( version0002to0003 ).then( version0003to0004 ).then( version0004to0005 ).then( version0005to0006 ).then( version0006to0007 ).then( version0007to0008 ).
-		then( version0008to0009 ).then( version0009to0010 ).then( version0010to0011 ).then( version0011to0012 ).then( version0012to0013 ).then( version0013to0014 ).then( version0014to0015 ).then( version0015to0016 ).
-		then( version0016to0017 ).then( version0017to0018 ).then( version0018to0019 ).then( version0019to0020 ).then( version0020to0021 ).then( version0021to0022 ).then( version0022to0023 ).then( version0023to0024 ).
-		then( version0024to0025 ).then( version0025to0026 ).then( version0026to0027 ).then( version0027to0028 ).then( version0028to0029 ).then( version0029to0030 ).then( version0030to0031 ).then( version0031to0032 ).
-		then( version0032to0033 ).then( version0033to0034 ).then( version0034to0035 ).then( version0035to0036 ).then( version0036to0037 ).then( version0037to0038 ).then( version0038to0039 ).then( version0039to0040 ).
-		then( version0040to0041 ).then( version0041to0042 ).then( version0042to0043 ).then( version0043to0044 ).then( version0044to0045 ).then( version0045to0046 ).then( version0046to0047 ).then( version0047to0048 ).
-		then( version0048to0049 ).then( version0049to0050 ).then( version0050to0051 ).then( version0051to0052 ).then( version0052to0053 ).then( version0053to0054 ).then( version0054to0055 ).then( version0055to0056 ).
-		then( version0056to0057 ).then( version0057to0058 ).then( version0058to0059 ).then( version0059to0060 ).then( version0060to0061 ).then( version0061to0062 ).then( version0062to0063 ).then( version0063to0064 ).
-		then( version0064to0065 ).then( version0065to0066 ).then( version0066to0067 ).then( version0067to0068 ).then( version0068to0069 ).then( version0069to0070 ).then( version0070to0071 ).then( version0071to0072 ).
+		then( to0001 ).then( to0002 ).then( to0003 ).then( to0004 ).then( to0005 ).then( to0006 ).then( to0007 ).then( to0008 ).then( to0009 ).then( to0010 ).then( to0011 ).then( to0012 ).then( to0013 ).then( to0014 ).then( to0015 ).
+		then( to0016 ).then( to0017 ).then( to0018 ).then( to0019 ).then( to0020 ).then( to0021 ).then( to0022 ).then( to0023 ).then( to0024 ).then( to0025 ).then( to0026 ).then( to0027 ).then( to0028 ).then( to0029 ).then( to0030 ).
+		then( to0031 ).then( to0032 ).then( to0033 ).then( to0034 ).then( to0035 ).then( to0036 ).then( to0037 ).then( to0038 ).then( to0039 ).then( to0040 ).then( to0041 ).then( to0042 ).then( to0043 ).then( to0044 ).then( to0045 ).
+		then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).
+		then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).
+		then( to0076 ).then( to0077 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -52,10 +49,64 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
-const version0081to0082 = ( currentVersion: number ) => {
+const to0077 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
-		const expectedCurrentVersion = 81;
-		const nextVersion = expectedCurrentVersion + 1;
+		const nextVersion = 77;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE settings CHANGE value value TEXT NULL DEFAULT NULL', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
+const to0076 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 76;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'SELECT * FROM settings', ( err, rows: { id: number, name: string, value: string }[], fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					const newSetting: DimeSystemAdminSettings = { emailaddress: '' };
+					const rowsToDelete: number[] = [];
+					rows.forEach( row => {
+						if ( row.name === 'systemadminemailaddress' ) {
+							newSetting.emailaddress = row.value;
+							rowsToDelete.push( row.id );
+						}
+					} );
+					db.query( 'INSERT INTO settings (name, value) VALUES (?, ?)', ['systemadmin', JSON.stringify( newSetting )], ( err2, result2 ) => {
+						if ( err2 ) {
+							reject( err2 );
+						} else {
+							db.query( 'DELETE FROM settings WHERE id IN (' + rowsToDelete.join( ', ' ) + ')', ( err3, result3 ) => {
+								if ( err3 ) {
+									reject( err3 );
+								} else {
+									resolve( utils.updateToVersion( nextVersion ) );
+								}
+							} );
+						}
+					} );
+				}
+			} );
+		}
+	} );
+};
+const to0075 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 75;
+		const expectedCurrentVersion = nextVersion - 1;
 		if ( currentVersion > expectedCurrentVersion ) {
 			resolve( currentVersion );
 		} else {
@@ -68,21 +119,23 @@ const version0081to0082 = ( currentVersion: number ) => {
 					rows.forEach( row => {
 						if ( row.name === 'emailserverhost' ) {
 							newSetting.host = row.value;
+							if ( !newSetting.host ) { newSetting.host = ''; }
 							rowsToDelete.push( row.id );
 						} else if ( row.name === 'emailserverport' ) {
 							newSetting.port = parseInt( row.value, 10 );
+							if ( !newSetting.port ) { newSetting.port = 25; }
 							rowsToDelete.push( row.id );
 						}
 					} );
-					db.query( 'INSERT INTO settings (name, value) VALUES (?, ?)', ['emailserversettings', JSON.stringify( newSetting )], ( err2, result2 ) => {
+					db.query( 'INSERT INTO settings (name, value) VALUES (?, ?)', ['emailserver', JSON.stringify( newSetting )], ( err2, result2 ) => {
 						if ( err2 ) {
 							reject( err2 );
 						} else {
-							db.query( 'DELETE FROM settings WHERE id IN ?', rowsToDelete, ( err3, result3 ) => {
+							db.query( 'DELETE FROM settings WHERE id IN (' + rowsToDelete.join( ', ' ) + ')', ( err3, result3 ) => {
 								if ( err3 ) {
 									reject( err3 );
 								} else {
-									resolve( this.updateToVersion( nextVersion ) );
+									resolve( utils.updateToVersion( nextVersion ) );
 								}
 							} );
 						}
@@ -92,26 +145,88 @@ const version0081to0082 = ( currentVersion: number ) => {
 		}
 	} );
 };
-// Below already exists and we should reshape.
-// const version0071to0072 = ( currentVersion: number ) => {
-// 	return new Promise( ( resolve, reject ) => {
-// 		const expectedCurrentVersion = 71;
-// 		const nextVersion = expectedCurrentVersion + 1;
-// 		if ( currentVersion > expectedCurrentVersion ) {
-// 			resolve( currentVersion );
-// 		} else {
-// 			const tableDef: TableDefiner = {
-// 				name: 'settings',
-// 				fields: ['id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT',
-// 					'name varchar(1024) NULL',
-// 					'value varchar(2048) NULL'],
-// 				primaryKey: 'id'
-// 			};
-// 			resolve( utils.checkAndCreateTable( tableDef ).then( () => utils.updateToVersion( nextVersion ) ) );
-// 		}
-// 	} );
-// };
-const version0070to0071 = ( currentVersion: number ) => {
+const to0074 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 73;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'SELECT * FROM settings WHERE name = \'systemadminemailaddress\'', ( err, rows ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					if ( rows.length === 0 ) {
+						db.query( 'INSERT INTO settings (name, value) VALUES (\'systemadminemailaddress\', \'\')', ( err2, result ) => {
+							if ( err2 ) {
+								reject( err2 );
+							} else {
+								resolve( utils.updateToVersion( nextVersion ) );
+							}
+						} );
+					} else {
+						resolve( utils.updateToVersion( nextVersion ) );
+					}
+				}
+			} );
+		}
+	} );
+};
+const to0073 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 72;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'SELECT * FROM settings WHERE name = \'emailserverport\'', ( err, rows ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					if ( rows.length === 0 ) {
+						db.query( 'INSERT INTO settings (name, value) VALUES (\'emailserverport\', \'\')', ( err2, result ) => {
+							if ( err2 ) {
+								reject( err2 );
+							} else {
+								resolve( utils.updateToVersion( nextVersion ) );
+							}
+						} );
+					} else {
+						resolve( utils.updateToVersion( nextVersion ) );
+					}
+				}
+			} );
+		}
+	} );
+};
+const to0072 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const expectedCurrentVersion = 71;
+		const nextVersion = expectedCurrentVersion + 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'SELECT * FROM settings WHERE name = \'emailserverhost\'', ( err, rows ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					if ( rows.length === 0 ) {
+						db.query( 'INSERT INTO settings (name, value) VALUES (\'emailserverhost\', \'\')', ( err2, result ) => {
+							if ( err2 ) {
+								reject( err2 );
+							} else {
+								resolve( utils.updateToVersion( nextVersion ) );
+							}
+						} );
+					} else {
+						resolve( utils.updateToVersion( nextVersion ) );
+					}
+				}
+			} );
+		}
+	} );
+};
+const to0071 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 70;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -125,7 +240,7 @@ const version0070to0071 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0069to0070 = ( currentVersion: number ) => {
+const to0070 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 69;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -142,7 +257,7 @@ const version0069to0070 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0068to0069 = ( currentVersion: number ) => {
+const to0069 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 68;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -156,7 +271,7 @@ const version0068to0069 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0067to0068 = ( currentVersion: number ) => {
+const to0068 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 67;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -173,7 +288,7 @@ const version0067to0068 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0066to0067 = ( currentVersion: number ) => {
+const to0067 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 66;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -190,7 +305,7 @@ const version0066to0067 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0065to0066 = ( currentVersion: number ) => {
+const to0066 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 65;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -207,7 +322,7 @@ const version0065to0066 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0064to0065 = ( currentVersion: number ) => {
+const to0065 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 64;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -221,7 +336,7 @@ const version0064to0065 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0063to0064 = ( currentVersion: number ) => {
+const to0064 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 63;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -235,7 +350,7 @@ const version0063to0064 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0062to0063 = ( currentVersion: number ) => {
+const to0063 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 62;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -249,7 +364,7 @@ const version0062to0063 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0061to0062 = ( currentVersion: number ) => {
+const to0062 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 61;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -263,7 +378,7 @@ const version0061to0062 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0060to0061 = ( currentVersion: number ) => {
+const to0061 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 60;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -280,7 +395,7 @@ const version0060to0061 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0059to0060 = ( currentVersion: number ) => {
+const to0060 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 59;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -298,7 +413,7 @@ const version0059to0060 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0058to0059 = ( currentVersion: number ) => {
+const to0059 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 58;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -316,7 +431,7 @@ const version0058to0059 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0057to0058 = ( currentVersion: number ) => {
+const to0058 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 57;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -334,7 +449,7 @@ const version0057to0058 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0056to0057 = ( currentVersion: number ) => {
+const to0057 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 56;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -349,7 +464,7 @@ const version0056to0057 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0055to0056 = ( currentVersion: number ) => {
+const to0056 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 55;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -366,7 +481,7 @@ const version0055to0056 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0054to0055 = ( currentVersion: number ) => {
+const to0055 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 54;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -380,7 +495,7 @@ const version0054to0055 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0053to0054 = ( currentVersion: number ) => {
+const to0054 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 53;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -397,7 +512,7 @@ const version0053to0054 = ( currentVersion: number ) => {
 		}
 	} );
 };
-const version0052to0053 = ( currentVersion: number ) => {
+const to0053 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 52;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -414,8 +529,7 @@ const version0052to0053 = ( currentVersion: number ) => {
 		}
 	} );
 };
-
-const version0051to0052 = ( currentVersion: number ) => {
+const to0052 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 51;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -433,7 +547,7 @@ const version0051to0052 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0050to0051 = ( currentVersion: number ) => {
+const to0051 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 50;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -448,7 +562,7 @@ const version0050to0051 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0049to0050 = ( currentVersion: number ) => {
+const to0050 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 49;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -466,7 +580,7 @@ const version0049to0050 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0048to0049 = ( currentVersion: number ) => {
+const to0049 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 48;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -484,7 +598,7 @@ const version0048to0049 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0047to0048 = ( currentVersion: number ) => {
+const to0048 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 47;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -525,7 +639,7 @@ const version0047to0048 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0046to0047 = ( currentVersion: number ) => {
+const to0047 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 46;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -540,7 +654,7 @@ const version0046to0047 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0045to0046 = ( currentVersion: number ) => {
+const to0046 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 45;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -559,7 +673,7 @@ const version0045to0046 = ( currentVersion: number ) => {
 
 };
 
-const version0044to0045 = ( currentVersion: number ) => {
+const to0045 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 44;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -574,7 +688,7 @@ const version0044to0045 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0043to0044 = ( currentVersion: number ) => {
+const to0044 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 43;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -589,7 +703,7 @@ const version0043to0044 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0042to0043 = ( currentVersion: number ) => {
+const to0043 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 42;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -607,7 +721,7 @@ const version0042to0043 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0041to0042 = ( currentVersion: number ) => {
+const to0042 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 41;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -652,7 +766,7 @@ const version0041to0042 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0040to0041 = ( currentVersion: number ) => {
+const to0041 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 40;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -667,7 +781,7 @@ const version0040to0041 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0039to0040 = ( currentVersion: number ) => {
+const to0040 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 39;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -683,7 +797,7 @@ const version0039to0040 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0038to0039 = ( currentVersion: number ) => {
+const to0039 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 38;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -707,7 +821,7 @@ const version0038to0039 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0037to0038 = ( currentVersion: number ) => {
+const to0038 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 37;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -728,7 +842,7 @@ const version0037to0038 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0036to0037 = ( currentVersion: number ) => {
+const to0037 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 36;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -750,7 +864,7 @@ const version0036to0037 = ( currentVersion: number ) => {
 
 };
 
-const version0035to0036 = ( currentVersion: number ) => {
+const to0036 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 35;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -769,7 +883,7 @@ const version0035to0036 = ( currentVersion: number ) => {
 
 };
 
-const version0034to0035 = ( currentVersion: number ) => {
+const to0035 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 34;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -788,7 +902,7 @@ const version0034to0035 = ( currentVersion: number ) => {
 
 };
 
-const version0033to0034 = ( currentVersion: number ) => {
+const to0034 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 33;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -817,7 +931,7 @@ const version0033to0034 = ( currentVersion: number ) => {
 
 };
 
-const version0032to0033 = ( currentVersion: number ) => {
+const to0033 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 32;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -846,7 +960,7 @@ const version0032to0033 = ( currentVersion: number ) => {
 
 };
 
-const version0031to0032 = ( currentVersion: number ) => {
+const to0032 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 31;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -875,7 +989,7 @@ const version0031to0032 = ( currentVersion: number ) => {
 
 };
 
-const version0030to0031 = ( currentVersion: number ) => {
+const to0031 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 30;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -904,7 +1018,7 @@ const version0030to0031 = ( currentVersion: number ) => {
 
 };
 
-const version0029to0030 = ( currentVersion: number ) => {
+const to0030 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 29;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -933,7 +1047,7 @@ const version0029to0030 = ( currentVersion: number ) => {
 
 };
 
-const version0028to0029 = ( currentVersion: number ) => {
+const to0029 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 28;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -962,7 +1076,7 @@ const version0028to0029 = ( currentVersion: number ) => {
 
 };
 
-const version0027to0028 = ( currentVersion: number ) => {
+const to0028 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 27;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -991,7 +1105,7 @@ const version0027to0028 = ( currentVersion: number ) => {
 
 };
 
-const version0026to0027 = ( currentVersion: number ) => {
+const to0027 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 26;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1010,7 +1124,7 @@ const version0026to0027 = ( currentVersion: number ) => {
 
 };
 
-const version0025to0026 = ( currentVersion: number ) => {
+const to0026 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 25;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1041,7 +1155,7 @@ const version0025to0026 = ( currentVersion: number ) => {
 
 };
 
-const version0024to0025 = ( currentVersion: number ) => {
+const to0025 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 24;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1066,7 +1180,7 @@ const version0024to0025 = ( currentVersion: number ) => {
 
 };
 
-const version0023to0024 = ( currentVersion: number ) => {
+const to0024 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 23;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1089,7 +1203,7 @@ const version0023to0024 = ( currentVersion: number ) => {
 
 };
 
-const version0022to0023 = ( currentVersion: number ) => {
+const to0023 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 22;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1118,7 +1232,7 @@ const version0022to0023 = ( currentVersion: number ) => {
 
 };
 
-const version0021to0022 = ( currentVersion: number ) => {
+const to0022 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 21;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1141,7 +1255,7 @@ const version0021to0022 = ( currentVersion: number ) => {
 
 };
 
-const version0020to0021 = ( currentVersion: number ) => {
+const to0021 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 20;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1172,7 +1286,7 @@ const version0020to0021 = ( currentVersion: number ) => {
 
 };
 
-const version0019to0020 = ( currentVersion: number ) => {
+const to0020 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 19;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1207,7 +1321,7 @@ const version0019to0020 = ( currentVersion: number ) => {
 
 };
 
-const version0018to0019 = ( currentVersion: number ) => {
+const to0019 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 18;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1229,7 +1343,7 @@ const version0018to0019 = ( currentVersion: number ) => {
 
 };
 
-const version0017to0018 = ( currentVersion: number ) => {
+const to0018 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 17;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1255,7 +1369,7 @@ const version0017to0018 = ( currentVersion: number ) => {
 
 };
 
-const version0016to0017 = ( currentVersion: number ) => {
+const to0017 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 16;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1277,7 +1391,7 @@ const version0016to0017 = ( currentVersion: number ) => {
 
 };
 
-const version0015to0016 = ( currentVersion: number ) => {
+const to0016 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 15;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1304,7 +1418,7 @@ const version0015to0016 = ( currentVersion: number ) => {
 
 };
 
-const version0014to0015 = ( currentVersion: number ) => {
+const to0015 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 14;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1331,7 +1445,7 @@ const version0014to0015 = ( currentVersion: number ) => {
 
 };
 
-const version0013to0014 = ( currentVersion: number ) => {
+const to0014 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 13;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1353,7 +1467,7 @@ const version0013to0014 = ( currentVersion: number ) => {
 
 };
 
-const version0012to0013 = ( currentVersion: number ) => {
+const to0013 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 12;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1376,7 +1490,7 @@ const version0012to0013 = ( currentVersion: number ) => {
 	} );
 };
 
-const version0011to0012 = ( currentVersion: number ) => {
+const to0012 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 11;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1399,7 +1513,7 @@ const version0011to0012 = ( currentVersion: number ) => {
 
 };
 
-const version0010to0011 = ( currentVersion: number ) => {
+const to0011 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 10;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1422,7 +1536,7 @@ const version0010to0011 = ( currentVersion: number ) => {
 
 };
 
-const version0009to0010 = ( currentVersion: number ) => {
+const to0010 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 9;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1444,7 +1558,7 @@ const version0009to0010 = ( currentVersion: number ) => {
 
 };
 
-const version0008to0009 = ( currentVersion: number ) => {
+const to0009 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 8;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1468,7 +1582,7 @@ const version0008to0009 = ( currentVersion: number ) => {
 
 };
 
-const version0007to0008 = ( currentVersion: number ) => {
+const to0008 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 7;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1491,7 +1605,7 @@ const version0007to0008 = ( currentVersion: number ) => {
 
 };
 
-const version0006to0007 = ( currentVersion: number ) => {
+const to0007 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 6;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1513,7 +1627,7 @@ const version0006to0007 = ( currentVersion: number ) => {
 
 };
 
-const version0005to0006 = ( currentVersion: number ) => {
+const to0006 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 5;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1562,7 +1676,7 @@ const version0005to0006 = ( currentVersion: number ) => {
 
 };
 
-const version0004to0005 = ( currentVersion: number ) => {
+const to0005 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 4;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1586,7 +1700,7 @@ const version0004to0005 = ( currentVersion: number ) => {
 
 };
 
-const version0003to0004 = ( currentVersion: number ) => {
+const to0004 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 3;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1611,7 +1725,7 @@ const version0003to0004 = ( currentVersion: number ) => {
 
 };
 
-const version0002to0003 = ( currentVersion: number ) => {
+const to0003 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 2;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1637,7 +1751,7 @@ const version0002to0003 = ( currentVersion: number ) => {
 
 };
 
-const version0001to0002 = ( currentVersion: number ) => {
+const to0002 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 1;
 		const nextVersion = expectedCurrentVersion + 1;
@@ -1662,7 +1776,7 @@ const version0001to0002 = ( currentVersion: number ) => {
 
 };
 
-const version0000to0001 = ( currentVersion: number ) => {
+const to0001 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const expectedCurrentVersion = 0;
 		const nextVersion = expectedCurrentVersion + 1;

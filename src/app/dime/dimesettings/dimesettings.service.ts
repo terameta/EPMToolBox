@@ -3,6 +3,7 @@ import { DimeSettingObject } from '../../../../shared/model/dime/settings';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../ngstore/models';
 import { ToastrService } from 'ngx-toastr';
+import { DimeSettingsActions } from './dimesettings.actions';
 
 @Injectable()
 export class DimeSettingsService {
@@ -20,5 +21,7 @@ export class DimeSettingsService {
 			console.error( error );
 		} );
 	}
+
+	public update = ( name: string ) => this.store.dispatch( DimeSettingsActions.ONE.UPDATE.INITIATE.action( this.items[name] ) );
 
 }

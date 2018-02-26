@@ -5,6 +5,7 @@ import { DimesettingsToolbarComponent } from './dimesettings-toolbar/dimesetting
 import { Routes, RouterModule } from '@angular/router';
 import { DimesettingsMailserverComponent } from './dimesettings-mailserver/dimesettings-mailserver.component';
 import { FormsModule } from '@angular/forms';
+import { DimesettingsSystemadminComponent } from './dimesettings-systemadmin/dimesettings-systemadmin.component';
 
 // const dimeProcessRoutes: Routes = [
 //   { path: 'dime/processes', pathMatch: 'prefix', redirectTo: 'dime/processes/process-list' },
@@ -30,7 +31,8 @@ import { FormsModule } from '@angular/forms';
 // ];
 
 const dimeSettingsRoutes: Routes = [
-	{ path: '', pathMatch: 'prefix', redirectTo: 'mailserver' },
+	{ path: '', pathMatch: 'prefix', redirectTo: 'systemadmin' },
+	{ path: 'systemadmin', component: DimesettingsSystemadminComponent },
 	{ path: 'mailserver', component: DimesettingsMailserverComponent }
 ];
 
@@ -44,7 +46,8 @@ const dimeSettingsRoutes: Routes = [
 	declarations: [
 		DimesettingsComponent,
 		DimesettingsToolbarComponent,
-		DimesettingsMailserverComponent
+		DimesettingsMailserverComponent,
+		DimesettingsSystemadminComponent
 	]
 } )
 export class DimeSettingsModule { }

@@ -17,10 +17,11 @@ export class ApiSettings {
 		this.settingsTool = new SettingsTool( this.db, this.tools );
 		this.rester = new Rester( this.tools );
 		this.setRoutes();
+		this.rester.restify( this.apiRoutes, this.settingsTool );
 		this.app.use( '/api/settings', this.apiRoutes );
 	}
 
 	private setRoutes = () => {
-		this.apiRoutes.put( '/all', ( req, res ) => { this.rester.respond( this.settingsTool.updateAll, req.body, req, res ); } );
+		// this.apiRoutes.put( '/all', ( req, res ) => { this.rester.respond( this.settingsTool.updateAll, req.body, req, res ); } );
 	}
 }

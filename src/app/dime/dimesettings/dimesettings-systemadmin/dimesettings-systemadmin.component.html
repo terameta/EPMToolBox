@@ -1,4 +1,4 @@
-<form (ngSubmit)="mainService.update('emailserver')" #f="ngForm" action="form-horizontal">
+<form (ngSubmit)="mainService.update('systemadmin')" #f="ngForm" action="form-horizontal">
 	<div class="table-responsive">
 		<table class="table table-hover table-condensed">
 			<thead>
@@ -9,15 +9,9 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td>Host</td>
+					<td>E-Mail Address</td>
 					<td>
-						<input type="text" class="form-control" id="host" name="host" [(ngModel)]="mainService.items.emailserver.value.host">
-					</td>
-				</tr>
-				<tr>
-					<td>Port</td>
-					<td>
-						<input type="number" class="form-control" id="port" name="port" [(ngModel)]="mainService.items.emailserver.value.port">
+						<input type="email" class="form-control" id="host" name="host" [(ngModel)]="mainService.items.systemadmin.value.emailaddress">
 					</td>
 				</tr>
 				<tr>

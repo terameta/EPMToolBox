@@ -5,7 +5,7 @@ import { Pool } from 'mysql';
 
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeMap } from '../../shared/model/dime/map';
-import { DimeProcess, DimeProcessStepType } from '../../shared/model/dime/process';
+import { DimeProcess, DimeProcessStepType, DimeCartesianDefinitions } from '../../shared/model/dime/process';
 import { DimeProcessDefaultTarget } from '../../shared/model/dime/process';
 import { DimeProcessTransformation } from '../../shared/model/dime/process';
 import { DimeProcessRunning } from '../../shared/model/dime/process';
@@ -24,10 +24,11 @@ import { SettingsTool } from './tools.settings';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { ATReadyStatus } from '../../shared/enums/generic/readiness';
-import { isNumeric, SortByPosition, getMonthSorterValue } from '../../shared/utilities/utilityFunctions';
+import { isNumeric, SortByPosition, getMonthSorterValue, verylongelementname, SortByVeryLongElementName } from '../../shared/utilities/utilityFunctions';
 import { DimeMatrixTool } from './tools.dime.matrix';
 import { DimeMatrix } from '../../shared/model/dime/matrix';
 import * as _ from 'lodash';
+import { DimeSetting } from '../../shared/model/dime/settings';
 
 const excel = require( 'exceljs' );
 const streamBuffers = require( 'stream-buffers' );
@@ -685,13 +686,13 @@ export class ProcessTools {
 
 							switch ( curStep.type ) {
 								case DimeProcessStepType.SourceProcedure: {
-									this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PullData: {
-									this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.MapData: {
@@ -699,28 +700,33 @@ export class ProcessTools {
 										refProcess.mapList = [];
 									}
 									refProcess.mapList.push( curStep.referedid );
-									this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.TransformData: {
-									this.runTransformations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runTransformations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.ValidateData: {
-									this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PushData: {
-									this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.TargetProcedure: {
-									this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									break;
+								}
+								case DimeProcessStepType.SendData: {
+									this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 									break;
 								}
 								default: {
@@ -988,9 +994,9 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			let fromAddress: string; fromAddress = '';
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Missing Maps: Sending data file.' ).
-				then( () => this.settingsTool.getOne( 'systemadminemailaddress' ) ).
-				then( ( systemadminemailaddress: any ) => {
-					fromAddress = systemadminemailaddress.value;
+				then( () => this.settingsTool.getOne( 'systemadmin' ) ).
+				then( ( systemadmin: DimeSetting ) => {
+					fromAddress = systemadmin.value.emailaddress;
 					return this.workbookToStreamBuffer( refBook );
 				} ).
 				then( ( theStreamBuffer: any ) => {
@@ -1049,63 +1055,62 @@ export class ProcessTools {
 				catch( reject );
 		} );
 	}
-	private runSendData = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
+	private runSendData = ( process: DimeProcessRunning, step: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
-			refProcess.recepients = refStep.details.split( ';' ).join( ',' );
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Send data.' ).
-				then( () => this.sendDataDropCrossTable( refProcess, refStep ) ).
-				then( () => this.sendDataCreateCrossTable( refProcess, refStep ) ).
-				then( ( result ) => this.sendDataInsertDistincts( refProcess, refStep, result ) ).
-				then( ( result ) => this.sendDataPopulateDataColumns( refProcess, refStep, result ) ).
-				then( ( result ) => this.sendDataPopulateDescriptionColumns( refProcess, refStep, result ) ).
-				then( ( result ) => this.sendDataCreateFile( refProcess, refStep, result ) ).
-				then( ( result ) => this.sendDataSendFile( refProcess, refStep, result ) ).
+			process.recepients = step.detailsObject.map( recepient => recepient.address ).join( ', ' );
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ': Send data.' ).
+				then( () => this.sendDataDropCrossTable( process, step ) ).
+				then( () => this.sendDataCreateCrossTable( process, step ) ).
+				then( ( result ) => this.sendDataInsertDistincts( process, step, result ) ).
+				then( ( result ) => this.sendDataPopulateDataColumns( process, step, result ) ).
+				then( ( result ) => this.sendDataPopulateDescriptionColumns( process, step, result ) ).
+				then( ( result ) => this.sendDataSetValidationResults( process, step, result ) ).
+				then( ( result ) => this.sendDataCreateFile( process, step, result ) ).
+				then( ( result ) => this.sendDataSendFile( process, step, result ) ).
 				then( resolve ).
 				catch( reject );
 		} );
 	}
-	private sendDataDropCrossTable = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
+	private sendDataDropCrossTable = ( process: DimeProcessRunning, step: DimeProcessStepRunning ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Dropping crosstab table.' ).
-				then( () => {
-					this.db.query( 'DROP TABLE IF EXISTS PROCESS' + refProcess.id + '_CRSTBL', ( err, rows, fields ) => {
-						if ( err ) {
-							reject( err );
-						} else {
-							resolve();
-						}
-					} );
-				} ).
-				catch( reject );
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Dropping crosstab table.' ).then( () => {
+				this.db.query( 'DROP TABLE IF EXISTS PROCESS' + process.id + '_CRSTBL', ( err, rows, fields ) => {
+					if ( err ) {
+						reject( err );
+					} else {
+						resolve();
+					}
+				} );
+			} ).catch( reject );
 		} );
 	}
-	private sendDataCreateCrossTable = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
+	private sendDataCreateCrossTable = ( process: DimeProcessRunning, step: DimeProcessStepRunning ): Promise<DimeCartesianDefinitions> => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Creating crosstab table.' ).
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Creating crosstab table.' ).
 				then( () => {
-					let createQuery: string; createQuery = 'CREATE TABLE PROCESS' + refProcess.id + '_CRSTBL (\nid BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
+					let createQuery: string; createQuery = 'CREATE TABLE PROCESS' + process.id + '_CRSTBL (\nid BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 					let dataFieldDefinition: any; dataFieldDefinition = {};
 					let inserterFields: any[]; inserterFields = [];
-					refProcess.CRSTBLDescribedFields = [];
+					process.CRSTBLDescribedFields = [];
 
-					refProcess.sourceStreamFields.forEach( ( curField: any ) => {
-						if ( !curField.isCrossTab && !curField.isData && !curField.shouldIgnore && !curField.shouldIgnoreCrossTab ) {
+					process.sourceStreamFields.forEach( ( curField: DimeStreamFieldDetail ) => {
+						if ( !curField.isCrossTab && !curField.isData && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
-							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'string' ) {
+							if ( process.sourceStream.type === DimeStreamType.RDBT && curField.type === 'string' ) {
 								createQuery += ', SRC_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
 							}
-							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'number' ) {
+							if ( process.sourceStream.type === DimeStreamType.RDBT && curField.type === 'number' ) {
 								createQuery += ', SRC_' + curField.name + ' NUMERIC(' + curField.fPrecision + ',' + curField.fDecimals + ')';
 							}
-							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'date' ) {
+							if ( process.sourceStream.type === DimeStreamType.RDBT && curField.type === 'date' ) {
 								createQuery += ', SRC_' + curField.name + ' DATETIME';
 							}
-							if ( refProcess.sourceStream.type === DimeStreamType.HPDB ) {
+							if ( process.sourceStream.type === DimeStreamType.HPDB ) {
 								createQuery += ', SRC_' + curField.name + ' VARCHAR(80)';
 								createQuery += ', SRC_' + curField.name + '_Desc VARCHAR(1024)';
-								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'SRC_' + curField.name } );
+								process.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'SRC_' + curField.name } );
 							}
-							if ( curField.isDescribed === 1 ) {
+							if ( curField.isDescribed ) {
 								if ( curField.ddfType === 'string' ) {
 									createQuery += ', SRC_' + curField.name + '_Desc VARCHAR(' + curField.ddfCharacters + ')';
 								}
@@ -1115,35 +1120,36 @@ export class ProcessTools {
 								if ( curField.ddfType === 'date' ) {
 									createQuery += ', SRC_' + curField.name + '_Desc DATETIME';
 								}
-								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'SRC_' + curField.name } );
+								process.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'SRC_' + curField.name } );
 							}
 							inserterFields.push( 'SRC_' + curField.name );
 							createQuery += ', INDEX (SRC_' + curField.name + ')';
 						}
 					} );
 
-					refProcess.targetStreamFields.forEach( ( curField ) => {
+					process.targetStreamFields.forEach( ( curField ) => {
 						if ( !curField.isCrossTab && !curField.shouldIgnoreCrossTab ) {
 							createQuery += '\n';
-							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'string' ) {
+							if ( process.sourceStream.type === DimeStreamType.RDBT && curField.type === 'string' ) {
 								createQuery += ', TAR_' + curField.name + ' VARCHAR(' + curField.fCharacters + ')';
 							}
-							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'number' ) {
+							if ( process.sourceStream.type === DimeStreamType.RDBT && curField.type === 'number' ) {
 								createQuery += ', TAR_' + curField.name + ' NUMERIC(' + curField.fPrecision + ',' + curField.fDecimals + ')';
 							}
-							if ( refProcess.sourceStream.type === DimeStreamType.RDBT && curField.type === 'date' ) {
+							if ( process.sourceStream.type === DimeStreamType.RDBT && curField.type === 'date' ) {
 								createQuery += ', TAR_' + curField.name + ' DATETIME';
 							}
-							if ( refProcess.targetStream.type === DimeStreamType.HPDB ) {
+							if ( process.targetStream.type === DimeStreamType.HPDB ) {
 								createQuery += ', TAR_' + curField.name + ' VARCHAR(80)';
 								createQuery += ', TAR_' + curField.name + '_DESC VARCHAR(1024)';
-								refProcess.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'TAR_' + curField.name } );
+								process.CRSTBLDescribedFields.push( { fieldid: curField.id, fieldname: 'TAR_' + curField.name } );
 							}
 							inserterFields.push( 'TAR_' + curField.name );
 							createQuery += ', INDEX (TAR_' + curField.name + ')';
 						}
 					} );
-					refProcess.sourceStreamFields.forEach( ( curField ) => {
+
+					process.sourceStreamFields.forEach( ( curField ) => {
 						if ( curField.isData ) {
 							dataFieldDefinition.type = curField.type;
 							dataFieldDefinition.characters = curField.fCharacters;
@@ -1154,47 +1160,29 @@ export class ProcessTools {
 						}
 					} );
 
-					let promises: any[]; promises = [];
-					let cartesianFields: any[]; cartesianFields = [];
-					refProcess.sourceStreamFields.forEach( ( curField ) => {
-						if ( curField.isCrossTab ) {
-							promises.push( this.getDataTableDistinctFields( refProcess, curField, 'source', false, refStep, true ) );
-							cartesianFields.push( { name: curField.name, srctar: 'source' } );
-						}
+					process.steps.filter( s => s.type === DimeProcessStepType.ValidateData ).forEach( s => {
+						createQuery += '\n, Matrix_' + s.referedid + '_Result VARCHAR(7), INDEX (Matrix_' + s.referedid + '_Result) ';
+						inserterFields.push( 'Matrix_' + s.referedid + '_Result' );
 					} );
-					Promise.all( promises ).then( ( ctFields ) => {
-						let cartesianArray: any[]; cartesianArray = [];
-						ctFields.forEach( ( curField ) => {
-							if ( cartesianArray.length === 0 ) {
-								curField.rows.forEach( ( curDVALUE: any ) => {
-									cartesianArray.push( curDVALUE.DVALUE );
-								} );
-							} else {
-								let tempCartesian: any[]; tempCartesian = [];
-								cartesianArray.forEach( ( curCartesian ) => {
-									curField.rows.forEach( ( curDVALUE: any ) => {
-										tempCartesian.push( curCartesian + '-|-' + curDVALUE.DVALUE );
-									} );
-								} );
-								cartesianArray = tempCartesian;
-							}
-						} );
-						let toResolve: any; toResolve = {};
-						toResolve.cartesianArray = cartesianArray;
-						toResolve.cartesianFields = cartesianFields;
-						toResolve.inserterFields = inserterFields;
-						toResolve.dataFieldDefinition = dataFieldDefinition;
-						toResolve.cartesianArray.forEach( ( curField: any ) => {
+
+					const toResolve: any = {};
+					toResolve.cartesianFields = process.sourceStreamFields.filter( f => f.isCrossTab ).map( f => ( { name: f.name, isMonth: f.isMonth, type: f.type, maxlength: 0, varname: f.name, srctar: 'source' } ) );
+					toResolve.inserterFields = inserterFields;
+					toResolve.dataFieldDefinition = dataFieldDefinition;
+
+					this.getDataTableDistinctFields( process, toResolve.cartesianFields, 'source', true, step, true ).then( ( result: any[] ) => {
+						toResolve.cartesianArray = this.sortCartesian( toResolve.cartesianFields, result );
+						toResolve.cartesianArray.forEach( cartesian => {
+							createQuery += '\n, `' + Object.values( cartesian ).join( '-' ) + '`';
 							if ( dataFieldDefinition.type === 'string' ) {
-								createQuery += ', ' + curField.replace( '-|-', '_' ) + ' VARCHAR(' + dataFieldDefinition.characters + ')';
+								createQuery += ' VARCHAR(' + dataFieldDefinition.characters + ')';
 							}
 							if ( dataFieldDefinition.type === 'number' ) {
-								createQuery += ', ' + curField.replace( '-|-', '_' ) + ' NUMERIC(60,' + dataFieldDefinition.decimals + ')';
+								createQuery += ' NUMERIC(' + dataFieldDefinition.precision + ',' + dataFieldDefinition.decimals + ')';
 							}
 							if ( dataFieldDefinition.type === 'date' ) {
-								createQuery += ', ' + curField.replace( '-|-', '_' ) + ' DATETIME';
+								createQuery += ' DATETIME';
 							}
-
 						} );
 						createQuery += '\n, PRIMARY KEY(id) );';
 						this.db.query( createQuery, ( err, rows, fields ) => {
@@ -1209,105 +1197,101 @@ export class ProcessTools {
 				catch( reject );
 		} );
 	}
-	private sendDataInsertDistincts = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
+	private sendDataInsertDistincts = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Inserting distinct combinations.' ).
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Inserting distinct combinations.' ).
 				then( () => {
-					let insertQuery: string; insertQuery = 'INSERT INTO PROCESS' + refProcess.id + '_CRSTBL (';
-					insertQuery += refDefinitions.inserterFields.join( ', ' );
+					let insertQuery: string; insertQuery = 'INSERT INTO PROCESS' + process.id + '_CRSTBL (';
+					insertQuery += definitions.inserterFields.join( ', ' );
 					insertQuery += ')\n';
-					insertQuery += 'SELECT DISTINCT ' + refDefinitions.inserterFields.join( ', ' ) + ' FROM PROCESS' + refProcess.id + '_DATATBL';
+					insertQuery += 'SELECT DISTINCT ' + definitions.inserterFields.join( ', ' ) + ' FROM PROCESS' + process.id + '_DATATBL';
 					this.db.query( insertQuery, ( err, rows, fields ) => {
 						if ( err ) {
 							reject( err );
 						} else {
-							resolve( refDefinitions );
+							resolve( definitions );
 						}
 					} );
 				} ).
 				catch( reject );
 		} );
 	}
-	private sendDataPopulateDataColumns = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
+	private sendDataPopulateDataColumns = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Populating data columns.' ).
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Populating data columns.' ).
 				then( () => {
-					refDefinitions.cartesianTemp = [];
-					refDefinitions.cartesianArray.forEach( ( curItem: any ) => {
-						refDefinitions.cartesianTemp.push( curItem );
-					} );
-					return this.sendDataPopulateDataColumnsAction( refProcess, refDefinitions );
+					definitions.cartesianTemp = definitions.cartesianArray.map( item => JSON.parse( JSON.stringify( item ) ) );
+					return this.sendDataPopulateDataColumnsAction( process, step, definitions );
 				} ).
 				then( resolve ).
 				catch( reject );
 		} );
 	}
-	private sendDataPopulateDataColumnsAction = ( refProcess: DimeProcessRunning, refDefinitions: any ) => {
-		const curItem = refDefinitions.cartesianTemp.shift();
+	private sendDataPopulateDataColumnsAction = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
+		const curItem = definitions.cartesianTemp.shift();
 		return new Promise( ( resolve, reject ) => {
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Populating data columns for ' + Object.values( curItem ).join( '-' ) ).catch( console.error );
 			let updateWherers: string[]; updateWherers = [];
-			let updateQuery: string; updateQuery = 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ';
+			let updateQuery: string; updateQuery = 'UPDATE PROCESS' + process.id + '_CRSTBL CT \n\tLEFT JOIN ';
 
-			if ( refDefinitions.dataFieldDefinition.aggregateFunction ) {
-				let subQuery: string; subQuery = 'SELECT ';
-				subQuery += refDefinitions.inserterFields.join( ', ' );
-				refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => { if ( curField.srctar === 'source' ) { subQuery += ', SRC_' + curField.name; } } );
-				subQuery += ', ';
-				subQuery += refDefinitions.dataFieldDefinition.aggregateFunction + '(SRC_' + refDefinitions.dataFieldDefinition.name + ') AS SRC_' + refDefinitions.dataFieldDefinition.name;
-				subQuery += ' FROM PROCESS' + refProcess.id + '_DATATBL ';
+			if ( definitions.dataFieldDefinition.aggregateFunction ) {
+				let subQuery = '\n\t\tSELECT ';
+				subQuery += '\n\t\t\t' + definitions.inserterFields.join( ', \n\t\t\t' );
+				definitions.cartesianFields.filter( f => f.srctar === 'source' ).forEach( field => { subQuery += ', \n\t\t\tSRC_' + field.name; } );
+				subQuery += ', \n\t\t\t';
+				subQuery += definitions.dataFieldDefinition.aggregateFunction + '(SRC_' + definitions.dataFieldDefinition.name + ') AS SRC_' + definitions.dataFieldDefinition.name;
+				subQuery += ' \n\t\tFROM PROCESS' + process.id + '_DATATBL ';
 				let whereFields: string[]; whereFields = [];
 				let whereValues: string[]; whereValues = [];
-				refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => {
-					if ( curField.srctar === 'source' ) {
-						whereFields.push( 'SRC_' + curField.name + ' = ?' );
-						whereValues.push( curItem.split( '-|-' )[curKey] );
-					}
+				definitions.cartesianFields.filter( f => f.srctar === 'source' ).forEach( ( curField: any, curKey: number ) => {
+					whereFields.push( 'SRC_' + curField.name + ' = ?' );
+					whereValues.push( curItem[curField.name] );
 				} );
-				whereValues.forEach( function ( curWhere ) {
+				whereValues.forEach( ( curWhere ) => {
 					updateWherers.push( curWhere );
 				} );
 				if ( whereFields.length > 0 ) { subQuery += ' WHERE ' + whereFields.join( ' AND ' ); }
-				subQuery += ' GROUP BY ';
-				subQuery += refDefinitions.inserterFields.join( ', ' );
-				refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => { if ( curField.srctar === 'source' ) { subQuery += ', SRC_' + curField.name; } } );
-				subQuery += ' HAVING ' + refDefinitions.dataFieldDefinition.aggregateFunction + '(SRC_' + refDefinitions.dataFieldDefinition.name + ') <> 0';
-				updateQuery += '(' + subQuery + ') DT ON ';
+				subQuery += ' \n\t\tGROUP BY \n\t\t\t';
+				subQuery += definitions.inserterFields.join( ', \n\t\t\t' );
+				definitions.cartesianFields.filter( f => f.srctar === 'source' ).forEach( f => { subQuery += ', SRC_' + f.name; } );
+				subQuery += ' \n\t\tHAVING \n\t\t\t' + definitions.dataFieldDefinition.aggregateFunction + '(SRC_' + definitions.dataFieldDefinition.name + ') <> 0';
+				updateQuery += '(' + subQuery + '\n\t) DT ON \n\t\t';
 			} else {
-				updateQuery += 'PROCESS' + refProcess.id + '_DATATBL DT ON ';
+				updateQuery += 'PROCESS' + process.id + '_DATATBL DT ON ';
 			}
 
 			let onFields: string[]; onFields = [];
-			refDefinitions.inserterFields.forEach( ( curField: any ) => {
+			definitions.inserterFields.forEach( ( curField: any ) => {
 				onFields.push( 'CT.' + curField + ' = DT.' + curField );
 			} );
 
-			refDefinitions.cartesianFields.forEach( ( curField: any, curKey: number ) => {
+			definitions.cartesianFields.forEach( ( curField: any, curKey: number ) => {
 				let curPrefix: string; curPrefix = '';
 				if ( curField.srctar === 'source' ) { curPrefix = 'SRC_'; }
 				if ( curField.srctar === 'target' ) { curPrefix = 'TAR_'; }
 				onFields.push( 'DT.' + curPrefix + curField.name + ' = ?' );
 			} );
 
-			updateQuery += onFields.join( ' AND ' );
-			updateQuery += ' SET CT.' + curItem.replace( '-|-', '_' ) + ' = DT.SRC_' + refDefinitions.dataFieldDefinition.name;
+			updateQuery += onFields.join( ' AND \n\t\t' );
+			updateQuery += ' \n\tSET CT.`' + Object.values( curItem ).join( '-' ) + '` = DT.SRC_' + definitions.dataFieldDefinition.name;
 
-			curItem.split( '-|-' ).forEach( ( curWhere: any ) => {
+			Object.values( curItem ).forEach( ( curWhere: any ) => {
 				updateWherers.push( curWhere );
 			} );
 			this.db.query( updateQuery, updateWherers, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( err );
 				} else {
-					if ( refDefinitions.cartesianTemp.length === 0 ) {
-						resolve( refDefinitions );
+					if ( definitions.cartesianTemp.length === 0 ) {
+						resolve( definitions );
 					} else {
-						resolve( this.sendDataPopulateDataColumnsAction( refProcess, refDefinitions ) );
+						resolve( this.sendDataPopulateDataColumnsAction( process, step, definitions ) );
 					}
 				}
 			} );
 		} );
 	}
-	private sendDataPopulateDescriptionColumns = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
+	private sendDataPopulateDescriptionColumns = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Populating description columns.' ).
 				then( () => {
@@ -1316,7 +1300,7 @@ export class ProcessTools {
 						( item, key, callback ) => {
 							this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Populating description columns - checking table for ' + item.fieldname ).
 								then( () => {
-									let selectQuery: string; selectQuery = '';
+									let selectQuery = '';
 									selectQuery += 'SELECT TABLE_NAME FROM information_schema.tables ';
 									selectQuery += 'WHERE TABLE_SCHEMA = \'' + this.tools.config.mysql.db + '\' AND TABLE_NAME LIKE \'STREAM%_DESCTBL' + item.fieldid + '\'';
 									this.db.query( selectQuery, ( err, rows, fields ) => {
@@ -1366,14 +1350,37 @@ export class ProcessTools {
 				catch( reject );
 		} );
 	}
-	private sendDataCreateFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
+	private sendDataSetValidationResults = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Creating data file.' ).
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Setting validation results.' ).then( () => {
+				const promises: any[] = [];
+				process.steps.filter( s => s.type === DimeProcessStepType.ValidateData ).forEach( s => {
+					promises.push( new Promise( ( iresolve, ireject ) => {
+						const updateQuery = 'UPDATE PROCESS' + process.id + '_CRSTBL SET Matrix_' + s.referedid + '_Result = \'invalid\' WHERE Matrix_' + s.referedid + '_Result IS NULL';
+						this.db.query( updateQuery, ( err, result ) => {
+							if ( err ) {
+								ireject( err );
+							} else {
+								iresolve();
+							}
+						} );
+					} ) );
+				} );
+				Promise.all( promises ).then( () => {
+					resolve( definitions );
+				} ).catch( reject );
+			} ).catch( reject );
+
+		} );
+	}
+	private sendDataCreateFile = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: any ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Creating data file.' ).
 				then( () => {
-					let selectQuery: string; selectQuery = 'SELECT * FROM PROCESS' + refProcess.id + '_CRSTBL';
+					let selectQuery: string; selectQuery = 'SELECT * FROM PROCESS' + process.id + '_CRSTBL';
 					let wherers: string[]; wherers = [];
-					refDefinitions.cartesianArray.forEach( ( curItem: any ) => {
-						wherers.push( curItem.replace( '-|-', '_' ) + ' <> 0' );
+					definitions.cartesianArray.forEach( ( curItem: any ) => {
+						wherers.push( '`' + Object.values( curItem ).join( '-' ) + '` <> 0' );
 					} );
 					if ( wherers.length > 0 ) {
 						selectQuery += ' WHERE (' + wherers.join( ' OR ' ) + ')';
@@ -1382,7 +1389,7 @@ export class ProcessTools {
 						if ( err ) {
 							reject( err );
 						} else {
-							let workbook; workbook = new excel.Workbook();
+							const workbook = new excel.Workbook();
 							workbook.creator = 'EPM ToolBox';
 							workbook.lastModifiedBy = 'EPM ToolBox';
 							workbook.created = new Date();
@@ -1406,7 +1413,7 @@ export class ProcessTools {
 								sheet.columns = curColumns;
 								sheet.addRows( rows );
 							}
-							resolve( { workbook: workbook, refDefinitions: refDefinitions } );
+							resolve( { workbook, definitions } );
 						}
 					} );
 				} ).
@@ -1425,11 +1432,11 @@ export class ProcessTools {
 	}
 	private sendDataSendFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefs: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			let fromAddress: string; fromAddress = '';
+			let fromAddress = '';
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Sending data file.' ).
-				then( () => this.settingsTool.getOne( 'systemadminemailaddress' ) ).
-				then( ( systemadminemailaddress: any ) => {
-					fromAddress = systemadminemailaddress.value;
+				then( () => this.settingsTool.getOne( 'systemadmin' ) ).
+				then( ( systemadmin: DimeSetting ) => {
+					fromAddress = systemadmin.value.emailaddress;
 					return this.workbookToStreamBuffer( refDefs.workbook );
 				} ).
 				then( ( theStream: any ) => {
@@ -1521,104 +1528,41 @@ export class ProcessTools {
 							} );
 						}
 
-						fieldList.forEach( field => {
-							cartesianArray.forEach( subject => {
-								if ( subject[field.varname] ) {
-									if ( subject[field.varname].length > field.maxlength ) {
-										field.maxlength = subject[field.varname].length;
-									}
-								}
-							} );
-						} );
-						cartesianArray.forEach( subject => {
-							subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 = '';
-							fieldList.forEach( field => {
-								// Folks, cross your fingers
-								if ( field.isMonth || field.type === 'Time' ) {
-									subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 += getMonthSorterValue( subject[field.varname] );
-								} else {
-									subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 += subject[field.varname].padEnd( field.maxlength );
-								}
-							} );
-						} );
-						cartesianArray.sort( ( e1, e2 ) => {
-							if ( e1.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 > e2.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 ) {
-								return 1;
-							} else if ( e1.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 < e2.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929 ) {
-								return -1;
-							} else {
-								return 0;
-							}
-						} );
-						cartesianArray.forEach( subject => {
-							delete subject.weareexpectingnofieldordimensionnametobesamewiththisone12345678900101010292929;
-						} );
+						cartesianArray = this.sortCartesian( fieldList, cartesianArray );
 						resolve( cartesianArray );
 					} ).catch( reject );
-					// let stepDetails: any; stepDetails = JSON.parse( refStep.details );
-					// /*
-					// 	We should order the variables in the dimension order as defined in the stream definition.
-					// 	This way users will be able to edit the order of the business rules running.
-					// */
-					// stepDetails.variables.forEach( ( curVariable: any ) => {
-					// 	if ( curVariable.valuetype !== 'manualvalue' ) {
-					// 		refProcess.targetStreamFields.forEach( ( curField ) => {
-					// 			if ( curField.name === curVariable.value ) { curVariable.vOrder = curField.position; }
-					// 		} );
-					// 	} else {
-					// 		curVariable.vOrder = 0;
-					// 	}
-					// } );
-					// stepDetails.variables.sort( ( a: any, b: any ) => { if ( a.vOrder > b.vOrder ) { return 1; } if ( a.vOrder < b.vOrder ) { return -1; } return 0; } );
-					// let promises: any[]; promises = [];
-					// stepDetails.variables.forEach( ( curVariable: any ) => {
-					// 	promises.push( new Promise( ( iResolve, iReject ) => {
-					// 		if ( curVariable.valuetype !== 'manualvalue' ) {
-					// 			this.getDataTableDistinctFields( refProcess, <DimeStreamField>{ name: curVariable.dimension }, 'target', curVariable.valuetype === 'filteredvalues', refStep, false ).
-					// 				then( ( currentDistinctList: any ) => {
-					// 					currentDistinctList.name = curVariable.name;
-					// 					iResolve( currentDistinctList );
-					// 				} ).catch( iReject );
-					// 		} else {
-					// 			iResolve( { name: curVariable.name, rows: [{ DVALUE: curVariable.value, sorter: curVariable.value }] } );
-					// 		}
-					// 	} ) );
-					// } );
-					// Promise.all( promises ).then( function ( results ) {
-					// 	let cartesianFields: string[]; cartesianFields = [];
-					// 	results.forEach( ( curResult ) => {
-					// 		cartesianFields.push( curResult.name );
-					// 	} );
-					// 	let cartesianArray: any[]; cartesianArray = [];
-					// 	results.forEach( ( curField ) => {
-					// 		if ( cartesianArray.length === 0 ) {
-					// 			curField.rows.forEach( ( curDVALUE: any ) => {
-					// 				if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { cartesianArray.push( curDVALUE.DVALUE ); }
-					// 			} );
-					// 		} else {
-					// 			let tempCartesian: any[]; tempCartesian = [];
-					// 			cartesianArray.forEach( ( curCartesian ) => {
-					// 				curField.rows.forEach( ( curDVALUE: any ) => {
-					// 					if ( curDVALUE.DVALUE !== 'ignore' && curDVALUE.DVALUE !== 'ignore:ignore' ) { tempCartesian.push( curCartesian + '-|-' + curDVALUE.DVALUE ); }
-					// 				} );
-					// 			} );
-					// 			cartesianArray = tempCartesian;
-					// 		}
-					// 	} );
-					// 	let toReturn: any;
-					// 	toReturn = {
-					// 		cartesianArray: cartesianArray,
-					// 		cartesianFields: cartesianFields,
-					// 		processDetails: stepDetails
-					// 	};
-					// 	resolve( toReturn );
-					// } ).catch( reject );
 				} ).catch( reject );
 		} );
 	}
+	private sortCartesian = ( fieldList: { name: string, isMonth: boolean, type: string, maxlength: number, varname: string }[], cartesianArray: any[] ) => {
+		fieldList.forEach( field => {
+			cartesianArray.forEach( subject => {
+				if ( subject[field.varname] ) {
+					if ( subject[field.varname].length > field.maxlength ) {
+						field.maxlength = subject[field.varname].length;
+					}
+				}
+			} );
+		} );
+		cartesianArray.forEach( subject => {
+			subject[verylongelementname] = '';
+			fieldList.forEach( field => {
+				if ( field.isMonth || field.type === 'Time' ) {
+					subject[verylongelementname] += getMonthSorterValue( subject[field.varname].toString() );
+				} else {
+					subject[verylongelementname] += subject[field.varname].toString().padEnd( field.maxlength );
+				}
+			} );
+		} );
+		cartesianArray.sort( SortByVeryLongElementName );
+		cartesianArray.forEach( subject => {
+			delete subject[verylongelementname];
+		} );
+		return cartesianArray;
+	}
 	private getDataTableDistinctFields = ( refProcess: DimeProcessRunning, fieldList: { name: string, varname: string }[], srctar: 'source' | 'target', shouldFilter: boolean, refStep: DimeProcessStepRunning, isForDataFile: boolean ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Run Target Procedure: Getting distinct values for field(s) - ' + fieldList.map( field => field.name ).join( ' - ' ) + '.' ).then( () => {
+			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Getting distinct values for field(s) - ' + fieldList.map( field => field.name ).join( ' - ' ) + '.' ).then( () => {
 				if ( fieldList && fieldList.length > 0 ) {
 
 					const selector: string = srctar === 'source' ? 'SRC_' : 'TAR_';

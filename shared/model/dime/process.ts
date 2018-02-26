@@ -59,6 +59,14 @@ export interface DimeProcessStepRunning extends DimeProcessStep {
 	isPending: boolean
 }
 
+export interface DimeCartesianDefinitions {
+	cartesianArray: any[],
+	cartesianTemp: any[],
+	cartesianFields: any[],
+	inserterFields: any[],
+	dataFieldDefinition: any
+}
+
 export enum DimeProcessStepType {
 	SourceProcedure = 'srcprocedure',
 	PullData = 'pulldata',

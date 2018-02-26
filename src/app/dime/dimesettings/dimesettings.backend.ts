@@ -9,5 +9,5 @@ export class DimeSettingsBackend {
 	constructor( private http: HttpClient ) { }
 
 	public allLoad = () => this.http.get<DimeSetting[]>( this.baseUrl );
-	public allUpdate = ( payload: DimeSetting[] ) => this.http.put( this.baseUrl, payload );
+	public update = ( payload: DimeSetting ) => this.http.put( this.baseUrl, payload );
 }
