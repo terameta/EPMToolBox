@@ -9,9 +9,15 @@
 			</thead>
 			<tbody>
 				<tr>
+					<td>From Name</td>
+					<td>
+						<input type="text" class="form-control" id="fromname" name="fromname" [(ngModel)]="mainService.items.systemadmin.fromname">
+					</td>
+				</tr>
+				<tr>
 					<td>E-Mail Address</td>
 					<td>
-						<input type="email" class="form-control" id="host" name="host" [(ngModel)]="mainService.items.systemadmin.value.emailaddress">
+						<input type="email" class="form-control" id="emailaddress" name="emailaddress" [(ngModel)]="mainService.items.systemadmin.emailaddress">
 					</td>
 				</tr>
 				<tr>

@@ -45,7 +45,11 @@ export class AuthService {
 	}
 
 	get authenticated() {
-		return !this.jwtHelper.isTokenExpired();
+		if ( this.jwtHelper.tokenGetter() ) {
+			return !this.jwtHelper.isTokenExpired();
+		} else {
+			return false;
+		}
 	}
 
 	private _setSession( authResult ) {

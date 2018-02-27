@@ -1,4 +1,46 @@
-<div class="btn-toolbar" role="toolbar" aria-label="Schedules Menu">
+<form class="form-inline">
+	<div class="form-group form-group-sm">
+		<div class="input-group">
+			<a class="input-group-addon btn" title="Schedule List" routerLink="/dime/schedules">
+				<i class="fa fa-cogs fa-fw"></i> Schedules
+			</a>
+			<select class="form-control" style="width:0px;padding-left:0px;padding-right:0px;border:none;">
+				<option value="0">Hidden</option>
+			</select>
+			<a class="input-group-addon btn" title="Current Item: {{mainService.currentItem.name}}" *ngIf="mainService.currentItem.id > 0" [routerLink]="['/dime/schedules/schedule-detail', mainService.currentItem.id]">
+				<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.currentItem.name}}
+			</a>
+		</div>
+	</div>
+
+	<div class="form-group form-group-sm">
+		<div class="input-group">
+			<a class="input-group-addon btn" title="Schedule List" routerLink="/dime/schedules">
+				<i class="fa fa-list fa-fw"></i> List</a>
+			<select class="form-control" name="selecteddimeschedule" (change)="mainService.navigateTo($event.target.value)" [ngModel]="mainService.currentItem.id">
+				<option value="0">Go To</option>
+				<option *ngFor="let itemid of mainService.itemids" value="{{itemid}}">{{mainService.items[itemid]?.name}}</option>
+			</select>
+			<div class="input-group-addon btn" title="New Schedule" (click)="mainService.create()">
+				<i class="fa fa-plus fa-fw"></i> New</div>
+		</div>
+	</div>
+
+	<button type="button" class="btn btn-default btn-sm pull-right">Help</button>
+	<div class="form-group form-group-sm pull-right">
+		<div class="input-group" *ngFor="let tagGroup of tagService.groupList">
+			<div class="input-group-addon" title="Please select an {{tagGroup.name}} tag">{{tagGroup.name}}:</div>
+			<select name="TagSelector{{tagGroup.id}}" id="TagSelector{{tagGroup.id}}" class="form-control" (change)="uiService.tagChanged(tagGroup.id, $event.target.value)" [ngModel]="uiService.uiState.selectedTags[tagGroup.id]">
+				<option value="0">All</option>
+				<ng-container *ngFor="let tagItem of tagService.itemList">
+					<option *ngIf="tagItem.taggroup == tagGroup.id" value="{{tagItem.id}}">{{tagItem.name}}</option>
+				</ng-container>
+			</select>
+		</div>
+	</div>
+</form>
+
+<!-- <div class="btn-toolbar" role="toolbar" aria-label="Schedules Menu">
 	<div class="btn-group btn-group-xs" role="group">
 		<button type="button" class="btn btn-default btn-xs" title="Schedule List" routerLink="schedule-list"><i class="fa fa-calendar fa-fw"></i> Schedules</button>
 		<button type="button"
@@ -26,4 +68,4 @@
 	<div class="btn-group btn-group-xs pull-right" role="group">
 		<button type="button" class="btn btn-default" title="Help"><i class="fa fa-question fa-fw"></i> Help</button>
 	</div>
-</div>
+</div> -->

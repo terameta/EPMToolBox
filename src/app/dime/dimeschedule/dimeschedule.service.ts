@@ -1,19 +1,51 @@
-import { ActivatedRoute, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
-// import { Headers, Http, Response } from '@angular/http';
-
-// import { AuthHttp } from 'angular2-jwt';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { ToastrService } from 'ngx-toastr';
-
-import { EnumToArray, SortByName } from '../../../../shared/utilities/utilityFunctions';
-
-import { DimeSchedule } from '../../../../shared/model/dime/schedule';
-import { DimeScheduleStepType } from '../../../../shared/enums/dime/schedulesteptypes';
-import { HttpClient } from '@angular/common/http';
+import { DimeScheduleObject, DimeSchedule } from '../../../../shared/model/dime/schedule';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../ngstore/models';
+import { Router } from '@angular/router';
+import { DimeScheduleActions } from './dimeschedule.actions';
 
 @Injectable()
+export class DimeScheduleService {
+	private serviceName = 'Schedules';
+
+	public itemids: number[];
+	public items: DimeScheduleObject;
+	public currentItem: DimeSchedule;
+
+	constructor(
+		private store: Store<AppState>,
+		private router: Router
+	) {
+		this.store.select( 'dimeSchedule' ).subscribe( state => {
+			this.itemids = state.ids;
+			this.items = state.items;
+			this.currentItem = state.curItem;
+		}, error => {
+			console.error( error );
+		} );
+	}
+
+	public create = () => this.store.dispatch( DimeScheduleActions.ONE.CREATE.INITIATE.action( <DimeSchedule>{} ) );
+	public update = () => this.store.dispatch( DimeScheduleActions.ONE.UPDATE.INITIATE.action( this.currentItem ) );
+	public delete = ( id: number, name?: string ) => {
+		if ( !name ) { name = this.items[id].name; }
+		const verificationQuestion = this.serviceName + ': Are you sure you want to delete ' + ( name !== undefined ? name : 'the item' ) + '?';
+		if ( confirm( verificationQuestion ) ) {
+			this.store.dispatch( DimeScheduleActions.ONE.DELETE.INITIATE.action( id ) );
+		}
+	}
+	public navigateTo = ( id: number ) => {
+		this.router.navigateByUrl(
+			this.router.routerState.snapshot.url
+				.split( '/' )
+				.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )
+				.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )
+				.join( '/' )
+		);
+	}
+}
+/*
 export class DimeScheduleService {
 	items: Observable<DimeSchedule[]>;
 	curItem: DimeSchedule;
@@ -145,3 +177,4 @@ export class DimeScheduleService {
 		}
 	}
 }
+*/

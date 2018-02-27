@@ -9,3 +9,7 @@ export interface DimeSchedule {
 	schedule: ATCronStructure[],
 	status: ATStatusType
 }
+
+export interface DimeScheduleObject {
+	[key: number]: DimeSchedule
+}

@@ -9,7 +9,7 @@
 		"test": "ng test",
 		"lint": "ng lint",
 		"e2e": "ng e2e",
-		"server": "nodemon -w ./server -e ts,json --exec ts-node server/server.ts --type-check",
+		"server": "nodemon -w ./server -e ts,json --exec ts-node server/server.ts",
 		"serverprod": "ts-node server/server.ts"
 	},
 	"private": true,

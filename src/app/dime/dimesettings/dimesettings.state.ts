@@ -1,4 +1,4 @@
-import { DimeSetting, DimeSettingObject, DimeEmailServerSettings } from '../../../../shared/model/dime/settings';
+import { DimeSetting, DimeSettingObject } from '../../../../shared/model/dime/settings';
 
 export interface DimeSettingsState {
 	items: DimeSettingObject,
@@ -7,8 +7,8 @@ export interface DimeSettingsState {
 
 export const dimeSettingsInitialState: DimeSettingsState = {
 	items: {
-		emailserver: <DimeSetting>{ name: 'emailserver', value: { host: '', port: 25 } },
-		systemadmin: <DimeSetting>{ name: 'systemadmin', value: { emailaddress: '' } }
+		emailserver: <DimeSetting>{ name: 'emailserver', host: '', port: 25 },
+		systemadmin: <DimeSetting>{ name: 'systemadmin', emailaddress: '' }
 	},
 	isLoaded: false
 };

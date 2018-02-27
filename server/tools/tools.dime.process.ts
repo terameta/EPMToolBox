@@ -637,7 +637,7 @@ export class ProcessTools {
 					console.error( issue );
 					this.logTool.appendLog( refProcess.currentlog, 'Failed: ' + issue ).
 						then( () => {
-							const toLogProcess = <DimeProcess>{};
+							const toLogProcess = <DimeProcessRunning>{};
 							toLogProcess.id = refProcess.id;
 							toLogProcess.name = refProcess.name;
 							toLogProcess.status = refProcess.status;
@@ -686,13 +686,13 @@ export class ProcessTools {
 
 							switch ( curStep.type ) {
 								case DimeProcessStepType.SourceProcedure: {
-									// this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PullData: {
-									// this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.MapData: {
@@ -700,32 +700,42 @@ export class ProcessTools {
 										refProcess.mapList = [];
 									}
 									refProcess.mapList.push( curStep.referedid );
-									// this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.TransformData: {
-									// this.runTransformations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runTransformations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.ValidateData: {
-									// this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PushData: {
-									// this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runPushData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.TargetProcedure: {
-									// this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.SendData: {
 									this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									break;
+								}
+								case DimeProcessStepType.SendMissingMaps: {
+									this.runSendMissing( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									break;
+								}
+								case DimeProcessStepType.SendLogs: {
+									this.runSendLog( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
 									// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
 									break;
 								}
@@ -733,20 +743,6 @@ export class ProcessTools {
 									reject( new Error( 'This is not a known step type (' + curStep.type + ')' ) );
 								}
 							}
-							/*
-							else if ( curStep.type === 'senddata' ) {
-								this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
-							} else if ( curStep.type === 'sendmissing' ) {
-								this.runSendMissing( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
-							} else if ( curStep.type === 'sendlogs' ) {
-								this.runSendLog( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-								// curStep.isPending = false; resolve(this.runStepsAction(refProcess));
-							} else {
-								reject( 'This is not a known step type (' + curStep.type + ')' );
-							}
-							*/
 						} ).
 						catch( reject );
 				} else {
@@ -760,8 +756,29 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			this.runValidationPrepare( process.id, step.referedid )
 				.then( () => this.runValidationAction( process, step ) )
+				.then( () => this.runValidationMarkInvalids( process, step ) )
 				.then( resolve )
 				.catch( reject );
+		} );
+	}
+	private runValidationMarkInvalids = ( process: DimeProcessRunning, step: DimeProcessStepRunning ) => {
+		return new Promise( ( resolve, reject ) => {
+			const promises: any[] = [];
+			process.steps.filter( s => s.type === DimeProcessStepType.ValidateData ).forEach( s => {
+				promises.push( new Promise( ( iresolve, ireject ) => {
+					const updateQuery = 'UPDATE PROCESS' + process.id + '_DATATBL SET Matrix_' + s.referedid + '_Result = \'invalid\' WHERE Matrix_' + s.referedid + '_Result IS NULL';
+					this.db.query( updateQuery, ( err, result ) => {
+						if ( err ) {
+							ireject( err );
+						} else {
+							iresolve();
+						}
+					} );
+				} ) );
+			} );
+			Promise.all( promises ).then( () => {
+				resolve();
+			} ).catch( reject );
 		} );
 	}
 	private runValidationAction = ( process: DimeProcessRunning, step: DimeProcessStepRunning ) => {
@@ -816,7 +833,8 @@ export class ProcessTools {
 		} );
 	}
 	private runSendMissing = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		refProcess.recepients = refStep.details.split( ';' ).join( ',' );
+		// refProcess.recepients = refStep.details.split( ';' ).join( ',' );
+		refProcess.recepients = refStep.detailsObject.map( recepient => recepient.address ).join( ', ' );
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Send missing maps.' ).
 				then( () => this.sendMissingPrepareAll( refProcess, refStep ) ).
@@ -837,97 +855,88 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			let masterMap: DimeMap;
 			this.mapTool.getOne( mapID ).
-				then( ( curMap: DimeMap ) => { masterMap = curMap; return this.sendMissingPrepareQuery( refProcess, refStep, curMap ); } ).
+				then( ( curMap: DimeMap ) => {
+					masterMap = curMap;
+					if ( curMap.matrix ) {
+						return this.matrixTool.getOne( curMap.matrix );
+					} else {
+						return Promise.resolve( <DimeMatrix>{} );
+					}
+				} ).
+				then( ( matrix ) => this.sendMissingPrepareQuery( refProcess, refStep, masterMap, matrix ) ).
 				then( ( curQuery: string ) => this.sendMissingRunQuery( curQuery, masterMap ) ).
 				then( resolve ).
 				catch( reject );
 		} );
 	}
-	private sendMissingPrepareQuery = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refMap: DimeMap ) => {
+	private sendMissingPrepareQuery = ( process: DimeProcessRunning, step: DimeProcessStepRunning, map: DimeMap, matrix: DimeMatrix ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.mapTool.getFields( refMap.id ).
+			this.mapTool.getFields( map.id ).
 				then( ( mapFields: any[] ) => {
 					let mapFieldList: any[]; mapFieldList = [];
-					mapFields.forEach( ( curMapField ) => {
+					mapFields.forEach( curMapField => {
 						if ( curMapField.srctar === 'source' ) {
-							refProcess.sourceStreamFields.forEach( ( curStreamField ) => {
-								if ( curStreamField.name === curMapField.name ) {
-									mapFieldList.push( { id: curStreamField.id, name: curStreamField.name, srctar: 'source', type: 'main', streamid: curStreamField.stream, order: curStreamField.position } );
-									if ( curStreamField.isDescribed || refProcess.sourceStream.type === DimeStreamType.HPDB ) {
-										mapFieldList.push( {
-											id: curStreamField.id,
-											name: curStreamField.name,
-											srctar: 'source',
-											type: 'description',
-											streamid: curStreamField.stream,
-											order: curStreamField.position
-										} );
+							process.sourceStreamFields
+								.filter( f => f.name === curMapField.name )
+								.forEach( f => {
+									mapFieldList.push( { id: f.id, name: f.name, srctar: 'source', type: 'main', streamid: f.stream, position: f.position } );
+									if ( f.isDescribed ) {
+										mapFieldList.push( { id: f.id, name: f.name, srctar: 'source', type: 'description', streamid: f.stream, position: f.position } );
 									}
-								}
-							} );
+								} );
 						}
 						if ( curMapField.srctar === 'target' ) {
-							refProcess.targetStreamFields.forEach( ( curStreamField ) => {
-								if ( curStreamField.name === curMapField.name ) {
-									mapFieldList.push( {
-										id: curStreamField.id,
-										name: curStreamField.name,
-										srctar: 'target',
-										type: 'main',
-										streamid: curStreamField.stream,
-										order: curStreamField.position
-									} );
-									if ( curStreamField.isDescribed || refProcess.targetStream.type === DimeStreamType.HPDB ) {
-										mapFieldList.push( {
-											id: curStreamField.id,
-											name: curStreamField.name,
-											srctar: 'target',
-											type: 'description',
-											streamid: curStreamField.stream,
-											order: curStreamField.position
-										} );
+							process.targetStreamFields
+								.filter( f => f.name === curMapField.name )
+								.forEach( f => {
+									mapFieldList.push( { id: f.id, name: f.name, srctar: 'target', type: 'main', streamid: f.stream, position: f.position } );
+									if ( f.isDescribed ) {
+										mapFieldList.push( { id: f.id, name: f.name, srctar: 'target', type: 'description', streamid: f.stream, position: f.position } );
 									}
-								}
-							} );
+								} );
 						}
 					} );
-					mapFieldList.forEach( ( curField ) => {
-						curField.order = parseInt( curField.order, 10 ) * 100;
-						if ( curField.srctar === 'source' ) { curField.order += 1000000; }
-						if ( curField.srctar === 'target' ) { curField.order += 2000000; }
-						if ( curField.type === 'main' ) { curField.order += 1; }
-						if ( curField.type === 'description' ) { curField.order += 2; }
+					mapFieldList.forEach( ( f ) => {
+						f.position = parseInt( f.position, 10 ) * 100;
+						if ( f.srctar === 'source' ) { f.position += 1000000; }
+						if ( f.srctar === 'target' ) { f.position += 2000000; }
+						if ( f.type === 'main' ) { f.position += 1; }
+						if ( f.type === 'description' ) { f.position += 2; }
 					} );
-					mapFieldList.sort( ( a: any, b: any ) => {
-						if ( a.order > b.order ) { return 1; }
-						if ( a.order < b.order ) { return -1; }
-						return 0;
-					} );
-					let selects: string[]; selects = [];
-					mapFieldList.forEach( ( curField ) => {
-						if ( curField.srctar === 'source' ) { curField.name = 'SRC_' + curField.name; }
-						if ( curField.srctar === 'target' ) { curField.name = 'TAR_' + curField.name; }
-						if ( curField.type === 'description' ) { curField.onField = curField.name; }
-						if ( curField.type === 'description' ) { curField.name = 'Description'; }
-						if ( curField.type === 'main' ) { curField.tableName = 'MAP' + refMap.id + '_MAPTBL'; }
-						if ( curField.type === 'description' ) { curField.tableName = 'STREAM' + curField.streamid + '_DESCTBL' + curField.id; }
+					mapFieldList.sort( SortByPosition );
+					const selects: string[] = [];
+					mapFieldList.forEach( f => {
+						if ( f.srctar === 'source' ) { f.name = 'SRC_' + f.name; }
+						if ( f.srctar === 'target' ) { f.name = 'TAR_' + f.name; }
+						if ( f.type === 'description' ) { f.onField = f.name; }
+						if ( f.type === 'description' ) { f.name = 'Description'; }
+						if ( f.type === 'main' ) { f.tableName = 'MAP' + map.id + '_MAPTBL'; }
+						if ( f.type === 'description' ) { f.tableName = 'STREAM' + f.streamid + '_DESCTBL' + f.id; }
 
-						if ( curField.type === 'description' ) {
-							selects.push( '\n\t' + curField.tableName + '.' + curField.name + ' AS ' + curField.onField + '_DESC' );
+						if ( f.type === 'description' ) {
+							selects.push( '\n\t' + f.tableName + '.' + f.name + ' AS ' + f.onField + '_DESC' );
 						} else {
-							selects.push( '\n\t' + curField.tableName + '.' + curField.name );
+							selects.push( '\n\t' + f.tableName + '.' + f.name );
 						}
 					} );
-					const mapTableName = 'MAP' + refMap.id + '_MAPTBL';
-					let selectQuery: string; selectQuery = '';
+					if ( map.matrix ) {
+						selects.push( '\n\tIF(ISNULL(MATRIX' + map.matrix + '_MATRIXTBL.id), \'invalid\', \'valid\') AS Matrix_' + map.matrix + '_Result' );
+					}
+					const mapTableName = 'MAP' + map.id + '_MAPTBL';
+					let selectQuery = '';
 					selectQuery += 'SELECT ';
 					selectQuery += selects.join( ', ' ) + ' \n';
 					selectQuery += 'FROM ' + mapTableName + ' ';
-					mapFieldList.forEach( ( curField ) => {
-						if ( curField.type === 'description' ) {
-							selectQuery += '\n\tLEFT JOIN ' + curField.tableName + ' ON ' + curField.tableName + '.RefField = ' + mapTableName + '.' + curField.onField;
+					mapFieldList.forEach( f => {
+						if ( f.type === 'description' ) {
+							selectQuery += '\n\tLEFT JOIN ' + f.tableName + ' ON ' + f.tableName + '.RefField = ' + mapTableName + '.' + f.onField;
 						}
 					} );
+					if ( map.matrix ) {
+						const mtname = 'MATRIX' + map.matrix + '_MATRIXTBL';
+						selectQuery += '\n\tLEFT JOIN ' + mtname + ' ON \n\t\t';
+						selectQuery += process.targetStreamFields.filter( f => matrix.fields[f.id] ).map( f => mtname + '.' + f.name + ' = ' + mapTableName + '.TAR_' + f.name ).join( ' AND \n\t\t' );
+					}
 					let wherers: string[]; wherers = [];
 					mapFieldList.forEach( ( curField ) => {
 						if ( curField.srctar === 'target' && curField.type === 'main' ) {
@@ -935,6 +944,9 @@ export class ProcessTools {
 							wherers.push( curField.name + ' = \'missing\'' );
 						}
 					} );
+					if ( map.matrix ) {
+						wherers.push( '\n\tISNULL(MATRIX' + map.matrix + '_MATRIXTBL.id)' );
+					}
 					if ( wherers.length > 0 ) {
 						selectQuery += ' \n';
 						selectQuery += 'WHERE ';
@@ -992,19 +1004,19 @@ export class ProcessTools {
 	}
 	private sendMissingSendFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refBook: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			let fromAddress: string; fromAddress = '';
+			let systemAdminInfo: DimeSetting;
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Missing Maps: Sending data file.' ).
 				then( () => this.settingsTool.getOne( 'systemadmin' ) ).
 				then( ( systemadmin: DimeSetting ) => {
-					fromAddress = systemadmin.value.emailaddress;
+					systemAdminInfo = systemadmin;
 					return this.workbookToStreamBuffer( refBook );
 				} ).
 				then( ( theStreamBuffer: any ) => {
 					return this.mailTool.sendMail( {
-						from: fromAddress,
+						from: systemAdminInfo.emailaddress,
 						to: refProcess.recepients,
 						subject: 'Missing map list for Process: ' + refProcess.name,
-						text: 'Hi,\n\nYou can kindly find the file as attached.\n\nBest Regards\nHyperion Team',
+						text: 'Hi,\n\nYou can kindly find the file as attached.\n\nBest Regards\n' + systemAdminInfo.fromname,
 						attachments: [
 							{
 								filename: refProcess.name + ' Missing Map File (' + this.tools.getFormattedDateTime() + ').xlsx',
@@ -1021,31 +1033,36 @@ export class ProcessTools {
 		} );
 	}
 	private runSendLog = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning ) => {
-		const toLogProcess = <DimeProcess>{};
+		const toLogProcess = <DimeProcessRunning>{};
 		toLogProcess.id = refProcess.id;
 		toLogProcess.name = refProcess.name;
-		toLogProcess.status = refProcess.status;
+		toLogProcess.currentlog = refProcess.currentlog;
 		toLogProcess.erroremail = refProcess.erroremail;
+		toLogProcess.recepients = refStep.detailsObject.map( recepient => recepient.address ).join( ', ' );
 		return this.sendLogFile( toLogProcess, false );
 	}
-	private sendLogFile = ( refProcess: DimeProcess, iserror: boolean ) => {
+	private sendLogFile = ( refProcess: DimeProcessRunning, iserror: boolean ) => {
 		return new Promise( ( resolve, reject ) => {
-			let fromAddress: string; fromAddress = '';
-			this.settingsTool.getOne( 'systemadminemailaddress' ).
-				then( ( systemadminemailaddress: any ) => {
-					fromAddress = systemadminemailaddress.value;
+			let systemAdminInfo: DimeSetting;
+			this.settingsTool.getOne( 'systemadmin' ).
+				then( ( systemadmin: DimeSetting ) => {
+					systemAdminInfo = systemadmin;
 					return this.logTool.checkLog( refProcess.currentlog );
 				} ).
 				then( ( curLog: any ) => {
 					const curEmail: any = {};
-					curEmail.to = refProcess.erroremail;
-					curEmail.from = fromAddress;
+					if ( iserror ) {
+						curEmail.to = refProcess.erroremail;
+					} else {
+						curEmail.to = refProcess.recepients;
+					}
+					curEmail.from = systemAdminInfo.emailaddress;
 					curEmail.subject = '';
 					if ( iserror ) { curEmail.subject += 'Process Error - '; }
 					curEmail.subject += 'Log for process: ' + refProcess.name;
 					curEmail.text = curLog.details;
 					curEmail.html = '<pre>' + curLog.details + '</pre>';
-					if ( curEmail.to === '' || !curEmail.to ) { curEmail.to = fromAddress; }
+					if ( curEmail.to === '' || !curEmail.to ) { curEmail.to = systemAdminInfo.emailaddress; }
 					this.mailTool.sendMail( curEmail ).
 						then( () => {
 							resolve( refProcess );
@@ -1064,7 +1081,6 @@ export class ProcessTools {
 				then( ( result ) => this.sendDataInsertDistincts( process, step, result ) ).
 				then( ( result ) => this.sendDataPopulateDataColumns( process, step, result ) ).
 				then( ( result ) => this.sendDataPopulateDescriptionColumns( process, step, result ) ).
-				then( ( result ) => this.sendDataSetValidationResults( process, step, result ) ).
 				then( ( result ) => this.sendDataCreateFile( process, step, result ) ).
 				then( ( result ) => this.sendDataSendFile( process, step, result ) ).
 				then( resolve ).
@@ -1230,7 +1246,7 @@ export class ProcessTools {
 	private sendDataPopulateDataColumnsAction = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
 		const curItem = definitions.cartesianTemp.shift();
 		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Populating data columns for ' + Object.values( curItem ).join( '-' ) ).catch( console.error );
+			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Populating data column for ' + Object.values( curItem ).join( '-' ) ).catch( console.error );
 			let updateWherers: string[]; updateWherers = [];
 			let updateQuery: string; updateQuery = 'UPDATE PROCESS' + process.id + '_CRSTBL CT \n\tLEFT JOIN ';
 
@@ -1298,79 +1314,51 @@ export class ProcessTools {
 					asynclib.eachOfSeries(
 						refProcess.CRSTBLDescribedFields,
 						( item, key, callback ) => {
-							this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Populating description columns - checking table for ' + item.fieldname ).
-								then( () => {
-									let selectQuery = '';
-									selectQuery += 'SELECT TABLE_NAME FROM information_schema.tables ';
-									selectQuery += 'WHERE TABLE_SCHEMA = \'' + this.tools.config.mysql.db + '\' AND TABLE_NAME LIKE \'STREAM%_DESCTBL' + item.fieldid + '\'';
-									this.db.query( selectQuery, ( err, rows, fields ) => {
-										if ( err ) {
-											this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Populating description columns error, can not find table for ' + item.fieldname ).
-												then( function () { callback(); } );
-										} else {
-											let selectedTable: string; selectedTable = '';
-											rows.forEach( ( curTable: any ) => {
-												selectedTable = curTable.TABLE_NAME;
-											} );
-
-											if ( selectedTable === '' ) {
-												const toLog = 'Step ' + refStep.position + ' - Send Data: Populating description columns - no table for ' + item.fieldname;
-												this.logTool.appendLog( refProcess.currentlog, toLog ).then( () => { callback(); } );
-											} else {
-												// const toLog = 'Step ' + refStep.position + ' - Send Data: Populating description columns - Table for ' + item.fieldname + ' is ' + selectedTable
-												const toLog = 'Step ' + refStep.position + ' - Send Data: Populating description column for ' + item.fieldname;
-												this.logTool.appendLog( refProcess.currentlog, toLog ).
-													then( () => {
-														let updateQuery: string; updateQuery = '';
-														updateQuery += 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ' + selectedTable + ' ST';
-														updateQuery += ' ON CT.' + item.fieldname + ' = ST.RefField';
-														updateQuery += ' SET ';
-														updateQuery += ' CT.' + item.fieldname + '_Desc = ST.Description';
-														this.db.query( updateQuery, ( uErr, uRows, uFields ) => {
-															if ( uErr ) {
-																const toLogC = 'Step ' + refStep.position + ' - Send Data: Population description columns - ' + item.fieldname + ' population has failed';
-																this.logTool.appendLog( refProcess.currentlog, toLogC ).
-																	then( () => { callback(); } );
-															} else {
-																const toLogC = 'Step ' + refStep.position + ' - Send Data: Population description columns - ' + item.fieldname + ' population has completed';
-																this.logTool.appendLog( refProcess.currentlog, toLogC ).
-																	then( () => { callback(); } );
-															}
-														} );
-													} );
-											}
-										}
+							let selectQuery = '';
+							selectQuery += 'SELECT TABLE_NAME FROM information_schema.tables ';
+							selectQuery += 'WHERE TABLE_SCHEMA = \'' + this.tools.config.mysql.db + '\' AND TABLE_NAME LIKE \'STREAM%_DESCTBL' + item.fieldid + '\'';
+							this.db.query( selectQuery, ( err, rows, fields ) => {
+								if ( err ) {
+									this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Populating description columns error, can not find table for ' + item.fieldname ).
+										then( function () { callback(); } );
+								} else {
+									let selectedTable: string; selectedTable = '';
+									rows.forEach( ( curTable: any ) => {
+										selectedTable = curTable.TABLE_NAME;
 									} );
-								} );
+
+									if ( selectedTable === '' ) {
+										const toLog = 'Step ' + refStep.position + ' - Send Data: Populating description columns - no table for ' + item.fieldname;
+										this.logTool.appendLog( refProcess.currentlog, toLog ).then( () => { callback(); } );
+									} else {
+										// const toLog = 'Step ' + refStep.position + ' - Send Data: Populating description columns - Table for ' + item.fieldname + ' is ' + selectedTable
+										const toLog = 'Step ' + refStep.position + ' - Send Data: Populating description column for ' + item.fieldname;
+										this.logTool.appendLog( refProcess.currentlog, toLog ).
+											then( () => {
+												let updateQuery: string; updateQuery = '';
+												updateQuery += 'UPDATE PROCESS' + refProcess.id + '_CRSTBL CT LEFT JOIN ' + selectedTable + ' ST';
+												updateQuery += ' ON CT.' + item.fieldname + ' = ST.RefField';
+												updateQuery += ' SET ';
+												updateQuery += ' CT.' + item.fieldname + '_Desc = ST.Description';
+												this.db.query( updateQuery, ( uErr, uRows, uFields ) => {
+													if ( uErr ) {
+														const toLogC = 'Step ' + refStep.position + ' - Send Data: Population description columns - ' + item.fieldname + ' population has failed';
+														this.logTool.appendLog( refProcess.currentlog, toLogC ).
+															then( () => { callback(); } );
+													} else {
+														callback();
+													}
+												} );
+											} );
+									}
+								}
+							} );
 						}, () => {
 							resolve( refDefinitions );
 						}
 					);
 				} ).
 				catch( reject );
-		} );
-	}
-	private sendDataSetValidationResults = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: DimeCartesianDefinitions ): Promise<DimeCartesianDefinitions> => {
-		return new Promise( ( resolve, reject ) => {
-			this.logTool.appendLog( process.currentlog, 'Step ' + step.position + ' - Send Data: Setting validation results.' ).then( () => {
-				const promises: any[] = [];
-				process.steps.filter( s => s.type === DimeProcessStepType.ValidateData ).forEach( s => {
-					promises.push( new Promise( ( iresolve, ireject ) => {
-						const updateQuery = 'UPDATE PROCESS' + process.id + '_CRSTBL SET Matrix_' + s.referedid + '_Result = \'invalid\' WHERE Matrix_' + s.referedid + '_Result IS NULL';
-						this.db.query( updateQuery, ( err, result ) => {
-							if ( err ) {
-								ireject( err );
-							} else {
-								iresolve();
-							}
-						} );
-					} ) );
-				} );
-				Promise.all( promises ).then( () => {
-					resolve( definitions );
-				} ).catch( reject );
-			} ).catch( reject );
-
 		} );
 	}
 	private sendDataCreateFile = ( process: DimeProcessRunning, step: DimeProcessStepRunning, definitions: any ) => {
@@ -1432,20 +1420,20 @@ export class ProcessTools {
 	}
 	private sendDataSendFile = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefs: any ) => {
 		return new Promise( ( resolve, reject ) => {
-			let fromAddress = '';
+			let systemAdminInfo: DimeSetting;
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Send Data: Sending data file.' ).
 				then( () => this.settingsTool.getOne( 'systemadmin' ) ).
 				then( ( systemadmin: DimeSetting ) => {
-					fromAddress = systemadmin.value.emailaddress;
+					systemAdminInfo = systemadmin;
 					return this.workbookToStreamBuffer( refDefs.workbook );
 				} ).
 				then( ( theStream: any ) => {
 					return this.mailTool.sendMail( {
-						from: fromAddress,
+						from: systemAdminInfo.emailaddress,
 						to: refProcess.recepients,
-						cc: fromAddress,
+						cc: systemAdminInfo.emailaddress,
 						subject: 'Data File for Process: ' + refProcess.name,
-						text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\nHyperion Team',
+						text: 'Hi,\n\nYou can kindly find the data file as attached.\n\nBest Regards\n' + systemAdminInfo.fromname,
 						attachments: [
 							{
 								filename: refProcess.name + ' Data File (' + this.tools.getFormattedDateTime() + ').xlsx',

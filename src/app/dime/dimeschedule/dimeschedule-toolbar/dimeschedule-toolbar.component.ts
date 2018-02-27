@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
 import { DimeScheduleService } from '../dimeschedule.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
 
 @Component( {
 	selector: 'app-dimeschedule-toolbar',
@@ -9,10 +11,13 @@ import { DimeScheduleService } from '../dimeschedule.service';
 } )
 export class DimescheduleToolbarComponent implements OnInit {
 
-	constructor( public mainService: DimeScheduleService ) { }
+	constructor(
+		public mainService: DimeScheduleService,
+		public tagService: DimeTagService,
+		public uiService: DimeUIService
+	) { }
 
 	ngOnInit() {
-		this.mainService.getAll();
 	}
 
 }

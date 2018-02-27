@@ -17,8 +17,8 @@ export class DimescheduleDetailComponent implements OnInit, OnDestroy {
 	) { }
 
 	ngOnInit() {
-		this.paramSubscription = this.route.params.subscribe(( params: Params ) => {
-			this.mainService.getOne( params['id'] );
+		this.paramSubscription = this.route.params.subscribe( ( params: Params ) => {
+			// this.mainService.getOne( params['id'] );
 		} );
 	}
 

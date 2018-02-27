@@ -54,6 +54,8 @@ import { DimeSettingsEffects } from './dime/dimesettings/dimesettings.effects';
 import { DimeSettingsBackend } from './dime/dimesettings/dimesettings.backend';
 
 import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
+import { DimeScheduleEffects } from './dime/dimeschedule/dimeschedule.effects';
+import { DimeScheduleBackend } from './dime/dimeschedule/dimeschedule.backend';
 
 import { DimeAsyncProcessService } from './dime/dimeasyncprocess/dimeasyncprocess.service';
 
@@ -129,7 +131,8 @@ export function tokenGetter() {
 			DimeMapEffects,
 			DimeMatrixEffects,
 			DimeProcessEffects,
-			DimeSettingsEffects
+			DimeSettingsEffects,
+			DimeScheduleEffects
 		] ),
 		StoreRouterConnectingModule,
 		// StoreDevtoolsModule.instrument( {
@@ -159,6 +162,7 @@ export function tokenGetter() {
 		DimeSettingsService,
 		DimeSettingsBackend,
 		DimeScheduleService,
+		DimeScheduleBackend,
 		DimeSettingsService,
 		DimeAsyncProcessService,
 		DimeAsyncProcessBackend,

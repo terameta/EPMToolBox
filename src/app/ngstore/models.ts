@@ -50,6 +50,10 @@ import { DimeSettingsState, dimeSettingsInitialState } from '../dime/dimesetting
 import { dimeSettingsReducer } from '../dime/dimesettings/dimesettings.reducer';
 import { DimeSettingsActions } from '../dime/dimesettings/dimesettings.actions';
 
+import { DimeScheduleState, dimeScheduleInitialState } from '../dime/dimeschedule/dimeschedule.state';
+import { dimeScheduleReducer } from '../dime/dimeschedule/dimeschedule.reducer';
+import { DimeScheduleActions } from '../dime/dimeschedule/dimeschedule.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
@@ -63,7 +67,8 @@ export interface AppState {
 	dimeMap: DimeMapState,
 	dimeMatrix: DimeMatrixState,
 	dimeProcess: DimeProcessState,
-	dimeSettings: DimeSettingsState
+	dimeSettings: DimeSettingsState,
+	dimeSchedule: DimeScheduleState
 }
 
 export const appInitialState: AppState = {
@@ -78,7 +83,8 @@ export const appInitialState: AppState = {
 	dimeMap: dimeMapInitialState,
 	dimeMatrix: dimeMatrixInitialState,
 	dimeProcess: dimeProcessInitialState,
-	dimeSettings: dimeSettingsInitialState
+	dimeSettings: dimeSettingsInitialState,
+	dimeSchedule: dimeScheduleInitialState
 };
 
 export class DoNothingAction implements Action {
@@ -124,7 +130,8 @@ export const reducers = {
 	dimeMap: dimeMapReducer,
 	dimeMatrix: dimeMatrixReducer,
 	dimeProcess: dimeProcessReducer,
-	dimeSettings: dimeSettingsReducer
+	dimeSettings: dimeSettingsReducer,
+	dimeSchedule: dimeScheduleReducer
 };
 
 @Injectable()
@@ -236,6 +243,21 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						}
 						default: {
 							console.log( 'We are at processes default' );
+							return new DoNothingAction();
+						}
+					}
+				}
+				case 'schedules': {
+					switch ( segments[2] ) {
+						case 'schedule-list': {
+							return DimeScheduleActions.ALL.LOAD.INITIATEIFEMPTY.action();
+						}
+						case 'schedule-detail/:id': {
+							paramset.params.id = parseInt( paramset.params.id, 10 );
+							return DimeScheduleActions.ONE.LOAD.INITIATEIFEMPTY.action( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at schedules default' );
 							return new DoNothingAction();
 						}
 					}
