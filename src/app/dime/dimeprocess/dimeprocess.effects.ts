@@ -327,6 +327,17 @@ export class DimeProcessEffects {
 				}, 3000 );
 			}
 		} );
+	@Effect() ONE_SENDDATAFILE_INITIATE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.SENDDATAFILE.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Initiating the process send data file', this.serviceName ) ); return <Action<number>>action; } )
+		.switchMap( action => {
+			return this.backend.sendDataFile( action.payload )
+				.map( resp => DimeProcessActions.ONE.SENDDATAFILE.COMPLETE.action( action.payload ) )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+		} );
+	@Effect() ONE_SENDDATAFILE_COMPLETE$ = this.actions$
+		.ofType( DimeProcessActions.ONE.SENDDATAFILE.COMPLETE.type )
+		.map( action => DimeStatusActions.success( 'You will receive the data file in your inbox', this.serviceName ) );
 
 	constructor(
 		private actions$: Actions,

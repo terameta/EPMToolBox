@@ -26,6 +26,10 @@ export const DimeScheduleActions = {
 		DELETE: {
 			INITIATE: actionFactory<number>( 'DIME SCHEDULE ACTIONS ONE DELETE INITIATE' ),
 			COMPLETE: actionFactory( 'DIME SCHEDULE ACTIONS ONE DELETE COMPLETE' )
+		},
+		UNLOCK: {
+			INITIATE: actionFactory<number>( 'DIME SCHEDULE ACTIONS ONE UNLOCK INITIATE' ),
+			COMPLETE: actionFactory<number>( 'DIME SCHEDULE ACTIONS ONE UNLOCK COMPLETE' )
 		}
 	}
 };

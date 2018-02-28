@@ -9,5 +9,5 @@ export interface DimeScheduleState {
 export const dimeScheduleInitialState: DimeScheduleState = {
 	ids: [],
 	items: {},
-	curItem: <DimeSchedule>{ id: 0 }
+	curItem: <DimeSchedule>{ id: 0, tags: {} }
 };

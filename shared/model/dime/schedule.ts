@@ -7,7 +7,8 @@ export interface DimeSchedule {
 	name: string,
 	steps: DimeScheduleStep[],
 	schedule: ATCronStructure[],
-	status: ATStatusType
+	status: ATStatusType,
+	tags: any
 }
 
 export interface DimeScheduleObject {

@@ -21,6 +21,6 @@ export class ApiDimeSchedule {
 	}
 
 	private setRoutes = () => {
-		// this.apiRoutes.post( '/saveMatrixTuple', ( req, res ) => { this.rester.respond( this.scheduleTool.saveMatrixTuple, req.body, req, res ); } );
-	};
+		this.apiRoutes.get( '/unlock/:id', ( req, res ) => { this.rester.respond( this.scheduleTool.unlock, req.params.id, req, res ); } );
+	}
 }

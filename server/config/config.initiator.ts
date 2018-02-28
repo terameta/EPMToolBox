@@ -9,7 +9,7 @@ import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { MainTools } from '../tools/tools.main';
 import { DimeCredential } from '../../shared/model/dime/credential';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
-import { DimeEmailServerSettings, DimeSystemAdminSettings } from '../../shared/model/dime/settings';
+import { DimeSetting } from '../../shared/model/dime/settings';
 
 interface TableDefiner {
 	name: string;
@@ -40,7 +40,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( to0031 ).then( to0032 ).then( to0033 ).then( to0034 ).then( to0035 ).then( to0036 ).then( to0037 ).then( to0038 ).then( to0039 ).then( to0040 ).then( to0041 ).then( to0042 ).then( to0043 ).then( to0044 ).then( to0045 ).
 		then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).
 		then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).
-		then( to0076 ).then( to0077 ).
+		then( to0076 ).then( to0077 ).then( to0078 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -49,6 +49,20 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+const to0078 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 78;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'schedules', 'tags TEXT NULL AFTER status' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
 const to0077 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const nextVersion = 77;
@@ -77,7 +91,7 @@ const to0076 = ( currentVersion: number ) => {
 				if ( err ) {
 					reject( err );
 				} else {
-					const newSetting: DimeSystemAdminSettings = { emailaddress: '' };
+					const newSetting: DimeSetting = <DimeSetting>{ emailaddress: '' };
 					const rowsToDelete: number[] = [];
 					rows.forEach( row => {
 						if ( row.name === 'systemadminemailaddress' ) {
@@ -114,7 +128,7 @@ const to0075 = ( currentVersion: number ) => {
 				if ( err ) {
 					reject( err );
 				} else {
-					const newSetting: DimeEmailServerSettings = { host: '', port: 25 };
+					const newSetting: DimeSetting = <DimeSetting>{ host: '', port: 25 };
 					const rowsToDelete: number[] = [];
 					rows.forEach( row => {
 						if ( row.name === 'emailserverhost' ) {

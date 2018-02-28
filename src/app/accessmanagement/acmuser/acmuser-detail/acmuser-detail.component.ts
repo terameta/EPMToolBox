@@ -9,6 +9,9 @@ import { DimeProcessService } from '../../../dime/dimeprocess/dimeprocess.servic
 
 import { AcmUserService } from '../acmuser.service';
 import { AcmServerService } from '../../acmserver/acmserver.service';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../ngstore/models';
+import { DimeProcessActions } from '../../../dime/dimeprocess/dimeprocess.actions';
 
 @Component( {
 	selector: 'app-acmuser-detail',
@@ -17,7 +20,7 @@ import { AcmServerService } from '../../acmserver/acmserver.service';
 } )
 export class AcmUserDetailComponent implements OnInit, OnDestroy {
 	paramsSubscription: Subscription;
-	assignedProcesses: any[];
+	assignedProcesses: any[] = [];
 
 	constructor(
 		private route: ActivatedRoute,
@@ -25,7 +28,8 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 		public mainService: AcmUserService,
 		public serverService: AcmServerService,
 		public dimeProcessService: DimeProcessService,
-		private toastr: ToastrService
+		private toastr: ToastrService,
+		private store: Store<AppState>
 	) { }
 
 	ngOnInit() {
@@ -34,23 +38,19 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 				this.mainService.getOne( params['id'] );
 			}
 		);
-		// this.dimeProcessService.getAll();
-		// this.dimeProcessService.fetchAll().subscribe(() => {
-		// 	this.assignedProcesses = [];
-		// 	this.dimeProcessService.items.forEach(( curProcessList ) => {
-		// 		curProcessList.forEach(( curProcess ) => {
-		// 			console.log( curProcess );
-		// 			let toPush: any; toPush = {};
-		// 			toPush.id = curProcess.id;
-		// 			toPush.name = curProcess.name;
-		// 			toPush.isAssigned = false;
-		// 			this.assignedProcesses.push( toPush );
-		// 		} );
-		// 	} );
-		// 	this.populateAccessRights();
-		// }, ( error ) => {
-		// 	this.toastr.error( 'Failed to receive processes' );
-		// } );
+		this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+		this.store.select( 'dimeProcess' ).subscribe( processState => {
+			processState.ids.forEach( processid => {
+				let toPush: any; toPush = {};
+				toPush.id = processid;
+				toPush.name = processState.items[processid].name;
+				toPush.isAssigned = false;
+				this.assignedProcesses.push( toPush );
+			} );
+			this.populateAccessRights();
+		}, error => {
+			this.toastr.error( 'Failed to receive processes' );
+		} );
 	}
 
 	ngOnDestroy() {

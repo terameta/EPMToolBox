@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../ngstore/models';
 import { Router } from '@angular/router';
 import { DimeScheduleActions } from './dimeschedule.actions';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable()
 export class DimeScheduleService {
@@ -15,7 +16,8 @@ export class DimeScheduleService {
 
 	constructor(
 		private store: Store<AppState>,
-		private router: Router
+		private router: Router,
+		private toastr: ToastrService
 	) {
 		this.store.select( 'dimeSchedule' ).subscribe( state => {
 			this.itemids = state.ids;
@@ -35,14 +37,29 @@ export class DimeScheduleService {
 			this.store.dispatch( DimeScheduleActions.ONE.DELETE.INITIATE.action( id ) );
 		}
 	}
+	public unlock = () => {
+		if ( confirm( 'Are you sure you want to unlock the schedule? This does not cancel the running schedule.' ) ) {
+			this.store.dispatch( DimeScheduleActions.ONE.UNLOCK.INITIATE.action( this.currentItem.id ) );
+		} else {
+			this.toastr.info( 'Unlock of schedule cancelled.', this.serviceName );
+		}
+	}
 	public navigateTo = ( id: number ) => {
-		this.router.navigateByUrl(
-			this.router.routerState.snapshot.url
-				.split( '/' )
-				.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )
-				.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )
-				.join( '/' )
-		);
+		if ( id > 0 ) {
+			let toNavigate = '';
+			if ( this.router.routerState.snapshot.url.split( '/' ).length < 5 ) {
+				toNavigate = '/dime/schedules/schedule-detail/' + id;
+			} else {
+				toNavigate = this.router.routerState.snapshot.url
+					.split( '/' )
+					.map( ( curPart, curIndex ) => ( curIndex === 3 ? 'schedule-detail' : curPart ) )
+					.map( ( curPart, curIndex ) => ( curIndex === 4 ? id : curPart ) )
+					.filter( ( curPart, curIndex ) => ( curIndex < 6 ) )
+					.join( '/' );
+			}
+			console.log( toNavigate, this.router.routerState.snapshot.url.split( '/' ).length, this.router.routerState.snapshot.url );
+			this.router.navigateByUrl( toNavigate );
+		}
 	}
 }
 /*

@@ -804,15 +804,19 @@ export class SmartViewTools {
 				followRedirect: false,
 				timeout: 120000
 			}, ( err, response, body ) => {
-				refInfo.refDetails.redirectTarget = response.headers.location;
-				if ( this.pbcsGetRequestContext( response.headers['set-cookie'] ) ) {
-					refInfo.refDetails.requestContext += '; ' + this.pbcsGetRequestContext( response.headers['set-cookie'] );
-				}
-				if ( refInfo.refDetails.requestContext === '' ) {
-					reject( new Error( 'No request context retrieved ' + refInfo.refObj.name + '@pbcsObtainSID03' ) );
+				if ( err ) {
+					reject( err );
 				} else {
-					refInfo.refDetails.encquery = url.parse( refInfo.refDetails.redirectTarget ).search;
-					resolve( refInfo );
+					refInfo.refDetails.redirectTarget = response.headers.location;
+					if ( this.pbcsGetRequestContext( response.headers['set-cookie'] ) ) {
+						refInfo.refDetails.requestContext += '; ' + this.pbcsGetRequestContext( response.headers['set-cookie'] );
+					}
+					if ( refInfo.refDetails.requestContext === '' ) {
+						reject( new Error( 'No request context retrieved ' + refInfo.refObj.name + '@pbcsObtainSID03' ) );
+					} else {
+						refInfo.refDetails.encquery = url.parse( refInfo.refDetails.redirectTarget ).search;
+						resolve( refInfo );
+					}
 				}
 			} );
 		} );
@@ -827,31 +831,35 @@ export class SmartViewTools {
 				followRedirect: false,
 				timeout: 120000
 			}, ( err, response, body ) => {
-				const $ = cheerio.load( response.body );
-				refInfo.refDetails.formFields = {};
-				$( 'input' ).each( ( i: any, elem: any ) => {
-					if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
-						refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
-					}
-				} );
-
-				$( 'form' ).each( ( i: any, elem: any ) => {
-					if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
-						refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
-					}
-				} );
-
-				refInfo.refDetails.formFields.username = refInfo.refObj.username;
-				refInfo.refDetails.formFields.password = refInfo.refObj.password;
-				refInfo.refDetails.formFields.userid = refInfo.refObj.username;
-				refInfo.refDetails.formFields.tenantDisplayName = refInfo.refObj.identitydomain;
-				refInfo.refDetails.formFields.tenantName = refInfo.refObj.identitydomain;
-
-				refInfo.refDetails.formCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
-				if ( refInfo.refDetails.formAction ) {
-					resolve( refInfo );
+				if ( err ) {
+					reject( err );
 				} else {
-					reject( new Error( 'Form action is not set ' + refInfo.refObj.name + '@pbcsObtainSID04' ) );
+					const $ = cheerio.load( response.body );
+					refInfo.refDetails.formFields = {};
+					$( 'input' ).each( ( i: any, elem: any ) => {
+						if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
+							refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
+						}
+					} );
+
+					$( 'form' ).each( ( i: any, elem: any ) => {
+						if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
+							refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+						}
+					} );
+
+					refInfo.refDetails.formFields.username = refInfo.refObj.username;
+					refInfo.refDetails.formFields.password = refInfo.refObj.password;
+					refInfo.refDetails.formFields.userid = refInfo.refObj.username;
+					refInfo.refDetails.formFields.tenantDisplayName = refInfo.refObj.identitydomain;
+					refInfo.refDetails.formFields.tenantName = refInfo.refObj.identitydomain;
+
+					refInfo.refDetails.formCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
+					if ( refInfo.refDetails.formAction ) {
+						resolve( refInfo );
+					} else {
+						reject( new Error( 'Form action is not set ' + refInfo.refObj.name + '@pbcsObtainSID04' ) );
+					}
 				}
 			} );
 		} );
@@ -911,8 +919,12 @@ export class SmartViewTools {
 				followRedirect: false,
 				timeout: 120000
 			}, ( err, response, body ) => {
-				refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
-				resolve( refInfo );
+				if ( err ) {
+					reject( err );
+				} else {
+					refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
+					resolve( refInfo );
+				}
 			} );
 		} );
 	}
@@ -929,7 +941,11 @@ export class SmartViewTools {
 				followRedirect: false,
 				timeout: 120000
 			}, ( err, response, body ) => {
-				resolve( refInfo );
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( refInfo );
+				}
 			} );
 		} );
 	}
@@ -945,19 +961,23 @@ export class SmartViewTools {
 				followRedirect: false,
 				timeout: 120000
 			}, ( err, response, body ) => {
-				const $ = cheerio.load( body );
-				$( 'Product' ).each( ( i: any, elem: any ) => {
-					if ( $( elem ).attr( 'id' ) === 'HP' ) {
-						refInfo.refObj.planningurl = refInfo.refObj.server + ':' + refInfo.refObj.port + $( elem ).children( 'Server' ).attr( 'context' );
-					}
-				} );
-				refInfo.refObj.ssotoken = $( 'sso' ).text();
-				if ( !refInfo.refObj.planningurl ) {
-					reject( new Error( 'No planning url could be identified ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
-				} else if ( !refInfo.refObj.ssotoken ) {
-					reject( new Error( 'No sso token was found ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+				if ( err ) {
+					reject( err );
 				} else {
-					resolve( refInfo );
+					const $ = cheerio.load( body );
+					$( 'Product' ).each( ( i: any, elem: any ) => {
+						if ( $( elem ).attr( 'id' ) === 'HP' ) {
+							refInfo.refObj.planningurl = refInfo.refObj.server + ':' + refInfo.refObj.port + $( elem ).children( 'Server' ).attr( 'context' );
+						}
+					} );
+					refInfo.refObj.ssotoken = $( 'sso' ).text();
+					if ( !refInfo.refObj.planningurl ) {
+						reject( new Error( 'No planning url could be identified ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+					} else if ( !refInfo.refObj.ssotoken ) {
+						reject( new Error( 'No sso token was found ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+					} else {
+						resolve( refInfo );
+					}
 				}
 			} );
 		} );
@@ -970,13 +990,17 @@ export class SmartViewTools {
 				headers: { 'Content-Type': 'application/xml', cookie: refInfo.refDetails.currentCookie },
 				timeout: 120000
 			}, ( err, response, body ) => {
-				const $ = cheerio.load( body );
-				refInfo.refObj.SID = $( 'sID' ).text();
-				refInfo.refObj.cookies = refInfo.refDetails.currentCookie;
-				if ( refInfo.refObj.SID ) {
-					resolve( refInfo.refObj );
+				if ( err ) {
+					reject( err );
 				} else {
-					reject( new Error( 'No SID found ' + refInfo.refObj.name + '@pbcsObtainSID10' ) );
+					const $ = cheerio.load( body );
+					refInfo.refObj.SID = $( 'sID' ).text();
+					refInfo.refObj.cookies = refInfo.refDetails.currentCookie;
+					if ( refInfo.refObj.SID ) {
+						resolve( refInfo.refObj );
+					} else {
+						reject( new Error( 'No SID found ' + refInfo.refObj.name + '@pbcsObtainSID10' ) );
+					}
 				}
 			} );
 		} );

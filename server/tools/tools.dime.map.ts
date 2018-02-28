@@ -373,7 +373,6 @@ export class MapTools {
 		return this.retrieveMapDataAction( refObj ).then( ( result: any ) => result.map );
 	}
 	private retrieveMapDataAction = ( refObj: any ) => {
-		// console.log( refObj );
 		return new Promise( ( resolve, reject ) => {
 			let curMap: DimeMap; curMap = <DimeMap>{ id: 0, name: '' };
 			let mapFields: any[]; mapFields = [];
@@ -487,86 +486,61 @@ export class MapTools {
 						let wherers: string[]; wherers = [];
 						let wherevals: any[]; wherevals = [];
 						if ( refObj.filters ) {
-							if ( refObj.filters.source ) {
-								refObj.filters.source.forEach( filter => {
-									if ( filter.value ) {
-										switch ( filter.type ) {
-											case 'is': {
-												if ( filter.isDescribed ) {
-													wherers.push( '(' + filter.name + ' = ? OR ' + filter.name + '_DESC = ?)' );
-													wherevals.push( filter.value );
-													wherevals.push( filter.value );
-												} else {
-													wherers.push( filter.name + ' = ?' );
-													wherevals.push( filter.value );
-												}
-												break;
-											}
-											case 'co': {
-												if ( filter.isDescribed ) {
-													wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
-													wherevals.push( filter.value );
-													wherevals.push( filter.value );
-												} else {
-													wherers.push( filter.name + ' LIKE ?' );
-													wherevals.push( '%' + filter.value + '%' );
-												}
-												break;
-											}
-											case 'bw': {
-												if ( filter.isDescribed ) {
-													wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
-													wherevals.push( filter.value );
-													wherevals.push( filter.value );
-												} else {
-													wherers.push( filter.name + ' LIKE ?' );
-													wherevals.push( filter.value + '%' );
-												}
-												break;
-											}
-											case 'ew': {
-												if ( filter.isDescribed ) {
-													wherers.push( '(' + filter.name + ' LIKE ? OR ' + filter.name + '_DESC LIKE ?)' );
-													wherevals.push( filter.value );
-													wherevals.push( filter.value );
-												} else {
-													wherers.push( filter.name + ' LIKE ?' );
-													wherevals.push( '%' + filter.value );
-												}
-												break;
-											}
-										}
-									}
-								} );
+							const allFilters: any[] = [];
+							if ( refObj.filters.source && Array.isArray( refObj.filters.source ) ) {
+								refObj.filters.source.forEach( f => allFilters.push( Object.assign( { prefix: 'SRC_' }, f ) ) );
 							}
-							if ( refObj.filters.target ) {
-								refObj.filters.target.forEach( currentFilter => {
-									if ( currentFilter.value ) {
-										switch ( currentFilter.type ) {
-											case 'is': {
-												wherers.push( 'TAR_' + currentFilter.name + ' = ?' );
-												wherevals.push( currentFilter.value );
-												break;
-											}
-											case 'co': {
-												wherers.push( 'TAR_' + currentFilter.name + ' LIKE ?' );
-												wherevals.push( '%' + currentFilter.value + '%' );
-												break;
-											}
-											case 'bw': {
-												wherers.push( 'TAR_' + currentFilter.name + ' LIKE ?' );
-												wherevals.push( currentFilter.value + '%' );
-												break;
-											}
-											case 'ew': {
-												wherers.push( 'TAR_' + currentFilter.name + ' LIKE ?' );
-												wherevals.push( '%' + currentFilter.value );
-												break;
-											}
-										}
-									}
-								} );
+							if ( refObj.filters.target && Array.isArray( refObj.filters.target ) ) {
+								refObj.filters.target.forEach( f => allFilters.push( Object.assign( { prefix: 'TAR_' }, f ) ) );
 							}
+							allFilters.filter( f => f.value ).forEach( filter => {
+								switch ( filter.type ) {
+									case 'is': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.prefix + filter.name + ' = ? OR ' + filter.prefix + filter.name + '_DESC = ?)' );
+											wherevals.push( filter.value );
+											wherevals.push( filter.value );
+										} else {
+											wherers.push( filter.prefix + filter.name + ' = ?' );
+											wherevals.push( filter.value );
+										}
+										break;
+									}
+									case 'co': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.prefix + filter.name + ' LIKE ? OR ' + filter.prefix + filter.name + '_DESC LIKE ?)' );
+											wherevals.push( '%' + filter.value + '%' );
+											wherevals.push( '%' + filter.value + '%' );
+										} else {
+											wherers.push( filter.prefix + filter.name + ' LIKE ?' );
+											wherevals.push( '%' + filter.value + '%' );
+										}
+										break;
+									}
+									case 'bw': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.prefix + filter.name + ' LIKE ? OR ' + filter.prefix + filter.name + '_DESC LIKE ?)' );
+											wherevals.push( filter.value + '%' );
+											wherevals.push( filter.value + '%' );
+										} else {
+											wherers.push( filter.prefix + filter.name + ' LIKE ?' );
+											wherevals.push( filter.value + '%' );
+										}
+										break;
+									}
+									case 'ew': {
+										if ( filter.isDescribed ) {
+											wherers.push( '(' + filter.prefix + filter.name + ' LIKE ? OR ' + filter.prefix + filter.name + '_DESC LIKE ?)' );
+											wherevals.push( '%' + filter.value );
+											wherevals.push( '%' + filter.value );
+										} else {
+											wherers.push( filter.prefix + filter.name + ' LIKE ?' );
+											wherevals.push( '%' + filter.value );
+										}
+										break;
+									}
+								}
+							} );
 						}
 						wherers.forEach( ( curWhere: string ) => {
 							selectQuery += '\n\tAND ';
@@ -578,7 +552,6 @@ export class MapTools {
 								.map( currentSorter => ( '\n\t' + currentSorter.type + '_' + currentSorter.name + ' ' + ( currentSorter.isAsc ? 'ASC' : 'DESC' ) ) )
 								.join( ', ' );
 						}
-						// console.log( selectQuery );
 						this.db.query( selectQuery, wherevals, ( err, result, fields ) => {
 							if ( err ) {
 								reject( err );

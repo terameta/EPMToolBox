@@ -2,7 +2,7 @@
 	<i class="fa fa-refresh fa-fw"></i> Refresh Fields from Server
 </button>
 
-<table class="table table-striped table-bordered table-hover table-condensed" *ngIf="mainService.currentItem.fieldList">
+<table class="table table-hover table-condensed" *ngIf="mainService.currentItem.fieldList">
 	<tr>
 		<th>Name</th>
 		<th>Type</th>
@@ -48,7 +48,7 @@
 	</tr>
 </table>
 
-<!-- <table class="table table-striped table-bordered table-hover table-condensed" *ngIf="mainService.currentItem.fieldList">
+<!-- <table class="table table-hover table-condensed" *ngIf="mainService.currentItem.fieldList">
 	<tr>
 		<th>Name</th>
 		<th>Type</th>
@@ -116,7 +116,7 @@
 
 </div>
 <div *ngIf="mainService.curItemSourcedFields && !mainService.curItemAssignedFields && mainService.curItemEnvironmentType == 'PBCS'">
-	<table class="table table-striped table-bordered table-hover table-condensed">
+	<table class="table table-hover table-condensed">
 		<tr>
 			<th>Name</th>
 			<th>Type</th>

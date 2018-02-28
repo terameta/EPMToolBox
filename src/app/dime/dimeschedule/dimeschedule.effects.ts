@@ -10,6 +10,7 @@ import { DimeStatusActions } from '../../ngstore/applicationstatus';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { of } from 'rxjs/observable/of';
 import { DimeSchedule } from '../../../../shared/model/dime/schedule';
+import { DimeProcessActions } from '../dimeprocess/dimeprocess.actions';
 
 
 @Injectable()
@@ -67,6 +68,7 @@ export class DimeScheduleEffects {
 				.mergeMap( resp => [
 					DimeScheduleActions.ONE.LOAD.COMPLETE.action( resp ),
 					DimeScheduleActions.ALL.LOAD.INITIATEIFEMPTY.action(),
+					DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action(),
 					DimeStatusActions.success( 'The schedule is loaded.', this.serviceName )
 				] )
 				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
@@ -110,7 +112,22 @@ export class DimeScheduleEffects {
 	@Effect( { dispatch: false } ) ONE_DELETE_COMPLETE$ = this.actions$
 		.ofType( DimeScheduleActions.ONE.DELETE.COMPLETE.type )
 		.map( action => {
-			this.router.navigateByUrl( 'dime/schedules/' );
+			this.router.navigateByUrl( 'dime/schedules/schedule-list' );
+		} );
+
+	@Effect() ONE_UNLOCK_INITIATE$ = this.actions$
+		.ofType( DimeScheduleActions.ONE.UNLOCK.INITIATE.type )
+		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Unlocking the schedule', this.serviceName ) ); return <Action<number>>action; } )
+		.switchMap( action => {
+			console.log( 'Initiating schedule unlock' );
+			return this.backend.unlock( action.payload )
+				.mergeMap( resp => [
+					DimeStatusActions.success( 'Schedule is unlocked', this.serviceName ),
+					DimeScheduleActions.ONE.UNLOCK.COMPLETE.action( action.payload ),
+					DimeScheduleActions.ONE.LOAD.INITIATE.action( action.payload ),
+					DimeScheduleActions.ALL.LOAD.INITIATE.action()
+				] )
+				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
 		} );
 
 	constructor(

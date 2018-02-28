@@ -4,21 +4,27 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="#scheduletabmaindefinitions" data-toggle="tab">Main Definitions</a></li>
-			<li><a href="#scheduletabsteps" data-toggle="tab">Steps</a></li>
-			<li><a href="#scheduletabhistory" data-toggle="tab">History</a></li>
+			<li routerLinkActive="active">
+				<a routerLink="definitions" data-toggle="tab">
+					<i class="fa fa-sliders fa-fw"></i> Main Definitions
+				</a>
+			</li>
+			<li routerLinkActive="active">
+				<a routerLink="steps" data-toggle="tab">
+					<i class="fa fa-steam fa-fw"></i> Steps
+				</a>
+			</li>
+			<li routerLinkActive="active">
+				<a routerLink="history" data-toggle="tab">
+					<i class="fa fa-history fa-fw"></i> History
+				</a>
+			</li>
 		</ul>
 	</div>
 	<div class="box-body">
 		<div class="tab-content">
-			<div class="tab-pane fade in active" id="scheduletabmaindefinitions">
-				<app-dimeschedule-detail-maindefinitions></app-dimeschedule-detail-maindefinitions>
-			</div>
-			<div class="tab-pane fade in" id="scheduletabsteps">
-				<app-dimeschedule-detail-steps></app-dimeschedule-detail-steps>
-			</div>
-			<div class="tab-pane fade in" id="scheduletabhistory">
-				<app-dimeschedule-detail-history></app-dimeschedule-detail-history>
+			<div class="tab-pane active" id="scheduletabmaindefinitions">
+				<router-outlet></router-outlet>
 			</div>
 		</div>
 	</div>

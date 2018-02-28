@@ -5,6 +5,11 @@ import { AuthService } from '../../welcome/auth.service';
 import { Component, OnInit } from '@angular/core';
 // import { AuthHttp } from 'angular2-jwt';
 import { ToastrService } from 'ngx-toastr';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../ngstore/models';
+import { DimeProcessActions } from '../../dime/dimeprocess/dimeprocess.actions';
+import { DimeProcessBackend } from '../../dime/dimeprocess/dimeprocess.backend';
+import { DimeProcessStatus, DimeProcess } from '../../../../shared/model/dime/process';
 
 @Component( {
 	selector: 'app-enduser-dime',
@@ -21,77 +26,78 @@ export class EnduserDimeComponent implements OnInit {
 		private userService: AcmUserService,
 		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
-		private processService: DimeProcessService
+		private processService: DimeProcessService,
+		private processBackend: DimeProcessBackend,
+		private store: Store<AppState>
 	) { }
 
 	ngOnInit() {
-		// this.currentUser = this.authService.getCurrentUser();
-		// this.userService.fetchUserRights( this.currentUser.id ).
-		// 	subscribe(( data ) => {
-		// 		this.userProcesses = data.processes;
-		// 		this.prepareProcesses();
-		// 	}, ( error ) => {
-		// 		console.error( error );
-		// 	} );
+		setTimeout( () => {
+			this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+		}, 1000 );
+		this.currentUser = this.authService.getCurrentUser();
+		this.userService.fetchUserRights( this.currentUser.id ).
+			subscribe( ( data ) => {
+				this.userProcesses = data.processes;
+				this.prepareProcesses();
+			}, ( error ) => {
+				console.error( error );
+			} );
 	}
-	/*
 	private prepareProcesses = () => {
 		this.userProcessDetails = [];
-		this.userProcesses.forEach(( curProcess ) => {
-			this.processService.fetchOne( curProcess.process ).
-				subscribe(( data ) => {
-					this.userProcessDetails.push( data );
-					if ( data.status !== 'ready' ) {
-						this.checkLog( data.id, data.status );
-					}
-					this.processService.fetchFiltersFetch( curProcess.process ).
-						subscribe(( filterdata ) => {
-							data.filters = filterdata;
-						}, ( error ) => {
-							this.toastr.error( 'Failed to get process filters' + curProcess.process );
-						} );
-				}, ( error ) => {
-					this.toastr.error( 'Failed to get process' + curProcess.process );
+		this.store.select( 'dimeProcess' ).subscribe( processState => {
+			this.userProcessDetails = [];
+			processState.ids.filter( id => this.userProcesses.findIndex( e => e.process === id ) >= 0 ).forEach( id => {
+				const toPush: DimeProcess = JSON.parse( JSON.stringify( processState.items[id] ) );
+				this.userProcessDetails.push( toPush );
+				this.processBackend.filtersLoad( id ).subscribe( filters => {
+					toPush.filters = filters;
+				}, error => {
+					this.toastr.error( 'Failed to get processes' );
 				} );
-		} );
-	};
-	public processRun = ( id: number ) => {
-		this.authHttp.get( '/api/dime/process/run/' + id ).
-			map( response => response.json() ).
-			subscribe(( result ) => {
-				this.setProcessLog( id, '', result.status );
-				this.checkLog( id, result.status );
-			}, ( error ) => {
-				this.toastr.error( 'Failed to initiate the night run.' );
-				console.error( error );
 			} );
+			this.userProcessDetails.forEach( p => {
+				if ( p.status === DimeProcessStatus.Running ) {
+					this.checkLog( p.id, p.currentlog );
+				}
+			} );
+		} );
 	}
 	public checkLog = ( process: number, log: number ) => {
-		this.authHttp.get( '/api/log/' + log ).
-			map( response => response.json() ).
-			subscribe(( result ) => {
-				this.setProcessLog( process, result.details, log );
-				if ( result.start === result.end ) {
-					setTimeout(() => {
-						this.checkLog( process, log );
-					}, 2000 );
-				} else {
-					this.prepareProcesses();
-				}
-			}, ( error ) => {
-				this.toastr.error( 'Failed to retrieve log records.' );
-				console.error( error );
-				setTimeout(() => {
+		this.processBackend.checkLog( log ).subscribe( result => {
+			this.setProcessLog( process, result.details, log );
+			if ( result.start.toString() === result.end.toString() ) {
+				setTimeout( () => {
 					this.checkLog( process, log );
 				}, 2000 );
-			} );
-	};
+			} else {
+				this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATE.action() );
+			}
+		}, error => {
+			this.toastr.error( 'Failed to retrieve log records.' );
+			console.error( error );
+			setTimeout( () => {
+				this.checkLog( process, log );
+			}, 2000 );
+		} );
+	}
 	private setProcessLog = ( process: number, log: string, logID: number ) => {
-		this.userProcessDetails.forEach(( curUserProcess ) => {
+		this.userProcessDetails.forEach( ( curUserProcess ) => {
 			if ( curUserProcess.id === process ) {
 				curUserProcess.log = log;
-				curUserProcess.status = logID;
+				curUserProcess.currentlog = logID;
 			}
 		} );
-	}*/
+	}
+	public processRun = ( id: number ) => {
+		this.toastr.info( 'Initiating the process' );
+		this.processBackend.run( id ).subscribe( result => {
+			this.toastr.success( 'Process is initiated' );
+			this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATE.action() );
+		}, error => {
+			this.toastr.error( 'Failed to initiate the process.' );
+			console.error( error );
+		} );
+	}
 }

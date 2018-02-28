@@ -6,18 +6,6 @@ import { DimeScheduleTool } from '../tools/tools.dime.schedule';
 import * as Cron from 'cron';
 import { Pool } from 'mysql';
 
-// export function initiateCronWorker( refDB: Pool ) {
-// 	const jobPer10Sec = new Cron.CronJob(
-// 		'0 * * * * *',
-// 		function () {
-// 			console.log( 'Every minute', new Date() );
-
-// 		}, function () {
-// 			console.log( 'This is the end!' );
-// 		},
-// 		true
-// 	);
-// }
 
 export class InitiateCronWorker {
 	public registeredCrons: { schedule: number, scheduleName: string, cronString: string, cronJob: Cron.CronJob }[];
@@ -37,7 +25,8 @@ export class InitiateCronWorker {
 		this.everyminute = new Cron.CronJob(
 			'*/10 * * * * *',
 			() => {
-				// console.log( 'Every minute', new Date() );
+				// console.log( 'Every 10 secs', new Date() );
+				// console.log( 'Every 10 secs', this.registeredCrons.length );
 				this.registerSchedules();
 			}, function () {
 				console.log( 'This is the end!' );
@@ -53,8 +42,6 @@ export class InitiateCronWorker {
 			then( this.addNewCrons ).
 			then( this.activateNewCrons ).
 			then( ( schedules: DimeSchedule[] ) => {
-				// console.log( this.registeredCrons );
-				// console.log( this.proposedCrons );
 			} ).
 			catch( ( error ) => {
 				console.log( '===========================================' );
@@ -71,7 +58,6 @@ export class InitiateCronWorker {
 			schedules.forEach( ( curSchedule ) => {
 				curSchedule.schedule.forEach( ( curCron: ATCronStructure ) => {
 					const cronString = curCron.second + ' ' + curCron.minute + ' ' + curCron.hour + ' ' + curCron.dayofmonth + ' ' + curCron.month + ' ' + curCron.dayofweek;
-					// console.log( curSchedule.name, cronString, JSON.stringify( curCron ) );
 					this.proposedCrons.push( { schedule: curSchedule.id, scheduleName: curSchedule.name, cronString: cronString, cronJob: <Cron.CronJob>{} } );
 				} );
 			} );

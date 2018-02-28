@@ -84,7 +84,7 @@ export class DimeProcessService {
 	public filtersDataFileUpdate = () => this.store.dispatch( DimeProcessActions.ONE.FILTERSDATAFILE.UPDATE.INITIATE.action( { id: this.currentItem.id, filters: this.currentItem.filtersDataFile } ) );
 
 	public run = () => this.store.dispatch( DimeProcessActions.ONE.RUN.INITIATE.action( this.currentItem.id ) );
-	public sendDataFile = () => this.store.dispatch( DimeProcessActions.ONE.SENDDATAFILE.INITIATE.action( this.currentItem.id ) );
+	public sendDataFile = ( id: number ) => this.store.dispatch( DimeProcessActions.ONE.SENDDATAFILE.INITIATE.action( id ) );
 	public unlock = () => {
 		if ( confirm( 'Are you sure you want to unlock the process? This does not cancel the running process.' ) ) {
 			this.store.dispatch( DimeProcessActions.ONE.UNLOCK.INITIATE.action( this.currentItem.id ) );

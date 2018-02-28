@@ -16,39 +16,36 @@ export class DimescheduleDetailStepsComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeScheduleService,
-		private processService: DimeProcessService
+		public processService: DimeProcessService
 	) { }
 
 	ngOnInit() {
-		// this.processService.getAll();
 	}
-	/*
-		public stepAdd = () => {
-			let curMax = 0;
-			this.mainService.curItem.steps.forEach(( curStep ) => {
-				if ( curStep.position >= curMax ) {
-					curMax = curStep.position;
-				}
-			} );
-			this.mainService.curItem.steps.push( { type: 0, referedid: 0, position: ++curMax } );
-		};
-		private stepDelete = ( index: number ) => {
-			this.mainService.curItem.steps.splice( index, 1 );
-			this.mainService.curItem.steps.forEach(( curStep, stepIndex ) => {
-				curStep.position = stepIndex;
-			} );
-		};
-		public stepMoveOrder = ( curStep: any, direction: string ) => {
-			const curPosition = curStep.position;
-			const nextPosition = parseInt( curPosition, 10 ) + ( direction === 'down' ? 1 : -1 );
-			this.mainService.curItem.steps.forEach(( curItem ) => {
-				if ( curItem.position === nextPosition ) { curItem.position = curPosition; }
-			} );
-			curStep.position = nextPosition;
-			this.mainService.curItem.steps.sort( SortByPosition );
-		};
-		public findStepType = ( type: number ) => {
-			return DimeScheduleStepType[type];
-		}
-	*/
+	public stepAdd = () => {
+		let curMax = 0;
+		this.mainService.currentItem.steps.forEach( ( curStep ) => {
+			if ( curStep.position >= curMax ) {
+				curMax = curStep.position;
+			}
+		} );
+		this.mainService.currentItem.steps.push( { type: 0, referedid: 0, position: ++curMax } );
+	}
+	private stepDelete = ( index: number ) => {
+		this.mainService.currentItem.steps.splice( index, 1 );
+		this.mainService.currentItem.steps.forEach( ( curStep, stepIndex ) => {
+			curStep.position = stepIndex;
+		} );
+	}
+	public stepMoveOrder = ( curStep: any, direction: string ) => {
+		const curPosition = curStep.position;
+		const nextPosition = parseInt( curPosition, 10 ) + ( direction === 'down' ? 1 : -1 );
+		this.mainService.currentItem.steps.forEach( ( curItem ) => {
+			if ( curItem.position === nextPosition ) { curItem.position = curPosition; }
+		} );
+		curStep.position = nextPosition;
+		this.mainService.currentItem.steps.sort( SortByPosition );
+	}
+	public findStepType = ( type: number ) => {
+		return DimeScheduleStepType[type];
+	}
 }

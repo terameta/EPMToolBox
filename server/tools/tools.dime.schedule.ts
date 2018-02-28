@@ -39,17 +39,19 @@ export class DimeScheduleTool {
 		const newItem = this.tools.isEmptyObject( sentItem ) ? <any>{ name: 'New Item (Please change name)' } : <any>sentItem;
 
 		if ( !newItem.schedule ) {
-			newItem.schedule = [{ second: '*', minute: '*', hour: '*', dayofmonth: '*', month: '*', dayofweek: '*' }];
+			// newItem.schedule = [{ second: '0', minute: '0', hour: '0', dayofmonth: '0', month: '0', dayofweek: '0' }];
+			newItem.schedule = [];
 		}
 		newItem.schedule = JSON.stringify( newItem.schedule );
 
 		if ( !newItem.steps ) {
-			newItem.steps = [{ type: 0, referedid: 0, position: 0 }];
+			newItem.steps = [];
 		}
 		newItem.steps = JSON.stringify( newItem.steps );
+		newItem.status = ATStatusType.Ready;
 
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO schedules SET ?', newItem, function ( err, result, fields ) {
+			this.db.query( 'INSERT INTO schedules SET ?', newItem, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to create a new item.' } );
 				} else {
@@ -91,31 +93,46 @@ export class DimeScheduleTool {
 		if ( !item.status ) {
 			item.status = ATStatusType.Ready;
 		}
+
+		if ( item.tags ) {
+			item.tags = JSON.parse( item.tags );
+		} else {
+			item.tags = {};
+		}
 		return <DimeSchedule>item;
 	}
 	public update = ( item: DimeSchedule ) => {
 		const curItem = <any>item;
 		if ( !curItem.schedule ) {
-			curItem.schedule = [{ second: '*', minute: '*', hour: '*', dayofmonth: '*', month: '*', dayofweek: '*' }];
+			curItem.schedule = [];
 		}
 		curItem.schedule = JSON.stringify( curItem.schedule );
 
 		if ( !curItem.steps ) {
-			curItem.steps = [{ type: 0, referedid: 0, position: 0 }];
+			curItem.steps = [];
 		}
+		curItem.steps.forEach( step => {
+			step.referedid = parseInt( step.referedid, 10 );
+			step.type = parseInt( step.type, 10 );
+			step.position = parseInt( step.position, 10 );
+		} );
 		curItem.steps = JSON.stringify( curItem.steps );
+
+		curItem.tags = JSON.stringify( curItem.tags );
 
 		delete curItem.status;
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'UPDATE schedules SET ? WHERE id = ' + item.id, curItem, function ( err, result, fields ) {
+			this.db.query( 'UPDATE schedules SET ? WHERE id = ' + item.id, curItem, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the item' } );
 				} else {
-					curItem.schedule = JSON.parse( curItem.schedule );
-					resolve( { curItem } );
+					resolve();
 				}
 			} );
 		} );
+	}
+	public unlock = ( id: number ) => {
+		return this.setStatus( id, ATStatusType.Ready );
 	}
 	public setStatus = ( id: number, status: ATStatusType ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -164,6 +181,7 @@ export class DimeScheduleTool {
 				return this.runSteps( item, logid );
 			} ).
 			then( () => {
+				console.log( 'Run is now complete' );
 				return this.runClose( id, logid );
 			} ).
 			catch( ( error ) => {
@@ -176,14 +194,8 @@ export class DimeScheduleTool {
 						console.log( '===========================================' );
 						console.log( '===========================================' );
 					} );
+				this.runClose( id, logid ).catch( console.log );
 			} );
-		// this.runInitiate( id ).
-		// 	then( this.getOne ).
-		// 	then( this.runSteps ).
-		// 	then( this.runClose ).
-		// 	catch(( error ) => {
-		// 		console.error( error );
-		// 	} );
 	}
 	private runInitiate = ( id: number, logid: number ) => {
 		return new Promise( ( resolve, reject ) => {
@@ -227,12 +239,7 @@ export class DimeScheduleTool {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( logid, 'Running Step:' + key ).
 				then( () => {
-					console.log( step );
-					console.log( key );
-					console.log( DimeScheduleStepType[step.type] );
-					console.log( step.type, typeof step.type, DimeScheduleStepType.Process, typeof DimeScheduleStepType.Process );
-					// tslint:disable-next-line:triple-equals
-					if ( step.type == DimeScheduleStepType.Process ) {
+					if ( step.type === DimeScheduleStepType.Process ) {
 						return this.processTool.runAndWait( step.referedid );
 					} else {
 						return Promise.reject( 'Not a ready to use step type' );
@@ -252,7 +259,13 @@ export class DimeScheduleTool {
 					return this.logTool.closeLog( logid );
 				} ).
 				then( resolve ).
-				catch();
+				catch( error => {
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( error );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+				} );
 		} );
 	}
 }

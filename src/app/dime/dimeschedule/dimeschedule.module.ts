@@ -15,7 +15,14 @@ import { DimescheduleDetailHistoryComponent } from './dimeschedule-detail/dimesc
 const dimeScheduleRoutes: Routes = [
 	{ path: 'dime/schedules', pathMatch: 'prefix', redirectTo: 'dime/schedules/schedule-list' },
 	{ path: 'schedule-list', component: DimescheduleListComponent },
-	{ path: 'schedule-detail/:id', component: DimescheduleDetailComponent }
+	{
+		path: 'schedule-detail/:id', component: DimescheduleDetailComponent, children: [
+			{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
+			{ path: 'definitions', component: DimescheduleDetailMaindefinitionsComponent },
+			{ path: 'steps', component: DimescheduleDetailStepsComponent },
+			{ path: 'history', component: DimescheduleDetailHistoryComponent }
+		]
+	}
 ];
 
 @NgModule( {
