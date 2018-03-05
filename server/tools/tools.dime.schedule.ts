@@ -181,7 +181,6 @@ export class DimeScheduleTool {
 				return this.runSteps( item, logid );
 			} ).
 			then( () => {
-				console.log( 'Run is now complete' );
 				return this.runClose( id, logid );
 			} ).
 			catch( ( error ) => {

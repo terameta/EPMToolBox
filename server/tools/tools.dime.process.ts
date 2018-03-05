@@ -578,7 +578,6 @@ export class ProcessTools {
 							resolve( this.runAndWaitWait( logid ) );
 						}, 2000 );
 					} else {
-						console.log( '>>> Wait has finished.' );
 						resolve();
 					}
 				} ).

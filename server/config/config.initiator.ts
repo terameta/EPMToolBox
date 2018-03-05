@@ -261,11 +261,17 @@ const to0070 = ( currentVersion: number ) => {
 		if ( currentVersion > expectedCurrentVersion ) {
 			resolve( currentVersion );
 		} else {
-			db.query( 'ALTER TABLE processes CHANGE status status TINYINT NULL DEFAULT 0', ( err, result ) => {
-				if ( err ) {
-					reject( err );
+			db.query( 'UPDATE processes SET status = 0', ( ierr, iresults ) => {
+				if ( ierr ) {
+					reject( ierr );
 				} else {
-					resolve( utils.updateToVersion( nextVersion ) );
+					db.query( 'ALTER TABLE processes CHANGE status status TINYINT NULL DEFAULT 0', ( err, result ) => {
+						if ( err ) {
+							reject( err );
+						} else {
+							resolve( utils.updateToVersion( nextVersion ) );
+						}
+					} );
 				}
 			} );
 		}
