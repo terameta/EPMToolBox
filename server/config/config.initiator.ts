@@ -40,7 +40,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( to0031 ).then( to0032 ).then( to0033 ).then( to0034 ).then( to0035 ).then( to0036 ).then( to0037 ).then( to0038 ).then( to0039 ).then( to0040 ).then( to0041 ).then( to0042 ).then( to0043 ).then( to0044 ).then( to0045 ).
 		then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).
 		then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).
-		then( to0076 ).then( to0077 ).then( to0078 ).
+		then( to0076 ).then( to0077 ).then( to0078 ).then( to0079 ).then( to0080 ).then( to0081 ).then( to0082 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -49,6 +49,122 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+const to0082 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 82;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'DROP TABLE streamtypes', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
+const to0081 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 81;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE streams DROP newtype', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
+const to0080 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 80;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'SELECT * FROM streamtypes', ( err, rows ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					const types = _.keyBy( rows, 'value' );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( types );
+					console.log( '===========================================' );
+					console.log( DimeStreamType );
+					console.log( '===========================================' );
+					to0080a( types ).then( () => {
+						return to0080b( types );
+					} ).then( to0080c ).then( () => {
+						resolve( utils.updateToVersion( nextVersion ) );
+					} ).catch( reject );
+				}
+			} );
+			// db.query( 'UPDATE streams ss LEFT JOIN streamtypes st ON ss.type = st.id SET ss.newtype = ? WHERE st.value = st.value = \'HPDB\'', DimeStreamType.HPDB, ( err, rows ) => {
+			// 	if ( err ) {
+			// 		reject( err );
+			// 	} else {
+			// 		console.log( rows );
+			// 	}
+			// } );
+		}
+	} );
+};
+const to0080a = ( types ) => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'UPDATE streams SET newtype = ? WHERE type = ?', [DimeStreamType.HPDB, types.HPDB.id], ( err, result ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve();
+			}
+		} );
+	} );
+};
+const to0080b = ( types ) => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'UPDATE streams SET newtype = ? WHERE type = ?', [DimeStreamType.RDBT, types.RDBT.id], ( err, result ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve();
+			}
+		} );
+	} );
+};
+const to0080c = () => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'UPDATE streams SET type = newtype', ( err, result ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve();
+			}
+		} );
+	} );
+}
+const to0079 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 79;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'streams', 'newtype BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER type' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
 const to0078 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const nextVersion = 78;
