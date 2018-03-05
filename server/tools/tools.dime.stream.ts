@@ -333,7 +333,12 @@ export class StreamTools {
 					if ( fields.length === 0 ) {
 						reject( 'No fields are defined for stream' );
 					} else {
-						if ( topStream.typeName === 'HPDB' ) {
+						console.log( '===========================================' );
+						console.log( '===========================================' );
+						console.log( topStream.id, topStream.name, topStream.type, DimeStreamType[topStream.type] );
+						console.log( '===========================================' );
+						console.log( '===========================================' );
+						if ( topStream.type === DimeStreamType.HPDB ) {
 							fields.forEach( ( curField ) => {
 								curField.isDescribed = true;
 							} );
