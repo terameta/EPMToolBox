@@ -63,7 +63,11 @@ const to0084 = ( currentVersion: number ) => {
 				} else {
 					rows.forEach( row => {
 						if ( row.details ) { row.details = JSON.parse( row.details.toString() ); }
+
 						console.log( row );
+						if ( row.details.type === 'Rules' ) {
+							console.log( '>>>We should change' );
+						}
 					} );
 				}
 			} );
