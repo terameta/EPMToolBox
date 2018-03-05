@@ -40,7 +40,7 @@ export function initiateApplicationWorker( refDB: Pool, refConfig: SystemConfig 
 
 	initializeRestApi( app, refDB, mainTools );
 
-	app.set( 'port', 7000 );
+	app.set( 'port', 8000 );
 
 	app.get( '*', ( req, res ) => {
 		res.sendFile( path.join( __dirname, '../../dist/index.html' ) );
