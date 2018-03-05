@@ -889,6 +889,11 @@ export class SmartViewTools {
 	}
 	private pbcsObtainSID06 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
 		return new Promise( ( resolve, reject ) => {
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( refInfo.refDetails.redirectTarget );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
 			request.get( {
 				url: refInfo.refDetails.redirectTarget,
 				headers: {
