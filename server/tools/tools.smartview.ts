@@ -879,6 +879,11 @@ export class SmartViewTools {
 				if ( err ) {
 					reject( err );
 				} else {
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( response.headers );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
 					refInfo.refDetails.formResponseCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
 					refInfo.refDetails.redirectTarget = response.headers.location;
 					refInfo.refDetails.referer = refInfo.refDetails.formAction + refInfo.refDetails.encquery;
