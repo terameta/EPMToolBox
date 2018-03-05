@@ -25,7 +25,7 @@ export function initiateApplicationWorker( refDB: Pool, refConfig: SystemConfig 
 	app.use( bodyParser.text( { limit: '100mb' } ) );
 	app.use( bodyParser.urlencoded( { extended: true, limit: '100mb' } ) );
 	app.use( multer( { storage: multerStorage } ).any() );
-	app.use( express.static( path.join( __dirname, '../../client/dist' ) ) );
+	app.use( express.static( path.join( __dirname, '../../dist' ) ) );
 
 	app.enable( 'trust proxy' );
 
@@ -43,7 +43,7 @@ export function initiateApplicationWorker( refDB: Pool, refConfig: SystemConfig 
 	app.set( 'port', 7000 );
 
 	app.get( '*', ( req, res ) => {
-		res.sendFile( path.join( __dirname, '../../client/dist/index.html' ) );
+		res.sendFile( path.join( __dirname, '../../dist/index.html' ) );
 	} );
 
 	const server: http.Server = app.listen( app.get( 'port' ), () => {
