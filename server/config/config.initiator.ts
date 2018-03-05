@@ -62,6 +62,7 @@ const to0084 = ( currentVersion: number ) => {
 					reject( err );
 				} else {
 					rows.forEach( row => {
+						if ( row.details ) { row.details = JSON.parse( row.details.toString() ); }
 						console.log( row );
 					} );
 				}
