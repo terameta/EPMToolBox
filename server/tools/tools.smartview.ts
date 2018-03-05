@@ -40,23 +40,12 @@ export class SmartViewTools {
 			body += '</prompts>';
 			body += '<ODL_ECID>0000</ODL_ECID>';
 			body += '</req_LaunchBusinessRule>';
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( resEnv.procedure );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
 			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 		} ).then( response => {
 			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_launchbusinessrule' ) ).length > 0;
 			if ( isSuccessful ) {
 				return Promise.resolve();
 			} else {
-				console.log( '===========================================' );
-				console.log( '===========================================' );
-				console.log( body );
-				console.log( '===========================================' );
-				console.log( response.body );
-				console.log( '===========================================' );
 				return Promise.reject( new Error( 'There is an issue with running business rule' ) );
 			}
 		} );
