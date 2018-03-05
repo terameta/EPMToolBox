@@ -25,7 +25,6 @@ export class ApiDimeStream {
 		this.apiRoutes.get( '/fieldsStartOver/:id', ( req, res ) => { this.rester.respond( this.stream.fieldsStartOver, { id: req.params.id }, req, res ); } );
 
 
-		this.apiRoutes.get( '/listTypes', ( req, res ) => { this.rester.respond( this.stream.listTypes, null, req, res ); } );
 		this.apiRoutes.get( '/retrieveFields/:id', ( req, res ) => { this.rester.respond( this.stream.retrieveFields, req.params.id, req, res ); } );
 		this.apiRoutes.get( '/prepareTables/:id', ( req, res ) => { this.rester.respond( this.stream.prepareTables, req.params.id, req, res ); } );
 		this.apiRoutes.get( '/populateFieldDescriptions/:id', ( req, res ) => { this.rester.respond( this.stream.populateFieldDescriptions, req.params.id, req, res ); } );

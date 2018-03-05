@@ -33,23 +33,6 @@ export class DimeStreamListComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		// this.environmentService.getAll();
-		/*this.getAll();
-		this.environmentService.getAll().subscribe(
-			(curEnvList) => {
-				this.environmentList = curEnvList;
-				this.environmentList.sort(this.sortByName);
-			}, (error) => {
-				this.toastr.error(error);
-			}
-		);
-		this.streamService.listTypes().subscribe(
-			(typeList) => {
-				this.streamTypeList = typeList;
-			}, (error) => {
-				this.toastr.error(error);
-			}
-		);*/
 		this.store.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() );
 	}
 

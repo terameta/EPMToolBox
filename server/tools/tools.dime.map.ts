@@ -16,6 +16,7 @@ import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { ATReadyStatus } from '../../shared/enums/generic/readiness';
+import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
 
 export class MapTools {
 	private streamTool: StreamTools;
@@ -270,19 +271,10 @@ export class MapTools {
 				} ).
 				then( ( mapFields ) => {
 					refObj.mapFields = mapFields;
-					return this.streamTool.listTypes();
-				} ).
-				then( ( streamTypes: any[] ) => {
-					streamTypes.forEach( ( curType ) => {
-						if ( curType.id === refObj.sourceDetails.type ) {
-							refObj.sourceDetails.typeName = curType.name;
-							refObj.sourceDetails.typeValue = curType.value;
-						}
-						if ( curType.id === refObj.targetDetails.type ) {
-							refObj.targetDetails.typeName = curType.name;
-							refObj.targetDetails.typeValue = curType.value;
-						}
-					} );
+					refObj.sourceDetails.typeName = DimeStreamType[refObj.sourceDetails.type];
+					refObj.sourceDetails.typeValue = DimeStreamType[refObj.sourceDetails.type];
+					refObj.targetDetails.typeName = DimeStreamType[refObj.targetDetails.type];
+					refObj.targetDetails.typeValue = DimeStreamType[refObj.targetDetails.type];
 					return refObj;
 				} ).
 				then( () => {

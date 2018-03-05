@@ -442,17 +442,6 @@ export class EnvironmentTools {
 				catch( reject );
 		} );
 	}
-	// public listTypes = () => {
-	// 	return new Promise( ( resolve, reject ) => {
-	// 		this.db.query( 'SELECT * FROM environmenttypes', function ( err, rows, fields ) {
-	// 			if ( err ) {
-	// 				reject( { error: err, message: 'Retrieving environment type list has failed' } );
-	// 			} else {
-	// 				resolve( rows );
-	// 			}
-	// 		} );
-	// 	} );
-	// };
 
 	// public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
 	// 	return new Promise( ( resolve, reject ) => {

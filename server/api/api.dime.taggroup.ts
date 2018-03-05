@@ -21,7 +21,6 @@ export class ApiDimeTagGroup {
 	}
 
 	private setRoutes = () => {
-		// this.apiRoutes.get( '/listTypes', ( req, res ) => { this.rester.respond( this.environment.listTypes, null, req, res ); } );
 		// this.apiRoutes.get( '/verify/:id', ( req, res ) => { this.rester.respond( this.environment.verify, req.params.id, req, res ); } );
 	}
 }

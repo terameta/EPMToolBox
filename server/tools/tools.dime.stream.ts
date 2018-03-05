@@ -99,17 +99,6 @@ export class StreamTools {
 			} ).catch( reject );
 		} );
 	}
-	public listTypes = () => {
-		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM streamtypes', ( err, rows, fields ) => {
-				if ( err ) {
-					reject( { error: err, message: 'Retrieving stream type list has failed' } );
-				} else {
-					resolve( rows );
-				}
-			} );
-		} );
-	}
 	public update = ( refItem: DimeStreamDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			delete refItem.databaseList;
@@ -337,14 +326,12 @@ export class StreamTools {
 			this.getOne( id ).
 				then( ( curStream: DimeStream ) => {
 					topStream = curStream;
-					return this.listTypes();
-				} ).
-				then( ( typeList: any[] ) => {
-					typeList.forEach( ( curType ) => {
-						if ( curType.id === topStream.type ) {
-							topStream.typeName = curType.value;
-						}
-					} );
+					topStream.typeName = DimeStreamType[topStream.type];
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( topStream.type, topStream.typeName );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
 					return this.retrieveFields( id );
 				} ).
 				then( ( fields: DimeStreamFieldDetail[] ) => {

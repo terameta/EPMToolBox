@@ -95,12 +95,6 @@ const to0080 = ( currentVersion: number ) => {
 					reject( err );
 				} else {
 					const types = _.keyBy( rows, 'value' );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( types );
-					console.log( '===========================================' );
-					console.log( DimeStreamType );
-					console.log( '===========================================' );
 					to0080a( types ).then( () => {
 						return to0080b( types );
 					} ).then( to0080c ).then( () => {
