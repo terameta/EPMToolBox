@@ -55,6 +55,7 @@ export class SmartViewTools {
 				console.log( '===========================================' );
 				console.log( body );
 				console.log( '===========================================' );
+				console.log( response.body );
 				console.log( '===========================================' );
 				return Promise.reject( new Error( 'There is an issue with running business rule' ) );
 			}
