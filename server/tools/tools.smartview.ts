@@ -153,6 +153,11 @@ export class SmartViewTools {
 				}
 			} );
 			payload.data.forEach( ( curTuple: any ) => {
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				console.log( curTuple );
+				console.log( '===========================================' );
+				console.log( '===========================================' );
 				Object.keys( curTuple ).forEach( ( curHeader, curKey ) => {
 					if ( curKey < numSparseDims ) {
 						vals.push( curTuple[curHeader].toString() );
