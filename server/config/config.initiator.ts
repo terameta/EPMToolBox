@@ -61,14 +61,29 @@ const to0084 = ( currentVersion: number ) => {
 				if ( err ) {
 					reject( err );
 				} else {
+					const promises = [];
 					rows.forEach( row => {
 						if ( row.details ) { row.details = JSON.parse( row.details.toString() ); }
 
 						console.log( row );
 						if ( row.details.type === 'Rules' ) {
 							console.log( '>>>We should change' );
+							row.details.type = 'graphical';
+							row.details = JSON.stringify( row.details );
+							promises.push( new Promise( ( iresolve, ireject ) => {
+								db.query( 'UPDATE processsteps SET details = ? WHERE id = ?', [row.details, row.id], ( ierr, iresult ) => {
+									if ( ierr ) {
+										ireject( ierr );
+									} else {
+										iresolve();
+									}
+								} );
+							} ) );
 						}
 					} );
+					Promise.all( promises ).then( () => {
+						resolve( utils.updateToVersion( nextVersion ) );
+					} ).catch( reject );
 				}
 			} );
 		}
