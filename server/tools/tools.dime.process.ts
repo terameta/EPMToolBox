@@ -1863,6 +1863,11 @@ export class ProcessTools {
 							wherers.push( 'SUMMARIZEDRESULT IS NOT NULL' );
 							sQuery += wherers.join( ' AND ' );
 							sQuery += ' GROUP BY ' + selecters.join( ', ' );
+							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+							console.log( sQuery );
+							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 							this.db.query( sQuery, ( serr, srows, sfields ) => {
 								if ( serr ) {
 									reject( serr );
