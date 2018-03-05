@@ -890,11 +890,6 @@ export class SmartViewTools {
 				if ( err ) {
 					reject( err );
 				} else {
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( response.headers );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
 					refInfo.refDetails.formResponseCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
 					refInfo.refDetails.redirectTarget = response.headers.location;
 					refInfo.refDetails.referer = refInfo.refDetails.formAction + refInfo.refDetails.encquery;
@@ -905,11 +900,6 @@ export class SmartViewTools {
 	}
 	private pbcsObtainSID06 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
 		return new Promise( ( resolve, reject ) => {
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( refInfo.refDetails.redirectTarget );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
 			request.get( {
 				url: refInfo.refDetails.redirectTarget,
 				headers: {
