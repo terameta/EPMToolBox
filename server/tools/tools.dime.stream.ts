@@ -327,11 +327,6 @@ export class StreamTools {
 				then( ( curStream: DimeStream ) => {
 					topStream = curStream;
 					topStream.typeName = DimeStreamType[topStream.type];
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( topStream.type, topStream.typeName );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
 					return this.retrieveFields( id );
 				} ).
 				then( ( fields: DimeStreamFieldDetail[] ) => {
@@ -393,6 +388,11 @@ export class StreamTools {
 			} else {
 				this.retrieveField( tableStatus.field ).
 					then( ( field: DimeStreamFieldDetail ) => {
+						console.log( '===========================================' );
+						console.log( '===========================================' );
+						console.log( tableStatus );
+						console.log( '===========================================' );
+						console.log( '===========================================' );
 						let curQuery: string; curQuery = '';
 						curQuery += 'CREATE TABLE ' + tableStatus.tableName + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 						if ( tableStatus.streamType !== 'HPDB' ) { curQuery += ', RefField '; }
