@@ -23,8 +23,9 @@ export class SmartViewTools {
 		return this.smartviewRunBusinessRule( payload );
 	}
 	private smartviewRunBusinessRule = ( payload ) => {
+		let body = '';
 		return this.smartviewOpenCube( payload ).then( resEnv => {
-			let body = '';
+
 			body += '<req_LaunchBusinessRule>';
 			body += '<sID>' + resEnv.SID + '</sID>';
 			body += '<cube>' + resEnv.table + '</cube>';
@@ -45,6 +46,11 @@ export class SmartViewTools {
 			if ( isSuccessful ) {
 				return Promise.resolve();
 			} else {
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				console.log( body );
+				console.log( '===========================================' );
+				console.log( '===========================================' );
 				return Promise.reject( new Error( 'There is an issue with running business rule' ) );
 			}
 		} );
