@@ -1889,10 +1889,17 @@ export class ProcessTools {
 				} else if ( finalData.length === 0 ) {
 					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
 				} else {
-					let sparseDims: string[]; sparseDims = [];
+					const sparseDims: string[] = [];
 					for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
 						sparseDims.push( refProcess.targetStreamFields[i].name );
 					}
+					console.log('===========================================');
+					console.log( '===========================================' );
+					finalData.forEach( cData => {
+						console.log( cData );
+					} );
+					console.log('===========================================');
+					console.log('===========================================');
 					this.environmentTool.writeData( {
 						id: refProcess.targetStream.environment,
 						data: finalData,

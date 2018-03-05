@@ -72,11 +72,6 @@ export class SmartViewTools {
 			payload.cellsInvalidCount = 0;
 			const pushLimit = 1000;
 			const wholeData = payload.data;
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( wholeData );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
 			let numberofRowsPerChunk = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
 			if ( numberofRowsPerChunk < 1 ) {
 				numberofRowsPerChunk = 1;
