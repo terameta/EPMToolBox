@@ -142,13 +142,6 @@ export class SmartViewTools {
 				colHeaders.push( { type: 'dense', name: denseMemberName } );
 			} );
 			colHeaders.sort( SortByName );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( rowHeaders );
-			console.log( '===========================================' );
-			console.log( colHeaders );
-			console.log( '===========================================' );
-
 			rowHeaders.forEach( rowHeader => {
 				vals.push( '' );
 				typs.push( '7' );
