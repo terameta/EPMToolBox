@@ -148,12 +148,14 @@ export class SmartViewTools {
 				typs.push( '7' );
 				stts.push( '' );
 				i++;
+				dirtyCells.push( '' );
 			} );
 			colHeaders.forEach( colHeader => {
 				vals.push( colHeader.name );
 				typs.push( '0' );
 				stts.push( '0' );
 				i++;
+				dirtyCells.push( '' );
 			} );
 			payload.data.forEach( ( curTuple: any ) => {
 				rowHeaders.forEach( rowHeader => {
@@ -161,6 +163,7 @@ export class SmartViewTools {
 					typs.push( '0' );
 					stts.push( '0' );
 					i++;
+					dirtyCells.push( '' );
 				} );
 				colHeaders.forEach( colHeader => {
 					i++;
