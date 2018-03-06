@@ -172,6 +172,7 @@ export class SmartViewTools {
 					} else {
 						stts.push( '8193' );
 						vals.push( '' );
+						dirtyCells.push( '' );
 					}
 				} );
 			} );
