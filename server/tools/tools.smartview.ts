@@ -147,26 +147,25 @@ export class SmartViewTools {
 				vals.push( '' );
 				typs.push( '7' );
 				stts.push( '' );
-				i++;
 				dirtyCells.push( '' );
+				i++;
 			} );
 			colHeaders.forEach( colHeader => {
 				vals.push( colHeader.name );
 				typs.push( '0' );
 				stts.push( '0' );
-				i++;
 				dirtyCells.push( '' );
+				i++;
 			} );
 			payload.data.forEach( ( curTuple: any ) => {
 				rowHeaders.forEach( rowHeader => {
 					vals.push( curTuple[rowHeader.name].toString() );
 					typs.push( '0' );
 					stts.push( '0' );
-					i++;
 					dirtyCells.push( '' );
+					i++;
 				} );
 				colHeaders.forEach( colHeader => {
-					i++;
 					typs.push( '2' );
 					if ( curTuple[colHeader.name] ) {
 						stts.push( '258' );
@@ -177,6 +176,7 @@ export class SmartViewTools {
 						vals.push( '' );
 						dirtyCells.push( '' );
 					}
+					i++;
 				} );
 			} );
 			const rangeEnd = ( payload.data.length + 1 ) * Object.keys( payload.data[0] ).length;
