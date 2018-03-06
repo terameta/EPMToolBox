@@ -223,7 +223,7 @@ export class SmartViewTools {
 						const result = JSON.parse( JSON.stringify( sparsePart ) );
 						result[header] = vals.splice( 0, 1 )[0];
 						result.writestatus = stts.splice( 0, 1 )[0];
-						console.log( JSON.stringify( result ) );
+						// console.log( JSON.stringify( result ) );
 						results.push( result );
 					}
 				} );
@@ -252,6 +252,7 @@ export class SmartViewTools {
 				// }
 				if ( result.writestatus !== '8194' ) {
 					result.finalStatus = 'Target is not valid: ' + result.writestatus;
+					console.log( JSON.stringify( result ) );
 				}
 				payload.cellsTotalCount++;
 				if ( result.finalStatus !== '' ) {
