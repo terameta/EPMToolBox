@@ -5,11 +5,11 @@ import { ToastrService } from 'ngx-toastr';
 
 import { DimeStreamService } from '../dimestream.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
-import { DimeUIService } from 'app/ngstore/uistate.service';
-import { DimeTagService } from 'app/dime/dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
 import { Store } from '@ngrx/store';
-import { AppState } from 'app/ngstore/models';
-import { DimeEnvironmentActions } from 'app/dime/dimeenvironment/dimeenvironment.actions';
+import { DimeEnvironmentActions } from '../../dimeenvironment/dimeenvironment.actions';
+import { AppState } from '../../../ngstore/models';
 
 @Component( {
 	selector: 'app-dimestream-list',

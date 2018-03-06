@@ -116,18 +116,7 @@ export class SmartViewTools {
 			body += '<slices>';
 			body += '<slice rows="' + ( payload.data.length + 1 ) + '" cols="' + Object.keys( payload.data[0] ).length + '">';
 			body += '<data>';
-			const rangeEnd = ( payload.data.length + 1 ) * Object.keys( payload.data[0] ).length;
 			const dirtyCells: any[] = [];
-			let i = Object.keys( payload.data[0] ).length - 1;
-			const numSparseDims = payload.sparseDims.length;
-			payload.data.forEach( ( curTuple: any ) => {
-				Object.keys( curTuple ).forEach( ( curCell, curKey ) => {
-					i++;
-					if ( curKey >= numSparseDims ) { dirtyCells.push( curTuple[curCell] ? i.toString( 10 ) : '' ); }
-				} );
-			} );
-			body += '<dirtyCells>' + dirtyCells.join( '|' ) + '</dirtyCells>';
-			body += '<range start="0" end="' + ( rangeEnd - 1 ) + '">';
 			const vals: any[] = [];
 			const typs: any[] = [];
 			const stts: any[] = [];
@@ -141,40 +130,54 @@ export class SmartViewTools {
 			Object.keys( headerTuple ).forEach( denseMemberName => {
 				colHeaders.push( { type: 'dense', name: denseMemberName } );
 			} );
+
+			// let i = Object.keys( payload.data[0] ).length - 1;
+			// const numSparseDims = payload.sparseDims.length;
+			// payload.data.forEach( ( curTuple: any ) => {
+			// 	Object.keys( curTuple ).forEach( ( curCell, curKey ) => {
+			// 		i++;
+			// 		if ( curKey >= numSparseDims ) { dirtyCells.push( curTuple[curCell] ? i.toString( 10 ) : '' ); }
+			// 	} );
+			// } );
+
+			let i = 0;
+
 			colHeaders.sort( SortByName );
 			rowHeaders.forEach( rowHeader => {
 				vals.push( '' );
 				typs.push( '7' );
 				stts.push( '' );
+				i++;
 			} );
 			colHeaders.forEach( colHeader => {
 				vals.push( colHeader.name );
 				typs.push( '0' );
 				stts.push( '0' );
+				i++;
 			} );
 			payload.data.forEach( ( curTuple: any ) => {
 				rowHeaders.forEach( rowHeader => {
 					vals.push( curTuple[rowHeader.name].toString() );
 					typs.push( '0' );
 					stts.push( '0' );
-					if ( curTuple[rowHeader.name] === '1612' ) {
-						console.log( curTuple );
-						colHeaders.forEach( colHeader => {
-							console.log( colHeader.type, colHeader.name, curTuple[colHeader.name], parseFloat( curTuple[colHeader.name] ).toString() );
-						} );
-					}
+					i++;
 				} );
 				colHeaders.forEach( colHeader => {
+					i++;
 					typs.push( '2' );
 					if ( curTuple[colHeader.name] ) {
 						stts.push( '258' );
 						vals.push( parseFloat( curTuple[colHeader.name] ).toString() );
+						dirtyCells.push( i.toString( 10 ) );
 					} else {
 						stts.push( '8193' );
 						vals.push( '' );
 					}
 				} );
 			} );
+			const rangeEnd = ( payload.data.length + 1 ) * Object.keys( payload.data[0] ).length;
+			body += '<dirtyCells>' + dirtyCells.join( '|' ) + '</dirtyCells>';
+			body += '<range start="0" end="' + ( rangeEnd - 1 ) + '">';
 			body += '<vals>' + vals.join( '|' ) + '</vals>';
 			body += '<types>' + typs.join( '|' ) + '</types>';
 			body += '<status enc="0">' + stts.join( '|' ) + '</status>';

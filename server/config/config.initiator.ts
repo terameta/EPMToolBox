@@ -202,7 +202,7 @@ const to0080c = () => {
 			}
 		} );
 	} );
-}
+};
 const to0079 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const nextVersion = 79;
