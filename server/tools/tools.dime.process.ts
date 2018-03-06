@@ -663,13 +663,13 @@ export class ProcessTools {
 
 							switch ( curStep.type ) {
 								case DimeProcessStepType.SourceProcedure: {
-									this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runSourceProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PullData: {
-									this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runPullData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.MapData: {
@@ -677,18 +677,18 @@ export class ProcessTools {
 										refProcess.mapList = [];
 									}
 									refProcess.mapList.push( curStep.referedid );
-									this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runMapData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.TransformData: {
-									this.runTransformations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runTransformations( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.ValidateData: {
-									this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runValidation( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.PushData: {
@@ -697,23 +697,23 @@ export class ProcessTools {
 									break;
 								}
 								case DimeProcessStepType.TargetProcedure: {
-									this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runTargetProcedure( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.SendData: {
-									this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runSendData( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.SendMissingMaps: {
-									this.runSendMissing( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runSendMissing( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								case DimeProcessStepType.SendLogs: {
-									this.runSendLog( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
-									// curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
+									// this.runSendLog( refProcess, curStep ).then( ( result: any ) => { curStep.isPending = false; resolve( this.runStepsAction( refProcess ) ); } ).catch( reject );
+									curStep.isPending = false; resolve( this.runStepsAction( refProcess ) );
 									break;
 								}
 								default: {
@@ -1863,11 +1863,6 @@ export class ProcessTools {
 							wherers.push( 'SUMMARIZEDRESULT IS NOT NULL' );
 							sQuery += wherers.join( ' AND ' );
 							sQuery += ' GROUP BY ' + selecters.join( ', ' );
-							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-							console.log( sQuery );
-							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-							console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 							this.db.query( sQuery, ( serr, srows, sfields ) => {
 								if ( serr ) {
 									reject( serr );
@@ -1893,13 +1888,6 @@ export class ProcessTools {
 					for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
 						sparseDims.push( refProcess.targetStreamFields[i].name );
 					}
-					console.log('===========================================');
-					console.log( '===========================================' );
-					finalData.forEach( cData => {
-						console.log( cData );
-					} );
-					console.log('===========================================');
-					console.log('===========================================');
 					this.environmentTool.writeData( {
 						id: refProcess.targetStream.environment,
 						data: finalData,

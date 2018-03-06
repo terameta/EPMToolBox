@@ -11,6 +11,7 @@ import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSma
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SmartViewRequestOptions } from '../../shared/model/dime/smartviewrequestoptions';
+import { SortByName } from '../../shared/utilities/utilityFunctions';
 
 export class SmartViewTools {
 	xmlBuilder: xml2js.Builder;
@@ -130,37 +131,48 @@ export class SmartViewTools {
 			const vals: any[] = [];
 			const typs: any[] = [];
 			const stts: any[] = [];
-			Object.keys( payload.data[0] ).forEach( ( curHeader, curKey ) => {
-				if ( curKey < numSparseDims ) {
-					vals.push( '' );
-					typs.push( '7' );
-					stts.push( '' );
-				} else {
-					vals.push( curHeader );
-					typs.push( '0' );
-					stts.push( '0' );
-				}
+			const rowHeaders: { type: string, name: string }[] = [];
+			const colHeaders: { type: string, name: string }[] = [];
+			const headerTuple = JSON.parse( JSON.stringify( payload.data[0] ) );
+			payload.sparseDims.forEach( dimensionName => {
+				rowHeaders.push( { type: 'sparse', name: dimensionName } );
+				delete headerTuple[dimensionName];
+			} );
+			Object.keys( headerTuple ).forEach( denseMemberName => {
+				colHeaders.push( { type: 'dense', name: denseMemberName } );
+			} );
+			colHeaders.sort( SortByName );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( rowHeaders );
+			console.log( '===========================================' );
+			console.log( colHeaders );
+			console.log( '===========================================' );
+
+			rowHeaders.forEach( rowHeader => {
+				vals.push( '' );
+				typs.push( '7' );
+				stts.push( '' );
+			} );
+			colHeaders.forEach( colHeader => {
+				vals.push( colHeader.name );
+				typs.push( '0' );
+				stts.push( '0' );
 			} );
 			payload.data.forEach( ( curTuple: any ) => {
-				console.log( '===========================================' );
-				console.log( '===========================================' );
-				console.log( curTuple );
-				console.log( '===========================================' );
-				console.log( '===========================================' );
-				Object.keys( curTuple ).forEach( ( curHeader, curKey ) => {
-					if ( curKey < numSparseDims ) {
-						vals.push( curTuple[curHeader].toString() );
-						typs.push( '0' );
-						stts.push( '0' );
+				rowHeaders.forEach( rowHeader => {
+					vals.push( curTuple[rowHeader.name].toString() );
+					typs.push( '0' );
+					stts.push( '0' );
+				} );
+				colHeaders.forEach( colHeader => {
+					typs.push( '2' );
+					if ( curTuple[colHeader.name] ) {
+						stts.push( '258' );
+						vals.push( parseFloat( curTuple[colHeader.name] ).toString() );
 					} else {
-						typs.push( '2' );
-						if ( curTuple[curHeader] ) {
-							stts.push( '258' );
-							vals.push( parseFloat( curTuple[curHeader] ).toString() );
-						} else {
-							stts.push( '8193' );
-							vals.push( '' );
-						}
+						stts.push( '8193' );
+						vals.push( '' );
 					}
 				} );
 			} );
