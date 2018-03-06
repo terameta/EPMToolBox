@@ -223,7 +223,7 @@ export class SmartViewTools {
 						const result = JSON.parse( JSON.stringify( sparsePart ) );
 						result[header] = vals.splice( 0, 1 )[0];
 						result.writestatus = stts.splice( 0, 1 )[0];
-						console.log( result );
+						console.log( JSON.stringify( result ) );
 						results.push( result );
 					}
 				} );
