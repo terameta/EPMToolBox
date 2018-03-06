@@ -231,13 +231,13 @@ export class SmartViewTools {
 				Object.keys( result ).forEach( ( header, index ) => {
 					if ( index < payload.sparseDims.length ) {
 						if ( result[header] === '' ) {
-							result.finalStatus += '\'' + header + '\' doesn\'t exist in the database;';
+							result.finalStatus += '\'' + header + '\' doesn\'t exist in the database;' + result[header];
 						} else if ( result[header] === '2' ) {
-							result.finalStatus += '\'' + header + '\' is a parent member in the database;';
+							result.finalStatus += '\'' + header + '\' is a parent member in the database;' + result[header];
 						} else if ( result[header] === '0' ) {
 							// this is a valid entry
 						} else {
-							result.finalStatus += '\'' + header + '\' has an unknown issue;';
+							result.finalStatus += '\'' + header + '\' has an unknown issue;' + result[header];
 						}
 					}
 				} );
