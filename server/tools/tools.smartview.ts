@@ -159,6 +159,9 @@ export class SmartViewTools {
 					stts.push( '0' );
 					if ( curTuple[rowHeader.name] === '1612' ) {
 						console.log( curTuple );
+						colHeaders.forEach( colHeader => {
+							console.log( colHeader.type, colHeader.name, curTuple[colHeader.name], parseFloat( curTuple[colHeader.name] ).toString() );
+						} );
 					}
 				} );
 				colHeaders.forEach( colHeader => {
