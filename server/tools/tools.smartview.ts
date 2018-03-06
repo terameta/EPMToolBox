@@ -60,7 +60,7 @@ export class SmartViewTools {
 			payload.cellsTotalCount = 0;
 			payload.cellsValidCount = 0;
 			payload.cellsInvalidCount = 0;
-			const pushLimit = 1000;
+			const pushLimit = 5000;
 			const wholeData = payload.data;
 			let numberofRowsPerChunk = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
 			if ( numberofRowsPerChunk < 1 ) {
