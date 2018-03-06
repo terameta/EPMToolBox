@@ -76,6 +76,7 @@ export class SmartViewTools {
 	private smartviewWriteDataSendChuncks = ( payload, chunks: any[] ) => {
 		return new Promise( ( resolve, reject ) => {
 			asynclib.eachOfSeries( chunks, ( chunk, key, callback ) => {
+				console.log( 'Sending chunk', key, 'of', chunks.length );
 				payload.data = chunk;
 				this.smartviewWriteDataTry( payload, 0 ).then( result => { callback(); } ).catch( callback );
 			}, ( err ) => {
@@ -194,6 +195,7 @@ export class SmartViewTools {
 			// console.log( body );
 			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 		} ).then( response => {
+			console.log( 'Received response' );
 			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
 			const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
 			const vals = response.$( 'vals' ).text().split( '|' );
