@@ -250,7 +250,7 @@ export class SmartViewTools {
 				// if ( result.writestatus === '8193' && result.finalStatus === '' ) {
 				// 	result.finalStatus += 'This intersection is read-only;';
 				// }
-				if ( result.writestatus !== '8194' ) {
+				if ( result.writestatus !== '8194' && result.writestatus !== '2' ) {
 					result.finalStatus = 'Target is not valid: ' + result.writestatus;
 					console.log( JSON.stringify( result ) );
 				}
