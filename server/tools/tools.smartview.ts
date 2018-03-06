@@ -76,7 +76,6 @@ export class SmartViewTools {
 	private smartviewWriteDataSendChuncks = ( payload, chunks: any[] ) => {
 		return new Promise( ( resolve, reject ) => {
 			asynclib.eachOfSeries( chunks, ( chunk, key, callback ) => {
-				console.log( 'Sending chunk', key, 'of', chunks.length );
 				payload.data = chunk;
 				this.smartviewWriteDataTry( payload, 0 ).then( result => { callback(); } ).catch( callback );
 			}, ( err ) => {
@@ -132,15 +131,6 @@ export class SmartViewTools {
 				colHeaders.push( { type: 'dense', name: denseMemberName } );
 			} );
 
-			// let i = Object.keys( payload.data[0] ).length - 1;
-			// const numSparseDims = payload.sparseDims.length;
-			// payload.data.forEach( ( curTuple: any ) => {
-			// 	Object.keys( curTuple ).forEach( ( curCell, curKey ) => {
-			// 		i++;
-			// 		if ( curKey >= numSparseDims ) { dirtyCells.push( curTuple[curCell] ? i.toString( 10 ) : '' ); }
-			// 	} );
-			// } );
-
 			let i = 0;
 
 			colHeaders.sort( SortByName );
@@ -195,7 +185,6 @@ export class SmartViewTools {
 			// console.log( body );
 			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 		} ).then( response => {
-			console.log( 'Received response' );
 			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
 			const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
 			const vals = response.$( 'vals' ).text().split( '|' );
@@ -210,10 +199,6 @@ export class SmartViewTools {
 				// Prepare the sparse part
 				headers.forEach( ( header, index ) => {
 					if ( index < payload.sparseDims.length ) {
-						// sparsePart[header] = {
-						// 	value: vals.splice( 0, 1 )[0],
-						// 	status: stts.splice( 0, 1 )[0]
-						// };
 						sparsePart[vals.splice( 0, 1 )[0]] = stts.splice( 0, 1 )[0];
 					}
 				} );
@@ -223,7 +208,6 @@ export class SmartViewTools {
 						const result = JSON.parse( JSON.stringify( sparsePart ) );
 						result[header] = vals.splice( 0, 1 )[0];
 						result.writestatus = stts.splice( 0, 1 )[0];
-						// console.log( JSON.stringify( result ) );
 						results.push( result );
 					}
 				} );
@@ -231,28 +215,8 @@ export class SmartViewTools {
 			}
 			results.forEach( result => {
 				result.finalStatus = '';
-				// Object.keys( result ).forEach( ( header, index ) => {
-				// 	if ( index < payload.sparseDims.length ) {
-				// 		if ( result[header] === '' ) {
-				// 			result.finalStatus += '\'' + header + '\' doesn\'t exist in the database;' + result[header];
-				// 		} else if ( result[header] === '2' ) {
-				// 			result.finalStatus += '\'' + header + '\' is a parent member in the database;' + result[header];
-				// 		} else if ( result[header] === '0' ) {
-				// 			// this is a valid entry
-				// 		} else {
-				// 			result.finalStatus += '\'' + header + '\' has an unknown issue;' + result[header];
-				// 		}
-				// 	}
-				// } );
-				// if ( result.writestatus === '1' && result.finalStatus === '' ) {
-				// 	result.finalStatus += 'This intersection is read-only;';
-				// }
-				// if ( result.writestatus === '8193' && result.finalStatus === '' ) {
-				// 	result.finalStatus += 'This intersection is read-only;';
-				// }
 				if ( result.writestatus !== '8194' && result.writestatus !== '2' ) {
 					result.finalStatus = 'Target is not valid: ' + result.writestatus;
-					console.log( JSON.stringify( result ) );
 				}
 				payload.cellsTotalCount++;
 				if ( result.finalStatus !== '' ) {
