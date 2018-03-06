@@ -23,7 +23,19 @@ export class SmartViewTools {
 	public runBusinessRule = ( payload ) => {
 		return this.smartviewRunBusinessRule( payload );
 	}
-	private smartviewRunBusinessRule = ( payload ) => {
+	private smartviewRunBusinessRule = ( payload, retrycount = 0 ) => {
+		const maxRetry = 10;
+		return new Promise( ( resolve, reject ) => {
+			this.smartviewRunBusinessRuleAction( payload ).then( resolve ).catch( issue => {
+				if ( retrycount < maxRetry ) {
+					resolve( this.smartviewRunBusinessRule( payload, ++retrycount ) );
+				} else {
+					reject( issue );
+				}
+			} );
+		} );
+	}
+	private smartviewRunBusinessRuleAction = ( payload ): Promise<any> => {
 		let body = '';
 		return this.smartviewOpenCube( payload ).then( resEnv => {
 
@@ -47,7 +59,7 @@ export class SmartViewTools {
 			if ( isSuccessful ) {
 				return Promise.resolve();
 			} else {
-				return Promise.reject( new Error( 'There is an issue with running business rule' ) );
+				return Promise.reject( new Error( 'There is an issue with running business rule ' + response.body ) );
 			}
 		} );
 	}
@@ -92,7 +104,7 @@ export class SmartViewTools {
 		return new Promise( ( resolve, reject ) => {
 			this.smartviewWriteDataAction( payload ).then( resolve ).catch( issue => {
 				if ( retrycount < maxRetry ) {
-					this.smartviewWriteDataTry( payload, ++retrycount );
+					resolve( this.smartviewWriteDataTry( payload, ++retrycount ) );
 				} else {
 					reject( issue );
 				}
