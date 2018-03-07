@@ -1533,8 +1533,15 @@ export class ProcessTools {
 					const selector: string = srctar === 'source' ? 'SRC_' : 'TAR_';
 					let localWherers: string[] = [];
 
-					if ( shouldFilter || isForDataFile ) {
-						localWherers = localWherers.concat( refProcess.wherersWithSrc );
+					// if ( shouldFilter || isForDataFile ) {
+					// 	localWherers = localWherers.concat( refProcess.wherersWithSrc );
+					// }
+					if ( shouldFilter ) {
+						if ( isForDataFile ) {
+							localWherers = localWherers.concat( refProcess.wherersDataFileWithSrc );
+						} else {
+							localWherers = localWherers.concat( refProcess.wherersWithSrc );
+						}
 					}
 					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'missing\'' ) );
 					localWherers = localWherers.concat( fieldList.map( field => selector + field.name + '<> \'missing:missing\'' ) );
@@ -1556,91 +1563,7 @@ export class ProcessTools {
 				} else {
 					resolve( [] );
 				}
-				// let selector: string; selector = '';
-				// if ( srctar === 'source' ) { selector = 'SRC_'; }
-				// if ( srctar === 'target' ) { selector = 'TAR_'; }
-				// let wherers: string[]; wherers = [];
-				// let wherePart: string; wherePart = '';
-				// if ( shouldFilter || isForDataFile ) {
-				// 	let curFilterList: any[];
-				// 	if ( isForDataFile ) {
-				// 		curFilterList = refProcess.filtersDataFile;
-				// 	} else {
-				// 		curFilterList = refProcess.filters;
-				// 	}
-				// 	curFilterList.forEach( ( curFilter ) => {
-				// 		refProcess.sourceStreamFields.forEach( ( theField: any ) => {
-				// 			if ( theField.id === curFilter.field ) { curFilter.fieldName = theField.name; }
-				// 		} );
-				// 		if ( curFilter.filterfrom ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
-				// 		if ( curFilter.filterto ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
-				// 		if ( curFilter.filtertext ) { wherers.push( 'SRC_' + curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
-				// 		if ( curFilter.filterbeq ) { wherers.push( 'SRC_' + curFilter.fieldName + '>=' + curFilter.filterbeq ); }
-				// 		if ( curFilter.filterseq ) { wherers.push( 'SRC_' + curFilter.fieldName + '<=' + curFilter.filterseq ); }
-				// 	} );
-				// 	if ( wherers.length > 0 ) {
-				// 		wherePart += ' WHERE ' + wherers.join( ' AND ' );
-				// 	}
-				// }
-				// selector += curField.name;
-				// const selectQuery = 'SELECT DISTINCT ' + selector + ' AS DVALUE FROM PROCESS' + refProcess.id + '_DATATBL' + wherePart;
-				// this.db.query( selectQuery, ( err, rows, fields ) => {
-				// 	if ( err ) {
-				// 		reject( err );
-				// 	} else {
-				// 		if ( curField.isMonth === 0 ) {
-				// 			rows.forEach( ( curRow: any, curKey: number ) => {
-				// 				rows[curKey].sorter = curRow.DVALUE;
-				// 			} );
-				// 		} else {
-				// 			rows.forEach( ( curRow: any, curKey: number ) => {
-				// 				if ( curRow.DVALUE === 'Jan' || curRow.DVALUE === 'January' ) {
-				// 					rows[curKey].sorter = 1;
-				// 				} else if ( curRow.DVALUE === 'Feb' || curRow.DVALUE === 'February' ) {
-				// 					rows[curKey].sorter = 2;
-				// 				} else if ( curRow.DVALUE === 'Mar' || curRow.DVALUE === 'March' ) {
-				// 					rows[curKey].sorter = 3;
-				// 				} else if ( curRow.DVALUE === 'Apr' || curRow.DVALUE === 'April' ) {
-				// 					rows[curKey].sorter = 4;
-				// 				} else if ( curRow.DVALUE === 'May' ) {
-				// 					rows[curKey].sorter = 5;
-				// 				} else if ( curRow.DVALUE === 'Jun' || curRow.DVALUE === 'June' ) {
-				// 					rows[curKey].sorter = 6;
-				// 				} else if ( curRow.DVALUE === 'Jul' || curRow.DVALUE === 'July' ) {
-				// 					rows[curKey].sorter = 7;
-				// 				} else if ( curRow.DVALUE === 'Aug' || curRow.DVALUE === 'August' ) {
-				// 					rows[curKey].sorter = 8;
-				// 				} else if ( curRow.DVALUE === 'Sep' || curRow.DVALUE === 'September' ) {
-				// 					rows[curKey].sorter = 9;
-				// 				} else if ( curRow.DVALUE === 'Oct' || curRow.DVALUE === 'October' ) {
-				// 					rows[curKey].sorter = 10;
-				// 				} else if ( curRow.DVALUE === 'Nov' || curRow.DVALUE === 'November' ) {
-				// 					rows[curKey].sorter = 11;
-				// 				} else if ( curRow.DVALUE === 'Dec' || curRow.DVALUE === 'December' ) {
-				// 					rows[curKey].sorter = 12;
-				// 				} else if ( curRow.DVALUE === 'BegBalance' ) {
-				// 					rows[curKey].sorter = 0;
-				// 				} else if ( curRow.DVALUE === 'OBL' ) {
-				// 					rows[curKey].sorter = 0;
-				// 				} else if ( curRow.DVALUE === 'CBL' ) {
-				// 					rows[curKey].sorter = 13;
-				// 				} else if ( isNumeric( curRow.DVALUE ) ) {
-				// 					rows[curKey].sorter = parseFloat( curRow.DVALUE );
-				// 				} else {
-				// 					rows[curKey].sorter = curRow.DVALUE;
-				// 				}
-				// 			} );
-				// 		}
-				// 		rows.sort( function ( a: any, b: any ) {
-				// 			if ( a.sorter > b.sorter ) { return 1; }
-				// 			if ( a.sorter < b.sorter ) { return -1; }
-				// 			return 0;
-				// 		} );
-				// 		resolve( { name: curField.name, rows: rows } );
-				// 	}
-				// } );
-			} ).
-				catch( reject );
+			} ).catch( reject );
 		} );
 	}
 	// private runTargetProcedureRunProcedures = ( refProcess: DimeProcessRunning, refStep: DimeProcessStepRunning, refDefinitions: any ) => {
@@ -1727,6 +1650,9 @@ export class ProcessTools {
 					cellsTotalCount = result.cellsTotalCount;
 					cellsValidCount = result.cellsValidCount;
 					cellsInvalidCount = result.cellsInvalidCount;
+					if ( !result.issueList ) {
+						result.issueList = [];
+					}
 					if ( result.issueList.length > 0 ) {
 						return this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': There are issues with data push\n' + result.issueList.join( '\n' ) );
 					} else {
@@ -1880,9 +1806,9 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: Pushing data to the target.' ).then( () => {
 				if ( !finalData ) {
-					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
+					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( { issueList: ['There is no data to push'] } ); } );
 				} else if ( finalData.length === 0 ) {
-					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( 'There is no data to push' ); } );
+					this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ' - Push Data: There is no data to push.' ).then( () => { resolve( { issueList: ['There is no data to push'] } ); } );
 				} else {
 					const sparseDims: string[] = [];
 					for ( let i = 0; i < ( refProcess.targetStreamFields.length - 1 ); i++ ) {
@@ -2436,16 +2362,18 @@ export class ProcessTools {
 				} ).
 				then( ( filters: any[] ) => {
 					refProcess.filtersDataFile = filters;
+					refProcess.wherersDataFile = [];
 					refProcess.filtersDataFile.forEach( ( curFilter ) => {
 						refProcess.sourceStreamFields.forEach( ( curField ) => {
 							if ( curField.id === curFilter.field ) { curFilter.fieldName = curField.name; }
 						} );
-						// if ( curFilter.filterfrom ) { refProcess.wherers.push( curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
-						// if ( curFilter.filterto ) { refProcess.wherers.push( curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
-						// if ( curFilter.filtertext ) { refProcess.wherers.push( curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
-						// if ( curFilter.filterbeq ) { refProcess.wherers.push( curFilter.fieldName + '>=' + curFilter.filterbeq ); }
-						// if ( curFilter.filterseq ) { refProcess.wherers.push( curFilter.fieldName + '<=' + curFilter.filterseq ); }
+						if ( curFilter.filterfrom ) { refProcess.wherersDataFile.push( curFilter.fieldName + '>=\'' + curFilter.filterfrom + '\'' ); }
+						if ( curFilter.filterto ) { refProcess.wherersDataFile.push( curFilter.fieldName + '<=\'' + curFilter.filterto + '\'' ); }
+						if ( curFilter.filtertext ) { refProcess.wherersDataFile.push( curFilter.fieldName + ' LIKE \'' + curFilter.filtertext + '\'' ); }
+						if ( curFilter.filterbeq ) { refProcess.wherersDataFile.push( curFilter.fieldName + '>=' + curFilter.filterbeq ); }
+						if ( curFilter.filterseq ) { refProcess.wherersDataFile.push( curFilter.fieldName + '<=' + curFilter.filterseq ); }
 					} );
+					refProcess.wherersDataFileWithSrc = refProcess.wherersDataFile.map( wherer => 'SRC_' + wherer );
 					resolve( refProcess );
 				} ).
 				catch( reject );

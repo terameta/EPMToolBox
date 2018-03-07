@@ -14,10 +14,12 @@
 			<tbody>
 				<ng-container *ngFor="let item of mainService.itemList">
 					<tr *ngIf="shouldListItem(item.id)">
-						<td> {{ item.name }} </td>
+						<td>
+							<a [routerLink]="['../stream-detail', item.id]" class="at-table-link">{{item.name}}</a>
+						</td>
 						<td> {{ mainService.getStreamTypeDescription(item.type) }} </td>
 						<td>
-							<a routerLink="../../environments/environment-detail/{{ environmentService.itemObject[item.environment]?.id }}">{{ environmentService.itemObject[item.environment]?.name }}</a>
+							<a routerLink="../../environments/environment-detail/{{ environmentService.itemObject[item.environment]?.id }}" class="at-table-link">{{ environmentService.itemObject[item.environment]?.name }}</a>
 						</td>
 						<td>{{ item.dbName }}</td>
 						<td>{{ item.tableName }}</td>

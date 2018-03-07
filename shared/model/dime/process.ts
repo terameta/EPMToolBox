@@ -39,6 +39,8 @@ export interface DimeProcessRunning extends DimeProcess {
 	filtersDataFile: any[],
 	wherers: string[],
 	wherersWithSrc: string[],
+	wherersDataFile: string[],
+	wherersDataFileWithSrc: string[],
 	pullResult: any[],
 	recepients: string,
 	CRSTBLDescribedFields: any[],

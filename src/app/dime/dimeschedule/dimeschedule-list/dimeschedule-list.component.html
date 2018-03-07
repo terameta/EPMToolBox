@@ -18,7 +18,9 @@
 				<ng-container *ngFor="let id of mainService.itemids; let i = index;">
 					<ng-container *ngIf="!mainService.items[id].schedule || mainService.items[id].schedule.length == 0">
 						<tr>
-							<td>{{mainService.items[id].name}}</td>
+							<td>
+								<a [routerLink]="['../schedule-detail', id]" class="at-table-link">{{mainService.items[id].name}}</a>
+							</td>
 							<td colspan="6">There is no schedule item defined. Please go to details.</td>
 							<td>{{findStatus(mainService.items[id].status)}}</td>
 							<td>
@@ -45,7 +47,9 @@
 					</ng-container>
 					<ng-container *ngIf="mainService.items[id].schedule && mainService.items[id].schedule.length > 0">
 						<tr *ngFor="let cron of mainService.items[id].schedule; let c = index;">
-							<td *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">{{mainService.items[id].name}}</td>
+							<td *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">
+								<a [routerLink]="['../schedule-detail', id]" class="at-table-link">{{mainService.items[id].name}}</a>
+							</td>
 							<td>{{cron.second}}</td>
 							<td>{{cron.minute}}</td>
 							<td>{{cron.hour}}</td>

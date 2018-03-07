@@ -13,13 +13,17 @@
 				<ng-container *ngFor="let itemid of mainService.itemids; let i = index;">
 					<tr *ngIf="shouldListItem(itemid)">
 						<td>
-							{{mainService.items[itemid].name}}
+							<a [routerLink]="['../process-detail', itemid]" class="at-table-link">{{mainService.items[itemid].name}}</a>
 						</td>
 						<td>
-							{{environmentService.itemObject[mainService.items[itemid].source]?.name}}
+							<a routerLink="../../environments/environment-detail/{{mainService.items[itemid].source}}" class="at-table-link">
+								{{environmentService.itemObject[mainService.items[itemid].source]?.name}}
+							</a>
 						</td>
 						<td>
-							{{environmentService.itemObject[mainService.items[itemid].target]?.name}}
+							<a routerLink="../../environments/environment-detail/{{mainService.items[itemid].target}}" class="at-table-link">
+								{{environmentService.itemObject[mainService.items[itemid].target]?.name}}
+							</a>
 						</td>
 						<td>
 							<div class="btn-toolbar" role="toolbar" aria-label="Process Actions">

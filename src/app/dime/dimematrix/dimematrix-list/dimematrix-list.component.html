@@ -12,10 +12,10 @@
 				<ng-container *ngFor="let item of mainService.itemList; let i = index;">
 					<tr *ngIf="shouldListItem(item.id)">
 						<td>
-							<a [routerLink]="['../matrix-detail', item.id, 'definitions']">{{item.name}}</a>
+							<a [routerLink]="['../matrix-detail', item.id, 'definitions']" class="at-table-link">{{item.name}}</a>
 						</td>
 						<td>
-							<a routerLink="../../streams/stream-detail/{{streamService.itemObject[item.stream]?.id}}">{{streamService.itemObject[item.stream]?.name}}</a>
+							<a routerLink="../../streams/stream-detail/{{streamService.itemObject[item.stream]?.id}}" class="at-table-link">{{streamService.itemObject[item.stream]?.name}}</a>
 						</td>
 						<td width="150">
 							<div class="btn-toolbar" role="toolbar" aria-label="Stream Actions">

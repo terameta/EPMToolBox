@@ -14,7 +14,9 @@
 			<tbody>
 				<ng-container *ngFor="let item of mainService.itemList">
 					<tr *ngIf="shouldListItem(item.id)">
-						<td>{{ item.name }}</td>
+						<td>
+							<a [routerLink]="['../environment-detail', item.id]" class="at-table-link">{{item.name}}</a>
+						</td>
 						<td> {{mainService.typeObject[item.type].label}} </td>
 						<td>{{ item.server }}</td>
 						<td>{{ item.port }}</td>

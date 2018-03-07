@@ -13,13 +13,13 @@
 				<ng-container *ngFor="let map of mainService.itemList; let i = index;">
 					<tr *ngIf="shouldListItem(map.id)">
 						<td>
-							<a [routerLink]="['../map-detail', map.id, 'maindefinitions']">{{map.name}}</a>
+							<a [routerLink]="['../map-detail', map.id, 'maindefinitions']" class="at-table-link">{{map.name}}</a>
 						</td>
 						<td>
-							<a routerLink="../../streams/stream-detail/{{streamService.itemObject[map.source]?.id}}">{{streamService.itemObject[map.source]?.name}}</a>
+							<a routerLink="../../streams/stream-detail/{{streamService.itemObject[map.source]?.id}}" class="at-table-link">{{streamService.itemObject[map.source]?.name}}</a>
 						</td>
 						<td>
-							<a routerLink="../../streams/stream-detail/{{streamService.itemObject[map.target]?.id}}">{{streamService.itemObject[map.target]?.name}}</a>
+							<a routerLink="../../streams/stream-detail/{{streamService.itemObject[map.target]?.id}}" class="at-table-link">{{streamService.itemObject[map.target]?.name}}</a>
 						</td>
 						<td>
 							<div class="btn-toolbar" role="toolbar" aria-label="Map Actions">
