@@ -7,14 +7,15 @@ import { DimeStreamService } from '../../../dimestream/dimestream.service';
 import { DimeMapService } from '../../../dimemap/dimemap.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
-import { DimeMapField } from '../../../../../../shared/model/dime/map';
+import { DimeMapField, DimeMapFilterTuple } from '../../../../../../shared/model/dime/map';
 import { DimeStatusActions } from '../../../../ngstore/applicationstatus';
 import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
 import { DimeMapActions } from '../../dimemap.actions';
-import { HotRegisterer } from 'angular-handsontable';
-import Handsontable from 'handsontable';
+import { HotTableRegisterer } from '@handsontable/angular';
+import * as Handsontable from 'handsontable';
 import { DimeMatrixService } from '../../../dimematrix/dimematrix.service';
 import { DimeMatrixBackend } from '../../../dimematrix/dimematrix.backend';
+import { SortByName } from '../../../../../../shared/utilities/utilityFunctions';
 // import * as Handsontable from 'handsontable/dist/handsontable.full.js';
 
 @Component( {
@@ -28,15 +29,14 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	public numberofRowsinMap: string;
 	public hotTableHeight = 250;
 	public currentItemID = 0;
-	public filtersShown = false;
 	public sortersShown = false;
-	public filters: { source: any[], target: any[] };
+	public filters: DimeMapFilterTuple[] = [];
 	public availableSorters = [];
 	public activeSorters = [];
 
 	public mapSettings;
 	public mapColumns: any[] = [];
-	public mapData: any[] = [];
+	public mapData: any[] = [{ id: 'Filter Type' }, { id: 'Filter' }];
 
 	private matrixObject: { targets: string[], matrixData: string[] } = { targets: [], matrixData: [] };
 
@@ -51,7 +51,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		public matrixService: DimeMatrixService,
 		private matrixBackend: DimeMatrixBackend,
 		private store: Store<AppState>,
-		private hotRegisterer: HotRegisterer
+		private hotRegisterer: HotTableRegisterer
 	) {
 		this.numberofRowsinMap = 'Rows: initiating...';
 
@@ -60,8 +60,20 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 				this.currentItemID = currentState.curItem.id;
 				this.getReady();
 			}
-			this.mapData = currentState.curItem.mapData;
-			if ( !this.mapData ) { this.mapData = []; }
+			if ( currentState.curItem ) {
+				if ( currentState.curItem.mapData ) {
+					if ( currentState.curItem.mapData[0] ) {
+						Object.keys( currentState.curItem.mapData[0] ).forEach( key => {
+							if ( key !== 'id' ) {
+								if ( !this.mapData[0][key] ) {
+									this.mapData[0][key] = 'Contains';
+								}
+							}
+						} );
+					}
+				}
+			}
+			this.mapData = [this.mapData[0], this.mapData[1], ...currentState.curItem.mapData];
 			this.numberofRowsinMap = 'Rows: ' + this.mapData.length;
 			if ( currentState.curItem.isMapDataRefreshing ) {
 				this.numberofRowsinMap = 'Please wait, refreshing the data...';
@@ -78,15 +90,65 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			stretchH: 'all',
 			manualColumnResize: true,
 			manualColumnMove: true,
-			// observeChanges: true,
+			fixedRowsTop: 2,
+			minSpareRows: 0,
 			afterChange: this.hotAfterChange,
 			afterValidate: this.hotAfterValidate,
-			afterOnCellMouseDown: this.hotAfterOnCellMouseDown
+			afterOnCellMouseDown: this.hotAfterOnCellMouseDown,
+			cells: function ( row, col, prop ) {
+				if ( row === 0 ) {
+					// console.log( row, col, prop );
+					if ( prop !== 'matrixresult' && prop !== 'saveresult' && prop !== 'id' ) {
+						this.type = 'dropdown';
+						this.source = ['Exact Match', 'Contains', 'Begins with', 'Ends with'];
+						this.readOnly = false;
+					} else if ( col > 0 ) {
+						this.readOnly = true;
+						this.type = 'text';
+						this.renderer = ( instance, td, rrow, rcol, rprop, value, cellProperties ) => {
+							td.innerHTML = '&nbsp;';
+							td.className = 'htCenter';
+						};
+					} else {
+						this.readOnly = true;
+						this.type = 'text';
+						this.renderer = ( instance, td, rrow, rcol, rprop, value, cellProperties ) => {
+							td.innerHTML = '<i class="fa fa-filter fa-fw"></i>';
+							td.className = 'htCenter';
+						};
+					}
+				}
+				if ( row === 1 ) {
+					if ( prop !== 'matrixresult' && prop !== 'saveresult' && prop !== 'id' ) {
+						this.type = 'text';
+						this.readOnly = false;
+					} else if ( col > 0 ) {
+						this.readOnly = true;
+						this.type = 'text';
+						this.renderer = ( instance, td, rrow, rcol, rprop, value, cellProperties ) => {
+							td.innerHTML = '&nbsp;';
+							td.className = 'htCenter';
+						};
+					} else {
+						this.readOnly = true;
+						this.type = 'text';
+						this.renderer = ( instance, td, rrow, rcol, rprop, value, cellProperties ) => {
+							td.innerHTML = '<i class="fa fa-filter fa-fw"></i>';
+							td.className = 'htCenter';
+						};
+					}
+				}
+			}
 		};
 	}
 	private hotDeleteRenderer = ( instance, td, row, col, prop, value, cellProperties ) => {
 		// console.log( 'Renderer is called', td, row, col, prop, value, cellProperties );
 		td.innerHTML = '<i class="fa fa-trash fa-fw" style="color:red;cursor:pointer;" id="' + value + '"></i>';
+		td.className = 'htCenter';
+	}
+	private hotEmptyRenderer = ( instance, td, row, col, prop, value, cellProperties ) => {
+		console.log( 'Renderer is called', td, row, col, prop, value, cellProperties );
+		td.innerHTML = '&nbsp;';
 		td.className = 'htCenter';
 	}
 	private hotAfterOnCellMouseDown = ( event, cords, td ) => {
@@ -128,77 +190,100 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		}
 	}
 	private hotAfterChange = ( changes: any[], source: string ) => {
-		// console.log( 'AfterChange' );
 		if ( source !== 'loadData' && changes && Array.isArray( changes ) && changes.length > 0 ) {
-			let changedRowNumber, changedFieldName, changedOldValue, changedNewValue, changedDataIndex, changedDataID, changedDataTuple, isChangeValid;
-			changes.forEach( currentChange => {
-				changedRowNumber = currentChange[0];
-				changedFieldName = currentChange[1];
-				changedOldValue = currentChange[2];
-				changedNewValue = currentChange[3].toString().split( '::' );
-				// When we use the getDataAtRow, the first element in array is the ID.
-				changedDataID = this.hotInstance.getDataAtRow( changedRowNumber )[0];
-				changedDataIndex = this.mapData.findIndex( element => element.id === changedDataID );
-				changedDataTuple = this.mapData[changedDataIndex];
-				// console.log( this.hotInstance.getDataAtRow( changedRowNumber ) );
-				// console.log( changedDataID, changedDataIndex );
-				// console.log( source, changedFieldName, changedDataTuple[changedFieldName], changedOldValue, changedNewValue );
-				changedDataTuple[changedFieldName] = changedNewValue[0];
-				isChangeValid = ( this.invalidRows.findIndex( element => element === changedRowNumber ) < 0 );
-				if ( isChangeValid ) {
-					// Here we will attempt to show the description in the map table
-					// This description part is only put under if the changed cell is valid.
-					// This is because if the cell is not valid, we are not expecting a description to be found.
-					// Also, while validating, we are already traversing the descriptions list and don't want to repeat it here and take a hit in the performance.
-					if ( changedNewValue[1] ) {
-						// If the user is typing or selecting from the dropdown, hotTable automatically provides the member name and description together
-						// Since we are splitting the string with '::' and assigning it to changedNewValue array, if there is a second element in this array, this second element is the description
-						changedDataTuple[changedFieldName + '_DESC'] = changedNewValue[1];
-					} else {
-						// If the user is copy/pasting from somewhere else or even within the hotTable
-						// Description is not brought forward with the pasted cell.
-						// In this case the changedNewValue array doesn't have a second element.
-						// We should look for the description
-						this.mainService.currentItem.targetfields
-							.filter( currentMapField => ( 'TAR_' + currentMapField.name === changedFieldName ) )
-							.forEach( ( currentMapField ) => {
-								currentMapField.descriptions
-									.filter( currentDescription => ( currentDescription.RefField === changedNewValue[0] ) )
-									.forEach( currentDescription => {
-										changedDataTuple[changedFieldName + '_DESC'] = currentDescription.Description;
-									} );
-							} );
+			const didFilterChange = changes.filter( change => ( change[0] === 0 || change[0] === 1 ) ).length > 0;
+			if ( didFilterChange ) {
+				const oldFilters = JSON.stringify( this.filters );
+				this.filters = [];
+				Object.keys( this.mapData[0] ).filter( key => key !== 'id' ).forEach( key => {
+					const toPush = <DimeMapFilterTuple>{};
+					toPush.name = key;
+					switch ( this.mapData[0][key] ) {
+						case 'Contains': { toPush.type = 'co'; break; }
+						case 'Exact Match': { toPush.type = 'is'; break; }
+						case 'Begins with': { toPush.type = 'bw'; break; }
+						case 'Ends with': { toPush.type = 'ew'; break; }
 					}
-
-
-					const toCheck = this.matrixObject.targets.map( field => changedDataTuple['TAR_' + field] ).join( '|||' );
-					const foundIndex = this.matrixObject.matrixData.findIndex( element => element === toCheck );
-					let isValidAgainstMatrix = ( foundIndex >= 0 );
-					if ( !this.mainService.currentItem.matrix ) {
-						isValidAgainstMatrix = true;
+					toPush.value = this.mapData[1][key];
+					if ( toPush.name && toPush.type && toPush.value ) {
+						this.filters.push( toPush );
 					}
-					if ( isValidAgainstMatrix ) {
-						this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-check-circle fa-fw" style="color:green;"></i>';
-						this.mapData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
-						const toSave: any = Object.assign( {}, changedDataTuple );
-						delete toSave.saveresult;
-						delete toSave.matrixresult;
-						Object.keys( toSave ).forEach( element => {
-							if ( element.substr( -5 ) === '_DESC' ) {
-								delete toSave[element];
-							}
-						} );
-						this.saveMapTuple( toSave, changedRowNumber );
-					} else {
-						this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-times fa-fw" style="color:red;"></i>';
-					}
-				} else {
-					this.mapData[changedRowNumber].saveresult = '<i class="fa fa-exclamation-circle fa-fw" style="color:red;"></i>';
+				} );
+				this.filters.sort( SortByName );
+				if ( oldFilters !== JSON.stringify( this.filters ) ) {
+					this.refreshMapTable();
 				}
-			} );
-			this.hotInstance.render();
-			// // this.mainService.currentItem.sourcefields.forEach( curField => console.log( curField ) );
-			// // this.mainService.currentItem.targetfields.forEach( curField => console.log( curField ) );
+			} else {
+				let changedRowNumber, changedFieldName, changedOldValue, changedNewValue, changedDataIndex, changedDataID, changedDataTuple, isChangeValid;
+				changes.forEach( currentChange => {
+					changedRowNumber = currentChange[0];
+					changedFieldName = currentChange[1];
+					changedOldValue = currentChange[2];
+					changedNewValue = currentChange[3].toString().split( '::' );
+					// When we use the getDataAtRow, the first element in array is the ID.
+					changedDataID = this.hotInstance.getDataAtRow( changedRowNumber )[0];
+					changedDataIndex = this.mapData.findIndex( element => element.id === changedDataID );
+					changedDataTuple = this.mapData[changedDataIndex];
+					// console.log( this.hotInstance.getDataAtRow( changedRowNumber ) );
+					// console.log( changedDataID, changedDataIndex );
+					// console.log( source, changedFieldName, changedDataTuple[changedFieldName], changedOldValue, changedNewValue );
+					changedDataTuple[changedFieldName] = changedNewValue[0];
+					isChangeValid = ( this.invalidRows.findIndex( element => element === changedRowNumber ) < 0 );
+					if ( isChangeValid ) {
+						// Here we will attempt to show the description in the map table
+						// This description part is only put under if the changed cell is valid.
+						// This is because if the cell is not valid, we are not expecting a description to be found.
+						// Also, while validating, we are already traversing the descriptions list and don't want to repeat it here and take a hit in the performance.
+						if ( changedNewValue[1] ) {
+							// If the user is typing or selecting from the dropdown, hotTable automatically provides the member name and description together
+							// Since we are splitting the string with '::' and assigning it to changedNewValue array, if there is a second element in this array, this second element is the description
+							changedDataTuple[changedFieldName + '_DESC'] = changedNewValue[1];
+						} else {
+							// If the user is copy/pasting from somewhere else or even within the hotTable
+							// Description is not brought forward with the pasted cell.
+							// In this case the changedNewValue array doesn't have a second element.
+							// We should look for the description
+							this.mainService.currentItem.targetfields
+								.filter( currentMapField => ( 'TAR_' + currentMapField.name === changedFieldName ) )
+								.forEach( ( currentMapField ) => {
+									currentMapField.descriptions
+										.filter( currentDescription => ( currentDescription.RefField === changedNewValue[0] ) )
+										.forEach( currentDescription => {
+											changedDataTuple[changedFieldName + '_DESC'] = currentDescription.Description;
+										} );
+								} );
+						}
+
+
+						const toCheck = this.matrixObject.targets.map( field => changedDataTuple['TAR_' + field] ).join( '|||' );
+						const foundIndex = this.matrixObject.matrixData.findIndex( element => element === toCheck );
+						let isValidAgainstMatrix = ( foundIndex >= 0 );
+						if ( !this.mainService.currentItem.matrix ) {
+							isValidAgainstMatrix = true;
+						}
+						if ( isValidAgainstMatrix ) {
+							this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-check-circle fa-fw" style="color:green;"></i>';
+							this.mapData[changedRowNumber].saveresult = '<i class="fa fa-circle-o-notch fa-spin fa-fw" style="color:orange;"></i>';
+							const toSave: any = Object.assign( {}, changedDataTuple );
+							delete toSave.saveresult;
+							delete toSave.matrixresult;
+							Object.keys( toSave ).forEach( element => {
+								if ( element.substr( -5 ) === '_DESC' ) {
+									delete toSave[element];
+								}
+							} );
+							this.saveMapTuple( toSave, changedRowNumber );
+						} else {
+							this.mapData[changedRowNumber].matrixresult = '<i class="fa fa-times fa-fw" style="color:red;"></i>';
+						}
+					} else {
+						this.mapData[changedRowNumber].saveresult = '<i class="fa fa-exclamation-circle fa-fw" style="color:red;"></i>';
+					}
+				} );
+				this.hotInstance.render();
+				// // this.mainService.currentItem.sourcefields.forEach( curField => console.log( curField ) );
+				// // this.mainService.currentItem.targetfields.forEach( curField => console.log( curField ) );
+			}
 		}
 	}
 	private saveMapTuple = ( toSave, changedRowNumber ) => {
@@ -224,15 +309,17 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		// console.log( 'Window width:', window.innerWidth, 'Window Height:', window.innerHeight, 'Hot Table Height:', this.hotTableHeight );
 	}
 	public refreshMapTable = () => {
-		this.filtersShown = false;
 		this.sortersShown = false;
 		this.numberofRowsinMap = 'Please wait, refreshing the data...';
-		this.mapData = [];
+		if ( this.mapData ) {
+			this.mapData = [this.mapData[0], this.mapData[1]];
+		} else {
+			this.mapData = [{ id: 'Filter Type' }, { id: 'Filter' }];
+		}
 		this.store.dispatch( DimeMapActions.ONE.REFRESH.initiate( { id: this.mainService.currentItem.id, filters: this.filters, sorters: this.activeSorters } ) );
 	}
 	private getReady = () => {
 		this.waitUntilItemIsReady()
-			.then( this.prepareFilters )
 			.then( this.prepareAvailableSorters )
 			.then( this.prepareColumns )
 			.then( this.prepareDescriptions )
@@ -394,22 +481,6 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 			} else {
 				resolve();
 			}
-		} );
-	}
-	private prepareFilters = () => {
-		return new Promise( ( resolve, reject ) => {
-			this.filters = { source: [], target: [] };
-			this.streamService.itemObject[this.mainService.currentItem.source].fieldList
-				.filter( currentStreamField => ( this.mainService.currentItem.sourcefields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
-				.forEach( currentStreamField => {
-					this.filters.source.push( { name: currentStreamField.name, type: 'is', value: '', isDescribed: currentStreamField.isDescribed } );
-				} );
-			this.streamService.itemObject[this.mainService.currentItem.target].fieldList
-				.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
-				.forEach( currentStreamField => {
-					this.filters.target.push( { name: currentStreamField.name, type: 'is', value: '', isDescribed: currentStreamField.isDescribed } );
-				} );
-			resolve();
 		} );
 	}
 	private prepareAvailableSorters = () => {

@@ -3,10 +3,10 @@ import { DimeMatrixService } from '../../dimematrix.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { ATReadyStatus } from '../../../../../../shared/enums/generic/readiness';
-import Handsontable from 'handsontable';
+import * as Handsontable from 'handsontable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
-import { HotRegisterer } from 'angular-handsontable';
+import { HotTableRegisterer } from '@handsontable/angular';
 import * as _ from 'lodash';
 import { DimeFieldDescription } from '../../../../../../shared/model/dime/fielddescription';
 import { DimeMatrixActions } from '../../dimematrix.actions';
@@ -47,7 +47,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 		private toastr: ToastrService,
 		private streamService: DimeStreamService,
 		private store: Store<AppState>,
-		private hotRegisterer: HotRegisterer
+		private hotRegisterer: HotTableRegisterer
 	) {
 		this.numberofRowsinMatrix = 'Rows: initiating...';
 

@@ -75,6 +75,7 @@ import { DimeTagGroupBackend } from './dime/dimetag/dimetaggroup.backend';
 import { DimeTagService } from './dime/dimetag/dimetag.service';
 import { DimeTagEffects } from './dime/dimetag/dimetag.effects';
 import { DimeStatusEffects } from './ngstore/applicationstatus';
+import { HotTableRegisterer, HotTableModule } from '@handsontable/angular';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -135,11 +136,13 @@ export function tokenGetter() {
 			DimeScheduleEffects
 		] ),
 		StoreRouterConnectingModule,
+		HotTableModule.forRoot(),
 		// StoreDevtoolsModule.instrument( {
 		// 	maxAge: 25
 		// } )
 	],
 	providers: [
+		// HotTableRegisterer,
 		AuthGuard,
 		AuthService,
 		DimeUIBackend,

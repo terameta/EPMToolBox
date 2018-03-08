@@ -26,6 +26,12 @@ export interface DimeMapField {
 
 export interface DimeMapRefreshPayload {
 	id: number,
-	filters: any,
+	filters: DimeMapFilterTuple[],
 	sorters: any
+}
+
+export interface DimeMapFilterTuple {
+	name: string,
+	type: 'is' | 'co' | 'bw' | 'ew',
+	value: string
 }

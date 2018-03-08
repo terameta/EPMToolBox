@@ -478,57 +478,26 @@ export class MapTools {
 						let wherers: string[]; wherers = [];
 						let wherevals: any[]; wherevals = [];
 						if ( refObj.filters ) {
-							const allFilters: any[] = [];
-							if ( refObj.filters.source && Array.isArray( refObj.filters.source ) ) {
-								refObj.filters.source.forEach( f => allFilters.push( Object.assign( { prefix: 'SRC_' }, f ) ) );
-							}
-							if ( refObj.filters.target && Array.isArray( refObj.filters.target ) ) {
-								refObj.filters.target.forEach( f => allFilters.push( Object.assign( { prefix: 'TAR_' }, f ) ) );
-							}
-							allFilters.filter( f => f.value ).forEach( filter => {
+							refObj.filters.filter( f => f.value ).forEach( filter => {
 								switch ( filter.type ) {
 									case 'is': {
-										if ( filter.isDescribed ) {
-											wherers.push( '(' + filter.prefix + filter.name + ' = ? OR ' + filter.prefix + filter.name + '_DESC = ?)' );
-											wherevals.push( filter.value );
-											wherevals.push( filter.value );
-										} else {
-											wherers.push( filter.prefix + filter.name + ' = ?' );
-											wherevals.push( filter.value );
-										}
+										wherers.push( filter.name + ' = ?' );
+										wherevals.push( filter.value );
 										break;
 									}
 									case 'co': {
-										if ( filter.isDescribed ) {
-											wherers.push( '(' + filter.prefix + filter.name + ' LIKE ? OR ' + filter.prefix + filter.name + '_DESC LIKE ?)' );
-											wherevals.push( '%' + filter.value + '%' );
-											wherevals.push( '%' + filter.value + '%' );
-										} else {
-											wherers.push( filter.prefix + filter.name + ' LIKE ?' );
-											wherevals.push( '%' + filter.value + '%' );
-										}
+										wherers.push( filter.name + ' LIKE ?' );
+										wherevals.push( '%' + filter.value + '%' );
 										break;
 									}
 									case 'bw': {
-										if ( filter.isDescribed ) {
-											wherers.push( '(' + filter.prefix + filter.name + ' LIKE ? OR ' + filter.prefix + filter.name + '_DESC LIKE ?)' );
-											wherevals.push( filter.value + '%' );
-											wherevals.push( filter.value + '%' );
-										} else {
-											wherers.push( filter.prefix + filter.name + ' LIKE ?' );
-											wherevals.push( filter.value + '%' );
-										}
+										wherers.push( filter.name + ' LIKE ?' );
+										wherevals.push( filter.value + '%' );
 										break;
 									}
 									case 'ew': {
-										if ( filter.isDescribed ) {
-											wherers.push( '(' + filter.prefix + filter.name + ' LIKE ? OR ' + filter.prefix + filter.name + '_DESC LIKE ?)' );
-											wherevals.push( '%' + filter.value );
-											wherevals.push( '%' + filter.value );
-										} else {
-											wherers.push( filter.prefix + filter.name + ' LIKE ?' );
-											wherevals.push( '%' + filter.value );
-										}
+										wherers.push( filter.name + ' LIKE ?' );
+										wherevals.push( '%' + filter.value );
 										break;
 									}
 								}

@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 
-import { HotTableModule } from 'angular-handsontable';
+import { HotTableModule } from '@handsontable/angular';
 
 import { AuthModule } from '../../welcome/auth.module';
 
