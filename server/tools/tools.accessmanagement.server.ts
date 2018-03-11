@@ -10,23 +10,23 @@ export class AcmServerTool {
 	}
 
 	public getAll = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM acmservers', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving access management server list has failed' } );
 				} else {
-					rows.forEach(( curRow: AcmServer ) => {
+					rows.forEach( ( curRow: AcmServer ) => {
 						curRow.password = '|||---protected---|||';
 					} );
 					resolve( rows );
 				}
 			} );
 		} );
-	};
+	}
 	public create = ( sentItem?: AcmServer ) => {
 		if ( sentItem ) { if ( sentItem.id ) { delete sentItem.id; } }
 		const newItem = this.tools.isEmptyObject( sentItem ) ? { name: 'New Server (Please change name)' } : sentItem as any;
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO acmservers SET ?', newItem, function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to create a new item.' } );
@@ -35,12 +35,12 @@ export class AcmServerTool {
 				}
 			} );
 		} );
-	};
+	}
 	public getOne = ( id: number ) => {
 		return this.getServerDetails( <AcmServer>{ id: id } );
-	};
+	}
 	public getServerDetails = ( refObj: AcmServer, shouldShowPassword?: boolean ): Promise<AcmServer> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM acmservers WHERE id = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving item with id ' + refObj.id + ' has failed' } );
@@ -58,7 +58,7 @@ export class AcmServerTool {
 		} );
 	}
 	public update = ( item: AcmServer ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( item.password === '|||---protected---|||' ) {
 				delete item.password;
 			} else if ( item.password ) {
@@ -73,9 +73,9 @@ export class AcmServerTool {
 				}
 			} );
 		} );
-	};
+	}
 	public delete = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM acmservers WHERE id = ?', id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to delete the item' } );

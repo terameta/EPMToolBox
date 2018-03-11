@@ -10,6 +10,11 @@
 				<span *ngIf="proceduresAll.length > 0">
 					<label for="procedureFilter" class="control-label">Filter:</label>
 					<div class="input-group">
+						<select class="form-control" name="selectedtable" (change)="tableChanged()" [(ngModel)]="currentStep.detailsObject.selectedTable">
+							<option value="0" disabled>Select</option>
+							<option *ngFor="let table of environmentTables" value="{{table.name}}">{{table.name}}</option>
+						</select>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
 						<input type="text" name="procedureFilter" id="procedureFilter" [(ngModel)]="filter" (keyup)="applyFilter()" class="form-control">
 						<span class="input-group-addon">
 							Showing {{procedures.length}}/{{proceduresAll.length}}
@@ -60,3 +65,4 @@
 		</div>
 	</div>
 </div>
+<pre>{{currentStep | json}}</pre>

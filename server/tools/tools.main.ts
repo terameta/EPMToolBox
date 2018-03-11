@@ -89,7 +89,7 @@ export class MainTools {
 		// console.log('CrTx:', crypted);
 		// console.log('-------- Encrypt End   ----------------');
 		return crypted;
-	};
+	}
 
 	public decryptTextOLDDONOTUSE = ( crypted: string ) => {
 		// console.log('-------- Decrypt Start ----------------');

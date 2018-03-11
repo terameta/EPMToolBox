@@ -442,23 +442,4 @@ export class EnvironmentTools {
 				catch( reject );
 		} );
 	}
-
-	// public getTypeDetails = ( refObj: DimeEnvironmentDetail ): Promise<DimeEnvironmentDetail> => {
-	// 	return new Promise( ( resolve, reject ) => {
-	// 		refObj.typedetails = EnumToArray( DimeEnvironmentType )[refObj.type];
-	// 		console.log( EnumToArray( DimeEnvironmentType ) );
-	// 		console.log( refObj.typedetails );
-	// 		resolve( refObj );
-	// 		// this.db.query( 'SELECT * FROM environmenttypes WHERE id = ?', refObj.type, ( err, results, fields ) => {
-	// 		// 	if ( err ) {
-	// 		// 		reject( err );
-	// 		// 	} else if ( results.length > 0 ) {
-	// 		// 		refObj.typedetails = results[0];
-	// 		// 		resolve( refObj );
-	// 		// 	} else {
-	// 		// 		resolve( refObj );
-	// 		// 	}
-	// 		// } );
-	// 	} );
-	// };
 }

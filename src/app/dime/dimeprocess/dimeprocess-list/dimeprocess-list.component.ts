@@ -4,6 +4,7 @@ import { DimeProcessService } from '../dimeprocess.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
 import { DimeTagService } from '../../dimetag/dimetag.service';
 import { DimeUIService } from '../../../ngstore/uistate.service';
+import { DimeProcessStatus } from '../../../../../shared/model/dime/process';
 
 @Component( {
 	selector: 'app-dimeprocess-list',
@@ -11,6 +12,7 @@ import { DimeUIService } from '../../../ngstore/uistate.service';
 	styleUrls: ['./dimeprocess-list.component.css']
 } )
 export class DimeprocessListComponent implements OnInit {
+	public dimeProcessStatus = DimeProcessStatus;
 
 	constructor(
 		public mainService: DimeProcessService,

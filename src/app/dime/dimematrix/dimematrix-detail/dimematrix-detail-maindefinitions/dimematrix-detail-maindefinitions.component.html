@@ -23,7 +23,7 @@
 					<ng-container *ngFor="let tagItem of tagService.itemList">
 						<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
 							<label>
-								<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="mainService.currentItem?.tags[tagItem.id]"> {{tagItem.name}} - {{tagItem.id}}
+								<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="mainService.currentItem?.tags[tagItem.id]"> {{tagItem.name}}
 							</label>
 						</div>
 					</ng-container>

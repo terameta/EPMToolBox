@@ -194,7 +194,6 @@ export class SmartViewTools {
 			body += '</slices>';
 			body += '</grid>';
 			body += '</req_WriteBack>';
-			// console.log( body );
 			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 		} ).then( response => {
 			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );

@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs/Subscription';
 import { ActivatedRoute, Params } from '@angular/router';
 import { SortByName, SortByDescription } from '../../../../../shared/utilities/utilityFunctions';
+import { DimeStream } from '../../../../../shared/model/dime/stream';
 
 @Component( {
 	selector: 'app-dimeprocess-step-detail-tarprocedure',
@@ -24,6 +25,8 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 	public targetStreamID: number;
 	public isRefreshingProcedureDetails = false;
 	private numberofListProcedureDetailsTry = 0;
+
+	public environmentTables: any[] = [];
 
 	constructor(
 		private route: ActivatedRoute,
@@ -100,7 +103,7 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 			setTimeout( () => { this.stepProcedureSelected( selectedProcedure ); }, 500 );
 		} else {
 			if ( selectedProcedure ) {
-				this.currentStep.detailsObject = {};
+				this.currentStep.detailsObject = { selectedTable: this.currentStep.detailsObject.selectedTable };
 				this.currentStep.detailsObject.name = selectedProcedure.name;
 				this.currentStep.detailsObject.hasRTP = selectedProcedure.hasRTP;
 				this.currentStep.detailsObject.type = selectedProcedure.type;
@@ -119,9 +122,20 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 		}
 	}
 
+	private streamImitator = () => {
+		const stream = <DimeStream>{};
+		stream.environment = this.mainService.currentItem.target;
+		stream.dbName = this.streamService.itemObject[this.targetStreamID].dbName;
+		if ( !this.currentStep.detailsObject.selectedTable ) {
+			this.currentStep.detailsObject.selectedTable = this.streamService.itemObject[this.targetStreamID].tableName;
+		}
+		stream.tableName = this.currentStep.detailsObject.selectedTable;
+		return stream;
+	}
+
 	public stepProcedureSelectedAction = ( selectedProcedure: any ) => {
 		this.isRefreshingProcedureDetails = true;
-		this.environmentService.listProcedureDetails( this.mainService.currentItem.target, { stream: this.streamService.itemObject[this.targetStreamID], procedure: selectedProcedure } ).
+		this.environmentService.listProcedureDetails( this.mainService.currentItem.target, { stream: this.streamImitator(), procedure: selectedProcedure } ).
 			subscribe( ( response ) => {
 				this.isRefreshingProcedureDetails = false;
 				if ( Array.isArray( response ) ) {
@@ -156,9 +170,11 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 		this.targetStreamID = this.mainService.currentItem.steps.filter( step => step.type === DimeProcessStepType.PushData ).map( step => step.referedid )[0];
 		if ( this.proceduresAll.length === 0 ) {
 			if ( this.mainService.currentItem.target && this.targetStreamID && this.streamService.itemObject[this.targetStreamID] ) {
+				this.environmentService.listTables( this.streamService.itemObject[this.targetStreamID].environment, this.streamService.itemObject[this.targetStreamID].dbName ).subscribe( ( result: any[] ) => {
+					this.environmentTables = result;
+				} );
 				// const targetStreamName = this.streamService.itemObject[this.targetStreamID].name;
-				// console.log( 'Target:', this.mainService.currentItem.target, 'StreamName:', this.streamService.itemObject[this.targetStreamID].name );
-				this.environmentService.listProcedures( this.mainService.currentItem.target, this.streamService.itemObject[this.targetStreamID] ).subscribe( ( result: any[] ) => {
+				this.environmentService.listProcedures( this.mainService.currentItem.target, this.streamImitator() ).subscribe( ( result: any[] ) => {
 					this.proceduresAll = result.sort( SortByName );
 					this.applyFilter();
 				}, error => {
@@ -172,4 +188,11 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 		}
 	}
 
+	public tableChanged = () => {
+		if ( this.currentStep.detailsObject.selectedTable !== '0' ) {
+			this.currentStep.detailsObject = { selectedTable: this.currentStep.detailsObject.selectedTable };
+			this.proceduresAll = [];
+			this.listProcedures();
+		}
+	}
 }
