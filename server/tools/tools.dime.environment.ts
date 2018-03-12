@@ -401,6 +401,9 @@ export class EnvironmentTools {
 						innerObj.database = refObj.stream.dbName;
 						innerObj.table = refObj.stream.tableName;
 						innerObj.procedure = refObj.procedure;
+						if ( refObj.procedure ) {
+							if ( refObj.procedure.tableName ) innerObj.table = refObj.procedure.tableName;
+						}
 						return this.sourceTools[innerObj.type].runProcedure( innerObj );
 					} ).
 					then( resolve ).

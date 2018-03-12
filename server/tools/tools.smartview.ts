@@ -38,7 +38,6 @@ export class SmartViewTools {
 	private smartviewRunBusinessRuleAction = ( payload ): Promise<any> => {
 		let body = '';
 		return this.smartviewOpenCube( payload ).then( resEnv => {
-
 			body += '<req_LaunchBusinessRule>';
 			body += '<sID>' + resEnv.SID + '</sID>';
 			body += '<cube>' + resEnv.table + '</cube>';
@@ -251,6 +250,7 @@ export class SmartViewTools {
 	private smartviewListBusinessRuleDetails = ( environment: DimeEnvironmentSmartView ) => {
 		return this.smartviewOpenCube( environment )
 			.then( resEnv => {
+				// tslint:disable-next-line:max-line-length
 				const body = '<req_EnumRunTimePrompts><sID>' + resEnv.SID + '</sID><cube>' + resEnv.table + '</cube ><rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule><ODL_ECID>0000</ODL_ECID></req_EnumRunTimePrompts>';
 				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
 			} )
@@ -306,6 +306,7 @@ export class SmartViewTools {
 		return this.smartviewOpenApplication( refObj )
 			.then( resEnv => {
 				refObj = resEnv;
+				// tslint:disable-next-line:max-line-length
 				const body = '<req_OpenCube><sID>' + refObj.SID + '</sID><srv>' + refObj.planningserver + '</srv><app>' + refObj.database + '</app><cube>HSP_DIM_' + refField.name + '</cube><type></type><url></url><form></form></req_OpenCube>';
 				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )
@@ -424,6 +425,7 @@ export class SmartViewTools {
 		return this.smartviewOpenCube( refObj )
 			.then( resEnv => {
 				refObj = resEnv;
+				// tslint:disable-next-line:max-line-length
 				const body = '<req_EnumDims><sID>' + refObj.SID + '</sID><srv>' + refObj.server + '</srv><app>' + refObj.database + '</app><cube>' + refObj.table + '</cube><alsTbl>Default</alsTbl><ODL_ECID>0000</ODL_ECID></req_EnumDims>';
 				return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } );
 			} )

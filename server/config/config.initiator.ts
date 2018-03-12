@@ -36,12 +36,13 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 	console.log( '===============================================' );
 
 	return checkVersion().
-		then( to0001 ).then( to0002 ).then( to0003 ).then( to0004 ).then( to0005 ).then( to0006 ).then( to0007 ).then( to0008 ).then( to0009 ).then( to0010 ).then( to0011 ).then( to0012 ).then( to0013 ).then( to0014 ).then( to0015 ).
-		then( to0016 ).then( to0017 ).then( to0018 ).then( to0019 ).then( to0020 ).then( to0021 ).then( to0022 ).then( to0023 ).then( to0024 ).then( to0025 ).then( to0026 ).then( to0027 ).then( to0028 ).then( to0029 ).then( to0030 ).
-		then( to0031 ).then( to0032 ).then( to0033 ).then( to0034 ).then( to0035 ).then( to0036 ).then( to0037 ).then( to0038 ).then( to0039 ).then( to0040 ).then( to0041 ).then( to0042 ).then( to0043 ).then( to0044 ).then( to0045 ).
-		then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).
-		then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).
-		then( to0076 ).then( to0077 ).then( to0078 ).then( to0079 ).then( to0080 ).then( to0081 ).then( to0082 ).then( to0083 ).then( to0084 ).then( to0085 ).
+		then( to0001 ).then( to0002 ).then( to0003 ).then( to0004 ).then( to0005 ).then( to0006 ).then( to0007 ).then( to0008 ).then( to0009 ).then( to0010 ).then( to0011 ).then( to0012 ).then( to0013 ).then( to0014 ).
+		then( to0015 ).then( to0016 ).then( to0017 ).then( to0018 ).then( to0019 ).then( to0020 ).then( to0021 ).then( to0022 ).then( to0023 ).then( to0024 ).then( to0025 ).then( to0026 ).then( to0027 ).then( to0028 ).
+		then( to0029 ).then( to0030 ).then( to0031 ).then( to0032 ).then( to0033 ).then( to0034 ).then( to0035 ).then( to0036 ).then( to0037 ).then( to0038 ).then( to0039 ).then( to0040 ).then( to0041 ).then( to0042 ).
+		then( to0043 ).then( to0044 ).then( to0045 ).then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).
+		then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).
+		then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).then( to0076 ).then( to0077 ).then( to0078 ).then( to0079 ).then( to0080 ).then( to0081 ).then( to0082 ).then( to0083 ).then( to0084 ).
+		then( to0085 ).then( to0086 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -50,6 +51,23 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+const to0086 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 86;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			db.query( 'ALTER TABLE processsteps CHANGE details details LONGTEXT NULL DEFAULT NULL', ( err, result ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					resolve( utils.updateToVersion( nextVersion ) );
+				}
+			} );
+		}
+	} );
+};
 const to0085 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const nextVersion = 85;
@@ -61,12 +79,55 @@ const to0085 = ( currentVersion: number ) => {
 				if ( err ) {
 					reject( err );
 				} else {
+					const promises: any[] = [];
 					rows.filter( row => row.type === 'tarprocedure' ).forEach( row => {
-						console.log( row.id, row.process, row.type, row.referedid, row.details ? row.details.toString() : '', row.position );
+						const stepDetails = row.details ? JSON.parse( row.details.toString() ) : {};
+						if ( !stepDetails.selectedTable ) {
+							rows.filter( r => r.process === row.process && r.type === 'pushdata' ).forEach( r => {
+								if ( r.referedid ) promises.push( to0085completeall( r.referedid, row.id, stepDetails ) );
+							} );
+						}
 					} );
+					Promise.all( promises ).then( () => {
+						resolve( utils.updateToVersion( nextVersion ) );
+					} ).catch( reject );
 				}
 			} );
 		}
+	} );
+};
+const to0085completeall = ( streamid: number, stepid: number, details: any ) => {
+	return new Promise( ( resolve, reject ) => {
+		to0085findTableName( streamid ).
+			then( ( tableName: string ) => {
+				details.selectedTable = tableName;
+
+				return to0085assignTableName( stepid, JSON.stringify( details ) );
+			} ).then( resolve ).catch( reject );
+	} );
+};
+const to0085findTableName = ( streamid: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'SELECT * FROM streams WHERE id = ?', streamid, ( err, rows, fields ) => {
+			if ( err ) {
+				reject( err );
+			} else if ( rows.length !== 1 ) {
+				resolve( streamid.toString() );
+			} else {
+				resolve( rows[0].tableName );
+			}
+		} );
+	} );
+};
+const to0085assignTableName = ( id: number, details: string ) => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'UPDATE processsteps SET details = ? WHERE id = ?', [details, id], ( err, result ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve();
+			}
+		} );
 	} );
 };
 const to0084 = ( currentVersion: number ) => {
