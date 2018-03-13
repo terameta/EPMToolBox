@@ -5,7 +5,6 @@
 			<i class="fa fa-plus fa-fw"></i> New Transformation
 		</button>
 		<hr>
-		<pre>{{currentStep|json}}</pre>
 		<ng-container *ngIf="currentStep.detailsObject">
 			<div *ngFor="let transformation of currentStep.detailsObject; let i = index;let last = last; let first = first">
 				<div class="form-inline">
