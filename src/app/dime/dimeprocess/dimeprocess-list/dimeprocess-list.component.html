@@ -7,7 +7,7 @@
 					<th>Source Environment</th>
 					<th>Target Environment</th>
 					<th>Status</th>
-					<th width="240">Actions</th>
+					<th width="260">Actions</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -47,8 +47,11 @@
 									<button class="btn btn-xs btn-default" [routerLink]="['../process-detail', itemid, 'filters']" title="Filters">
 										<i class="fa fa-filter fa-fw"></i>
 									</button>
-									<button class="btn btn-xs btn-default" [routerLink]="['../process-detail', itemid, 'filtersdatafile']" title="Filters">
+									<button class="btn btn-xs btn-default" [routerLink]="['../process-detail', itemid, 'filtersdatafile']" title="Filters for Data File">
 										<i class="fa fa-filter fa-fw"></i>
+									</button>
+									<button class="btn btn-xs btn-default" [routerLink]="['../process-detail', itemid, 'history']" title="History">
+										<i class="fa fa-history fa-fw"></i>
 									</button>
 									<button class="btn btn-xs btn-success" (click)="mainService.sendDataFile(itemid)">
 										<i class="fa fa-file-excel-o fa-fw"></i>

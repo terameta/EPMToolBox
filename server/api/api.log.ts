@@ -21,5 +21,6 @@ export class ApiLog {
 
 	private setRoutes = () => {
 		this.apiRoutes.get( '/:id', ( req, res ) => { this.rester.respond( this.logTool.checkLog, req.params.id, req, res ); } );
+		this.apiRoutes.get( '/getall/:type/:id', ( req, res ) => { this.rester.respond( this.logTool.getAllLogs, { type: req.params.type, id: req.params.id }, req, res ); } );
 	}
 }

@@ -30,6 +30,7 @@ import { DimeprocessStepDetailTarprocedureComponent } from './dimeprocess-step-d
 import { DimeprocessStepDetailSenddataComponent } from './dimeprocess-step-detail-senddata/dimeprocess-step-detail-senddata.component';
 import { DimeprocessStepDetailSendmissingComponent } from './dimeprocess-step-detail-sendmissing/dimeprocess-step-detail-sendmissing.component';
 import { DimeprocessStepDetailSendlogsComponent } from './dimeprocess-step-detail-sendlogs/dimeprocess-step-detail-sendlogs.component';
+import { DimeprocessDetailTabHistoryComponent } from './dimeprocess-detail/dimeprocess-detail-tab-history/dimeprocess-detail-tab-history.component';
 
 const dimeProcessRoutes: Routes = [
 	{ path: 'dime/processes', pathMatch: 'prefix', redirectTo: 'dime/processes/process-list' },
@@ -48,7 +49,8 @@ const dimeProcessRoutes: Routes = [
 			},
 			{ path: 'defaulttargets', component: DimeprocessDetailTabDefaulttargetsComponent },
 			{ path: 'filters', component: DimeprocessDetailTabFiltersComponent },
-			{ path: 'filtersdatafile', component: DimeprocessDetailTabFiltersdatafileComponent }
+			{ path: 'filtersdatafile', component: DimeprocessDetailTabFiltersdatafileComponent },
+			{ path: 'history', component: DimeprocessDetailTabHistoryComponent }
 		]
 	},
 	{ path: 'process-step-detail/:id', component: DimeprocessStepDetailComponent }
@@ -90,7 +92,8 @@ const dimeProcessRoutes: Routes = [
 		DimeprocessStepDetailTarprocedureComponent,
 		DimeprocessStepDetailSenddataComponent,
 		DimeprocessStepDetailSendmissingComponent,
-		DimeprocessStepDetailSendlogsComponent
+		DimeprocessStepDetailSendlogsComponent,
+		DimeprocessDetailTabHistoryComponent
 	]
 } )
 export class DimeprocessModule { }

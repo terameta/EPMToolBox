@@ -1,0 +1,14 @@
+<form class="form-inline">
+	<div class="form-group">
+		<div class="input-group">
+			<div class="input-group-addon">
+				Select Log:
+			</div>
+			<select name="selectedLog" id="selectedLog" class="form-control" [(ngModel)]="currentLog">
+				<option *ngFor="let log of allLogs; let i = index;" value="{{i}}">{{log.start}}</option>
+			</select>
+		</div>
+	</div>
+</form>
+<hr>
+<pre>{{allLogs[currentLog]?.details}}</pre>

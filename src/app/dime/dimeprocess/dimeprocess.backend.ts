@@ -32,6 +32,7 @@ export class DimeProcessBackend {
 	public checkLog = ( payload: number ) => this.http.get<DimeLog>( '/api/log/' + payload );
 	public unlock = ( payload: number ) => this.http.get( this.baseUrl + '/unlock/' + payload );
 	public sendDataFile = ( payload: number ) => this.http.get( this.baseUrl + '/sendDataFile/' + payload );
+	public getAllLogs = ( payload: number ) => this.http.get( '/api/log/getall/process/' + payload );
 
 	/**
 	 *

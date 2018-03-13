@@ -67,4 +67,18 @@ export class ATLogger {
 	public recordLog = ( details: string, parent: number, reftype: string, refid: number ) => {
 		return this.openLog( details, parent, reftype, refid );
 	}
+	public getAllLogs = ( payload: { type: string, id: number } ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.db.query( 'SELECT * FROM logs WHERE reftype = ? AND refid = ? ORDER BY end DESC', [payload.type, payload.id], ( err, rows, fields ) => {
+				if ( err ) {
+					reject( err );
+				} else {
+					rows.forEach( row => {
+						row.details = row.details.toString();
+					} );
+					resolve( rows );
+				}
+			} );
+		} );
+	}
 }
