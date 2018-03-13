@@ -5,71 +5,74 @@
 			<i class="fa fa-plus fa-fw"></i> New Transformation
 		</button>
 		<hr>
-		<div *ngFor="let transformation of currentStep.detailsObject; let i = index;let last = last; let first = first">
-			<div class="form-inline">
-				<div class="input-group">
-					<span class="input-group-addon">When</span>
-					<select name="transformation{{i}}when" class="form-control" [(ngModel)]="transformation.when" (change)="transformation.field = ''">
-						<option value="SRC">Source Field</option>
-						<option value="TAR">Target Field</option>
-					</select>
+		<pre>{{currentStep|json}}</pre>
+		<ng-container *ngIf="currentStep.detailsObject">
+			<div *ngFor="let transformation of currentStep.detailsObject; let i = index;let last = last; let first = first">
+				<div class="form-inline">
+					<div class="input-group">
+						<span class="input-group-addon">When</span>
+						<select name="transformation{{i}}when" class="form-control" [(ngModel)]="transformation.when" (change)="transformation.field = ''">
+							<option value="SRC">Source Field</option>
+							<option value="TAR">Target Field</option>
+						</select>
 
-					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
 
-					<select name="transformation{{i}}field" class="form-control" *ngIf="transformation.when == 'SRC'" [(ngModel)]="transformation.field">
-						<option *ngFor="let field of sourceFields" [value]="field.name">{{field.name}}</option>
-					</select>
-					<select name="transformation{{i}}field" class="form-control" *ngIf="transformation.when == 'TAR'" [(ngModel)]="transformation.field">
-						<option *ngFor="let field of targetFields" [value]="field.name">{{field.name}}</option>
-					</select>
+						<select name="transformation{{i}}field" class="form-control" *ngIf="transformation.when == 'SRC'" [(ngModel)]="transformation.field">
+							<option *ngFor="let field of sourceFields" [value]="field.name">{{field.name}}</option>
+						</select>
+						<select name="transformation{{i}}field" class="form-control" *ngIf="transformation.when == 'TAR'" [(ngModel)]="transformation.field">
+							<option *ngFor="let field of targetFields" [value]="field.name">{{field.name}}</option>
+						</select>
 
-					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
 
-					<select name="transformation{{i}}comparer" class="form-control" [(ngModel)]="transformation.comparer">
-						<option value="like">is like</option>
-						<option value="equals">is equal to</option>
-					</select>
+						<select name="transformation{{i}}comparer" class="form-control" [(ngModel)]="transformation.comparer">
+							<option value="like">is like</option>
+							<option value="equals">is equal to</option>
+						</select>
 
-					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
 
-					<input type="text" name="transformation{{i}}comparison" class="form-control" size="6" [(ngModel)]="transformation.comparison">
+						<input type="text" name="transformation{{i}}comparison" class="form-control" size="6" [(ngModel)]="transformation.comparison">
 
-					<span class="input-group-addon">then edit</span>
-					<select name="transformation{{i}}whichfield" class="form-control" [(ngModel)]="transformation.whichField">
-						<option value="current">Current Field</option>
-						<option value="data">Data Field</option>
-					</select>
+						<span class="input-group-addon">then edit</span>
+						<select name="transformation{{i}}whichfield" class="form-control" [(ngModel)]="transformation.whichField">
+							<option value="current">Current Field</option>
+							<option value="data">Data Field</option>
+						</select>
 
-					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
 
-					<select name="transformation{{i}}operation" class="form-control" [(ngModel)]="transformation.operation" (change)="transformation.operator = ''">
-						<option value="set">by setting to</option>
-						<option value="multiply">by multiplying with</option>
-						<option value="divide">by dividing with</option>
-						<option value="add">by adding</option>
-						<option value="subtract">by subtracting</option>
-					</select>
+						<select name="transformation{{i}}operation" class="form-control" [(ngModel)]="transformation.operation" (change)="transformation.operator = ''">
+							<option value="set">by setting to</option>
+							<option value="multiply">by multiplying with</option>
+							<option value="divide">by dividing with</option>
+							<option value="add">by adding</option>
+							<option value="subtract">by subtracting</option>
+						</select>
 
-					<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
+						<span class="input-group-addon" style="width:0px; padding-left:0px; padding-right:0px; border:none;"></span>
 
-					<input type="text" name="transformation{{i}}operator" class="form-control" size="6" [(ngModel)]="transformation.operator">
+						<input type="text" name="transformation{{i}}operator" class="form-control" size="6" [(ngModel)]="transformation.operator">
 
-					<span class="input-group-addon" style="padding:0 2px">
-						<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="stepTransformationMove(transformation, 'down')">
-							<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
-						</button>
-						<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!">
-							<i class="fa fa-fw" aria-hidden="true"></i>
-						</button>
-						<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="stepTransformationMove(transformation, 'up')">
-							<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
-						</button>
-						<button type="button" class="btn btn-xs btn-danger" (click)="stepTransformationDelete(transformation, i)">
-							<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
-						</button>
-					</span>
+						<span class="input-group-addon" style="padding:0 2px">
+							<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="stepTransformationMove(transformation, 'down')">
+								<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
+							</button>
+							<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!">
+								<i class="fa fa-fw" aria-hidden="true"></i>
+							</button>
+							<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="stepTransformationMove(transformation, 'up')">
+								<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
+							</button>
+							<button type="button" class="btn btn-xs btn-danger" (click)="stepTransformationDelete(transformation, i)">
+								<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+							</button>
+						</span>
+					</div>
 				</div>
 			</div>
-		</div>
+		</ng-container>
 	</div>
 </div>

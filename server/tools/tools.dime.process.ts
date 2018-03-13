@@ -221,6 +221,7 @@ export class ProcessTools {
 			if ( step.type === DimeProcessStepType.SendData ) { step.detailsObject = []; }
 			if ( step.type === DimeProcessStepType.SendLogs ) { step.detailsObject = []; }
 			if ( step.type === DimeProcessStepType.SendMissingMaps ) { step.detailsObject = []; }
+			if ( step.type === DimeProcessStepType.TransformData ) { step.detailsObject = []; }
 		}
 		return step;
 	}
