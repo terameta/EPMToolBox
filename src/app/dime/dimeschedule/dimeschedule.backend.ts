@@ -14,4 +14,5 @@ export class DimeScheduleBackend {
 	public oneUpdate = ( payload: DimeSchedule ) => this.http.put( this.baseUrl, payload );
 	public oneDelete = ( id: number ) => this.http.delete( this.baseUrl + '/' + id );
 	public unlock = ( payload: number ) => this.http.get( this.baseUrl + '/unlock/' + payload );
+	public getAllLogs = ( payload: number ) => this.http.get( '/api/log/getall/schedule/' + payload );
 }

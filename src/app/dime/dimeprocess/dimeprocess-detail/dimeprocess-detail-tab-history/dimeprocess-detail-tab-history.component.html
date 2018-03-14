@@ -7,8 +7,13 @@
 			<select name="selectedLog" id="selectedLog" class="form-control" [(ngModel)]="currentLog">
 				<option *ngFor="let log of allLogs; let i = index;" value="{{i}}">{{log.start}}</option>
 			</select>
+			<div class="input-group-btn">
+				<button class="btn btn-default" type="button" (click)="refreshLogs()">
+					<i class="fa fa-refresh fa-fw"></i> Refresh
+				</button>
+			</div>
 		</div>
 	</div>
 </form>
 <hr>
-<pre>{{allLogs[currentLog]?.details}}</pre>
+<pre *ngIf="allLogs[currentLog]">{{allLogs[currentLog].details}}</pre>

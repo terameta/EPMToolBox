@@ -41,6 +41,13 @@ export class DimeprocessDetailTabHistoryComponent implements OnInit, OnDestroy {
 	}
 
 	public refreshLogs = () => {
-		this.subscriptions.push( this.backend.getAllLogs( this.mainService.currentItem.id ).subscribe( ( result: DimeLog[] ) => { this.allLogs = result; } ) );
+		this.subscriptions.push( this.backend.getAllLogs( this.mainService.currentItem.id ).subscribe( ( result: DimeLog[] ) => { this.allLogs = this.prepareLogs( result ); } ) );
+	}
+	private prepareLogs = ( logs: DimeLog[] ) => {
+		logs.forEach( log => {
+			log.start = new Date( log.start );
+			log.end = new Date( log.end );
+		} );
+		return logs;
 	}
 }
