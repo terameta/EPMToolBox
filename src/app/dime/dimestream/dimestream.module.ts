@@ -20,6 +20,9 @@ import { DimeStreamDetailFieldsRdbtComponent } from './dimestream-detail/dime-st
 import { DimeStreamDetailFieldDescriptionsHpdbComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-hpdb/dime-stream-detail-field-descriptions-hpdb.component';
 import { DimeStreamDetailFieldDescriptionsRdbtComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-rdbt/dime-stream-detail-field-descriptions-rdbt.component';
 import { DimeStreamDetailFieldDescriptionsRouterComponent } from './dimestream-detail/dime-stream-detail-field-descriptions-router/dime-stream-detail-field-descriptions-router.component';
+import { DimeStreamDetailExportComponent } from './dimestream-detail/dime-stream-detail-export/dime-stream-detail-export.component';
+import { DimeStreamDetailExportRDBTComponent } from './dimestream-detail/dime-stream-detail-export-rdbt/dime-stream-detail-export-rdbt.component';
+import { DimeStreamDetailExportHPDBComponent } from './dimestream-detail/dime-stream-detail-export-hpdb/dime-stream-detail-export-hpdb.component';
 
 const dimeStreamRoutes: Routes = [
 	{ path: 'dime/streams', pathMatch: 'prefix', redirectTo: 'dime/streams/stream-list' },
@@ -34,10 +37,11 @@ const dimeStreamRoutes: Routes = [
 					{ path: '', component: DimeStreamDetailFieldDescriptionsComponent },
 					{ path: ':fieldid', component: DimeStreamDetailFieldDescriptionsComponent }
 				]
-			}
+			},
+			{ path: 'export', component: DimeStreamDetailExportComponent }
 		]
 	}
-]
+];
 
 @NgModule( {
 	imports: [
@@ -66,7 +70,10 @@ const dimeStreamRoutes: Routes = [
 		DimeStreamDetailFieldsRdbtComponent,
 		DimeStreamDetailFieldDescriptionsHpdbComponent,
 		DimeStreamDetailFieldDescriptionsRdbtComponent,
-		DimeStreamDetailFieldDescriptionsRouterComponent
+		DimeStreamDetailFieldDescriptionsRouterComponent,
+		DimeStreamDetailExportComponent,
+		DimeStreamDetailExportRDBTComponent,
+		DimeStreamDetailExportHPDBComponent
 	]
 } )
 export class DimestreamModule { }

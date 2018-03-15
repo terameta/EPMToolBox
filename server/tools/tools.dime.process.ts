@@ -1797,7 +1797,7 @@ export class ProcessTools {
 		return new Promise( ( resolve, reject ) => {
 			this.logTool.appendLog( refProcess.currentlog, 'Step ' + refStep.position + ': Transform data is initiating.' ).then( () => {
 				let transformations: DimeProcessTransformation[];
-				transformations = JSON.parse( refStep.details ).sort( SortByPosition );
+				transformations = JSON.parse( refStep.details ? refStep.details : '[]' ).sort( SortByPosition );
 				return this.runTransformationsAction( refProcess, transformations, refStep );
 			} ).then( resolve ).catch( reject );
 		} );
