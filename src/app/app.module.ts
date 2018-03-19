@@ -107,8 +107,7 @@ export function tokenGetter() {
 		HttpClientModule,
 		JwtModule.forRoot( {
 			config: {
-				tokenGetter: tokenGetter,
-				// whitelistedDomains: ['localhost:7000', 'localhost:4200']
+				tokenGetter: tokenGetter
 			}
 		} ),
 		WelcomeModule,

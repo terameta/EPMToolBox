@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DimeStreamService } from '../../dimestream.service';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -6,8 +7,12 @@ import { Component, OnInit } from '@angular/core';
 	styleUrls: ['./dime-stream-detail-export-hpdb.component.scss']
 } )
 export class DimeStreamDetailExportHPDBComponent implements OnInit {
+	public rowDims: any[] = [];
+	public colDims: any[] = [];
 
-	constructor() { }
+	constructor(
+		public mainService: DimeStreamService
+	) { }
 
 	ngOnInit() {
 	}

@@ -663,7 +663,7 @@ export class MapTools {
 		return new Promise( ( resolve, reject ) => {
 			this.getOne( refObj.id ).
 				then( ( curMap: any ) => {
-					curMap.filters = {};
+					curMap.filters = [];
 					return curMap;
 				} ).
 				then( this.retrieveMapDataAction ).
