@@ -1,1 +1,118 @@
-<pre>{{mainService.currentItem | json}}</pre>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-xs-4">
+			<div class="box box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						Available Dimensions
+					</h3>
+				</div>
+				<div class="box-body">
+					<div class="table-response">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Dimension</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr *ngFor="let field of mainService.currentItem?.fieldList; let i = index">
+									<ng-container *ngIf="!isAssigned(field.name)">
+										<td>{{field.name}}</td>
+										<td>
+											<div class="btn-group btn-group-xs">
+												<button class="btn btn-default" title="Assign to Columns" (click)="addToCols(field.name)">
+													<i class="fa fa-fw fa-columns"></i>
+												</button>
+												<button class="btn btn-default" title="Assign to Rows" (click)="addToRows(field.name)">
+													<i class="fa fa-fw fa-bars"></i>
+												</button>
+												<button class="btn btn-default" title="Assign to Filters" (click)="addToPOVs(field.name)">
+													<i class="fa fa-fw fa-filter"></i>
+												</button>
+											</div>
+										</td>
+									</ng-container>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-8">
+			<div class="box box-success">
+				<div class="box-header with-border">
+					<h3 class="box-title">
+						Assigned Dimensions
+					</h3>
+				</div>
+				<div class="box-body">
+					<div class="table-responsive">
+						<table class="table table-condensed" *ngIf="povDims.length > 0">
+							<thead>
+								<tr>
+									<th>POV:</th>
+								</tr>
+								<tr>
+									<th>&nbsp;</th>
+									<th *ngFor="let dimension of povDims;">
+										{{dimension.name}}
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<b>Member:</b>
+									</td>
+									<td *ngFor="let dimension of povDims;">
+										{{dimension.name}}
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<b>Selection:</b>
+									</td>
+									<td *ngFor="let dimension of povDims;">
+										Selection
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="table-response">
+						<table class="table table-condensed">
+							<thead>
+								<tr>
+									<th>Dimension</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr *ngFor="let field of mainService.currentItem?.fieldList; let i = index">
+									<td>{{field.name}}</td>
+									<td>
+										<div class="btn-group btn-group-xs">
+											<button class="btn btn-default" title="Assign to Columns">
+												<i class="fa fa-fw fa-columns"></i>
+											</button>
+											<button class="btn btn-default" title="Assign to Rows">
+												<i class="fa fa-fw fa-bars"></i>
+											</button>
+											<button class="btn btn-default" title="Assign to Filters">
+												<i class="fa fa-fw fa-filter"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<pre>{{mainService.currentItem.fieldList | json}}</pre>
