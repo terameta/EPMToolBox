@@ -294,6 +294,87 @@ export class SmartViewTools {
 				}
 			} );
 	}
+	public getDescriptionsWithHierarchy = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ) => {
+		return this.smartviewGetDescriptionsWithHierarchy( refObj, refField ).then( result => result.memberList );
+	}
+	private smartviewGetDescriptionsWithHierarchy = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
+		return this.smartviewListAliasTables( refObj )
+			.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
+			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsWithHierarchyAction( refObj, refField ); } );
+	}
+	private smartviewGetDescriptionsWithHierarchyAction = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
+		const numberofColumns = 4; // Because columns are membername, description, desired aliastable name and parent
+		let body = '';
+		body += '<req_ExecuteGrid>';
+		body += '<sID>' + refObj.SID + '</sID>';
+		body += '<action>zoomin</action>';
+		body += '<ords>' + numberofColumns + '</ords>';
+		body += '<preferences>';
+		body += '<row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>';
+		body += '<celltext val="1"/>';
+		body += '<zoomin ancestor="top" mode="descendents"/>';
+		body += '<navigate withData="1"/>';
+		body += '<includeSelection val="1"/>';
+		body += '<repeatMemberLabels val="1"/>';
+		body += '<withinSelectedGroup val="0"/>';
+		body += '<removeUnSelectedGroup val="0"/>';
+		body += '<col_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>';
+		body += '<block_suppression missing="0"/>';
+		body += '<includeDescriptionInLabel val="0"/>';
+		body += '<missingLabelText val=""/>';
+		body += '<noAccessText val="#No Access"/>';
+		body += '<essIndent val="2"/>';
+		body += '<sliceLimitation rows="1048576" cols="16384"/>';
+		body += '</preferences>';
+		body += '<grid>';
+		body += '<cube>' + refObj.table + '</cube>';
+		body += '<dims>';
+		body += '<dim id="0" name="' + refField.name + '" row="0" hidden="0" expand="0"/>';
+		body += '<dim id="1" name="Member Properties" col="0" hidden="0" expand="0"/>';
+		body += '</dims>';
+		body += '<perspective type="Reality"/>';
+		body += '<slices>';
+		body += '<slice rows="2" cols="' + numberofColumns + '">';
+		body += '<data>';
+		body += '<range start="0" end="' + ( numberofColumns * 2 - 1 ) + '">';
+		body += '<vals>|Description|Parent Member|' + refField.descriptiveTable + ' Alias Table' + '|' + refField.name + '|||</vals>';
+		body += '<types>7|0|0|0|0|13|13|13</types>';
+		body += '</range>';
+		body += '</data>';
+		body += '<metadata/>';
+		body += '<conditionalFormats/>';
+		body += '</slice>';
+		body += '</slices>';
+		body += '</grid>';
+		body += '</req_ExecuteGrid>';
+		return this.smartviewPoster( { url: refObj.planningurl, body, cookie: refObj.cookies } )
+			.then( response => {
+				let isSuccessful = false;
+				response.$( 'body' ).children().toArray().forEach( curElem => {
+					if ( curElem.name === 'res_executegrid' ) { isSuccessful = true; }
+				} );
+
+				const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
+
+				if ( !isSuccessful ) {
+					return Promise.reject( new Error( 'Failure to get descriptions ' + refObj.name + '@smartviewGetDescriptionsAction' ) );
+				} else if ( rangeStart > 1 ) {
+					return Promise.reject( new Error( 'Failure to get descriptions, wrong number returned for rangeStart ' + refObj.name + '@smartviewGetDescriptionsAction' ) );
+				} else {
+					const vals = response.$( 'vals' ).text().split( '|' );
+					vals.splice( 0, ( numberofColumns - rangeStart ) );
+					refObj.memberList = [];
+					while ( vals.length ) {
+						const curMemberArray = vals.splice( 0, numberofColumns );
+						const curMember: { RefField: string, Description: string, Parent: string } = { RefField: curMemberArray[0], Description: curMemberArray[numberofColumns - 1], Parent: curMemberArray[2] };
+						if ( !curMember.Description ) { curMember.Description = curMemberArray[1]; }
+						if ( !curMember.Description ) { curMember.Description = curMemberArray[0]; }
+						refObj.memberList.push( curMember );
+					}
+					return Promise.resolve( refObj );
+				}
+			} );
+	}
 	public getDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ) => {
 		return this.smartviewGetDescriptions( refObj, refField ).then( result => result.memberList );
 	}

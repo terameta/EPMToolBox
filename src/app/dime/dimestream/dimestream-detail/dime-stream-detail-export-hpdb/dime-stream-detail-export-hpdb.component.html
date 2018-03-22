@@ -1,118 +1,163 @@
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-xs-4">
-			<div class="box box-primary">
-				<div class="box-header with-border">
-					<h3 class="box-title">
-						Available Dimensions
-					</h3>
+<div class="table-responsive">
+	<table class="table table-condensed">
+		<tr>
+			<td colspan="2">
+				<div class="table-responsive">
+					<table class="table table-condensed" *ngIf="povDims.length > 0">
+						<thead>
+							<tr>
+								<th>POVs</th>
+								<th>Dimension</th>
+								<th>Member Selection</th>
+								<th>Selection Type</th>
+								<th>Status</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr *ngFor="let dimension of povDims; let i = index;">
+								<td>&nbsp;</td>
+								<td>{{dimension.name}}</td>
+								<td>
+									<select name="dim{{i}}member" class="form-control" style="padding: 1px 6px; border: 0;" [disabled]="dimension.status != 'Ready'">
+										<option value="SRC">Source Field</option>
+										<option value="TAR">Target Field</option>
+									</select>
+								</td>
+								<td>
+									<select name="dim{{i}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="dimension.selectiontype" disabled>
+										<option value="member">Member</option>
+										<option value="level0">Level 0 Descendants</option>
+										<option value="descendants">Descendants</option>
+										<option value="idescendants">Descendants &amp; Member</option>
+										<option value="children">Children</option>
+										<option value="ichildren">Children &amp; Member</option>
+									</select>
+								</td>
+								<td>{{dimension.status}}</td>
+								<td>
+									<div class="btn-group btn-group-xs">
+										<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(dimension.name)">
+											<i class="fa fa-fw fa-bars"></i>
+										</button>
+										<button class="btn btn-default" type="button" title="Move to columns" (click)="addToCols(dimension.name)">
+											<i class="fa fa-fw fa-columns"></i>
+										</button>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
-				<div class="box-body">
-					<div class="table-response">
-						<table class="table table-condensed">
-							<thead>
-								<tr>
-									<th>Dimension</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr *ngFor="let field of mainService.currentItem?.fieldList; let i = index">
-									<ng-container *ngIf="!isAssigned(field.name)">
-										<td>{{field.name}}</td>
-										<td>
-											<div class="btn-group btn-group-xs">
-												<button class="btn btn-default" title="Assign to Columns" (click)="addToCols(field.name)">
-													<i class="fa fa-fw fa-columns"></i>
-												</button>
-												<button class="btn btn-default" title="Assign to Rows" (click)="addToRows(field.name)">
-													<i class="fa fa-fw fa-bars"></i>
-												</button>
-												<button class="btn btn-default" title="Assign to Filters" (click)="addToPOVs(field.name)">
-													<i class="fa fa-fw fa-filter"></i>
-												</button>
-											</div>
-										</td>
-									</ng-container>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-xs-8">
-			<div class="box box-success">
-				<div class="box-header with-border">
-					<h3 class="box-title">
-						Assigned Dimensions
-					</h3>
-				</div>
-				<div class="box-body">
-					<div class="table-responsive">
-						<table class="table table-condensed" *ngIf="povDims.length > 0">
-							<thead>
-								<tr>
-									<th>POV:</th>
-								</tr>
-								<tr>
-									<th>&nbsp;</th>
-									<th *ngFor="let dimension of povDims;">
-										{{dimension.name}}
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>
-										<b>Member:</b>
-									</td>
-									<td *ngFor="let dimension of povDims;">
-										{{dimension.name}}
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<b>Selection:</b>
-									</td>
-									<td *ngFor="let dimension of povDims;">
-										Selection
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-					<div class="table-response">
-						<table class="table table-condensed">
-							<thead>
-								<tr>
-									<th>Dimension</th>
-									<th>Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr *ngFor="let field of mainService.currentItem?.fieldList; let i = index">
-									<td>{{field.name}}</td>
-									<td>
+			</td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>
+				<div class="table-responsive">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th [colSpan]="(colDims.length? colDims.length: 1) * cols.length">
+									<div class="btn-group btn-group-xs">
+										<button class="btn btn-default" type="button" title="Add column" (click)="addCol()">
+											<i class="fa fa-plus fw"></i>
+										</button>
+									</div>
+									Columns:
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td [colSpan]="colDims.length" *ngFor="let col of cols; let i = index">Column {{getColumnHeader(i)}}</td>
+							</tr>
+							<tr>
+								<ng-container *ngFor="let col of cols;">
+									<td *ngFor="let dimension of colDims;">
 										<div class="btn-group btn-group-xs">
-											<button class="btn btn-default" title="Assign to Columns">
-												<i class="fa fa-fw fa-columns"></i>
-											</button>
-											<button class="btn btn-default" title="Assign to Rows">
+											<button class="btn btn-default" type="button" title="{{dimension.name}}">{{dimension.name}}</button>
+											<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(dimension.name)">
 												<i class="fa fa-fw fa-bars"></i>
 											</button>
-											<button class="btn btn-default" title="Assign to Filters">
+											<button class="btn btn-default" type="button" title="Move to POV" (click)="addToPOVs(dimension.name)">
 												<i class="fa fa-fw fa-filter"></i>
 											</button>
 										</div>
 									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+								</ng-container>
+							</tr>
+						</tbody>
+					</table>
 				</div>
-			</div>
-		</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div class="table-responsive">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th>
+									<div class="btn-group btn-group-xs">
+										<button class="btn btn-default" type="button" title="Add row" (click)="addRow()">
+											<i class="fa fa-plus fw"></i>
+										</button>
+									</div>
+									Rows:
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<ng-container *ngFor="let row of rows;let i = index;">
+								<tr>
+									<td rowspan="3">Row {{i+1}}</td>
+									<td *ngFor="let dimension of rowDims;">
+										{{dimension.name}}
+									</td>
+								</tr>
+								<tr>
+									<td *ngFor="let dimension of rowDims;">
+										{{dimension.name}}
+									</td>
+								</tr>
+								<tr>
+									<td *ngFor="let dimension of rowDims;">
+										{{dimension.name}}
+									</td>
+								</tr>
+							</ng-container>
+						</tbody>
+					</table>
+				</div>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+</div>
+<div class="row">
+	<div class="col-xs-2">
+		<pre>FieldList
+{{mainService.currentItem.fieldList | json}}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>POV Dimensions
+{{povDims | json}}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Column Dimensions
+{{colDims | json}}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Columns
+{{cols | json}}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Row Dimensions
+{{rowDims | json}}</pre>
+	</div>
+	<div class="col-xs-2">
+		<pre>Rows
+{{rows | json}}</pre>
 	</div>
 </div>
-<pre>{{mainService.currentItem.fieldList | json}}</pre>

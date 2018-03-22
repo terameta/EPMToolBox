@@ -173,6 +173,9 @@ export class MSSQLTools {
 				catch( reject );
 		} );
 	}
+	public getDescriptionsWithHierarchy = ( refObj: any, refField: DimeStreamFieldDetail ) => {
+		return this.getDescriptions( refObj, refField );
+	}
 	public writeData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			console.log( '!!!!!!!!!!!!' );

@@ -35,6 +35,9 @@ export class HPTools {
 	public getDescriptions = ( refObj: DimeEnvironmentHP, refField: DimeStreamFieldDetail ) => {
 		return this.smartview.getDescriptions( Object.assign( <DimeEnvironmentSmartView>{}, refObj ), refField );
 	}
+	public getDescriptionsWithHierarchy = ( refObj: DimeEnvironmentHP, refField: DimeStreamFieldDetail ) => {
+		return this.smartview.getDescriptionsWithHierarchy( Object.assign( <DimeEnvironmentSmartView>{}, refObj ), refField );
+	}
 	public listProcedures = ( refObj: DimeEnvironmentHP ) => {
 		return this.smartview.listBusinessRules( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}

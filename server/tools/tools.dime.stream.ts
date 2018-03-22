@@ -432,6 +432,18 @@ export class StreamTools {
 			} );
 		} );
 	}
+	public getFieldDescriptionsWithHierarchy = ( payload: { stream: number, field: number } ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.getOne( payload.stream ).then( ( stream ) => {
+				stream.fieldList
+					.filter( field => field.id === payload.field )
+					.forEach( field => {
+						this.environmentTool.getDescriptionsWithHierarchy( stream, field )
+							.then( resolve ).catch( reject );
+					} );
+			} );
+		} );
+	}
 	public populateFieldDescriptions = ( id: number ) => {
 		return this.getOne( id )
 			.then( this.populateFieldDescriptionsClear )

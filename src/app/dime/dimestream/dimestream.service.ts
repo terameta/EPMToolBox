@@ -179,6 +179,8 @@ export class DimeStreamService {
 	public fetchFieldDescriptions = ( stream: number, field: number ) => {
 		return this.backend.fetchFieldDescriptions( { stream, field } );
 	}
+	public getFieldDescriptionsWithHierarchy = ( stream: number, field: number ) => this.backend.getFieldDescriptionsWithHierarchy( { stream, field } );
+
 	public populateFieldDescriptions = () => {
 		this.toastr.info( 'Please wait, refreshing the field descriptions from the source system', this.serviceName );
 		this.backend.populateFieldDescriptions( this.currentItem.id ).subscribe( result => {

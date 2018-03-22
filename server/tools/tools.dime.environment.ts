@@ -429,6 +429,21 @@ export class EnvironmentTools {
 			}
 		} );
 	}
+	public getDescriptionsWithHierarchy = ( refStream: DimeStream, refField: DimeStreamField ) => {
+		return new Promise( ( resolve, reject ) => {
+			if ( !refStream.environment ) {
+				reject( new Error( 'Malformed stream object' ) );
+			} else {
+				this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refStream.environment }, true )
+					.then( ( result: any ) => {
+						result.database = refStream.dbName;
+						result.table = refStream.tableName;
+						result.field = refField;
+						return this.sourceTools[result.type].getDescriptionsWithHierarchy( result, refField );
+					} ).then( resolve ).catch( reject );
+			}
+		} );
+	}
 	public writeData = ( refObj: any ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.id }, true ).

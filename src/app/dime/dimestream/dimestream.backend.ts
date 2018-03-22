@@ -23,5 +23,6 @@ export class DimeStreamBackend {
 	public listFieldsforField = ( body: { environmentID: number, field: DimeStreamFieldDetail } ): Observable<DimeStreamField[]> => this.http.post<DimeStreamField[]>( this.baseUrl + '/listFieldsforField', body );
 	public prepareTables = ( id: number ) => this.http.get( this.baseUrl + '/prepareTables/' + id );
 	public fetchFieldDescriptions = ( payload: { stream: number, field: number } ) => this.http.post( this.baseUrl + '/getFieldDescriptions', payload );
+	public getFieldDescriptionsWithHierarchy = ( payload: { stream: number, field: number } ) => this.http.post( this.baseUrl + '/getFieldDescriptionsWithHierarchy', payload );
 	public populateFieldDescriptions = ( id: number ) => this.http.get( this.baseUrl + '/populateFieldDescriptions/' + id );
 }
