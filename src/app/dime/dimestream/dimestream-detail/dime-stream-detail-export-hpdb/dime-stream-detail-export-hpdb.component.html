@@ -20,8 +20,7 @@
 								<td>{{dimension.name}}</td>
 								<td>
 									<select name="dim{{i}}member" class="form-control" style="padding: 1px 6px; border: 0;" [disabled]="dimension.status != 'Ready'">
-										<option value="SRC">Source Field</option>
-										<option value="TAR">Target Field</option>
+										<option value="{{member.RefField}}" *ngFor="let member of dimension.members">{{member.RefField}}:{{member.Description}}</option>
 									</select>
 								</td>
 								<td>
