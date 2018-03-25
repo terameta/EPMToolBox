@@ -22,6 +22,7 @@
 									<select name="dim{{i}}member" class="form-control" style="padding: 1px 6px; border: 0;" [disabled]="dimension.status != 'Ready'">
 										<option value="{{member.RefField}}" *ngFor="let member of dimension.members">{{member.RefField}}:{{member.Description}}</option>
 									</select>
+									<button class="btn btn-default btn-xs" (click)="openMemberSelector('pov', i)">Open Modal</button>
 								</td>
 								<td>
 									<select name="dim{{i}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="dimension.selectiontype" disabled>

@@ -23,6 +23,7 @@ import { DimeStreamDetailFieldDescriptionsRouterComponent } from './dimestream-d
 import { DimeStreamDetailExportComponent } from './dimestream-detail/dime-stream-detail-export/dime-stream-detail-export.component';
 import { DimeStreamDetailExportRDBTComponent } from './dimestream-detail/dime-stream-detail-export-rdbt/dime-stream-detail-export-rdbt.component';
 import { DimeStreamDetailExportHPDBComponent } from './dimestream-detail/dime-stream-detail-export-hpdb/dime-stream-detail-export-hpdb.component';
+import { SharedModule } from '../../shared/shared.module';
 
 const dimeStreamRoutes: Routes = [
 	{ path: 'dime/streams', pathMatch: 'prefix', redirectTo: 'dime/streams/stream-list' },
@@ -48,7 +49,8 @@ const dimeStreamRoutes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( dimeStreamRoutes ),
-		AuthModule
+		AuthModule,
+		SharedModule
 	],
 	exports: [
 		RouterModule

@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { DimeStreamService } from '../../dimestream.service';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import { ModalOptions } from 'ngx-bootstrap/modal/modal-options.class';
+import { HpdbMemberSelectorComponent } from '../../../../shared/hpdb-member-selector/hpdb-member-selector.component';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -14,8 +18,11 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	public rows: any[] = [{}];
 	public cols: any[] = [{}];
 
+	private modalRef: BsModalRef;
+
 	constructor(
-		public mainService: DimeStreamService
+		public mainService: DimeStreamService,
+		private modalService: BsModalService
 	) { }
 
 	ngOnInit() {
@@ -122,6 +129,14 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	}
 	public addRow = () => {
 		this.rows.push( JSON.parse( JSON.stringify( this.rows[this.rows.length - 1] ) ) );
+	}
+
+	public openMemberSelector = ( focalPoint: 'pov' | 'col' | 'row', index: number ) => {
+		let members;
+		if ( focalPoint === 'pov' ) members = this.povDims[index].members;
+		if ( focalPoint === 'row' ) members = this.rowDims[index].members;
+		if ( focalPoint === 'col' ) members = this.colDims[index].members;
+		this.modalRef = this.modalService.show( HpdbMemberSelectorComponent, { initialState: { members } } );
 	}
 
 }

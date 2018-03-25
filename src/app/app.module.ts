@@ -76,6 +76,7 @@ import { DimeTagService } from './dime/dimetag/dimetag.service';
 import { DimeTagEffects } from './dime/dimetag/dimetag.effects';
 import { DimeStatusEffects } from './ngstore/applicationstatus';
 import { HotTableRegisterer, HotTableModule } from '@handsontable/angular';
+import { ModalModule } from 'ngx-bootstrap/modal/modal.module';
 
 const appRoutes: Routes = [
 	// { path: '', component: AppComponent },
@@ -136,9 +137,7 @@ export function tokenGetter() {
 		] ),
 		StoreRouterConnectingModule,
 		HotTableModule.forRoot(),
-		// StoreDevtoolsModule.instrument( {
-		// 	maxAge: 25
-		// } )
+		ModalModule.forRoot()
 	],
 	providers: [
 		// HotTableRegisterer,
