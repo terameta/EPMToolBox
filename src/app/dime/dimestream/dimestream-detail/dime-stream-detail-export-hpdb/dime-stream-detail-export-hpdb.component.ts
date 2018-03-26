@@ -15,8 +15,8 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	public colDims: any[] = [];
 	public povDims: any[] = [];
 
-	public rows: any[] = [{}];
-	public cols: any[] = [{}];
+	public rows: any[] = [[]];
+	public cols: any[] = [[]];
 
 	private modalRef: BsModalRef;
 
@@ -51,7 +51,7 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	private prepareDims = () => {
 		return new Promise( ( resolve, reject ) => {
 			this.mainService.currentItem.fieldList.forEach( field => {
-				this.addToPOVs( field.name );
+				this.addToPOVs( field.name, '', 'member' );
 			} );
 			resolve();
 		} );
@@ -61,7 +61,7 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			this.mainService.currentItem.fieldList.forEach( field => {
 				const dimension = this.povDims.filter( dim => dim.name === field.name )[0];
 				dimension.status = 'Refreshing Members';
-				dimension.selectiontype = 'member';
+				dimension.selectionType = 'member';
 				dimension.members = [field.name];
 				this.mainService.getFieldDescriptionsWithHierarchy( this.mainService.currentItem.id, field.id ).subscribe( result => {
 					dimension.status = 'Ready';
@@ -89,36 +89,61 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		return assigned;
 	}
 
-	public addToRows = ( fieldName: string ) => {
-		this.rowDims.push( { name: fieldName } );
-		this.clearFromPOVs( fieldName );
-		this.clearFromCols( fieldName );
+	public addToRows = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'cols' ) => {
+		let fromDimension;
+		if ( fromName === 'povs' ) fromDimension = this.povDims;
+		if ( fromName === 'cols' ) fromDimension = this.colDims;
+		const source = fromDimension.splice( index, 1 )[0];
+		this.rowDims.push( source );
+		this.rows.forEach( row => {
+			row.push( { selectedMember, selectionType } );
+		} );
+		if ( fromName === 'cols' ) {
+			this.cols.forEach( col => {
+				col.splice( index, 1 );
+			} );
+		}
 	}
-	public addToCols = ( fieldName: string ) => {
-		this.colDims.push( { name: fieldName } );
-		this.clearFromPOVs( fieldName );
-		this.clearFromRows( fieldName );
+	public addToCols = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'rows' ) => {
+		let fromDimension;
+		if ( fromName === 'povs' ) fromDimension = this.povDims;
+		if ( fromName === 'rows' ) fromDimension = this.rowDims;
+		const source = fromDimension.splice( index, 1 )[0];
+		this.colDims.push( source );
+		this.cols.forEach( col => {
+			col.push( { selectedMember, selectionType } );
+		} );
+		if ( fromName === 'rows' ) {
+			this.rows.forEach( row => {
+				row.splice( index, 1 );
+			} );
+		}
 	}
-	public addToPOVs = ( fieldName: string ) => {
-		this.povDims.push( { name: fieldName } );
-		this.clearFromCols( fieldName );
-		this.clearFromRows( fieldName );
-	}
+	public addToPOVs = ( index: number | string, selectedMember: string, selectionType: string, fromName?: 'rows' | 'cols' ) => {
+		if ( typeof index === 'string' ) {
+			this.povDims.push( { name: index } );
+		} else {
+			let fromDimension;
+			if ( fromName === 'rows' ) fromDimension = this.rowDims;
+			if ( fromName === 'cols' ) fromDimension = this.colDims;
+			const source = fromDimension.splice( index, 1 )[0];
+			source.selectedMember = selectedMember;
+			source.selectionType = 'member';
+			this.povDims.push( JSON.parse( JSON.stringify( source ) ) );
+			if ( fromName === 'rows' ) {
+				this.rows.forEach( row => {
+					row.splice( index, 1 );
+				} );
+			}
+			if ( fromName === 'cols' ) {
+				this.cols.forEach( col => {
+					col.splice( index, 1 );
+				} );
+			}
+		}
 
-	private clearFromPOVs = ( fieldName: string ) => {
-		if ( this.povDims.findIndex( e => e.name === fieldName ) >= 0 ) {
-			this.povDims.splice( this.povDims.findIndex( e => e.name === fieldName ), 1 );
-		}
-	}
-	private clearFromRows = ( fieldName: string ) => {
-		if ( this.rowDims.findIndex( e => e.name === fieldName ) >= 0 ) {
-			this.rowDims.splice( this.rowDims.findIndex( e => e.name === fieldName ), 1 );
-		}
-	}
-	private clearFromCols = ( fieldName: string ) => {
-		if ( this.colDims.findIndex( e => e.name === fieldName ) >= 0 ) {
-			this.colDims.splice( this.colDims.findIndex( e => e.name === fieldName ), 1 );
-		}
+		// this.clearFromCols( fieldName );
+		// this.clearFromRows( fieldName );
 	}
 
 	public getColumnHeader = ( i: number ) => {
@@ -127,16 +152,33 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	public addCol = () => {
 		this.cols.push( JSON.parse( JSON.stringify( this.cols[this.cols.length - 1] ) ) );
 	}
+	public deleteCol = ( index: number ) => {
+		if ( confirm( 'Are you sure you want to delete this column?' ) ) this.cols.splice( index, 1 );
+	}
 	public addRow = () => {
 		this.rows.push( JSON.parse( JSON.stringify( this.rows[this.rows.length - 1] ) ) );
 	}
+	public deleteRow = ( index: number ) => {
+		if ( confirm( 'Are you sure you want to delete this row?' ) ) this.rows.splice( index, 1 );
+	}
 
-	public openMemberSelector = ( focalPoint: 'pov' | 'col' | 'row', index: number ) => {
-		let members;
-		if ( focalPoint === 'pov' ) members = this.povDims[index].members;
-		if ( focalPoint === 'row' ) members = this.rowDims[index].members;
-		if ( focalPoint === 'col' ) members = this.colDims[index].members;
+	public openMemberSelector = ( focalPoint: 'pov' | 'col' | 'row', index: number, rcindex: number ) => {
+		let dimension;
+		if ( focalPoint === 'pov' ) dimension = this.povDims[index];
+		if ( focalPoint === 'row' ) dimension = this.rowDims[index];
+		if ( focalPoint === 'col' ) dimension = this.colDims[index];
+		const members = dimension.members;
 		this.modalRef = this.modalService.show( HpdbMemberSelectorComponent, { initialState: { members } } );
+		this.modalRef.content.onClose.subscribe( result => {
+			if ( result ) {
+				if ( typeof rcindex === 'number' ) {
+					this.rows[rcindex][index].selectedMember = result;
+				} else {
+					dimension.selectedMember = result;
+				}
+			}
+			console.log( typeof rcindex );
+		} );
 	}
 
 }

@@ -6,12 +6,62 @@
 					<table class="table table-condensed" *ngIf="povDims.length > 0">
 						<thead>
 							<tr>
+								<th width="30">POVs</th>
+								<th>&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>&nbsp;</td>
+								<td>
+									<ng-container *ngFor="let dimension of povDims; let i = index;">
+										<div class="btn-toolbar" role="toolbar" style="padding-bottom: 2px;">
+											<div class="btn-group btn-group-xs">
+												<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(i, dimension.selectedMember, dimension.selectionType, 'povs')">
+													<i class="fa fa-fw fa-bars"></i>
+												</button>
+												<button class="btn btn-default" type="button" title="Move to columns" (click)="addToCols(i, dimension.selectedMember, dimension.selectionType, 'povs')">
+													<i class="fa fa-fw fa-columns"></i>
+												</button>
+											</div>
+											<div class="btn-group btn-group-xs">
+												<button class="btn btn-default" type="button" style="width:100px; max-width: 100px; text-align: left;">{{dimension.name}}</button>
+											</div>
+											<div class="btn-group btn-group-xs" *ngIf="dimension.status != 'Ready'">
+												<button class="btn btn-default btn-xs" disabled>
+													<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+													Please wait, refreshing member list
+												</button>
+											</div>
+											<div class="btn-group btn-group-xs" *ngIf="dimension.status == 'Ready'">
+												<button class="btn btn-default" type="button" (click)="openMemberSelector('pov', i)">
+													<i class="fa fa-puzzle-piece fa-fw" title="Change Selection"></i> Change
+												</button>
+												<button class="btn btn-default" type="button" (click)="openMemberSelector('pov', i)">
+													<ng-container *ngIf="dimension.selectedMember">{{dimension.selectedMember}}</ng-container>
+													<ng-container *ngIf="!dimension.selectedMember">No member is selected</ng-container>
+												</button>
+											</div>
+										</div>
+									</ng-container>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div class="table-responsive">
+					<table class="table table-condensed" *ngIf="povDims.length > 0">
+						<thead>
+							<tr>
 								<th>POVs</th>
 								<th>Dimension</th>
 								<th>Member Selection</th>
 								<th>Selection Type</th>
-								<th>Status</th>
-								<th>Actions</th>
+								<th width="80">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -19,13 +69,22 @@
 								<td>&nbsp;</td>
 								<td>{{dimension.name}}</td>
 								<td>
-									<select name="dim{{i}}member" class="form-control" style="padding: 1px 6px; border: 0;" [disabled]="dimension.status != 'Ready'">
-										<option value="{{member.RefField}}" *ngFor="let member of dimension.members">{{member.RefField}}:{{member.Description}}</option>
-									</select>
-									<button class="btn btn-default btn-xs" (click)="openMemberSelector('pov', i)">Open Modal</button>
+									<ng-container *ngIf="dimension.status != 'Ready'">
+										<button class="btn btn-default btn-xs" disabled>
+											<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+											Please wait, refreshing member list
+										</button>
+									</ng-container>
+									<ng-container *ngIf="dimension.status == 'Ready'">
+										<button class="btn btn-default btn-xs" (click)="openMemberSelector('pov', i)">
+											<i class="fa fa-puzzle-piece fa-fw" title="Change Selection"></i> Change
+										</button>
+										<ng-container *ngIf="dimension.selectedMember">{{dimension.selectedMember}}</ng-container>
+										<ng-container *ngIf="!dimension.selectedMember">No member is selected</ng-container>
+									</ng-container>
 								</td>
 								<td>
-									<select name="dim{{i}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="dimension.selectiontype" disabled>
+									<select name="dim{{i}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="dimension.selectionType" disabled>
 										<option value="member">Member</option>
 										<option value="level0">Level 0 Descendants</option>
 										<option value="descendants">Descendants</option>
@@ -34,13 +93,12 @@
 										<option value="ichildren">Children &amp; Member</option>
 									</select>
 								</td>
-								<td>{{dimension.status}}</td>
 								<td>
 									<div class="btn-group btn-group-xs">
-										<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(dimension.name)">
+										<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(i, dimension.selectedMember, dimension.selectionType, 'povs')">
 											<i class="fa fa-fw fa-bars"></i>
 										</button>
-										<button class="btn btn-default" type="button" title="Move to columns" (click)="addToCols(dimension.name)">
+										<button class="btn btn-default" type="button" title="Move to columns" (click)="addToCols(i, dimension.selectedMember, dimension.selectionType, 'povs')">
 											<i class="fa fa-fw fa-columns"></i>
 										</button>
 									</div>
@@ -70,23 +128,62 @@
 						</thead>
 						<tbody>
 							<tr>
-								<td [colSpan]="colDims.length" *ngFor="let col of cols; let i = index">Column {{getColumnHeader(i)}}</td>
+								<td>Column #</td>
+								<td>Dimension</td>
+								<td>Member Selection</td>
+								<td>Selection Type</td>
+								<td>Actions</td>
 							</tr>
-							<tr>
-								<ng-container *ngFor="let col of cols;">
-									<td *ngFor="let dimension of colDims;">
-										<div class="btn-group btn-group-xs">
-											<button class="btn btn-default" type="button" title="{{dimension.name}}">{{dimension.name}}</button>
-											<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(dimension.name)">
-												<i class="fa fa-fw fa-bars"></i>
+							<ng-container *ngFor="let col of cols; let i = index;">
+								<tr>
+									<td [rowSpan]="colDims.length+1">
+										Column {{getColumnHeader(i)}}
+										<button class="btn btn-xs pull-right" (click)="deleteCol(i)" *ngIf="cols.length > 1">
+											<i class="fa fa-trash fa-fw"></i>
+										</button>
+									</td>
+								</tr>
+								<tr *ngFor="let dimension of colDims; let dimindex = index;">
+									<td>
+										{{ dimension.name }}
+									</td>
+									<td>
+										<ng-container *ngIf="dimension.status != 'Ready'">
+											<button class="btn btn-default btn-xs" disabled>
+												<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+												Please wait, refreshing member list
 											</button>
-											<button class="btn btn-default" type="button" title="Move to POV" (click)="addToPOVs(dimension.name)">
+										</ng-container>
+										<ng-container *ngIf="dimension.status == 'Ready'">
+											<button class="btn btn-default btn-xs" (click)="openMemberSelector('col', dimindex, i)">
+												<i class="fa fa-puzzle-piece fa-fw" title="Change Selection"></i> Change
+											</button>
+											<ng-container *ngIf="col[dimindex].selectedMember">{{col[dimindex].selectedMember}}</ng-container>
+											<ng-container *ngIf="!col[dimindex].selectedMember">No member is selected</ng-container>
+										</ng-container>
+									</td>
+									<td>
+										<select name="coldim{{i}}{{dimindex}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="col[dimindex].selectionType">
+											<option value="member">Member</option>
+											<option value="level0">Level 0 Descendants</option>
+											<option value="descendants">Descendants</option>
+											<option value="idescendants">Descendants &amp; Member</option>
+											<option value="children">Children</option>
+											<option value="ichildren">Children &amp; Member</option>
+										</select>
+									</td>
+									<td>
+										<div class="btn-group btn-group-xs">
+											<button class="btn btn-default" type="button" title="Move to POVs" (click)="addToPOVs(dimindex, row[dimindex].selectedMember, row[dimindex].selectionType, 'cols')">
 												<i class="fa fa-fw fa-filter"></i>
+											</button>
+											<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(dimindex, row[dimindex].selectedMember, row[dimindex].selectionType, 'cols')">
+												<i class="fa fa-fw fa-bars"></i>
 											</button>
 										</div>
 									</td>
-								</ng-container>
-							</tr>
+								</tr>
+							</ng-container>
 						</tbody>
 					</table>
 				</div>
@@ -109,21 +206,60 @@
 							</tr>
 						</thead>
 						<tbody>
+							<tr>
+								<td>Row #</td>
+								<td>Dimension</td>
+								<td>Member Selection</td>
+								<td>Seletion Type</td>
+								<td>Actions</td>
+							</tr>
 							<ng-container *ngFor="let row of rows;let i = index;">
 								<tr>
-									<td rowspan="3">Row {{i+1}}</td>
-									<td *ngFor="let dimension of rowDims;">
-										{{dimension.name}}
+									<td [rowSpan]="rowDims.length+1">
+										Row {{i+1}}
+										<button class="btn btn-xs pull-right" (click)="deleteRow(i)" *ngIf="rows.length > 1">
+											<i class="fa fa-trash fa-fw"></i>
+										</button>
 									</td>
 								</tr>
-								<tr>
-									<td *ngFor="let dimension of rowDims;">
+								<tr *ngFor="let dimension of rowDims; let dimindex = index;">
+									<td>
 										{{dimension.name}}
 									</td>
-								</tr>
-								<tr>
-									<td *ngFor="let dimension of rowDims;">
-										{{dimension.name}}
+									<td>
+										<ng-container *ngIf="dimension.status != 'Ready'">
+											<button class="btn btn-default btn-xs" disabled>
+												<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
+												Please wait, refreshing member list
+											</button>
+										</ng-container>
+										<ng-container *ngIf="dimension.status == 'Ready'">
+											<button class="btn btn-default btn-xs" (click)="openMemberSelector('row', dimindex, i)">
+												<i class="fa fa-puzzle-piece fa-fw" title="Change Selection"></i> Change
+											</button>
+											<ng-container *ngIf="row[dimindex].selectedMember">{{row[dimindex].selectedMember}}</ng-container>
+											<ng-container *ngIf="!row[dimindex].selectedMember">No member is selected</ng-container>
+										</ng-container>
+									</td>
+									<td>
+										<select name="dim{{i}}{{dimindex}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="row[dimindex].selectionType">
+											<option value="member">Member</option>
+											<option value="level0">Level 0 Descendants</option>
+											<option value="descendants">Descendants</option>
+											<option value="idescendants">Descendants &amp; Member</option>
+											<option value="children">Children</option>
+											<option value="ichildren">Children &amp; Member</option>
+										</select>
+									</td>
+									<td>
+										<div class="btn-group btn-group-xs">
+											<button class="btn btn-default" type="button" title="Move to POVs" (click)="addToPOVs(dimindex, row[dimindex].selectedMember, row[dimindex].selectionType, 'rows')">
+												<i class="fa fa-fw fa-filter"></i>
+											</button>
+											<button class="btn btn-default" type="button" title="Move to columns" (click)="addToCols(dimindex, row[dimindex].selectedMember, row[dimindex].selectionType, 'rows')">
+												<i class="fa fa-fw fa-columns"></i>
+											</button>
+										</div>
 									</td>
 								</tr>
 							</ng-container>
@@ -135,7 +271,7 @@
 		</tr>
 	</table>
 </div>
-<div class="row">
+<!-- <div class="row">
 	<div class="col-xs-2">
 		<pre>FieldList
 {{mainService.currentItem.fieldList | json}}</pre>
@@ -160,4 +296,4 @@
 		<pre>Rows
 {{rows | json}}</pre>
 	</div>
-</div>
+</div> -->

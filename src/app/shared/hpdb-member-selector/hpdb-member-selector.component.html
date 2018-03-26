@@ -1,1 +1,20 @@
-<pre>{{members | json}}</pre>
+<div class="box box-solid box-primary">
+	<div class="box-header with-border">
+		<h3 class="box-title">Member Selection</h3>
+	</div>
+	<div class="box-body" style="max-height: 300px; overflow: auto;">
+		<tree-root [nodes]="nodes" [options]="options"></tree-root>
+	</div>
+	<div class="box-footer">
+		<b>Selected Member:</b> {{ selectedMember }}
+		<br>
+		<div class="btn-group btn-group-xs pull-right">
+			<button class="btn btn-default" type="button" title="Assign" (click)="assign()" [disabled]="selectedMember == ''">
+				Assign
+			</button>
+			<button class="btn btn-default" type="button" title="Cancel" (click)="cancel()">
+				Cancel
+			</button>
+		</div>
+	</div>
+</div>
