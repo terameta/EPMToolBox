@@ -52,64 +52,6 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2">
-				<div class="table-responsive">
-					<table class="table table-condensed" *ngIf="povDims.length > 0">
-						<thead>
-							<tr>
-								<th>POVs</th>
-								<th>Dimension</th>
-								<th>Member Selection</th>
-								<th>Selection Type</th>
-								<th width="80">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr *ngFor="let dimension of povDims; let i = index;">
-								<td>&nbsp;</td>
-								<td>{{dimension.name}}</td>
-								<td>
-									<ng-container *ngIf="dimension.status != 'Ready'">
-										<button class="btn btn-default btn-xs" disabled>
-											<i class="fa fa-circle-o-notch fa-spin fa-fw"></i>
-											Please wait, refreshing member list
-										</button>
-									</ng-container>
-									<ng-container *ngIf="dimension.status == 'Ready'">
-										<button class="btn btn-default btn-xs" (click)="openMemberSelector('pov', i)">
-											<i class="fa fa-puzzle-piece fa-fw" title="Change Selection"></i> Change
-										</button>
-										<ng-container *ngIf="dimension.selectedMember">{{dimension.selectedMember}}</ng-container>
-										<ng-container *ngIf="!dimension.selectedMember">No member is selected</ng-container>
-									</ng-container>
-								</td>
-								<td>
-									<select name="dim{{i}}type" class="form-control" style="padding: 1px 6px; border: 0;" [(ngModel)]="dimension.selectionType" disabled>
-										<option value="member">Member</option>
-										<option value="level0">Level 0 Descendants</option>
-										<option value="descendants">Descendants</option>
-										<option value="idescendants">Descendants &amp; Member</option>
-										<option value="children">Children</option>
-										<option value="ichildren">Children &amp; Member</option>
-									</select>
-								</td>
-								<td>
-									<div class="btn-group btn-group-xs">
-										<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(i, dimension.selectedMember, dimension.selectionType, 'povs')">
-											<i class="fa fa-fw fa-bars"></i>
-										</button>
-										<button class="btn btn-default" type="button" title="Move to columns" (click)="addToCols(i, dimension.selectedMember, dimension.selectionType, 'povs')">
-											<i class="fa fa-fw fa-columns"></i>
-										</button>
-									</div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</td>
-		</tr>
-		<tr>
 			<td>&nbsp;</td>
 			<td>
 				<div class="table-responsive">
