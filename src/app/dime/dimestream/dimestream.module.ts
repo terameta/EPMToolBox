@@ -24,6 +24,8 @@ import { DimeStreamDetailExportComponent } from './dimestream-detail/dime-stream
 import { DimeStreamDetailExportRDBTComponent } from './dimestream-detail/dime-stream-detail-export-rdbt/dime-stream-detail-export-rdbt.component';
 import { DimeStreamDetailExportHPDBComponent } from './dimestream-detail/dime-stream-detail-export-hpdb/dime-stream-detail-export-hpdb.component';
 import { SharedModule } from '../../shared/shared.module';
+import { DimeStreamDetailExportListComponent } from './dimestream-detail/dime-stream-detail-export-list/dime-stream-detail-export-list.component';
+import { DimeStreamDetailExportDetailComponent } from './dimestream-detail/dime-stream-detail-export-detail/dime-stream-detail-export-detail.component';
 
 const dimeStreamRoutes: Routes = [
 	{ path: 'dime/streams', pathMatch: 'prefix', redirectTo: 'dime/streams/stream-list' },
@@ -39,7 +41,13 @@ const dimeStreamRoutes: Routes = [
 					{ path: ':fieldid', component: DimeStreamDetailFieldDescriptionsComponent }
 				]
 			},
-			{ path: 'export', component: DimeStreamDetailExportComponent }
+			{
+				path: 'export', component: DimeStreamDetailExportComponent, children: [
+					{ path: '', pathMatch: 'prefix', redirectTo: 'list' },
+					{ path: 'list', component: DimeStreamDetailExportListComponent },
+					{ path: ':exportid', component: DimeStreamDetailExportDetailComponent }
+				]
+			}
 		]
 	}
 ];
@@ -75,7 +83,9 @@ const dimeStreamRoutes: Routes = [
 		DimeStreamDetailFieldDescriptionsRouterComponent,
 		DimeStreamDetailExportComponent,
 		DimeStreamDetailExportRDBTComponent,
-		DimeStreamDetailExportHPDBComponent
+		DimeStreamDetailExportHPDBComponent,
+		DimeStreamDetailExportListComponent,
+		DimeStreamDetailExportDetailComponent
 	]
 } )
 export class DimestreamModule { }

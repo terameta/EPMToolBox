@@ -18,6 +18,9 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	public rows: any[] = [[]];
 	public cols: any[] = [[]];
 
+	public cellCounts: any = {};
+	public cellCount = 0;
+
 	private modalRef: BsModalRef;
 
 	constructor(
@@ -103,6 +106,7 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 				col.splice( index, 1 );
 			} );
 		}
+		this.recalculateCellCounts();
 	}
 	public addToCols = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'rows' ) => {
 		let fromDimension;
@@ -118,6 +122,7 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 				row.splice( index, 1 );
 			} );
 		}
+		this.recalculateCellCounts();
 	}
 	public addToPOVs = ( index: number | string, selectedMember: string, selectionType: string, fromName?: 'rows' | 'cols' ) => {
 		if ( typeof index === 'string' ) {
@@ -141,13 +146,20 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 				} );
 			}
 		}
-
-		// this.clearFromCols( fieldName );
-		// this.clearFromRows( fieldName );
+		this.recalculateCellCounts();
 	}
 
 	public getColumnHeader = ( i: number ) => {
 		return String.fromCharCode( 65 + i );
+	}
+	public displaySelectionType = ( type: string ) => {
+		if ( type.substr( 0, 6 ) === 'member' ) return 'Member';
+		if ( type.substr( 0, 6 ) === 'level0' ) return 'Level 0 Descendants';
+		if ( type.substr( 0, 6 ) === 'descen' ) return 'Descendants';
+		if ( type.substr( 0, 6 ) === 'idesce' ) return 'IDescendants';
+		if ( type.substr( 0, 6 ) === 'childr' ) return 'Children';
+		if ( type.substr( 0, 6 ) === 'ichild' ) return 'IChildren';
+		return '';
 	}
 	public addCol = () => {
 		this.cols.push( JSON.parse( JSON.stringify( this.cols[this.cols.length - 1] ) ) );
@@ -171,14 +183,87 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		this.modalRef = this.modalService.show( HpdbMemberSelectorComponent, { initialState: { members } } );
 		this.modalRef.content.onClose.subscribe( result => {
 			if ( result ) {
-				if ( typeof rcindex === 'number' ) {
-					this.rows[rcindex][index].selectedMember = result;
-				} else {
-					dimension.selectedMember = result;
-				}
+				if ( focalPoint === 'col' ) this.cols[rcindex][index].selectedMember = result;
+				if ( focalPoint === 'row' ) this.rows[rcindex][index].selectedMember = result;
+				if ( focalPoint === 'pov' ) dimension.selectedMember = result;
 			}
-			console.log( typeof rcindex );
+			this.recalculateCellCounts();
 		} );
 	}
+
+	private recalculateCellCounts = () => {
+		this.cellCounts.povs = {};
+		this.povDims.forEach( dim => {
+			this.cellCounts.povs[dim.name] = 0;
+			if ( dim.selectedMember ) this.cellCounts.povs[dim.name] = 1;
+		} );
+		this.cellCounts.rows = [];
+		this.rows.forEach( row => {
+			const toPush: any = {};
+			this.rowDims.forEach( ( dim, dimindex ) => {
+				toPush[dim.name] = this.countMembers( dim, row[dimindex].selectionType, row[dimindex].selectedMember );
+			} );
+			this.cellCounts.rows.push( toPush );
+		} );
+		this.cellCounts.cols = [];
+		this.cols.forEach( col => {
+			const toPush: any = {};
+			this.colDims.forEach( ( dim, dimindex ) => {
+				toPush[dim.name] = this.countMembers( dim, col[dimindex].selectionType, col[dimindex].selectedMember );
+			} );
+			this.cellCounts.cols.push( toPush );
+		} );
+		this.cellCount = 1;
+		Object.values( this.cellCounts.povs ).forEach( count => {
+			this.cellCount *= count;
+		} );
+		this.cellCounts.rows.forEach( row => {
+			let rowCellCount = 1;
+			Object.values( row ).forEach( count => rowCellCount *= count );
+			this.cellCount *= rowCellCount;
+		} );
+		this.cellCounts.cols.forEach( col => {
+			let colCellCount = 1;
+			Object.values( col ).forEach( count => colCellCount *= count );
+			this.cellCount *= colCellCount;
+		} );
+	}
+
+	private countMembers = ( dimension: any, type: string, member: string ) => {
+		let count = 0;
+		if ( member ) {
+			if ( type === 'member' ) {
+				count = 1;
+			}
+			if ( type === 'level0' ) {
+				count = this.findLevel0( dimension.members, member ).length;
+			}
+			if ( type === 'children' ) {
+				count = this.findChildren( dimension.members, member ).length;
+			}
+			if ( type === 'ichildren' ) {
+				count = this.findChildren( dimension.members, member ).length + 1;
+			}
+			if ( type === 'descendants' ) {
+				count = this.findDescendants( dimension.members, member ).length;
+			}
+			if ( type === 'idescendants' ) {
+				count = this.findDescendants( dimension.members, member ).length + 1;
+			}
+		}
+		return count;
+	}
+
+	private findChildren = ( memberList: any[], member: string ) => memberList.filter( mbr => mbr.Parent === member );
+	private findDescendants = ( memberList: any[], member: string, currentList: any[] = [] ) => {
+		const children = this.findChildren( memberList, member );
+		children.forEach( child => {
+			currentList.push( child );
+			this.findDescendants( memberList, child.RefField, currentList );
+		} );
+		return currentList;
+	}
+	private findLevel0 = ( memberList: any[], member: string ) => this.findDescendants( memberList, member ).filter( element => this.isLevel0( memberList, element.RefField ) );
+	private isLevel0 = ( memberList: any[], member: string ) => memberList.findIndex( element => element.Parent === member ) < 0;
 
 }

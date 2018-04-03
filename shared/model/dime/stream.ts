@@ -9,7 +9,8 @@ export interface DimeStream {
 	tableName: string,
 	customQuery: string,
 	finalQuery: string,
-	tags: any
+	tags: any,
+	exports: any[]
 }
 
 export interface DimeStreamDetail extends DimeStream {

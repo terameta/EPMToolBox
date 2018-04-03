@@ -42,7 +42,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( to0043 ).then( to0044 ).then( to0045 ).then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).
 		then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).
 		then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).then( to0076 ).then( to0077 ).then( to0078 ).then( to0079 ).then( to0080 ).then( to0081 ).then( to0082 ).then( to0083 ).then( to0084 ).
-		then( to0085 ).then( to0086 ).
+		then( to0085 ).then( to0086 ).then( to0087 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -51,6 +51,20 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+const to0087 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 87;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'streams', 'exports TEXT NULL AFTER tags' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
 const to0086 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const nextVersion = 86;

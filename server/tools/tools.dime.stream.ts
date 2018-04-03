@@ -6,7 +6,7 @@ import { DimeStream, DimeStreamDetail } from '../../shared/model/dime/stream';
 import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
-import { SortByPosition } from '../../shared/utilities/utilityFunctions';
+import { SortByPosition, SortByName } from '../../shared/utilities/utilityFunctions';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -57,7 +57,18 @@ export class StreamTools {
 	}
 	private prepareOne = ( currentStream: DimeStream ): Promise<DimeStreamDetail> => {
 		return new Promise( ( resolve, reject ) => {
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( currentStream );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
 			const streamToReturn: DimeStreamDetail = Object.assign( <DimeStreamDetail>{}, currentStream );
+			if ( streamToReturn.exports ) {
+				streamToReturn.exports = JSON.parse( streamToReturn.exports.toString() );
+			} else {
+				streamToReturn.exports = [];
+			}
+			streamToReturn.exports.sort( SortByName );
 			if ( streamToReturn.tags ) {
 				streamToReturn.tags = JSON.parse( streamToReturn.tags );
 			} else {
@@ -99,13 +110,14 @@ export class StreamTools {
 			} ).catch( reject );
 		} );
 	}
-	public update = ( refItem: DimeStreamDetail ) => {
+	public update = ( refItem: DimeStreamDetail | any ) => {
 		return new Promise( ( resolve, reject ) => {
 			delete refItem.databaseList;
 			delete refItem.tableList;
 			const fieldList = refItem.fieldList;
 			delete refItem.fieldList;
 			refItem.tags = JSON.stringify( refItem.tags );
+			refItem.exports = JSON.stringify( refItem.exports );
 			this.db.query( 'UPDATE streams SET ? WHERE id = ?', [refItem, refItem.id], ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the stream' } );

@@ -1,2 +1,21 @@
-<app-dime-stream-detail-export-hpdb *ngIf="mainService.currentItem.type == streamTypes.HPDB"></app-dime-stream-detail-export-hpdb>
-<app-dime-stream-detail-export-rdbt *ngIf="mainService.currentItem.type == streamTypes.RDBT"></app-dime-stream-detail-export-rdbt>
+<!-- <app-dime-stream-detail-export-hpdb *ngIf="mainService.currentItem.type == streamTypes.HPDB"></app-dime-stream-detail-export-hpdb>
+<app-dime-stream-detail-export-rdbt *ngIf="mainService.currentItem.type == streamTypes.RDBT"></app-dime-stream-detail-export-rdbt> -->
+
+
+<ul class="nav nav-tabs">
+	<li routerLinkActive="active">
+		<a routerLink="list">
+			<i class="fa fa-list fa-fw"></i> List
+		</a>
+	</li>
+	<li routerLinkActive="active" *ngFor="let export of mainService.currentItem.exports;">
+		<a routerLink="{{export.id}}">
+			<i class="fa fa-download fa-fw"></i> {{export.name}}
+		</a>
+	</li>
+</ul>
+<div class="tab-content">
+	<div class="tab-pane active">
+		<router-outlet></router-outlet>
+	</div>
+</div>
