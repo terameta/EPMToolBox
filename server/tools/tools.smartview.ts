@@ -240,6 +240,11 @@ export class SmartViewTools {
 			if ( isSuccessful ) {
 				return Promise.resolve( 'Data is pushed to Hyperion Planning' );
 			} else {
+				console.log( '===========================================' );
+				console.log( '===========================================' );
+				console.log( response.body );
+				console.log( '===========================================' );
+				console.log( '===========================================' );
 				return Promise.reject( new Error( 'Failed to write data' ) );
 			}
 		} );
