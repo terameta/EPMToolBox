@@ -245,7 +245,7 @@ export class SmartViewTools {
 				console.log( response.body );
 				console.log( '===========================================' );
 				console.log( '===========================================' );
-				return Promise.reject( new Error( 'Failed to write data' ) );
+				return Promise.reject( new Error( 'Failed to write data:' + response.body ) );
 			}
 		} );
 	}
