@@ -11,7 +11,7 @@ import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSma
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SmartViewRequestOptions } from '../../shared/model/dime/smartviewrequestoptions';
-import { SortByName } from '../../shared/utilities/utilityFunctions';
+import { SortByName, encodeXML } from '../../shared/utilities/utilityFunctions';
 
 export class SmartViewTools {
 	xmlBuilder: xml2js.Builder;
@@ -111,8 +111,8 @@ export class SmartViewTools {
 		} );
 	}
 	private smartviewWriteDataAction = ( payload ) => {
+		let body = '';
 		return this.smartviewOpenCube( payload ).then( resEnv => {
-			let body = '';
 			body += '<req_WriteBack>';
 			body += '<sID>' + resEnv.SID + '</sID>';
 			body += '<preferences />';
@@ -182,10 +182,10 @@ export class SmartViewTools {
 				} );
 			} );
 			const rangeEnd = ( payload.data.length + 1 ) * Object.keys( payload.data[0] ).length;
-			body += '<dirtyCells>' + dirtyCells.join( '|' ) + '</dirtyCells>';
+			body += '<dirtyCells>' + encodeXML( dirtyCells.join( '|' ) ) + '</dirtyCells>';
 			body += '<range start="0" end="' + ( rangeEnd - 1 ) + '">';
-			body += '<vals>' + vals.join( '|' ) + '</vals>';
-			body += '<types>' + typs.join( '|' ) + '</types>';
+			body += '<vals>' + encodeXML( vals.join( '|' ) ) + '</vals>';
+			body += '<types>' + encodeXML( typs.join( '|' ) ) + '</types>';
 			body += '<status enc="0">' + stts.join( '|' ) + '</status>';
 			body += '</range>';
 			body += '</data>';
@@ -243,6 +243,7 @@ export class SmartViewTools {
 				console.log( '===========================================' );
 				console.log( '===========================================' );
 				console.log( response.body );
+				console.log( body );
 				console.log( '===========================================' );
 				console.log( '===========================================' );
 				return Promise.reject( new Error( 'Failed to write data:' + response.body ) );
