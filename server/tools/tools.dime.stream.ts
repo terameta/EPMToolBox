@@ -57,11 +57,6 @@ export class StreamTools {
 	}
 	private prepareOne = ( currentStream: DimeStream ): Promise<DimeStreamDetail> => {
 		return new Promise( ( resolve, reject ) => {
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( currentStream );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
 			const streamToReturn: DimeStreamDetail = Object.assign( <DimeStreamDetail>{}, currentStream );
 			if ( streamToReturn.exports ) {
 				streamToReturn.exports = JSON.parse( streamToReturn.exports.toString() );

@@ -24,10 +24,25 @@
 			</ng-container>
 			<ng-container *ngFor="let export of mainService.currentItem.exports; let i = index;">
 				<tr>
-					<td>{{export.name}}</td>
+					<td>
+						<a [routerLink]="['../', export.id]">{{export.name}}</a>
+					</td>
+					<td>
+						<div class="btn-toolbar" role="toolbar" aria-label="Stream Actions">
+							<div class="btn-group btn-group-xs" role="group">
+								<button class="btn btn-xs btn-default" [routerLink]="['../', export.id]" title="Details/Edit">
+									<i class="fa fa-sliders fa-fw"></i>
+								</button>
+							</div>
+							<div class="btn-group btn-group-xs pull-right" role="group">
+								<button type="button" class="btn btn-danger btn-xs" (click)="delete(export.id, export.name)" title="Delete">
+									<i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+								</button>
+							</div>
+						</div>
+					</td>
 				</tr>
 			</ng-container>
 		</tbody>
 	</table>
 </div>
-<pre>{{ mainService.currentItem.exports | json }}</pre>

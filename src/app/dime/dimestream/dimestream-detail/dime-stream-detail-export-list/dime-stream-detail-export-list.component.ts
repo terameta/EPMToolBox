@@ -17,9 +17,18 @@ export class DimeStreamDetailExportListComponent implements OnInit {
 
 	public create = () => {
 		const name = prompt( 'Please provide a name for the new export' );
-		const id = this.mainService.currentItem.exports.reduce( ( accumulator, currentValue ) => Math.max( accumulator, currentValue ), 1 );
+		const id = this.mainService.currentItem.exports.reduce( ( accumulator, currentExport ) => Math.max( accumulator, currentExport.id ), 0 ) + 1;
 		this.mainService.currentItem.exports.push( { id, name } );
 		this.mainService.update();
+	}
+
+	public delete = ( id: number, name: string ) => {
+		const asked = confirm( 'Are you sure you would like to delete ' + name );
+		if ( asked ) {
+			const index = this.mainService.currentItem.exports.findIndex( e => e.id === id );
+			this.mainService.currentItem.exports.splice( index, 1 );
+			this.mainService.update();
+		}
 	}
 
 }
