@@ -1,3 +1,2 @@
-<p>
-  dime-stream-detail-export-detail works!
-</p>
+<app-dime-stream-detail-export-hpdb *ngIf="mainService.currentItem.type == streamTypes.HPDB"></app-dime-stream-detail-export-hpdb>
+<app-dime-stream-detail-export-rdbt *ngIf="mainService.currentItem.type == streamTypes.RDBT"></app-dime-stream-detail-export-rdbt>
