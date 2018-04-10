@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { DimeStreamService } from '../../dimestream.service';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { ModalOptions } from 'ngx-bootstrap/modal/modal-options.class';
 import { HpdbMemberSelectorComponent } from '../../../../shared/hpdb-member-selector/hpdb-member-selector.component';
+import { DimeStreamExportHPDB } from '../../../../../../shared/model/dime/stream';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -11,9 +12,13 @@ import { HpdbMemberSelectorComponent } from '../../../../shared/hpdb-member-sele
 	styleUrls: ['./dime-stream-detail-export-hpdb.component.scss']
 } )
 export class DimeStreamDetailExportHPDBComponent implements OnInit {
-	public rowDims: any[] = [];
-	public colDims: any[] = [];
-	public povDims: any[] = [];
+	@Input() export: DimeStreamExportHPDB = <DimeStreamExportHPDB>{};
+
+	public dimensions: any[] = [];
+
+	// public rowDims: any[] = [];
+	// public colDims: any[] = [];
+	// public povDims: any[] = [];
 
 	public rows: any[] = [[]];
 	public cols: any[] = [[]];
@@ -30,7 +35,9 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 
 	ngOnInit() {
 		this.waitUntilReady()
-			.then( this.prepareDims )
+			.then( this.prepareExport )
+			.then( this.prepareDimensionDefinitions )
+			.then( this.prepareExportDimensions )
 			.then( this.prepareMembers )
 			.catch( issue => {
 				console.error( 'Failure somewhere:', issue );
@@ -39,54 +46,82 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 
 	private waitUntilReady = () => {
 		return new Promise( ( resolve, reject ) => {
-			if ( this.mainService.currentItem ) {
-				if ( this.mainService.currentItem.fieldList ) {
-					resolve();
-				} else {
-					setTimeout( () => { resolve( this.waitUntilReady() ); }, 500 );
-				}
-			} else {
+			if ( !this.mainService.currentItem ) {
 				setTimeout( () => { resolve( this.waitUntilReady() ); }, 500 );
+			} else if ( !this.mainService.currentItem.fieldList ) {
+				setTimeout( () => { resolve( this.waitUntilReady() ); }, 500 );
+			} else if ( !this.mainService.currentItem.exports ) {
+				setTimeout( () => { resolve( this.waitUntilReady() ); }, 500 );
+			} else if ( Object.keys( this.export ).length === 0 ) {
+				setTimeout( () => { resolve( this.waitUntilReady() ); }, 500 );
+			} else {
+				console.log( this.mainService.currentItem.exports );
+				console.log( this.export );
+				resolve();
 			}
 		} );
 	}
 
-	private prepareDims = () => {
+	private prepareExport = () => {
+		return new Promise( ( resolve, reject ) => {
+			if ( !this.export.rowDims ) this.export.rowDims = [];
+			if ( !this.export.colDims ) this.export.colDims = [];
+			if ( !this.export.povDims ) this.export.povDims = [];
+			resolve();
+		} );
+	}
+
+	private prepareDimensionDefinitions = () => {
 		return new Promise( ( resolve, reject ) => {
 			this.mainService.currentItem.fieldList.forEach( field => {
-				this.addToPOVs( field.name, '', 'member' );
+				this.dimensions.push( { id: field.id, name: field.name, status: '', members: [{ RefField: field.name, Description: field.name, Parent: '' }] } );
 			} );
+			resolve();
+		} );
+	}
+
+	private prepareExportDimensions = () => {
+		return new Promise( ( resolve, reject ) => {
+			if ( this.export.povDims.length === 0 && this.export.colDims.length === 0 && this.export.rowDims.length === 0 ) {
+				this.mainService.currentItem.fieldList.forEach( field => {
+					this.addToPOVs( field.name, '', 'member' );
+				} );
+			}
 			resolve();
 		} );
 	}
 	private prepareMembers = () => {
 		return new Promise( ( resolve, reject ) => {
-			this.mainService.currentItem.fieldList.forEach( field => {
-				const dimension = this.povDims.filter( dim => dim.name === field.name )[0];
-				dimension.status = 'Refreshing Members';
-				dimension.selectionType = 'member';
-				dimension.members = [field.name];
-				this.mainService.getFieldDescriptionsWithHierarchy( this.mainService.currentItem.id, field.id ).subscribe( result => {
-					dimension.status = 'Ready';
-					dimension.members = result;
-				}, issue => {
-					dimension.status = 'Failed: Can\'t refresh member list!';
-					console.error( 'Prepare Members issue:', issue );
-				} );
-			} );
+			const results = this.dimensions.forEach( dimension => this.prepareMembersForDimension( this.mainService.currentItem.id, dimension ) );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( results );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
 			resolve();
+		} );
+	}
+	private prepareMembersForDimension = ( streamid: number, dimension: any, retryCount = 0 ) => {
+		this.mainService.getFieldDescriptionsWithHierarchy( streamid, dimension.id ).subscribe( result => {
+			dimension.status = 'Ready';
+			dimension.members = result;
+		}, issue => {
+			dimension.status = 'Failed: Can\'t refresh member list!';
+			console.error( 'Prepare Members issue:', dimension.name );
+			console.error( 'Prepare Members issue:', issue );
+			this.prepareMembersForDimension( streamid, dimension, ++retryCount );
 		} );
 	}
 
 	public isAssigned = ( fieldName: string ) => {
 		let assigned = false;
-		this.rowDims.filter( row => row.name === fieldName ).forEach( row => {
+		this.export.rowDims.filter( row => row.name === fieldName ).forEach( row => {
 			assigned = true;
 		} );
-		this.colDims.filter( row => row.name === fieldName ).forEach( row => {
+		this.export.colDims.filter( row => row.name === fieldName ).forEach( row => {
 			assigned = true;
 		} );
-		this.povDims.filter( row => row.name === fieldName ).forEach( row => {
+		this.export.povDims.filter( row => row.name === fieldName ).forEach( row => {
 			assigned = true;
 		} );
 		return assigned;
@@ -94,10 +129,10 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 
 	public addToRows = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'cols' ) => {
 		let fromDimension;
-		if ( fromName === 'povs' ) fromDimension = this.povDims;
-		if ( fromName === 'cols' ) fromDimension = this.colDims;
+		if ( fromName === 'povs' ) fromDimension = this.export.povDims;
+		if ( fromName === 'cols' ) fromDimension = this.export.colDims;
 		const source = fromDimension.splice( index, 1 )[0];
-		this.rowDims.push( source );
+		this.export.rowDims.push( source );
 		this.rows.forEach( row => {
 			row.push( { selectedMember, selectionType } );
 		} );
@@ -110,10 +145,10 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 	}
 	public addToCols = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'rows' ) => {
 		let fromDimension;
-		if ( fromName === 'povs' ) fromDimension = this.povDims;
-		if ( fromName === 'rows' ) fromDimension = this.rowDims;
+		if ( fromName === 'povs' ) fromDimension = this.export.povDims;
+		if ( fromName === 'rows' ) fromDimension = this.export.rowDims;
 		const source = fromDimension.splice( index, 1 )[0];
-		this.colDims.push( source );
+		this.export.colDims.push( source );
 		this.cols.forEach( col => {
 			col.push( { selectedMember, selectionType } );
 		} );
@@ -125,16 +160,18 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		this.recalculateCellCounts();
 	}
 	public addToPOVs = ( index: number | string, selectedMember: string, selectionType: string, fromName?: 'rows' | 'cols' ) => {
+		// console.log( 'We are actually at the addToPOVs' );
 		if ( typeof index === 'string' ) {
-			this.povDims.push( { name: index } );
+			this.export.povDims.push( { name: index, selectedMember: index } );
+			// console.log( this.export.povDims );
 		} else {
 			let fromDimension;
-			if ( fromName === 'rows' ) fromDimension = this.rowDims;
-			if ( fromName === 'cols' ) fromDimension = this.colDims;
+			if ( fromName === 'rows' ) fromDimension = this.export.rowDims;
+			if ( fromName === 'cols' ) fromDimension = this.export.colDims;
 			const source = fromDimension.splice( index, 1 )[0];
 			source.selectedMember = selectedMember;
 			source.selectionType = 'member';
-			this.povDims.push( JSON.parse( JSON.stringify( source ) ) );
+			this.export.povDims.push( JSON.parse( JSON.stringify( source ) ) );
 			if ( fromName === 'rows' ) {
 				this.rows.forEach( row => {
 					row.splice( index, 1 );
@@ -176,9 +213,9 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 
 	public openMemberSelector = ( focalPoint: 'pov' | 'col' | 'row', index: number, rcindex: number ) => {
 		let dimension;
-		if ( focalPoint === 'pov' ) dimension = this.povDims[index];
-		if ( focalPoint === 'row' ) dimension = this.rowDims[index];
-		if ( focalPoint === 'col' ) dimension = this.colDims[index];
+		if ( focalPoint === 'pov' ) dimension = this.export.povDims[index];
+		if ( focalPoint === 'row' ) dimension = this.export.rowDims[index];
+		if ( focalPoint === 'col' ) dimension = this.export.colDims[index];
 		const members = dimension.members;
 		this.modalRef = this.modalService.show( HpdbMemberSelectorComponent, { initialState: { members } } );
 		this.modalRef.content.onClose.subscribe( result => {
@@ -193,14 +230,14 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 
 	private recalculateCellCounts = () => {
 		this.cellCounts.povs = {};
-		this.povDims.forEach( dim => {
+		this.export.povDims.forEach( dim => {
 			this.cellCounts.povs[dim.name] = 0;
 			if ( dim.selectedMember ) this.cellCounts.povs[dim.name] = 1;
 		} );
 		this.cellCounts.rows = [];
 		this.rows.forEach( row => {
 			const toPush: any = {};
-			this.rowDims.forEach( ( dim, dimindex ) => {
+			this.export.rowDims.forEach( ( dim, dimindex ) => {
 				toPush[dim.name] = this.countMembers( dim, row[dimindex].selectionType, row[dimindex].selectedMember );
 			} );
 			this.cellCounts.rows.push( toPush );
@@ -208,23 +245,23 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		this.cellCounts.cols = [];
 		this.cols.forEach( col => {
 			const toPush: any = {};
-			this.colDims.forEach( ( dim, dimindex ) => {
+			this.export.colDims.forEach( ( dim, dimindex ) => {
 				toPush[dim.name] = this.countMembers( dim, col[dimindex].selectionType, col[dimindex].selectedMember );
 			} );
 			this.cellCounts.cols.push( toPush );
 		} );
 		this.cellCount = 1;
-		Object.values( this.cellCounts.povs ).forEach( count => {
+		Object.values( this.cellCounts.povs ).forEach( ( count: any ) => {
 			this.cellCount *= count;
 		} );
 		this.cellCounts.rows.forEach( row => {
 			let rowCellCount = 1;
-			Object.values( row ).forEach( count => rowCellCount *= count );
+			Object.values( row ).forEach( ( count: any ) => rowCellCount *= count );
 			this.cellCount *= rowCellCount;
 		} );
 		this.cellCounts.cols.forEach( col => {
 			let colCellCount = 1;
-			Object.values( col ).forEach( count => colCellCount *= count );
+			Object.values( col ).forEach( ( count: any ) => colCellCount *= count );
 			this.cellCount *= colCellCount;
 		} );
 	}

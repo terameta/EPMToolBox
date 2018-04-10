@@ -3,7 +3,7 @@
 		<tr>
 			<td colspan="2">
 				<div class="table-responsive">
-					<table class="table table-condensed" *ngIf="povDims.length > 0">
+					<table class="table table-condensed" *ngIf="export?.povDims?.length > 0">
 						<thead>
 							<tr>
 								<th width="30">POVs</th>
@@ -14,7 +14,7 @@
 							<tr>
 								<td>&nbsp;</td>
 								<td>
-									<ng-container *ngFor="let dimension of povDims; let i = index;">
+									<ng-container *ngFor="let dimension of export.povDims; let i = index;">
 										<div class="btn-toolbar" role="toolbar" style="padding-bottom: 2px;">
 											<div class="btn-group btn-group-xs">
 												<button class="btn btn-default" type="button" title="Move to rows" (click)="addToRows(i, dimension.selectedMember, dimension.selectionType, 'povs')">
@@ -118,7 +118,7 @@
 										</button>
 									</td>
 									<td>
-										<ng-container *ngFor="let dimension of colDims; let dimindex = index;">
+										<ng-container *ngFor="let dimension of export.colDims; let dimindex = index;">
 											<div class="btn-toolbar" role="toolbar" style="padding-bottom: 2px;">
 												<div class="btn-group btn-group-xs">
 													<button class="btn btn-default" type="button" title="Move to POVs" (click)="addToPOVs(dimindex, col[dimindex].selectedMember, col[dimindex].selectionType, 'cols')">
@@ -213,7 +213,7 @@
 										</button>
 									</td>
 									<td>
-										<ng-container *ngFor="let dimension of rowDims; let dimindex = index;">
+										<ng-container *ngFor="let dimension of export.rowDims; let dimindex = index;">
 											<div class="btn-toolbar" role="toolbar" style="padding-bottom: 2px;">
 												<div class="btn-group btn-group-xs">
 													<button class="btn btn-default" type="button" title="Move to POVs" (click)="addToPOVs(dimindex, row[dimindex].selectedMember, row[dimindex].selectionType, 'rows')">
@@ -286,6 +286,19 @@
 	</table>
 </div>
 <div class="row">
+	<div class="col-xs-2" *ngFor="let dimension of dimensions">
+		<pre>{{dimension | json}}</pre>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-6">
+		<pre>{{export | json}}</pre>
+	</div>
+	<div class="col-xs-6">
+		<pre>{{mainService.currentItem.exports | json}}</pre>
+	</div>
+</div>
+<div class="row">
 	<div class="col-xs-12">
 		<pre>{{cellCounts | json}}</pre>
 	</div>
@@ -297,11 +310,11 @@
 	</div>
 	<div class="col-xs-2">
 		<pre>POV Dimensions
-{{povDims | json}}</pre>
+{{export.povDims | json}}</pre>
 	</div>
 	<div class="col-xs-2">
 		<pre>Column Dimensions
-{{colDims | json}}</pre>
+{{export.colDims | json}}</pre>
 	</div>
 	<div class="col-xs-2">
 		<pre>Columns
@@ -309,7 +322,7 @@
 	</div>
 	<div class="col-xs-2">
 		<pre>Row Dimensions
-{{rowDims | json}}</pre>
+{{export.rowDims | json}}</pre>
 	</div>
 	<div class="col-xs-2">
 		<pre>Rows
