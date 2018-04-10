@@ -8,7 +8,7 @@ import { DimeStreamType } from '../../../../../../shared/enums/dime/streamtypes'
 	styleUrls: ['./dime-stream-detail-export-detail.component.scss']
 } )
 export class DimeStreamDetailExportDetailComponent implements OnInit, OnDestroy {
-	private streamTypes = DimeStreamType;
+	public streamTypes = DimeStreamType;
 	public export: any = {};
 
 
