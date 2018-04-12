@@ -25,4 +25,7 @@ export class DimeStreamBackend {
 	public fetchFieldDescriptions = ( payload: { stream: number, field: number } ) => this.http.post( this.baseUrl + '/getFieldDescriptions', payload );
 	public getFieldDescriptionsWithHierarchy = ( payload: { stream: number, field: number } ) => this.http.post( this.baseUrl + '/getFieldDescriptionsWithHierarchy', payload );
 	public populateFieldDescriptions = ( id: number ) => this.http.get( this.baseUrl + '/populateFieldDescriptions/' + id );
+
+	public executeExport = ( payload: { streamid: number, exportid: number } ) => this.http.post( this.baseUrl + '/executeExport', payload );
+
 }

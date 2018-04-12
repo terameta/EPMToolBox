@@ -31,5 +31,6 @@ export interface DimeStreamExportHPDB extends DimeStreamExport {
 	cellCounts: any,
 	cellCount: number,
 	rows: any[],
-	cols: any[]
+	cols: any[],
+	povs: any[]
 }

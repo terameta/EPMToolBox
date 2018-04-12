@@ -5,6 +5,10 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { ModalOptions } from 'ngx-bootstrap/modal/modal-options.class';
 import { HpdbMemberSelectorComponent } from '../../../../shared/hpdb-member-selector/hpdb-member-selector.component';
 import { DimeStreamExportHPDB } from '../../../../../../shared/model/dime/stream';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
+import { ToastrService } from 'ngx-toastr';
+import { DimeStreamBackend } from '../../dimestream.backend';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -16,21 +20,17 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 
 	public dimensions: any[] = [];
 
-	// public rowDims: any[] = [];
-	// public colDims: any[] = [];
-	// public povDims: any[] = [];
-
-	public rows: any[] = [[]];
-	public cols: any[] = [[]];
-
 	public cellCounts: any = {};
 	public cellCount = 0;
+	public isDirty = false;
 
 	private modalRef: BsModalRef;
 
 	constructor(
 		public mainService: DimeStreamService,
-		private modalService: BsModalService
+		private modalService: BsModalService,
+		private toastr: ToastrService,
+		private backend: DimeStreamBackend
 	) { }
 
 	ngOnInit() {
@@ -55,22 +55,21 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			} else if ( Object.keys( this.export ).length === 0 ) {
 				setTimeout( () => { resolve( this.waitUntilReady() ); }, 500 );
 			} else {
-				console.log( this.mainService.currentItem.exports );
-				console.log( this.export );
 				resolve();
 			}
 		} );
 	}
-
 	private prepareExport = () => {
 		return new Promise( ( resolve, reject ) => {
 			if ( !this.export.rowDims ) this.export.rowDims = [];
 			if ( !this.export.colDims ) this.export.colDims = [];
 			if ( !this.export.povDims ) this.export.povDims = [];
+			if ( !this.export.rows ) this.export.rows = [[]];
+			if ( !this.export.cols ) this.export.cols = [[]];
+			if ( !this.export.povs ) this.export.povs = [];
 			resolve();
 		} );
 	}
-
 	private prepareDimensionDefinitions = () => {
 		return new Promise( ( resolve, reject ) => {
 			this.mainService.currentItem.fieldList.forEach( field => {
@@ -79,111 +78,118 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			resolve();
 		} );
 	}
-
 	private prepareExportDimensions = () => {
 		return new Promise( ( resolve, reject ) => {
-			if ( this.export.povDims.length === 0 && this.export.colDims.length === 0 && this.export.rowDims.length === 0 ) {
-				this.mainService.currentItem.fieldList.forEach( field => {
-					this.addToPOVs( field.name, '', 'member' );
-				} );
-			}
+			this.dimensions.forEach( ( dim, dimindex ) => {
+				if ( !this.isAssigned( dim.id ) ) {
+					this.addToPOVs( dim.id, dim.name, 'member' );
+				}
+			} );
 			resolve();
 		} );
 	}
 	private prepareMembers = () => {
 		return new Promise( ( resolve, reject ) => {
-			const results = this.dimensions.forEach( dimension => this.prepareMembersForDimension( this.mainService.currentItem.id, dimension ) );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( results );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
+			this.dimensions.forEach( dimension => this.prepareMembersForDimension( this.mainService.currentItem.id, dimension ) );
 			resolve();
+			this.recalculateCellCounts();
 		} );
 	}
 	private prepareMembersForDimension = ( streamid: number, dimension: any, retryCount = 0 ) => {
-		this.mainService.getFieldDescriptionsWithHierarchy( streamid, dimension.id ).subscribe( result => {
-			dimension.status = 'Ready';
-			dimension.members = result;
-		}, issue => {
-			dimension.status = 'Failed: Can\'t refresh member list!';
-			console.error( 'Prepare Members issue:', dimension.name );
-			console.error( 'Prepare Members issue:', issue );
-			this.prepareMembersForDimension( streamid, dimension, ++retryCount );
-		} );
-	}
-
-	public isAssigned = ( fieldName: string ) => {
-		let assigned = false;
-		this.export.rowDims.filter( row => row.name === fieldName ).forEach( row => {
-			assigned = true;
-		} );
-		this.export.colDims.filter( row => row.name === fieldName ).forEach( row => {
-			assigned = true;
-		} );
-		this.export.povDims.filter( row => row.name === fieldName ).forEach( row => {
-			assigned = true;
-		} );
-		return assigned;
-	}
-
-	public addToRows = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'cols' ) => {
-		let fromDimension;
-		if ( fromName === 'povs' ) fromDimension = this.export.povDims;
-		if ( fromName === 'cols' ) fromDimension = this.export.colDims;
-		const source = fromDimension.splice( index, 1 )[0];
-		this.export.rowDims.push( source );
-		this.rows.forEach( row => {
-			row.push( { selectedMember, selectionType } );
-		} );
-		if ( fromName === 'cols' ) {
-			this.cols.forEach( col => {
-				col.splice( index, 1 );
+		if ( retryCount < 10 ) {
+			dimension.status = 'Refreshing';
+			this.mainService.getFieldDescriptionsWithHierarchy( streamid, dimension.id ).subscribe( result => {
+				dimension.status = 'Ready';
+				dimension.members = result;
+				this.recalculateCellCounts();
+			}, issue => {
+				dimension.status = 'Failed: Can\'t refresh member list!';
+				console.error( 'Prepare Members issue:', dimension.name );
+				console.error( 'Prepare Members issue:', issue );
+				this.prepareMembersForDimension( streamid, dimension, ++retryCount );
 			} );
 		}
-		this.recalculateCellCounts();
 	}
-	public addToCols = ( index: number, selectedMember: string, selectionType: string, fromName: 'povs' | 'rows' ) => {
-		let fromDimension;
-		if ( fromName === 'povs' ) fromDimension = this.export.povDims;
-		if ( fromName === 'rows' ) fromDimension = this.export.rowDims;
-		const source = fromDimension.splice( index, 1 )[0];
-		this.export.colDims.push( source );
-		this.cols.forEach( col => {
-			col.push( { selectedMember, selectionType } );
-		} );
-		if ( fromName === 'rows' ) {
-			this.rows.forEach( row => {
-				row.splice( index, 1 );
-			} );
+
+	public delete = () => {
+		const delIndex = this.mainService.currentItem.exports.findIndex( e => e.id === this.export.id );
+		if ( delIndex >= 0 ) {
+			this.mainService.currentItem.exports.splice( delIndex, 1 );
+			this.mainService.update();
 		}
-		this.recalculateCellCounts();
+		this.mainService.navigateTo( this.mainService.currentItem.id );
 	}
-	public addToPOVs = ( index: number | string, selectedMember: string, selectionType: string, fromName?: 'rows' | 'cols' ) => {
-		// console.log( 'We are actually at the addToPOVs' );
-		if ( typeof index === 'string' ) {
-			this.export.povDims.push( { name: index, selectedMember: index } );
-			// console.log( this.export.povDims );
+
+	public save = () => {
+		this.mainService.update();
+		this.isDirty = false;
+	}
+
+	public execute = () => {
+		this.backend.executeExport( { streamid: this.mainService.currentItem.id, exportid: this.export.id } ).subscribe( () => {
+			this.toastr.info( 'Export execution is now initiated. Please expect the result in your inbox.', 'Streams' );
+		}, console.error );
+	}
+
+	public getDim = ( dimid: number ) => this.dimensions.find( e => e.id === dimid );
+	public getDims = ( dimids: number[] ) => dimids.map( id => this.getDim( id ) );
+
+	private removeFromPOVs = ( dimid: number ) => {
+		const found = this.isPOV( dimid );
+		if ( found !== false ) {
+			this.export.povDims.splice( found, 1 );
+			this.export.povs.splice( found, 1 );
+		}
+	}
+	private removeFromRows = ( dimid: number ) => {
+		const found = this.isRow( dimid );
+		if ( found !== false ) {
+			this.export.rowDims.splice( found, 1 );
+			this.export.rows.forEach( row => row.splice( found, 1 ) );
+		}
+	}
+	private removeFromCols = ( dimid: number ) => {
+		const found = this.isCol( dimid );
+		if ( found !== false ) {
+			this.export.colDims.splice( found, 1 );
+			this.export.cols.forEach( col => col.splice( found, 1 ) );
+		}
+	}
+	public isAssigned = ( dimid: number ) => ( this.isPOV( dimid ) !== false ) || ( this.isRow( dimid ) !== false ) || ( this.isCol( dimid ) !== false );
+	private isPOV = ( dimid: number ) => this.isAssignedTo( dimid, this.export.povDims );
+	private isCol = ( dimid: number ) => this.isAssignedTo( dimid, this.export.colDims );
+	private isRow = ( dimid: number ) => this.isAssignedTo( dimid, this.export.rowDims );
+	private isAssignedTo = ( dimid: number, section: number[] ) => {
+		const found = section.findIndex( e => e === dimid );
+		if ( found >= 0 ) {
+			return found;
 		} else {
-			let fromDimension;
-			if ( fromName === 'rows' ) fromDimension = this.export.rowDims;
-			if ( fromName === 'cols' ) fromDimension = this.export.colDims;
-			const source = fromDimension.splice( index, 1 )[0];
-			source.selectedMember = selectedMember;
-			source.selectionType = 'member';
-			this.export.povDims.push( JSON.parse( JSON.stringify( source ) ) );
-			if ( fromName === 'rows' ) {
-				this.rows.forEach( row => {
-					row.splice( index, 1 );
-				} );
-			}
-			if ( fromName === 'cols' ) {
-				this.cols.forEach( col => {
-					col.splice( index, 1 );
-				} );
-			}
+			return false;
 		}
+	}
+	public addToPOVs = ( dimid: number, selectedMember: string, selectionType: string ) => {
+		this.export.povDims.push( dimid );
+		this.export.povs.push( { selectedMember, selectionType: 'member' } );
+		this.removeFromCols( dimid );
+		this.removeFromRows( dimid );
 		this.recalculateCellCounts();
+		this.isDirty = true;
+	}
+	public addToRows = ( dimid: number, selectedMember: string, selectionType: string ) => {
+		this.export.rowDims.push( dimid );
+		this.export.rows.forEach( row => row.push( { selectedMember, selectionType } ) );
+		this.removeFromCols( dimid );
+		this.removeFromPOVs( dimid );
+		this.recalculateCellCounts();
+		this.isDirty = true;
+	}
+	public addToCols = ( dimid: number, selectedMember: string, selectionType: string ) => {
+		this.export.colDims.push( dimid );
+		this.export.cols.forEach( col => col.push( { selectedMember, selectionType } ) );
+		this.removeFromPOVs( dimid );
+		this.removeFromRows( dimid );
+		this.recalculateCellCounts();
+		this.isDirty = true;
 	}
 
 	public getColumnHeader = ( i: number ) => {
@@ -199,53 +205,63 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		return '';
 	}
 	public addCol = () => {
-		this.cols.push( JSON.parse( JSON.stringify( this.cols[this.cols.length - 1] ) ) );
+		this.export.cols.push( JSON.parse( JSON.stringify( this.export.cols[this.export.cols.length - 1] ) ) );
+		this.recalculateCellCounts();
+		this.isDirty = true;
 	}
 	public deleteCol = ( index: number ) => {
-		if ( confirm( 'Are you sure you want to delete this column?' ) ) this.cols.splice( index, 1 );
+		if ( confirm( 'Are you sure you want to delete this column?' ) ) this.export.cols.splice( index, 1 );
+		this.recalculateCellCounts();
+		this.isDirty = true;
 	}
 	public addRow = () => {
-		this.rows.push( JSON.parse( JSON.stringify( this.rows[this.rows.length - 1] ) ) );
+		this.export.rows.push( JSON.parse( JSON.stringify( this.export.rows[this.export.rows.length - 1] ) ) );
+		this.recalculateCellCounts();
+		this.isDirty = true;
 	}
 	public deleteRow = ( index: number ) => {
-		if ( confirm( 'Are you sure you want to delete this row?' ) ) this.rows.splice( index, 1 );
+		if ( confirm( 'Are you sure you want to delete this row?' ) ) this.export.rows.splice( index, 1 );
+		this.recalculateCellCounts();
+		this.isDirty = true;
 	}
 
-	public openMemberSelector = ( focalPoint: 'pov' | 'col' | 'row', index: number, rcindex: number ) => {
-		let dimension;
-		if ( focalPoint === 'pov' ) dimension = this.export.povDims[index];
-		if ( focalPoint === 'row' ) dimension = this.export.rowDims[index];
-		if ( focalPoint === 'col' ) dimension = this.export.colDims[index];
-		const members = dimension.members;
-		this.modalRef = this.modalService.show( HpdbMemberSelectorComponent, { initialState: { members } } );
+	public openMemberSelector = ( focalPoint: 'pov' | 'col' | 'row', dimid: number, index: number, rcindex?: number ) => {
+		const dimension = this.getDim( dimid );
+		this.modalRef = this.modalService.show( HpdbMemberSelectorComponent, { initialState: { members: dimension.members } } );
 		this.modalRef.content.onClose.subscribe( result => {
 			if ( result ) {
-				if ( focalPoint === 'col' ) this.cols[rcindex][index].selectedMember = result;
-				if ( focalPoint === 'row' ) this.rows[rcindex][index].selectedMember = result;
-				if ( focalPoint === 'pov' ) dimension.selectedMember = result;
+				if ( focalPoint === 'col' ) this.export.cols[rcindex][index].selectedMember = result;
+				if ( focalPoint === 'row' ) this.export.rows[rcindex][index].selectedMember = result;
+				if ( focalPoint === 'pov' ) this.export.povs[index].selectedMember = result;
 			}
 			this.recalculateCellCounts();
+			this.isDirty = true;
 		} );
 	}
 
 	private recalculateCellCounts = () => {
 		this.cellCounts.povs = {};
-		this.export.povDims.forEach( dim => {
-			this.cellCounts.povs[dim.name] = 0;
-			if ( dim.selectedMember ) this.cellCounts.povs[dim.name] = 1;
+		this.export.povs.forEach( ( pov, povindex ) => {
+			const dimID = this.export.povDims[povindex];
+			const dimName = this.getDim( dimID ).name;
+			this.cellCounts.povs[dimName] = pov.selectedMember ? 1 : 0;
 		} );
+
 		this.cellCounts.rows = [];
-		this.rows.forEach( row => {
+		this.export.rows.forEach( row => {
 			const toPush: any = {};
-			this.export.rowDims.forEach( ( dim, dimindex ) => {
-				toPush[dim.name] = this.countMembers( dim, row[dimindex].selectionType, row[dimindex].selectedMember );
+			this.export.rowDims.forEach( ( dimID, dimIndex ) => {
+				const dim = this.getDim( dimID );
+				toPush[dim.name] = this.countMembers( dim, row[dimIndex].selectionType, row[dimIndex].selectedMember );
 			} );
 			this.cellCounts.rows.push( toPush );
 		} );
+
 		this.cellCounts.cols = [];
-		this.cols.forEach( col => {
+		this.export.cols.forEach( col => {
 			const toPush: any = {};
-			this.export.colDims.forEach( ( dim, dimindex ) => {
+			this.export.colDims.forEach( ( dimID, dimindex ) => {
+				const dim = this.getDim( dimID );
 				toPush[dim.name] = this.countMembers( dim, col[dimindex].selectionType, col[dimindex].selectedMember );
 			} );
 			this.cellCounts.cols.push( toPush );

@@ -32,6 +32,6 @@ export class ApiDimeStream {
 		this.apiRoutes.post( '/listFieldsforField/', ( req, res ) => { this.rester.respond( this.stream.listFieldsforField, req.body, req, res ); } );
 		this.apiRoutes.post( '/getFieldDescriptions', ( req, res ) => { this.rester.respond( this.stream.getFieldDescriptions, req.body, req, res ); } );
 		this.apiRoutes.post( '/getFieldDescriptionsWithHierarchy', ( req, res ) => { this.rester.respond( this.stream.getFieldDescriptionsWithHierarchy, req.body, req, res ); } );
-		// this.apiRoutes.post( '/saveFields', ( req, res ) => { this.rester.respond( this.stream.saveFields, req.body, req, res ); } );
+		this.apiRoutes.post( '/executeExport', ( req, res ) => { this.rester.respond( this.stream.executeExport, { ...req.body, user: req.user }, req, res ); } );
 	}
 }

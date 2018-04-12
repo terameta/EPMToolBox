@@ -451,6 +451,33 @@ export class StreamTools {
 			} );
 		} );
 	}
+	public getAllFieldDescriptionsWithHierarchy = async ( streamid: number ) => {
+		const toReturn: any = {};
+		const stream = await this.getOne( streamid );
+		// Below works and waits but it waits for each of them. Too slow.
+		// for ( const field of stream.fieldList ) {
+		// 	toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
+		// 	console.log( 'Worked on', field.id, field.name );
+		// }
+		// Below works but doesn't wait, not good enough
+		// stream.fieldList.forEach( async ( field ) => {
+		// 	toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
+		// 	console.log( 'Worked on', field.id, field.name );
+		// } );
+		await Promise.all( stream.fieldList.map( async ( field ) => {
+			console.log( 'Started:', field.id, field.name );
+			toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
+			console.log( 'Finished:', field.id, field.name );
+		} ) );
+		return toReturn;
+		// return new Promise( ( resolve, reject ) => {
+		// 	reject( new Error( 'Not Yet' ) );
+		// 	// this.getOne( streamid )
+		// 	// 	.then( stream => {
+
+		// 	// 	} ).catch(reject);
+		// } );
+	}
 	public populateFieldDescriptions = ( id: number ) => {
 		return this.getOne( id )
 			.then( this.populateFieldDescriptionsClear )
@@ -519,5 +546,32 @@ export class StreamTools {
 				resolve( 'OK' );
 			}
 		} );
+	}
+
+	public executeExport = ( payload: { streamid: number, exportid: number, user: any } ) => {
+		this.executeExportAction( payload ).then( ( result ) => {
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			console.log( 'ExecuteExportAction is now complete:', result );
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		} ).catch( ( error ) => {
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( 'ExecuteExportAction failed:' );
+			console.log( error );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+		} );
+		return Promise.resolve( { status: 'Initiated' } );
+	}
+
+	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any } ) => {
+		const stream = await this.getOne( payload.streamid );
+		console.log( 'Received stream:', stream.name );
+		const exportDefinition = stream.exports.find( e => e.id === payload.exportid );
+		console.log( 'Found export:', exportDefinition.name );
+		const hierarchies = await this.getAllFieldDescriptionsWithHierarchy( payload.streamid );
+		console.log( 'Received hierarchies:', Object.keys( hierarchies ) );
 	}
 }
