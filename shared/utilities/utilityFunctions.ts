@@ -80,3 +80,23 @@ export const getMonthSorterValue = ( month: string ): string => {
 	sorter = sorter.substr( 0, 8 ).padStart( 8, '0' );
 	return sorter;
 };
+
+export const arrayCartesian = ( arg: any[] ) => {
+	const r = [];
+	const max = arg.length - 1;
+
+	const helper = ( arr, i ) => {
+		for ( let j = 0, l = arg[i].length; j < l; j++ ) {
+			// const a = JSON.parse( JSON.stringify( arr ) ); // arr.slice( 0 );
+			const a = arr.slice( 0 );
+			a.push( arg[i][j] );
+			if ( i === max ) {
+				r.push( a );
+			} else {
+				helper( a, i + 1 );
+			}
+		}
+	};
+	helper( [], 0 );
+	return r;
+};

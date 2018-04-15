@@ -460,4 +460,16 @@ export class EnvironmentTools {
 				catch( reject );
 		} );
 	}
+	public readData = ( refObj: any ) => {
+		return new Promise( ( resolve, reject ) => {
+			this.getEnvironmentDetails( <DimeEnvironmentDetail>{ id: refObj.id }, true )
+				.then( ( innerObj: any ) => {
+					innerObj.database = refObj.db;
+					innerObj.table = refObj.table;
+					innerObj.query = refObj.query;
+					return this.sourceTools[innerObj.type].readData( innerObj );
+				} )
+				.then( resolve ).catch( reject );
+		} );
+	}
 }

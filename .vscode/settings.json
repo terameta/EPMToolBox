@@ -45,5 +45,9 @@
 	"emmet.triggerExpansionOnTab": true,
 	"editor.smoothScrolling": true,
 	"editor.showFoldingControls": "always",
-	"editor.detectIndentation": false
+	"editor.detectIndentation": false,
+	"zenMode.centerLayout": false,
+	"zenMode.hideTabs": false,
+	"zenMode.hideStatusBar": false,
+	"zenMode.hideActivityBar": false
 }

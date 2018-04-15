@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { ToastrService } from 'ngx-toastr';
 import { DimeStreamBackend } from '../../dimestream.backend';
+import { countMembers } from '../../../../../../shared/utilities/hpUtilities';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -252,7 +253,7 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			const toPush: any = {};
 			this.export.rowDims.forEach( ( dimID, dimIndex ) => {
 				const dim = this.getDim( dimID );
-				toPush[dim.name] = this.countMembers( dim, row[dimIndex].selectionType, row[dimIndex].selectedMember );
+				toPush[dim.name] = countMembers( dim.members, row[dimIndex].selectionType, row[dimIndex].selectedMember );
 			} );
 			this.cellCounts.rows.push( toPush );
 		} );
@@ -262,7 +263,7 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			const toPush: any = {};
 			this.export.colDims.forEach( ( dimID, dimindex ) => {
 				const dim = this.getDim( dimID );
-				toPush[dim.name] = this.countMembers( dim, col[dimindex].selectionType, col[dimindex].selectedMember );
+				toPush[dim.name] = countMembers( dim.members, col[dimindex].selectionType, col[dimindex].selectedMember );
 			} );
 			this.cellCounts.cols.push( toPush );
 		} );
@@ -270,53 +271,19 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		Object.values( this.cellCounts.povs ).forEach( ( count: any ) => {
 			this.cellCount *= count;
 		} );
+		let totalNumberofRows = 0;
 		this.cellCounts.rows.forEach( row => {
 			let rowCellCount = 1;
 			Object.values( row ).forEach( ( count: any ) => rowCellCount *= count );
-			this.cellCount *= rowCellCount;
+			totalNumberofRows += rowCellCount;
 		} );
+		this.cellCount *= totalNumberofRows;
+		let totalNumberofCols = 0;
 		this.cellCounts.cols.forEach( col => {
 			let colCellCount = 1;
 			Object.values( col ).forEach( ( count: any ) => colCellCount *= count );
-			this.cellCount *= colCellCount;
+			totalNumberofCols += colCellCount;
 		} );
+		this.cellCount *= totalNumberofCols;
 	}
-
-	private countMembers = ( dimension: any, type: string, member: string ) => {
-		let count = 0;
-		if ( member ) {
-			if ( type === 'member' ) {
-				count = 1;
-			}
-			if ( type === 'level0' ) {
-				count = this.findLevel0( dimension.members, member ).length;
-			}
-			if ( type === 'children' ) {
-				count = this.findChildren( dimension.members, member ).length;
-			}
-			if ( type === 'ichildren' ) {
-				count = this.findChildren( dimension.members, member ).length + 1;
-			}
-			if ( type === 'descendants' ) {
-				count = this.findDescendants( dimension.members, member ).length;
-			}
-			if ( type === 'idescendants' ) {
-				count = this.findDescendants( dimension.members, member ).length + 1;
-			}
-		}
-		return count;
-	}
-
-	private findChildren = ( memberList: any[], member: string ) => memberList.filter( mbr => mbr.Parent === member );
-	private findDescendants = ( memberList: any[], member: string, currentList: any[] = [] ) => {
-		const children = this.findChildren( memberList, member );
-		children.forEach( child => {
-			currentList.push( child );
-			this.findDescendants( memberList, child.RefField, currentList );
-		} );
-		return currentList;
-	}
-	private findLevel0 = ( memberList: any[], member: string ) => this.findDescendants( memberList, member ).filter( element => this.isLevel0( memberList, element.RefField ) );
-	private isLevel0 = ( memberList: any[], member: string ) => memberList.findIndex( element => element.Parent === member ) < 0;
-
 }

@@ -50,6 +50,9 @@ export class PBCSTools {
 	public writeData = ( refObj ) => {
 		return this.smartview.writeData( refObj );
 	}
+	public readData = ( refObj ) => {
+		return this.smartview.readData( refObj );
+	}
 	public runProcedure = ( refObj ) => {
 		return this.smartview.runBusinessRule( refObj );
 	}

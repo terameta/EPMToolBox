@@ -6,7 +6,8 @@ import { DimeStream, DimeStreamDetail } from '../../shared/model/dime/stream';
 import { EnvironmentTools } from './tools.dime.environment';
 import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
-import { SortByPosition, SortByName } from '../../shared/utilities/utilityFunctions';
+import { SortByPosition, SortByName, arrayCartesian } from '../../shared/utilities/utilityFunctions';
+import { findMembers } from '../../shared/utilities/hpUtilities';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -454,29 +455,10 @@ export class StreamTools {
 	public getAllFieldDescriptionsWithHierarchy = async ( streamid: number ) => {
 		const toReturn: any = {};
 		const stream = await this.getOne( streamid );
-		// Below works and waits but it waits for each of them. Too slow.
-		// for ( const field of stream.fieldList ) {
-		// 	toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
-		// 	console.log( 'Worked on', field.id, field.name );
-		// }
-		// Below works but doesn't wait, not good enough
-		// stream.fieldList.forEach( async ( field ) => {
-		// 	toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
-		// 	console.log( 'Worked on', field.id, field.name );
-		// } );
 		await Promise.all( stream.fieldList.map( async ( field ) => {
-			console.log( 'Started:', field.id, field.name );
 			toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
-			console.log( 'Finished:', field.id, field.name );
 		} ) );
 		return toReturn;
-		// return new Promise( ( resolve, reject ) => {
-		// 	reject( new Error( 'Not Yet' ) );
-		// 	// this.getOne( streamid )
-		// 	// 	.then( stream => {
-
-		// 	// 	} ).catch(reject);
-		// } );
 	}
 	public populateFieldDescriptions = ( id: number ) => {
 		return this.getOne( id )
@@ -568,10 +550,68 @@ export class StreamTools {
 
 	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any } ) => {
 		const stream = await this.getOne( payload.streamid );
-		console.log( 'Received stream:', stream.name );
 		const exportDefinition = stream.exports.find( e => e.id === payload.exportid );
-		console.log( 'Found export:', exportDefinition.name );
+		if ( !exportDefinition ) {
+			throw new Error( 'Export couldn\'t be found' );
+		}
 		const hierarchies = await this.getAllFieldDescriptionsWithHierarchy( payload.streamid );
-		console.log( 'Received hierarchies:', Object.keys( hierarchies ) );
+		// Finding Column Members
+		const colCartesian = exportDefinition.cols.map( col => {
+			return arrayCartesian( col.map( ( selection, sindex ) => {
+				return findMembers( hierarchies[exportDefinition.colDims[sindex]], selection.selectionType, selection.selectedMember );
+			} ) );
+		} );
+		let colMembers: any[] = [];
+		colCartesian.forEach( cm => {
+			colMembers = colMembers.concat( cm );
+		} );
+		// Finding Row Members
+		const rowCartesian = exportDefinition.rows.map( row => {
+			return arrayCartesian( row.map( ( selection, sindex ) => {
+				return findMembers( hierarchies[exportDefinition.rowDims[sindex]], selection.selectionType, selection.selectedMember );
+			} ) );
+		} );
+		let rowMembers: any[] = [];
+		rowCartesian.forEach( rm => {
+			rowMembers = rowMembers.concat( rm );
+		} );
+		// Finding POV Members
+		const povMembers = exportDefinition.povs.map( ( pov, pindex ) => findMembers( hierarchies[exportDefinition.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
+
+		console.log( '===========================================' );
+		console.log( rowMembers.map( r => r.map( i => i.RefField ) ), rowMembers.length );
+		console.log( '===========================================' );
+		console.log( colMembers.map( r => r.map( i => i.RefField ) ), colMembers.length );
+		console.log( '===========================================' );
+		console.log( povMembers.map( r => r.map( i => i.RefField ) ), povMembers.length );
+		console.log( '===========================================' );
+		await this.environmentTool.readData( {
+			id: stream.environment,
+			db: stream.dbName,
+			table: stream.tableName,
+			query: {
+				dims: stream.fieldList.map( f => ( { id: f.id, name: f.name } ) ),
+				povDims: exportDefinition.povDims,
+				rowDims: exportDefinition.rowDims,
+				colDims: exportDefinition.colDims,
+				povMembers,
+				rowMembers,
+				colMembers
+			}
+		} ).then( ( result ) => {
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			console.log( 'ReadData environment tool is now complete' );
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			console.log( result );
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		} ).catch( ( issue ) => {
+			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+			console.log( 'ReadData environment tool has failed' );
+			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+			console.log( issue );
+			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		} );
 	}
 }

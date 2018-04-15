@@ -12,6 +12,7 @@ import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SmartViewRequestOptions } from '../../shared/model/dime/smartviewrequestoptions';
 import { SortByName, encodeXML } from '../../shared/utilities/utilityFunctions';
+import * as _ from 'lodash';
 
 export class SmartViewTools {
 	xmlBuilder: xml2js.Builder;
@@ -59,6 +60,125 @@ export class SmartViewTools {
 				return Promise.resolve();
 			} else {
 				return Promise.reject( new Error( 'There is an issue with running business rule ' + response.body ) );
+			}
+		} );
+	}
+	public readData = ( payload ) => {
+		return this.smartviewReadData( payload );
+	}
+	private smartviewReadData = ( payload ) => {
+		return new Promise( ( resolve, reject ) => {
+			payload.dims = _.keyBy( payload.query.dims, 'id' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( Object.keys( payload ) );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( Object.keys( payload.query ) );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			payload.pushLimit = 300000;
+			payload.data = [];
+			payload.numberofRowsPerChunk = Math.floor( payload.pushLimit / payload.query.colMembers.length );
+			if ( payload.numberofRowsPerChunk < 1 ) {
+				payload.numberofRowsPerChunk = 1;
+			}
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( payload.numberofRowsPerChunk );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			console.log( payload.dims );
+			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			this.smartviewReadDataPullChuncks( payload );
+			reject( new Error( 'Not Yet' ) );
+		} );
+	}
+	private smartviewReadDataPullChuncks = ( payload ) => {
+		let body = '';
+		return new Promise( ( resolve, reject ) => {
+			if ( payload.query.rowMembers.length < 1 ) {
+				resolve( payload );
+			} else {
+				const chunck = payload.query.rowMembers.splice( 0, payload.numberofRowsPerChunk );
+				this.smartviewOpenCube( payload ).then( resEnv => {
+					body += '<req_Refresh>';
+					body += '<sID>' + resEnv.SID + '</sID>';
+					body += '<preferences>';
+					body += '<row_suppression zero="1" invalid = "0" missing = "1" underscore = "0" noaccess = "0" />';
+					body += '<celltext val="1" />';
+					body += '<zoomin ancestor="bottom" mode = "children" />';
+					body += '<navigate withData="1" />';
+					body += '<includeSelection val="1" />';
+					body += '<repeatMemberLabels val="1" />';
+					body += '<withinSelectedGroup val="0" />';
+					body += '<removeUnSelectedGroup val="0" />';
+					body += '<col_suppression zero="0" invalid = "0" missing = "0" underscore = "0" noaccess = "0" />';
+					body += '<block_suppression missing="1" />';
+					body += '<includeDescriptionInLabel val="2" />';
+					body += '<missingLabelText val="" />';
+					body += '<noAccessText val="#No Access" />';
+					body += '<aliasTableName val="none" />';
+					body += '<essIndent val="2" />';
+					body += '<FormatSetting val="2" />';
+					body += '<sliceLimitation rows="1048576" cols = "16384" />';
+					body += '</preferences>';
+					body += '<grid>';
+					body += '<cube>' + resEnv.table + '</cube>';
+					body += '<dims>';
+					let currentID = 0;
+					payload.query.povDims.forEach( ( dim, dimindex ) => {
+						const memberName = payload.query.povMembers[dimindex].RefField;
+						body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" pov="' + memberName + '" display="' + memberName + '" hidden="0" expand="0"/>';
+						currentID++;
+					} );
+					payload.query.rowDims.forEach( ( dim, dimindex ) => {
+						body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" row="' + dimindex + '" hidden="0" expand="0"/>';
+						currentID++;
+					} );
+					payload.query.colDims.forEach( ( dim, dimindex ) => {
+						body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" col="' + dimindex + '" hidden="0" expand="0"/>';
+						currentID++;
+					} );
+					body += '</dims>';
+					body += '<slices>';
+					body += '<slice rows="' + ( payload.query.colDims.length + chunck.length ) + '" cols="' + ( payload.query.rowDims.length + payload.query.colMembers.length ) + '">';
+					body += '<data>';
+					body += '<range start="0" end="' + ( ( payload.query.colDims.length + chunck.length ) * ( payload.query.rowDims.length + payload.query.colMembers.length ) - 1 ) + '">';
+					const valueArray = [];
+					const typeArray = [];
+					payload.query.colDims.forEach( ( colDim, colDimIndex ) => {
+						payload.query.rowDims.forEach( ( rowDim, rowDimIndex ) => {
+							valueArray.push( '' );
+							typeArray.push( '7' );
+						} );
+						payload.query.colMembers.forEach( colMember => {
+							// console.log( '***', colMember );
+							valueArray.push( colMember[colDimIndex].RefField );
+							typeArray.push( '0' );
+						} );
+					} );
+					chunck.forEach( ( rowMemberList, rowMemberIndex ) => {
+						rowMemberList.forEach( rowMember => {
+							valueArray.push( rowMember.RefField );
+							typeArray.push( 0 );
+						} );
+						payload.query.colMembers.forEach( colMember => {
+							valueArray.push( '' );
+							typeArray.push( '2' );
+						} );
+						// console.log( rowMemberIndex, rowMemberList );
+					} );
+					// console.log( valueArray.join( '|' ) );
+					// console.log( typeArray.join( '|' ) );
+					body += '<vals>' + valueArray.join( '|' ) + '</vals>';
+					body += '<types>' + typeArray.join( '|' ) + '</types>';
+					body += '</range>';
+					body += '</data>';
+					body += '<metadata/>';
+					body += '<conditionalFormats/>';
+					body += '</slice>';
+					body += '</slices>';
+					body += '<perspective type="Reality"/>';
+					body += '</grid>';
+					body += '</req_Refresh>';
+				} ).catch( reject );
 			}
 		} );
 	}
