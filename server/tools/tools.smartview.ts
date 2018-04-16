@@ -69,118 +69,153 @@ export class SmartViewTools {
 	private smartviewReadData = ( payload ) => {
 		return new Promise( ( resolve, reject ) => {
 			payload.dims = _.keyBy( payload.query.dims, 'id' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( Object.keys( payload ) );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( Object.keys( payload.query ) );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			payload.pushLimit = 300000;
+			payload.pullLimit = 10000000;
 			payload.data = [];
-			payload.numberofRowsPerChunk = Math.floor( payload.pushLimit / payload.query.colMembers.length );
-			if ( payload.numberofRowsPerChunk < 1 ) {
-				payload.numberofRowsPerChunk = 1;
+			payload.numberofRowsPerChunck = Math.floor( payload.pullLimit / payload.query.colMembers.length );
+			if ( payload.numberofRowsPerChunck < 1 ) {
+				payload.numberofRowsPerChunck = 1;
 			}
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( payload.numberofRowsPerChunk );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( payload.dims );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			this.smartviewReadDataPullChuncks( payload );
-			reject( new Error( 'Not Yet' ) );
+			this.smartviewReadDataPullChuncks( payload ).then( resolve ).catch( reject );
 		} );
 	}
 	private smartviewReadDataPullChuncks = ( payload ) => {
-		let body = '';
 		return new Promise( ( resolve, reject ) => {
 			if ( payload.query.rowMembers.length < 1 ) {
 				resolve( payload );
 			} else {
-				const chunck = payload.query.rowMembers.splice( 0, payload.numberofRowsPerChunk );
-				this.smartviewOpenCube( payload ).then( resEnv => {
-					body += '<req_Refresh>';
-					body += '<sID>' + resEnv.SID + '</sID>';
-					body += '<preferences>';
-					body += '<row_suppression zero="1" invalid = "0" missing = "1" underscore = "0" noaccess = "0" />';
-					body += '<celltext val="1" />';
-					body += '<zoomin ancestor="bottom" mode = "children" />';
-					body += '<navigate withData="1" />';
-					body += '<includeSelection val="1" />';
-					body += '<repeatMemberLabels val="1" />';
-					body += '<withinSelectedGroup val="0" />';
-					body += '<removeUnSelectedGroup val="0" />';
-					body += '<col_suppression zero="0" invalid = "0" missing = "0" underscore = "0" noaccess = "0" />';
-					body += '<block_suppression missing="1" />';
-					body += '<includeDescriptionInLabel val="2" />';
-					body += '<missingLabelText val="" />';
-					body += '<noAccessText val="#No Access" />';
-					body += '<aliasTableName val="none" />';
-					body += '<essIndent val="2" />';
-					body += '<FormatSetting val="2" />';
-					body += '<sliceLimitation rows="1048576" cols = "16384" />';
-					body += '</preferences>';
-					body += '<grid>';
-					body += '<cube>' + resEnv.table + '</cube>';
-					body += '<dims>';
-					let currentID = 0;
-					payload.query.povDims.forEach( ( dim, dimindex ) => {
-						const memberName = payload.query.povMembers[dimindex].RefField;
-						body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" pov="' + memberName + '" display="' + memberName + '" hidden="0" expand="0"/>';
-						currentID++;
-					} );
-					payload.query.rowDims.forEach( ( dim, dimindex ) => {
-						body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" row="' + dimindex + '" hidden="0" expand="0"/>';
-						currentID++;
-					} );
-					payload.query.colDims.forEach( ( dim, dimindex ) => {
-						body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" col="' + dimindex + '" hidden="0" expand="0"/>';
-						currentID++;
-					} );
-					body += '</dims>';
-					body += '<slices>';
-					body += '<slice rows="' + ( payload.query.colDims.length + chunck.length ) + '" cols="' + ( payload.query.rowDims.length + payload.query.colMembers.length ) + '">';
-					body += '<data>';
-					body += '<range start="0" end="' + ( ( payload.query.colDims.length + chunck.length ) * ( payload.query.rowDims.length + payload.query.colMembers.length ) - 1 ) + '">';
-					const valueArray = [];
-					const typeArray = [];
-					payload.query.colDims.forEach( ( colDim, colDimIndex ) => {
-						payload.query.rowDims.forEach( ( rowDim, rowDimIndex ) => {
-							valueArray.push( '' );
-							typeArray.push( '7' );
-						} );
-						payload.query.colMembers.forEach( colMember => {
-							// console.log( '***', colMember );
-							valueArray.push( colMember[colDimIndex].RefField );
-							typeArray.push( '0' );
-						} );
-					} );
-					chunck.forEach( ( rowMemberList, rowMemberIndex ) => {
-						rowMemberList.forEach( rowMember => {
-							valueArray.push( rowMember.RefField );
-							typeArray.push( 0 );
-						} );
-						payload.query.colMembers.forEach( colMember => {
-							valueArray.push( '' );
-							typeArray.push( '2' );
-						} );
-						// console.log( rowMemberIndex, rowMemberList );
-					} );
-					// console.log( valueArray.join( '|' ) );
-					// console.log( typeArray.join( '|' ) );
-					body += '<vals>' + valueArray.join( '|' ) + '</vals>';
-					body += '<types>' + typeArray.join( '|' ) + '</types>';
-					body += '</range>';
-					body += '</data>';
-					body += '<metadata/>';
-					body += '<conditionalFormats/>';
-					body += '</slice>';
-					body += '</slices>';
-					body += '<perspective type="Reality"/>';
-					body += '</grid>';
-					body += '</req_Refresh>';
+				const chunck = payload.query.rowMembers.splice( 0, payload.numberofRowsPerChunck );
+				this.smartviewReadDataPullChuncksTry( payload, chunck ).then( result => {
+					resolve( this.smartviewReadDataPullChuncks( payload ) );
 				} ).catch( reject );
 			}
 		} );
+	}
+	private smartviewReadDataPullChuncksTry = ( payload, chunck: any[], retrycount = 0 ) => {
+		const maxRetry = 10;
+		return new Promise( ( resolve, reject ) => {
+			this.smartviewReadDataPullChuncksAction( payload, chunck ).then( resolve ).catch( issue => {
+				if ( retrycount < maxRetry ) {
+					resolve( this.smartviewReadDataPullChuncksTry( payload, chunck, ++retrycount ) );
+				} else {
+					reject( issue );
+				}
+			} );
+		} );
+	}
+	private smartviewReadDataPullChuncksAction = ( payload, chunck: any[] ) => {
+		let body = '';
+		const startTime = new Date();
+		return this.smartviewOpenCube( payload )
+			.then( resEnv => {
+				body += '<req_Refresh>';
+				body += '<sID>' + resEnv.SID + '</sID>';
+				body += '<preferences>';
+				body += '<row_suppression zero="1" invalid="0" missing="1" underscore="0" noaccess="0"/>';
+				body += '<celltext val="1"/>';
+				body += '<zoomin ancestor="bottom" mode="children"/>';
+				body += '<navigate withData="1"/>';
+				body += '<includeSelection val="1"/>';
+				body += '<repeatMemberLabels val="1"/>';
+				body += '<withinSelectedGroup val="0"/>';
+				body += '<removeUnSelectedGroup val="0"/>';
+				body += '<col_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>';
+				body += '<block_suppression missing="1"/>';
+				body += '<includeDescriptionInLabel val="2"/>';
+				body += '<missingLabelText val=""/>';
+				body += '<noAccessText val="#No Access"/>';
+				body += '<aliasTableName val="none"/>';
+				body += '<essIndent val="2"/>';
+				body += '<FormatSetting val="2"/>';
+				body += '<sliceLimitation rows="1048576" cols="16384"/>';
+				body += '</preferences>';
+				body += '<grid>';
+				body += '<cube>' + resEnv.table + '</cube>';
+				body += '<dims>';
+				let currentID = 0;
+				payload.query.povDims.forEach( ( dim, dimindex ) => {
+					const memberName = payload.query.povMembers[dimindex][0].RefField;
+					body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" pov="' + memberName + '" display="' + memberName + '" hidden="0" expand="0"/>';
+					currentID++;
+				} );
+				payload.query.rowDims.forEach( ( dim, dimindex ) => {
+					body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" row="' + dimindex + '" hidden="0" expand="0"/>';
+					currentID++;
+				} );
+				payload.query.colDims.forEach( ( dim, dimindex ) => {
+					body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" col="' + dimindex + '" hidden="0" expand="0"/>';
+					currentID++;
+				} );
+				body += '</dims>';
+				body += '<perspective type="Reality"/>';
+				body += '<slices>';
+				body += '<slice rows="' + ( payload.query.colDims.length + chunck.length ) + '" cols="' + ( payload.query.rowDims.length + payload.query.colMembers.length ) + '">';
+				body += '<data>';
+				body += '<range start="0" end="' + ( ( payload.query.colDims.length + chunck.length ) * ( payload.query.rowDims.length + payload.query.colMembers.length ) - 1 ) + '">';
+				const valueArray = [];
+				const typeArray = [];
+				payload.query.colDims.forEach( ( colDim, colDimIndex ) => {
+					payload.query.rowDims.forEach( ( rowDim, rowDimIndex ) => {
+						valueArray.push( '' );
+						typeArray.push( '7' );
+					} );
+					payload.query.colMembers.forEach( colMember => {
+						// console.log( '***', colMember );
+						valueArray.push( colMember[colDimIndex].RefField );
+						typeArray.push( '0' );
+					} );
+				} );
+				chunck.forEach( ( rowMemberList, rowMemberIndex ) => {
+					rowMemberList.forEach( rowMember => {
+						valueArray.push( rowMember.RefField );
+						typeArray.push( 0 );
+					} );
+					payload.query.colMembers.forEach( colMember => {
+						valueArray.push( '' );
+						typeArray.push( '2' );
+					} );
+					// console.log( rowMemberIndex, rowMemberList );
+				} );
+				// console.log( valueArray.join( '|' ) );
+				// console.log( typeArray.join( '|' ) );
+				body += '<vals>' + valueArray.join( '|' ) + '</vals>';
+				body += '<types>' + typeArray.join( '|' ) + '</types>';
+				body += '</range>';
+				body += '</data>';
+				body += '<metadata/>';
+				body += '<conditionalFormats/>';
+				body += '</slice>';
+				body += '</slices>';
+				body += '</grid>';
+				body += '</req_Refresh>';
+				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+				// return Promise.reject( 'Trying something' );
+			} )
+			.then( response => {
+				const doWeHaveData = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_refresh' ) ).length > 0;
+				console.log( '>>>>>>>>>>>Do We Have Data:', doWeHaveData, '>>>>>>>>>>>Duration Passed:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
+				if ( doWeHaveData ) {
+					const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
+					const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
+					const cellsToSkip = payload.query.colDims.length * ( payload.query.rowDims.length + payload.query.colMembers.length ) - rangeStart;
+					const vals: string[] = response.$( 'vals' ).text().split( '|' ).splice( cellsToSkip );
+					const stts: string[] = response.$( 'status' ).text().split( '|' ).splice( cellsToSkip );
+					const typs: string[] = response.$( 'types' ).text().split( '|' ).splice( cellsToSkip );
+					while ( chunck.length > 0 ) {
+						payload.data.push( {
+							intersection: chunck.splice( 0, 1 )[0],
+							data: vals.splice( 0, payload.query.colMembers.length )
+						} );
+					}
+					return Promise.resolve( payload );
+				} else {
+					const errcode = response.$( 'exception' ).attr( 'errcode' );
+					if ( errcode === '1000' ) {
+						return Promise.resolve( payload );
+					} else {
+						return Promise.reject( new Error( response.$( 'desc' ).text() ) );
+					}
+				}
+			} );
 	}
 	public writeData = ( payload ) => {
 		return this.smartviewWriteData( payload );
@@ -193,13 +228,13 @@ export class SmartViewTools {
 			payload.cellsInvalidCount = 0;
 			const pushLimit = 5000;
 			const wholeData = payload.data;
-			let numberofRowsPerChunk = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
-			if ( numberofRowsPerChunk < 1 ) {
-				numberofRowsPerChunk = 1;
+			let numberofRowsPerChunck = Math.floor( pushLimit / ( Object.keys( wholeData[0] ).length - payload.sparseDims.length ) );
+			if ( numberofRowsPerChunck < 1 ) {
+				numberofRowsPerChunck = 1;
 			}
 			const chunkedData: any[] = [];
 			while ( wholeData.length > 0 ) {
-				chunkedData.push( wholeData.splice( 0, numberofRowsPerChunk ) );
+				chunkedData.push( wholeData.splice( 0, numberofRowsPerChunck ) );
 			}
 			this.smartviewWriteDataSendChuncks( payload, chunkedData ).then( () => { resolve( payload ); } ).catch( reject );
 		} );
@@ -360,12 +395,6 @@ export class SmartViewTools {
 			if ( isSuccessful ) {
 				return Promise.resolve( 'Data is pushed to Hyperion Planning' );
 			} else {
-				console.log( '===========================================' );
-				console.log( '===========================================' );
-				console.log( response.body );
-				console.log( body );
-				console.log( '===========================================' );
-				console.log( '===========================================' );
 				return Promise.reject( new Error( 'Failed to write data:' + response.body ) );
 			}
 		} );

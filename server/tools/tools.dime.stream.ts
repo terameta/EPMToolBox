@@ -1,5 +1,7 @@
 import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { Pool } from 'mysql';
+import * as excel from 'exceljs';
+const streamBuffers = require( 'stream-buffers' );
 
 import { MainTools } from './tools.main';
 import { DimeStream, DimeStreamDetail } from '../../shared/model/dime/stream';
@@ -8,12 +10,18 @@ import { DimeEnvironmentDetail } from '../../shared/model/dime/environmentDetail
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
 import { SortByPosition, SortByName, arrayCartesian } from '../../shared/utilities/utilityFunctions';
 import { findMembers } from '../../shared/utilities/hpUtilities';
+import { MailTool } from './tools.mailer';
+import { SettingsTool } from './tools.settings';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
+	mailTool: MailTool;
+	settingsTool: SettingsTool;
 
 	constructor( public db: Pool, public tools: MainTools ) {
 		this.environmentTool = new EnvironmentTools( this.db, this.tools );
+		this.mailTool = new MailTool( this.db, this.tools );
+		this.settingsTool = new SettingsTool( this.db, this.tools );
 	}
 
 	public getAll = (): Promise<DimeStreamDetail[]> => {
@@ -531,20 +539,24 @@ export class StreamTools {
 	}
 
 	public executeExport = ( payload: { streamid: number, exportid: number, user: any } ) => {
-		this.executeExportAction( payload ).then( ( result ) => {
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			console.log( 'ExecuteExportAction is now complete:', result );
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		} ).catch( ( error ) => {
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( 'ExecuteExportAction failed:' );
-			console.log( error );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		} );
+		this.executeExportAction( payload )
+			.then( result => this.executeExportPrepareFile( { result, user: payload.user } ) )
+			.then( this.executeExportSendFile )
+			.then( ( result ) => {
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( 'ExecuteExportAction is now complete:', result );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				// console.log( payload.user );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+			} ).catch( ( error ) => {
+				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+				console.log( 'ExecuteExportAction failed:' );
+				console.log( error );
+				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+			} );
 		return Promise.resolve( { status: 'Initiated' } );
 	}
 
@@ -585,7 +597,7 @@ export class StreamTools {
 		console.log( '===========================================' );
 		console.log( povMembers.map( r => r.map( i => i.RefField ) ), povMembers.length );
 		console.log( '===========================================' );
-		await this.environmentTool.readData( {
+		return this.environmentTool.readData( {
 			id: stream.environment,
 			db: stream.dbName,
 			table: stream.tableName,
@@ -598,20 +610,46 @@ export class StreamTools {
 				rowMembers,
 				colMembers
 			}
-		} ).then( ( result ) => {
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			console.log( 'ReadData environment tool is now complete' );
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			console.log( result );
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		} ).catch( ( issue ) => {
-			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
-			console.log( 'ReadData environment tool has failed' );
-			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
-			console.log( issue );
-			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
-			console.log( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' );
+		} );
+	}
+	private executeExportPrepareFile = async ( payload ) => {
+		const workbook = new excel.Workbook();
+		workbook.creator = 'EPM Toolbox';
+		workbook.lastModifiedBy = 'EPM Toolbox';
+		workbook.created = new Date();
+		workbook.modified = new Date();
+
+		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] } );
+
+		return { payload, workbook };
+	}
+	private executeExportSendFile = async ( payload ) => {
+		const systemAdmin: any = await this.settingsTool.getOne( 'systemadmin' );
+		return this.workbookToStreamBuffer( payload.workbook )
+			.then( ( workbookStream: any ) => {
+				return this.mailTool.sendMail( {
+					from: systemAdmin.emailaddress,
+					to: payload.payload.user.email,
+					cc: systemAdmin.emailaddress,
+					subject: 'Requested Data File Attached',
+					text: 'Data file is attached.',
+					attachments: [
+						{
+							filename: 'deneme.xlsx',
+							content: workbookStream.getContents()
+						}
+					]
+				} );
+			} );
+	}
+	private workbookToStreamBuffer = ( workbook: any ) => {
+		return new Promise( ( resolve, reject ) => {
+			let myWritableStreamBuffer: any; myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer();
+			workbook.xlsx.write( myWritableStreamBuffer ).
+				then( () => {
+					resolve( myWritableStreamBuffer );
+				} ).
+				catch( reject );
 		} );
 	}
 }
