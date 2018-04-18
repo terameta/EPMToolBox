@@ -64,27 +64,88 @@ export class SmartViewTools {
 		} );
 	}
 	public readData = ( payload ) => {
-		return this.smartviewReadData( payload );
+		return this.smartviewReadDataNew( payload );
+	}
+	public smartviewReadDataNew = async ( payload ) => {
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+		console.log( payload );
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+		return this.smartviewOpenCube( payload )
+			.then( ( resEnv ) => {
+				let body = '<req_ExecuteQuery>';
+				body += '<sID>' + resEnv.SID + '</sID>';
+				body += '<preferences>';
+				body += '<row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>';
+				body += '<celltext val="1"/>';
+				body += '<zoomin ancestor="bottom" mode="children"/><navigate withData="1"/><includeSelection val="1"/><repeatMemberLabels val="1"/>';
+				body += '<withinSelectedGroup val="0"/><removeUnSelectedGroup val="0"/>';
+				body += '<col_suppression zero="0" invalid="0" missing="1" underscore="0" noaccess="0"/>';
+				body += '<block_suppression missing="1"/>';
+				body += '<includeDescriptionInLabel val="2"/>';
+				body += '<missingLabelText val=""/>';
+				body += '<noAccessText val="#No Access"/>';
+				body += '<aliasTableName val="none"/>';
+				body += '<essIndent val="2"/>';
+				body += '<FormatSetting val="2"/>';
+				body += '<sliceLimitation rows="104857600" cols="1638400"/>';
+				body += '</preferences>';
+				body += '<rows>';
+				body += '<row id="0" dim="Entity"><members>Atlantis The Palm</members></row>';
+				body += '<row id="1" dim="Currencies"><members>AED</members></row>';
+				body += '<row id="2" dim="Scenario"><members>Actual</members></row>';
+				body += '<row id="3" dim="Version"><members>Approved</members></row>';
+				body += '<row id="4" dim="Reporting"><members>Base</members></row>';
+				body += '</rows>';
+				body += '<cols>';
+				body += '<col id="0" dim="Year"><members>FY18</members></col>';
+				body += '<col id="1" dim="Period"><members>Children(YearTotal)</members></col>';
+				body += '<col id="2" dim="Days"><members>ILvl0Descendants(MT)</members></col>';
+				body += '<col id="3" dim="Products"><members>ILvl0Descendants(Products Total)</members></col>';
+				body += '<col id="4" dim="Departments"><members>ILvl0Descendants(Departments Total)</members></col>';
+				body += '<col id="5" dim="Account"><members>ILvl0Descendants(IncomeStatement)</members></col>';
+				body += '</cols>';
+				body += '<fields/>';
+				body += '<povs/><ODL_ECID>1.00imA5fM323Fw0zuBQ0CRz0TLgE2zHIzP00028W000000;kXjE</ODL_ECID></req_ExecuteQuery>';
+				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies, timeout: 120000000 } );
+			} )
+			.then( ( response ) => {
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( response.body );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				return Promise.reject( new Error( 'Not yet' ) );
+			} );
 	}
 	private smartviewReadData = ( payload ) => {
 		return new Promise( ( resolve, reject ) => {
 			payload.dims = _.keyBy( payload.query.dims, 'id' );
 			payload.pullLimit = 10000000;
 			payload.data = [];
+			payload.startTime = new Date();
 			payload.numberofRowsPerChunck = Math.floor( payload.pullLimit / payload.query.colMembers.length );
 			if ( payload.numberofRowsPerChunck < 1 ) {
 				payload.numberofRowsPerChunck = 1;
 			}
+			payload.numberOfChuncks = Math.ceil( payload.query.rowMembers.length / payload.numberofRowsPerChunck );
+			payload.consumedChuncks = 0;
 			this.smartviewReadDataPullChuncks( payload ).then( resolve ).catch( reject );
 		} );
 	}
 	private smartviewReadDataPullChuncks = ( payload ) => {
+		console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks );
+		const startTime = new Date();
 		return new Promise( ( resolve, reject ) => {
 			if ( payload.query.rowMembers.length < 1 ) {
 				resolve( payload );
 			} else {
 				const chunck = payload.query.rowMembers.splice( 0, payload.numberofRowsPerChunck );
 				this.smartviewReadDataPullChuncksTry( payload, chunck ).then( result => {
+					payload.consumedChuncks++;
+					const finishTime = new Date();
+					console.log( '>>> Pulling chunck', payload.consumedChuncks, '/', payload.numberOfChuncks, 'finished. Duration:', ( finishTime.getTime() - startTime.getTime() ) / 1000 );
 					resolve( this.smartviewReadDataPullChuncks( payload ) );
 				} ).catch( reject );
 			}
@@ -187,10 +248,12 @@ export class SmartViewTools {
 				body += '</slices>';
 				body += '</grid>';
 				body += '</req_Refresh>';
-				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+				console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'posted.' );
+				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies, timeout: 120000000 } );
 				// return Promise.reject( 'Trying something' );
 			} )
 			.then( response => {
+				console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'received.' );
 				const doWeHaveData = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_refresh' ) ).length > 0;
 				console.log( '>>>>>>>>>>>Do We Have Data:', doWeHaveData, '>>>>>>>>>>>Duration Passed:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
 				if ( doWeHaveData ) {
@@ -200,11 +263,8 @@ export class SmartViewTools {
 					const vals: string[] = response.$( 'vals' ).text().split( '|' ).splice( cellsToSkip );
 					const stts: string[] = response.$( 'status' ).text().split( '|' ).splice( cellsToSkip );
 					const typs: string[] = response.$( 'types' ).text().split( '|' ).splice( cellsToSkip );
-					while ( chunck.length > 0 ) {
-						payload.data.push( {
-							intersection: chunck.splice( 0, 1 )[0],
-							data: vals.splice( 0, payload.query.colMembers.length )
-						} );
+					while ( vals.length > 0 ) {
+						payload.data.push( vals.splice( 0, payload.query.rowDims.length + payload.query.colMembers.length ) );
 					}
 					return Promise.resolve( payload );
 				} else {
@@ -212,9 +272,14 @@ export class SmartViewTools {
 					if ( errcode === '1000' ) {
 						return Promise.resolve( payload );
 					} else {
+						console.log( response.body );
 						return Promise.reject( new Error( response.$( 'desc' ).text() ) );
 					}
 				}
+			} ).catch( issue => {
+				console.log( issue );
+				console.log( 'Time to failure:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
+				return Promise.reject( issue );
 			} );
 	}
 	public writeData = ( payload ) => {

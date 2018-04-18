@@ -538,9 +538,9 @@ export class StreamTools {
 		} );
 	}
 
-	public executeExport = ( payload: { streamid: number, exportid: number, user: any } ) => {
+	public executeExport = ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
 		this.executeExportAction( payload )
-			.then( result => this.executeExportPrepareFile( { result, user: payload.user } ) )
+			.then( result => this.executeExportPrepareFile( { result, user: payload.user, hierarchies: payload.hierarchies } ) )
 			.then( this.executeExportSendFile )
 			.then( ( result ) => {
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
@@ -560,13 +560,14 @@ export class StreamTools {
 		return Promise.resolve( { status: 'Initiated' } );
 	}
 
-	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any } ) => {
+	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
 		const stream = await this.getOne( payload.streamid );
 		const exportDefinition = stream.exports.find( e => e.id === payload.exportid );
 		if ( !exportDefinition ) {
 			throw new Error( 'Export couldn\'t be found' );
 		}
 		const hierarchies = await this.getAllFieldDescriptionsWithHierarchy( payload.streamid );
+		payload.hierarchies = hierarchies;
 		// Finding Column Members
 		const colCartesian = exportDefinition.cols.map( col => {
 			return arrayCartesian( col.map( ( selection, sindex ) => {
@@ -602,6 +603,7 @@ export class StreamTools {
 			db: stream.dbName,
 			table: stream.tableName,
 			query: {
+				name: exportDefinition.name,
 				dims: stream.fieldList.map( f => ( { id: f.id, name: f.name } ) ),
 				povDims: exportDefinition.povDims,
 				rowDims: exportDefinition.rowDims,
@@ -620,8 +622,55 @@ export class StreamTools {
 		workbook.modified = new Date();
 
 		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] } );
+		const data = payload.result.data;
+		const numRowDims = payload.result.query.rowDims.length;
 
-		return { payload, workbook };
+		console.log( '===========================================' );
+		console.log( payload );
+		console.log( '===========================================' );
+		console.log( 'Column Members' );
+		payload.result.query.colMembers.forEach( cm => console.log( cm ) );
+		console.log( '===========================================' );
+		console.log( 'POV Members' );
+		payload.result.query.povMembers.forEach( cm => console.log( cm ) );
+		console.log( '===========================================' );
+		console.log( 'Data' );
+		data.forEach( d => console.log( d ) );
+		console.log( '===========================================' );
+		Object.values( payload.hierarchies ).forEach( dim => console.log( dim ) );
+		console.log( '===========================================' );
+
+		let currentRow = 0;
+		let currentCol = 0;
+
+
+		sheet.getCell( ++currentRow, ++currentCol ).value = 'POVs:';
+		payload.result.query.povMembers.forEach( pov => {
+			sheet.getCell( currentRow, ++currentCol ).value = pov[0].RefField;
+		} );
+		currentRow++;
+		currentCol = 1;
+		if ( data.length < 1 ) {
+			sheet.getCell( ++currentRow, currentCol ).value = 'There is no data generated for this export';
+		} else {
+			const start = new Date();
+			currentCol += numRowDims * 2;
+			payload.result.query.colMembers.forEach( cm => {
+				sheet.getCell( currentRow, currentCol++ ).value = cm.map( f => f.RefField ).join( '-' );
+			} );
+			data.forEach( datum => {
+				currentRow++;
+				currentCol = 1;
+				datum.forEach( ( cell, dataIndex ) => {
+					sheet.getCell( currentRow, currentCol++ ).value = cell;
+					if ( dataIndex < numRowDims ) sheet.getCell( currentRow, currentCol++ ).value = payload.hierarchies[payload.result.query.rowDims[dataIndex]].find( e => e.RefField === cell ).Description || '';
+				} );
+			} );
+			const finish = new Date();
+			console.log( 'Data Write Duration:', finish.getTime() - start.getTime() );
+		}
+
+		return { ...payload, workbook };
 	}
 	private executeExportSendFile = async ( payload ) => {
 		const systemAdmin: any = await this.settingsTool.getOne( 'systemadmin' );
@@ -629,13 +678,13 @@ export class StreamTools {
 			.then( ( workbookStream: any ) => {
 				return this.mailTool.sendMail( {
 					from: systemAdmin.emailaddress,
-					to: payload.payload.user.email,
+					to: payload.user.email,
 					cc: systemAdmin.emailaddress,
 					subject: 'Requested Data File Attached',
 					text: 'Data file is attached.',
 					attachments: [
 						{
-							filename: 'deneme.xlsx',
+							filename: payload.result.query.name + '-' + this.tools.getFormattedDateTime() + '.xlsx',
 							content: workbookStream.getContents()
 						}
 					]
