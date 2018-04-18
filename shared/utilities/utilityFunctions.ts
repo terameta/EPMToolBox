@@ -22,6 +22,14 @@ export const SortByVeryLongElementName = ( e1: any, e2: any ) => {
 	if ( e1[verylongelementname] > e2[verylongelementname] ) { return 1; } else if ( e1[verylongelementname] < e2[verylongelementname] ) { return -1; } else { return 0; }
 };
 
+export const waiter = ( duration: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		setTimeout( () => {
+			resolve();
+		}, duration );
+	} );
+};
+
 export const EnumToArray = ( curEnum: any, shouldSort?: boolean ) => {
 	return Object.keys( curEnum ).filter( isNumeric ).map( ( item, index ) => ( { value: parseInt( item, 10 ), label: curEnum[item] } ) ).sort( shouldSort ? SortByName : SortByNothing );
 };

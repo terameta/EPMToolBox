@@ -12,6 +12,7 @@ import { SortByPosition, SortByName, arrayCartesian } from '../../shared/utiliti
 import { findMembers } from '../../shared/utilities/hpUtilities';
 import { MailTool } from './tools.mailer';
 import { SettingsTool } from './tools.settings';
+import * as _ from 'lodash';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -540,8 +541,8 @@ export class StreamTools {
 
 	public executeExport = ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
 		this.executeExportAction( payload )
-			.then( result => this.executeExportPrepareFile( { result, user: payload.user, hierarchies: payload.hierarchies } ) )
-			.then( this.executeExportSendFile )
+			// .then( result => this.executeExportPrepareFile( { result, user: payload.user, hierarchies: payload.hierarchies } ) )
+			// .then( this.executeExportSendFile )
 			.then( ( result ) => {
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
@@ -559,8 +560,15 @@ export class StreamTools {
 			} );
 		return Promise.resolve( { status: 'Initiated' } );
 	}
+	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any } ) => {
+		const stream = await this.getOne( payload.streamid );
+		const query = stream.exports.find( e => e.id === payload.exportid );
+		query.streamid = payload.streamid;
+		query.dimensions = _.keyBy( stream.fieldList.map( f => ( <DimeStreamFieldDetail>{ id: f.id, stream: f.stream, name: f.name, type: f.type, position: f.position } ) ), 'id' );
+		return this.environmentTool.readData( { id: stream.environment, db: stream.dbName, table: stream.tableName, query } );
+	}
 
-	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
+	private executeExportActionOLD = async ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
 		const stream = await this.getOne( payload.streamid );
 		const exportDefinition = stream.exports.find( e => e.id === payload.exportid );
 		if ( !exportDefinition ) {

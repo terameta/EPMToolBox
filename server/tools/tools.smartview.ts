@@ -11,7 +11,7 @@ import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSma
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SmartViewRequestOptions } from '../../shared/model/dime/smartviewrequestoptions';
-import { SortByName, encodeXML } from '../../shared/utilities/utilityFunctions';
+import { SortByName, encodeXML, SortByPosition, waiter } from '../../shared/utilities/utilityFunctions';
 import * as _ from 'lodash';
 
 export class SmartViewTools {
@@ -21,105 +21,14 @@ export class SmartViewTools {
 		this.xmlBuilder = new xml2js.Builder();
 		this.xmlParser = new xml2js.Parser();
 	}
-	public runBusinessRule = ( payload ) => {
-		return this.smartviewRunBusinessRule( payload );
-	}
-	private smartviewRunBusinessRule = ( payload, retrycount = 0 ) => {
-		const maxRetry = 10;
-		return new Promise( ( resolve, reject ) => {
-			this.smartviewRunBusinessRuleAction( payload ).then( resolve ).catch( issue => {
-				if ( retrycount < maxRetry ) {
-					resolve( this.smartviewRunBusinessRule( payload, ++retrycount ) );
-				} else {
-					reject( issue );
-				}
-			} );
-		} );
-	}
-	private smartviewRunBusinessRuleAction = ( payload ): Promise<any> => {
-		let body = '';
-		return this.smartviewOpenCube( payload ).then( resEnv => {
-			body += '<req_LaunchBusinessRule>';
-			body += '<sID>' + resEnv.SID + '</sID>';
-			body += '<cube>' + resEnv.table + '</cube>';
-			body += '<rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule>';
-			body += '<prompts>';
-			resEnv.procedure.variables.forEach( ( curRTP: any ) => {
-				body += '<rtp>';
-				body += '<name>' + curRTP.name + '</name>';
-				body += '<val>' + curRTP.value + '</val>';
-				body += '</rtp>';
-			} );
-			body += '</prompts>';
-			body += '<ODL_ECID>0000</ODL_ECID>';
-			body += '</req_LaunchBusinessRule>';
-			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
-		} ).then( response => {
-			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_launchbusinessrule' ) ).length > 0;
-			if ( isSuccessful ) {
-				return Promise.resolve();
-			} else {
-				return Promise.reject( new Error( 'There is an issue with running business rule ' + response.body ) );
-			}
-		} );
-	}
 	public readData = ( payload ) => {
-		return this.smartviewReadDataNew( payload );
+		return this.smartviewReadData( payload );
 	}
-	public smartviewReadDataNew = async ( payload ) => {
-		console.log( '===========================================' );
-		console.log( '===========================================' );
-		console.log( payload );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
-		return this.smartviewOpenCube( payload )
-			.then( ( resEnv ) => {
-				let body = '<req_ExecuteQuery>';
-				body += '<sID>' + resEnv.SID + '</sID>';
-				body += '<preferences>';
-				body += '<row_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>';
-				body += '<celltext val="1"/>';
-				body += '<zoomin ancestor="bottom" mode="children"/><navigate withData="1"/><includeSelection val="1"/><repeatMemberLabels val="1"/>';
-				body += '<withinSelectedGroup val="0"/><removeUnSelectedGroup val="0"/>';
-				body += '<col_suppression zero="0" invalid="0" missing="1" underscore="0" noaccess="0"/>';
-				body += '<block_suppression missing="1"/>';
-				body += '<includeDescriptionInLabel val="2"/>';
-				body += '<missingLabelText val=""/>';
-				body += '<noAccessText val="#No Access"/>';
-				body += '<aliasTableName val="none"/>';
-				body += '<essIndent val="2"/>';
-				body += '<FormatSetting val="2"/>';
-				body += '<sliceLimitation rows="104857600" cols="1638400"/>';
-				body += '</preferences>';
-				body += '<rows>';
-				body += '<row id="0" dim="Entity"><members>Atlantis The Palm</members></row>';
-				body += '<row id="1" dim="Currencies"><members>AED</members></row>';
-				body += '<row id="2" dim="Scenario"><members>Actual</members></row>';
-				body += '<row id="3" dim="Version"><members>Approved</members></row>';
-				body += '<row id="4" dim="Reporting"><members>Base</members></row>';
-				body += '</rows>';
-				body += '<cols>';
-				body += '<col id="0" dim="Year"><members>FY18</members></col>';
-				body += '<col id="1" dim="Period"><members>Children(YearTotal)</members></col>';
-				body += '<col id="2" dim="Days"><members>ILvl0Descendants(MT)</members></col>';
-				body += '<col id="3" dim="Products"><members>ILvl0Descendants(Products Total)</members></col>';
-				body += '<col id="4" dim="Departments"><members>ILvl0Descendants(Departments Total)</members></col>';
-				body += '<col id="5" dim="Account"><members>ILvl0Descendants(IncomeStatement)</members></col>';
-				body += '</cols>';
-				body += '<fields/>';
-				body += '<povs/><ODL_ECID>1.00imA5fM323Fw0zuBQ0CRz0TLgE2zHIzP00028W000000;kXjE</ODL_ECID></req_ExecuteQuery>';
-				return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies, timeout: 120000000 } );
-			} )
-			.then( ( response ) => {
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( response.body );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				return Promise.reject( new Error( 'Not yet' ) );
-			} );
+	public smartviewReadData = async ( payload ) => {
+		await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
+		return payload;
 	}
-	private smartviewReadData = ( payload ) => {
+	private smartviewReadDataOLD = ( payload ) => {
 		return new Promise( ( resolve, reject ) => {
 			payload.dims = _.keyBy( payload.query.dims, 'id' );
 			payload.pullLimit = 10000000;
@@ -281,6 +190,48 @@ export class SmartViewTools {
 				console.log( 'Time to failure:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
 				return Promise.reject( issue );
 			} );
+	}
+	public runBusinessRule = ( payload ) => {
+		return this.smartviewRunBusinessRule( payload );
+	}
+	private smartviewRunBusinessRule = ( payload, retrycount = 0 ) => {
+		const maxRetry = 10;
+		return new Promise( ( resolve, reject ) => {
+			this.smartviewRunBusinessRuleAction( payload ).then( resolve ).catch( issue => {
+				if ( retrycount < maxRetry ) {
+					resolve( this.smartviewRunBusinessRule( payload, ++retrycount ) );
+				} else {
+					reject( issue );
+				}
+			} );
+		} );
+	}
+	private smartviewRunBusinessRuleAction = ( payload ): Promise<any> => {
+		let body = '';
+		return this.smartviewOpenCube( payload ).then( resEnv => {
+			body += '<req_LaunchBusinessRule>';
+			body += '<sID>' + resEnv.SID + '</sID>';
+			body += '<cube>' + resEnv.table + '</cube>';
+			body += '<rule type="' + resEnv.procedure.type + '">' + resEnv.procedure.name + '</rule>';
+			body += '<prompts>';
+			resEnv.procedure.variables.forEach( ( curRTP: any ) => {
+				body += '<rtp>';
+				body += '<name>' + curRTP.name + '</name>';
+				body += '<val>' + curRTP.value + '</val>';
+				body += '</rtp>';
+			} );
+			body += '</prompts>';
+			body += '<ODL_ECID>0000</ODL_ECID>';
+			body += '</req_LaunchBusinessRule>';
+			return this.smartviewPoster( { url: resEnv.planningurl, body, cookie: resEnv.cookies } );
+		} ).then( response => {
+			const isSuccessful = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_launchbusinessrule' ) ).length > 0;
+			if ( isSuccessful ) {
+				return Promise.resolve();
+			} else {
+				return Promise.reject( new Error( 'There is an issue with running business rule ' + response.body ) );
+			}
+		} );
 	}
 	public writeData = ( payload ) => {
 		return this.smartviewWriteData( payload );
@@ -521,6 +472,22 @@ export class SmartViewTools {
 		return this.smartviewListAliasTables( refObj )
 			.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
 			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsWithHierarchyAction( refObj, refField ); } );
+	}
+	private smartviewGetAllDescriptionsWithHierarchy = async ( refObj: DimeEnvironmentSmartView, refFields: DimeStreamFieldDetail[] ) => {
+		const toReturn: any = {};
+		await Promise.all( refFields.map( async ( field ) => this.smartviewGetAllDescriptionsWithHierarchyAction( refObj, field, toReturn ) ) );
+		return toReturn;
+	}
+	private smartviewGetAllDescriptionsWithHierarchyAction = ( refObj, field, toReturn ) => {
+		const sourceEnvironment = JSON.parse( JSON.stringify( refObj ) );
+		return new Promise( ( resolve, reject ) => {
+			console.log( ( new Date() ), 'Getting descriptions for', field.name, field.id, field.position );
+			this.smartviewGetDescriptionsWithHierarchy( sourceEnvironment, field ).then( result => {
+				toReturn[field.id] = result;
+				console.log( ( new Date() ), 'Got descriptions for', field.name, field.id, field.position );
+				resolve();
+			} );
+		} );
 	}
 	private smartviewGetDescriptionsWithHierarchyAction = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
 		const numberofColumns = 4; // Because columns are membername, description, desired aliastable name and parent
