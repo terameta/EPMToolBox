@@ -546,9 +546,9 @@ export class StreamTools {
 			.then( ( result ) => {
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( 'ExecuteExportAction is now complete:', result );
+				console.log( 'ExecuteExportAction is now complete' );
+				// console.log( 'ExecuteExportAction is now complete:', result );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				// console.log( payload.user );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 			} ).catch( ( error ) => {
 				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
