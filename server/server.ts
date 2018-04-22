@@ -58,6 +58,7 @@ if ( cluster.isMaster ) {
 		}
 	} );
 } else /* this is not cluster master */ {
+	process.env.NODE_ENV = 'production';
 	if ( process.env.isCroner === 'true' ) {
 		const cronWorker = new InitiateCronWorker( db, configuration );
 	} else {

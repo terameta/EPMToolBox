@@ -355,7 +355,7 @@ export class DimeMatrixTool {
 			} else if ( payload.matrix.matrixData.length === 0 ) {
 				sheet.addRow( ['There is no matrix data produced. If in doubt, please contact system admin.'] );
 			} else {
-				const columns: excel.Column[] = [{ header: 'id', key: 'id' }];
+				const columns: excel.Column[] = [<excel.Column>{ header: 'id', key: 'id' }];
 				const identifiers: any = { id: 1 };
 				let column: string;
 				let identifier: number;
@@ -364,12 +364,12 @@ export class DimeMatrixTool {
 					.forEach( field => {
 						column = field.name;
 						identifier = 2;
-						columns.push( { header: column, key: column } );
+						columns.push( <excel.Column>{ header: column, key: column } );
 						identifiers[column] = identifier;
 						if ( field.isDescribed ) {
 							column = field.name + '_DESC';
 							identifier = 0;
-							columns.push( { header: column, key: column } );
+							columns.push( <excel.Column>{ header: column, key: column } );
 							identifiers[column] = identifier;
 						}
 					} );

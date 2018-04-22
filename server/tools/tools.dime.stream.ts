@@ -540,15 +540,19 @@ export class StreamTools {
 	}
 
 	public executeExport = ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
+		const startTime = new Date();
 		this.executeExportAction( payload )
-			// .then( result => this.executeExportPrepareFile( { result, user: payload.user, hierarchies: payload.hierarchies } ) )
-			// .then( this.executeExportSendFile )
+			.then( ( result: any ) => this.executeExportPrepareFile( { result, user: payload.user, hierarchies: result.query.hierarchies } ) )
+			.then( this.executeExportSendFile )
 			.then( ( result ) => {
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 				console.log( 'ExecuteExportAction is now complete' );
-				// console.log( 'ExecuteExportAction is now complete:', result );
+				console.log( 'ExecuteExportAction is now complete:', result );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				const totalTime = ( ( new Date() ).getTime() - startTime.getTime() ) / 1000;
+				console.log( 'Total Time is', totalTime, 'seconds' );
+				console.log( 'or', totalTime / 60, 'minutes' );
 				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 			} ).catch( ( error ) => {
 				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
@@ -568,60 +572,6 @@ export class StreamTools {
 		return this.environmentTool.readData( { id: stream.environment, db: stream.dbName, table: stream.tableName, query } );
 	}
 
-	private executeExportActionOLD = async ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
-		const stream = await this.getOne( payload.streamid );
-		const exportDefinition = stream.exports.find( e => e.id === payload.exportid );
-		if ( !exportDefinition ) {
-			throw new Error( 'Export couldn\'t be found' );
-		}
-		const hierarchies = await this.getAllFieldDescriptionsWithHierarchy( payload.streamid );
-		payload.hierarchies = hierarchies;
-		// Finding Column Members
-		const colCartesian = exportDefinition.cols.map( col => {
-			return arrayCartesian( col.map( ( selection, sindex ) => {
-				return findMembers( hierarchies[exportDefinition.colDims[sindex]], selection.selectionType, selection.selectedMember );
-			} ) );
-		} );
-		let colMembers: any[] = [];
-		colCartesian.forEach( cm => {
-			colMembers = colMembers.concat( cm );
-		} );
-		// Finding Row Members
-		const rowCartesian = exportDefinition.rows.map( row => {
-			return arrayCartesian( row.map( ( selection, sindex ) => {
-				return findMembers( hierarchies[exportDefinition.rowDims[sindex]], selection.selectionType, selection.selectedMember );
-			} ) );
-		} );
-		let rowMembers: any[] = [];
-		rowCartesian.forEach( rm => {
-			rowMembers = rowMembers.concat( rm );
-		} );
-		// Finding POV Members
-		const povMembers = exportDefinition.povs.map( ( pov, pindex ) => findMembers( hierarchies[exportDefinition.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
-
-		console.log( '===========================================' );
-		console.log( rowMembers.map( r => r.map( i => i.RefField ) ), rowMembers.length );
-		console.log( '===========================================' );
-		console.log( colMembers.map( r => r.map( i => i.RefField ) ), colMembers.length );
-		console.log( '===========================================' );
-		console.log( povMembers.map( r => r.map( i => i.RefField ) ), povMembers.length );
-		console.log( '===========================================' );
-		return this.environmentTool.readData( {
-			id: stream.environment,
-			db: stream.dbName,
-			table: stream.tableName,
-			query: {
-				name: exportDefinition.name,
-				dims: stream.fieldList.map( f => ( { id: f.id, name: f.name } ) ),
-				povDims: exportDefinition.povDims,
-				rowDims: exportDefinition.rowDims,
-				colDims: exportDefinition.colDims,
-				povMembers,
-				rowMembers,
-				colMembers
-			}
-		} );
-	}
 	private executeExportPrepareFile = async ( payload ) => {
 		const workbook = new excel.Workbook();
 		workbook.creator = 'EPM Toolbox';
@@ -629,12 +579,11 @@ export class StreamTools {
 		workbook.created = new Date();
 		workbook.modified = new Date();
 
-		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: 1, ySplit: 1, activeCell: 'A1' }] } );
 		const data = payload.result.data;
 		const numRowDims = payload.result.query.rowDims.length;
+		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: numRowDims * 2, ySplit: 2, activeCell: 'A1' }] } );
 
 		console.log( '===========================================' );
-		console.log( payload );
 		console.log( '===========================================' );
 		console.log( 'Column Members' );
 		payload.result.query.colMembers.forEach( cm => console.log( cm ) );
@@ -643,9 +592,9 @@ export class StreamTools {
 		payload.result.query.povMembers.forEach( cm => console.log( cm ) );
 		console.log( '===========================================' );
 		console.log( 'Data' );
-		data.forEach( d => console.log( d ) );
+		console.log( data.length, 'rows of data' );
 		console.log( '===========================================' );
-		Object.values( payload.hierarchies ).forEach( dim => console.log( dim ) );
+		// Object.values( payload.hierarchies ).forEach( dim => console.log( dim ) );
 		console.log( '===========================================' );
 
 		let currentRow = 0;

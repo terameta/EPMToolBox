@@ -1,5 +1,4 @@
-import { DimeCredentialDetail } from '../../shared/model/dime/credentialDetail';
-import { DimeCredential } from '../../shared/model/dime/credential';
+import { DimeCredential, DimeCredentialDetail } from '../../shared/model/dime/credential';
 import { Pool } from 'mysql';
 
 import { MainTools } from './tools.main';
@@ -62,7 +61,7 @@ export class CredentialTools {
 				}
 			} );
 		} );
-	};
+	}
 
 	public create = ( refItem: DimeCredential ) => {
 		const newCredential: DimeCredential = <DimeCredential>{ name: 'New Credential' };
@@ -77,7 +76,7 @@ export class CredentialTools {
 				}
 			} );
 		} );
-	};
+	}
 
 	public update = ( refItem: DimeCredentialDetail ) => {
 		return new Promise( ( resolve, reject ) => {

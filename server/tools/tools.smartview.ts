@@ -11,8 +11,11 @@ import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSma
 import { DimeEnvironmentType } from '../../shared/enums/dime/environmenttypes';
 import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { SmartViewRequestOptions } from '../../shared/model/dime/smartviewrequestoptions';
-import { SortByName, encodeXML, SortByPosition, waiter } from '../../shared/utilities/utilityFunctions';
+import { SortByName, encodeXML, SortByPosition, waiter, arrayCartesian } from '../../shared/utilities/utilityFunctions';
 import * as _ from 'lodash';
+import * as path from 'path';
+import * as Handlebars from 'handlebars';
+import * as Promisers from '../../shared/utilities/promisers';
 import { findMembers } from '../../shared/utilities/hpUtilities';
 
 export class SmartViewTools {
@@ -27,45 +30,37 @@ export class SmartViewTools {
 	}
 	public smartviewReadData = async ( payload ) => {
 		await this.smartviewReadDataPrepare( payload );
-		console.log( '!!!!' );
 		return payload;
 	}
 	public smartviewReadDataPrepare = async ( payload ) => {
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'Starting' );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
 		await this.smartviewOpenCube( payload );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'Cube opened' );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( payload );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'POVs' );
-		console.log( payload.query.povDims );
-		console.log( payload.query.povs );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'Rows' );
-		console.log( payload.query.rowDims );
-		console.log( payload.query.rows );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'Cols' );
-		console.log( payload.query.colDims );
-		console.log( payload.query.cols );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		payload.query.hierarhies = await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
+
+		payload.query.hierarchies = await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
+		payload.query.povMembers = payload.query.povs.map( ( pov, pindex ) => findMembers( payload.query.hierarchies[payload.query.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
+
+		const colCartesian = payload.query.cols.map( col => {
+			return arrayCartesian( col.map( ( selection, sindex ) => {
+				return findMembers( payload.query.hierarchies[payload.query.colDims[sindex]], selection.selectionType, selection.selectedMember );
+			} ) );
+		} );
+		payload.query.colMembers = [];
+		colCartesian.forEach( cm => {
+			payload.query.colMembers = payload.query.colMembers.concat( cm );
+		} );
+
 		payload.query.memberCounts = <any>{};
 		payload.query.memberCounts.povs = 1;
 		payload.query.memberCounts.rows = [];
 		payload.query.memberCounts.cols = [];
 		payload.query.povs.forEach( ( pov, index ) => {
-			pov.memberList = findMembers( payload.query.hierarhies[payload.query.povDims[index]], pov.selectionType, pov.selectedMember );
+			pov.memberList = findMembers( payload.query.hierarchies[payload.query.povDims[index]], pov.selectionType, pov.selectedMember );
 			pov.memberCount = pov.memberList.length;
 			payload.query.memberCounts.povs *= pov.memberCount;
 		} );
 		payload.query.rows.forEach( ( row, index ) => {
 			let rowCount = 1;
 			row.forEach( ( selection, dimindex ) => {
-				selection.memberList = findMembers( payload.query.hierarhies[payload.query.rowDims[dimindex]], selection.selectionType, selection.selectedMember );
+				selection.memberList = findMembers( payload.query.hierarchies[payload.query.rowDims[dimindex]], selection.selectionType, selection.selectedMember );
 				selection.memberCount = selection.memberList.length;
 				rowCount *= selection.memberCount;
 			} );
@@ -74,66 +69,49 @@ export class SmartViewTools {
 		payload.query.cols.forEach( ( col, index ) => {
 			let colCount = 1;
 			col.forEach( ( selection, dimindex ) => {
-				selection.memberList = findMembers( payload.query.hierarhies[payload.query.colDims[dimindex]], selection.selectionType, selection.selectedMember );
+				selection.memberList = findMembers( payload.query.hierarchies[payload.query.colDims[dimindex]], selection.selectionType, selection.selectedMember );
 				selection.memberCount = selection.memberList.length;
 				colCount *= selection.memberCount;
 			} );
 			payload.query.memberCounts.cols.push( colCount );
 		} );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'POVs' );
-		console.log( payload.query.povDims );
-		payload.query.povs.forEach( e => console.log( e ) );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'Rows' );
-		console.log( payload.query.rowDims );
-		payload.query.rows.forEach( e => console.log( e ) );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-		console.log( 'Cols' );
-		console.log( payload.query.colDims );
-		payload.query.cols.forEach( e => console.log( e ) );
-		console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
 
-		console.log( '===========================================' );
-		console.log( '===========================================' );
 		payload.query.memberCounts.totalRowIntersections = payload.query.memberCounts.rows.reduce( ( accumulator, currentValue ) => accumulator + currentValue );
 		payload.query.memberCounts.totalColIntersections = payload.query.memberCounts.cols.reduce( ( accumulator, currentValue ) => accumulator + currentValue );
-		console.log( payload.query.memberCounts );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
 
-		payload.pullLimit = 36;
-		payload.pullThreadNumber = 8;
+		payload.pullLimit = 3000000;
+		payload.pullThreadNumber = 12;
 		payload.pullThreadPool = []; for ( let x = 0; x < payload.pullThreadNumber; x++ ) payload.pullThreadPool[x] = 0;
 
 		if ( payload.query.memberCounts.totalColIntersections > payload.pullLimit ) {
 			return Promise.reject( new Error( 'Too many intersections on the column (' + payload.query.memberCounts.totalColIntersections + '). Limit is ' + payload.pullLimit ) );
 		}
 		payload.rowsPerChunck = Math.floor( payload.pullLimit / payload.query.memberCounts.totalColIntersections );
-		console.log( '===========================================' );
-		console.log( 'Rows/chunck:', payload.rowsPerChunck );
-		console.log( '===========================================' );
 
-		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		console.log( 'Chunck Preperation' );
+		payload.data = [];
+
+		payload.numberOfChuncks = Math.ceil( payload.query.memberCounts.totalRowIntersections / payload.rowsPerChunck );
 
 		const numberOfRowDimensions = payload.query.rowDims.length;
 		const chunck: string[][] = [];
 
+		let whichChunck = 0;
+		// let whichRow = 0;
+
 		for ( const row of payload.query.rows ) {
-			console.log( 'Row + >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 			payload.currentRowIntersection = payload.query.rowDims.map( r => 0 );
 			payload.currentRowIntersectionLimits = row.map( r => r.memberCount );
 			let keepWorking = true;
-			let count = 0;
+
 			while ( keepWorking ) {
-				console.log( 'Working on', ( ++count ).toString().padStart( 7, '0' ), payload.currentRowIntersection, payload.currentRowIntersectionLimits );
+				// console.log( 'Working on', ( ++whichRow ).toString().padStart( 7, '0' ), payload.currentRowIntersection, payload.currentRowIntersectionLimits );
 				chunck.push( payload.currentRowIntersection.map( ( index, dimindex ) => row[dimindex].memberList[index].RefField ) );
 				if ( chunck.length === payload.rowsPerChunck ) {
 					const threadToAssign = await this.waitForEmptyThread( payload.pullThreadPool );
 					payload.pullThreadPool[threadToAssign] = 1;
-					this.smartviewReadDataPullChunck( threadToAssign, payload, chunck.splice( 0 ) ).then( threadToRelease => payload.pullThreadPool[threadToRelease] = 0 );
+					this.smartviewReadDataPullChunck( threadToAssign, payload, chunck.splice( 0 ), 0, ++whichChunck )
+						.then( threadToRelease => payload.pullThreadPool[threadToRelease] = 0 )
+						.catch( issue => payload.pullThreadPool[threadToAssign] = 0 );
 				}
 
 				let currentIndex = numberOfRowDimensions - 1;
@@ -147,91 +125,51 @@ export class SmartViewTools {
 				}
 				if ( payload.currentRowIntersection.reduce( ( accumulator, currentValue ) => accumulator + currentValue ) === 0 ) keepWorking = false;
 
-				await waiter( 200 );
-				if ( count > 100 ) keepWorking = false;
+				// await waiter( 5000 );
+				// if ( whichChunck > 100 ) keepWorking = false;
 			}
 		}
 
-		const threadFinal = await this.waitForEmptyThread( payload.pullThreadPool );
-		payload.pullThreadPool[threadFinal] = 1;
-		this.smartviewReadDataPullChunck( threadFinal, payload, chunck.splice( 0 ) ).then( threadToRelease => payload.pullThreadPool[threadToRelease] = 0 );
+		if ( chunck.length > 0 ) {
+			const threadFinal = await this.waitForEmptyThread( payload.pullThreadPool );
+			payload.pullThreadPool[threadFinal] = 1;
+			this.smartviewReadDataPullChunck( threadFinal, payload, chunck.splice( 0 ), 0, ++whichChunck )
+				.then( threadToRelease => payload.pullThreadPool[threadToRelease] = 0 )
+				.catch( issue => payload.pullThreadPool[threadFinal] = 0 );
+		}
 
 		await this.waitForAllThreadsCompletion( payload.pullThreadPool );
 
 		// return Promise.reject( new Error( 'Not yet' ) );
 		// return payload;
 	}
-	private smartviewReadDataPullChunck = ( thread: number, payload, chunck, retrycount = 0 ): Promise<number> => {
+	private smartviewReadDataPullChunck = ( thread: number, payload, chunck, retrycount = 0, whichChunck: number ): Promise<number> => {
 		const maxRetry = 10;
 		return new Promise( ( resolve, reject ) => {
-			this.smartviewReadDataPullChunckAction( payload, chunck ).then( resolve ).catch( issue => {
+			this.smartviewReadDataPullChunckAction( payload, chunck, whichChunck ).then( () => resolve( thread ) ).catch( issue => {
 				if ( retrycount < maxRetry ) {
-					console.log( '?????', payload.pullThreadPool, thread, retrycount, maxRetry );
+					retrycount++;
+					console.log( '?????', payload.pullThreadPool.join( '' ), thread, retrycount, maxRetry, 'Chunck Length:', chunck.length, issue );
 					// payload.pullThreadPool[thread]++;
-					resolve( this.smartviewReadDataPullChunck( payload, chunck, ++retrycount ) );
+					resolve( this.smartviewReadDataPullChunck( thread, payload, chunck, retrycount, whichChunck ) );
 				} else {
 					reject( issue );
 				}
 			} );
 		} );
 	}
-	private smartviewReadDataPullChunckAction = async ( payload, chunck: any[] ) => {
-		let body = '';
+	private smartviewReadDataPullChunckAction = async ( payload, chunck: any[], whichChunck: number ) => {
 		const startTime = new Date();
 
-		body += '<req_Refresh>';
-		body += '<sID>' + payload.SID + '</sID>';
-		body += '<preferences>';
-		body += '<row_suppression zero="1" invalid="0" missing="1" underscore="0" noaccess="0"/>';
-		body += '<celltext val="1"/>';
-		body += '<zoomin ancestor="bottom" mode="children"/>';
-		body += '<navigate withData="1"/>';
-		body += '<includeSelection val="1"/>';
-		body += '<repeatMemberLabels val="1"/>';
-		body += '<withinSelectedGroup val="0"/>';
-		body += '<removeUnSelectedGroup val="0"/>';
-		body += '<col_suppression zero="0" invalid="0" missing="0" underscore="0" noaccess="0"/>';
-		body += '<block_suppression missing="1"/>';
-		body += '<includeDescriptionInLabel val="2"/>';
-		body += '<missingLabelText val=""/>';
-		body += '<noAccessText val="#No Access"/>';
-		body += '<aliasTableName val="none"/>';
-		body += '<essIndent val="2"/>';
-		body += '<FormatSetting val="2"/>';
-		body += '<sliceLimitation rows="1048576" cols="16384"/>';
-		body += '</preferences>';
-		body += '<grid>';
-		body += '<cube>' + payload.table + '</cube>';
-		body += '<dims>';
-		let currentID = 0;
-		payload.query.povDims.forEach( ( dim, dimindex ) => {
-			const memberName = payload.query.povMembers[dimindex][0].RefField;
-			body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" pov="' + memberName + '" display="' + memberName + '" hidden="0" expand="0"/>';
-			currentID++;
-		} );
-		payload.query.rowDims.forEach( ( dim, dimindex ) => {
-			body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" row="' + dimindex + '" hidden="0" expand="0"/>';
-			currentID++;
-		} );
-		payload.query.colDims.forEach( ( dim, dimindex ) => {
-			body += '<dim id="' + currentID + '" name="' + payload.dims[dim].name + '" col="' + dimindex + '" hidden="0" expand="0"/>';
-			currentID++;
-		} );
-		body += '</dims>';
-		body += '<perspective type="Reality"/>';
-		body += '<slices>';
-		body += '<slice rows="' + ( payload.query.colDims.length + chunck.length ) + '" cols="' + ( payload.query.rowDims.length + payload.query.colMembers.length ) + '">';
-		body += '<data>';
-		body += '<range start="0" end="' + ( ( payload.query.colDims.length + chunck.length ) * ( payload.query.rowDims.length + payload.query.colMembers.length ) - 1 ) + '">';
 		const valueArray = [];
 		const typeArray = [];
+
 		payload.query.colDims.forEach( ( colDim, colDimIndex ) => {
 			payload.query.rowDims.forEach( ( rowDim, rowDimIndex ) => {
 				valueArray.push( '' );
 				typeArray.push( '7' );
 			} );
 			payload.query.colMembers.forEach( colMember => {
-				// console.log( '***', colMember );
 				valueArray.push( colMember[colDimIndex].RefField );
 				typeArray.push( '0' );
 			} );
@@ -245,26 +183,30 @@ export class SmartViewTools {
 				valueArray.push( '' );
 				typeArray.push( '2' );
 			} );
-			// console.log( rowMemberIndex, rowMemberList );
 		} );
-		// console.log( valueArray.join( '|' ) );
-		// console.log( typeArray.join( '|' ) );
-		body += '<vals>' + valueArray.join( '|' ) + '</vals>';
-		body += '<types>' + typeArray.join( '|' ) + '</types>';
-		body += '</range>';
-		body += '</data>';
-		body += '<metadata/>';
-		body += '<conditionalFormats/>';
-		body += '</slice>';
-		body += '</slices>';
-		body += '</grid>';
-		body += '</req_Refresh>';
-		console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'posted.' );
+
+		const params: any = {};
+		params.SID = payload.SID;
+		params.cube = payload.table;
+		params.rows = payload.query.colDims.length + chunck.length;
+		params.cols = payload.query.rowDims.length + payload.query.colMembers.length;
+		params.range = { start: 0, end: ( ( payload.query.colDims.length + chunck.length ) * ( payload.query.rowDims.length + payload.query.colMembers.length ) - 1 ) };
+		params.povDims = payload.query.povDims.map( ( cd, index ) => ( { refreshid: index, name: payload.query.dimensions[cd].name, memberName: payload.query.povs[index].memberList[0].RefField } ) );
+		params.rowDims = payload.query.rowDims.map( ( cd, index ) => ( { refreshid: index + payload.query.povDims.length, name: payload.query.dimensions[cd].name, roworder: index } ) );
+		params.colDims = payload.query.colDims.map( ( cd, index ) => ( { refreshid: index + payload.query.povDims.length + payload.query.rowDims.length, name: payload.query.dimensions[cd].name, colorder: index } ) );
+		params.vals = valueArray.join( '|' );
+		params.types = typeArray.join( '|' );
+
+		const bodyXML = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_Refresh.xml' ) );
+		const bodyTemplate = Handlebars.compile( bodyXML );
+		const body = bodyTemplate( params );
+
+		console.log( '>>>', payload.pullThreadPool.join( '' ), 'Pulling chunck', whichChunck, '/', payload.numberOfChuncks, 'posted.' );
 		const response = await this.smartviewPoster( { url: payload.planningurl, body, cookie: payload.cookies, timeout: 120000000 } );
 
-		console.log( '>>> Pulling chunck', ( payload.consumedChuncks + 1 ), '/', payload.numberOfChuncks, 'received.' );
 		const doWeHaveData = response.$( 'body' ).children().toArray().filter( elem => ( elem.name === 'res_refresh' ) ).length > 0;
-		console.log( '>>>>>>>>>>>Do We Have Data:', doWeHaveData, '>>>>>>>>>>>Duration Passed:', ( ( new Date() ).getTime() - startTime.getTime() ) / 1000, 'seconds' );
+		const totalTime = ( ( new Date() ).getTime() - startTime.getTime() ) / 1000;
+		console.log( '>>>', payload.pullThreadPool.join( '' ), 'Pulling chunck', whichChunck, '/', payload.numberOfChuncks, 'received. WithData:', doWeHaveData, '-', totalTime, 'secs' );
 		if ( doWeHaveData ) {
 			const rangeStart = parseInt( response.$( 'range' ).attr( 'start' ), 10 );
 			const rangeEnd = parseInt( response.$( 'range' ).attr( 'end' ), 10 );
@@ -277,9 +219,7 @@ export class SmartViewTools {
 			}
 			return Promise.resolve( payload );
 		} else {
-			const errcode = response.$( 'exception' ).attr( 'errcode' );
-			console.log( response.body );
-			if ( errcode === '1000' ) {
+			if ( response.body.indexOf( 'there are no valid rows of data' ) >= 0 ) {
 				return Promise.resolve( payload );
 			} else {
 				console.log( response.body );
@@ -290,7 +230,7 @@ export class SmartViewTools {
 	private waitForAllThreadsCompletion = ( list: number[] ): Promise<boolean> => {
 		return new Promise( ( resolve, reject ) => {
 			const toClear = setInterval( () => {
-				console.log( 'Waiting for All threads completion:', list );
+				console.log( 'Waiting for All threads completion:', list.join( '' ) );
 				if ( list.filter( i => i > 0 ).length === 0 ) {
 					resolve();
 					clearInterval( toClear );
@@ -307,11 +247,8 @@ export class SmartViewTools {
 				const toClear = setInterval( () => {
 					foundIndex = list.findIndex( i => i === 0 );
 					if ( foundIndex >= 0 ) {
-						console.log( '>>> There is empty thread', foundIndex );
 						resolve( foundIndex );
 						clearInterval( toClear );
-					} else {
-						console.log( '!!! No empty threads' );
 					}
 				}, 2000 );
 			}
@@ -328,7 +265,6 @@ export class SmartViewTools {
 				payload.numberofRowsPerChunck = 1;
 			}
 			payload.numberOfChuncks = Math.ceil( payload.query.rowMembers.length / payload.numberofRowsPerChunck );
-			payload.consumedChuncks = 0;
 			this.smartviewReadDataPullChuncks( payload ).then( resolve ).catch( reject );
 		} );
 	}
