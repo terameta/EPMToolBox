@@ -45,3 +45,12 @@ export const findMembers = ( memberList: any[], type: string, member: string ) =
 	}
 	return null;
 };
+
+export const getPBCSReadDataSelections = ( payload: { selectedMember: string, selectionType: string } ): string => {
+	if ( payload.selectionType === 'member' ) return payload.selectedMember;
+	if ( payload.selectionType === 'level0' ) return 'ILvl0Descendants(' + payload.selectedMember + ')';
+	if ( payload.selectionType === 'children' ) return 'Children(' + payload.selectedMember + ')';
+	if ( payload.selectionType === 'ichildren' ) return 'Children(' + payload.selectedMember + '), ' + payload.selectedMember;
+	if ( payload.selectionType === 'descendants' ) return 'Descendants(' + payload.selectedMember + ')';
+	if ( payload.selectionType === 'idescendants' ) return 'Descendants(' + payload.selectedMember + '), ' + payload.selectedMember;
+};

@@ -3,6 +3,7 @@
 // import * as async from 'async';
 // import * as url from 'url';
 import { Pool } from 'mysql';
+import * as Promisers from '../../shared/utilities/promisers';
 
 
 import { DimeEnvironmentPBCS } from '../../shared/model/dime/environmentPBCS';
@@ -10,6 +11,8 @@ import { MainTools } from './tools.main';
 import { SmartViewTools } from './tools.smartview';
 import { DimeEnvironmentSmartView } from '../../shared/model/dime/environmentSmartView';
 import { DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
+import { getPBCSReadDataSelections, findMembers } from '../../shared/utilities/hpUtilities';
+import { SortByPosition, arrayCartesian } from '../../shared/utilities/utilityFunctions';
 
 
 export class PBCSTools {
@@ -47,43 +50,188 @@ export class PBCSTools {
 	public listProcedureDetails = ( refObj: DimeEnvironmentPBCS ) => {
 		return this.smartview.listBusinessRuleDetails( Object.assign( <DimeEnvironmentSmartView>{}, refObj ) );
 	}
-	public writeData = ( refObj ) => {
-		return this.smartview.writeData( refObj );
-	}
-	public readData = ( refObj ) => {
-		return this.smartview.readData( refObj );
-	}
-	public runProcedure = ( refObj ) => {
+	public runProcedure = ( refObj: DimeEnvironmentPBCS ) => {
 		return this.smartview.runBusinessRule( refObj );
 	}
-	/*
-		private staticVerify = ( refObj: DimeEnvironmentPBCS ) => {
-			return new Promise( ( resolve, reject ) => {
-				if ( !refObj ) {
-					reject( 'No data provided' );
-				} else if ( !refObj.username ) {
-					reject( 'No username provided' );
-				} else if ( !refObj.password ) {
-					reject( 'No password provided' );
-				} else if ( !refObj.server ) {
-					reject( 'No server is provided' );
-				} else if ( !refObj.port ) {
-					reject( 'No port is provided' );
-				} else if ( refObj.server.substr( 0, 4 ) !== 'http' ) {
-					reject( 'Server address is not valid. Make sure it starts with http:// or https://' );
-				} else {
-					refObj.address = refObj.server + ':' + refObj.port;
-					refObj.resturl = refObj.address + '/HyperionPlanning/rest';
-					refObj.smartviewurl = refObj.address + '/workspace/SmartViewProviders';
-					refObj.username = refObj.identitydomain + '.' + refObj.username;
-					resolve( refObj );
+	public writeData = ( refObj ) => this.smartview.writeData( refObj );
+	public readData = ( refObj ) => this.pbcsReadData( refObj );
+	private pbcsReadData = async ( payload ) => {
+		const startTime = new Date();
+		console.log( 'pbcsReadData is initiated' );
+		console.log( 'Reading hierarchies' );
+		payload.query.hierarchies = await this.smartview.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
+		console.log( 'Hierarchies received' );
+		await this.pbcsInitiateRest( payload );
+		payload.data = [];
+		const rows = JSON.parse( JSON.stringify( payload.query.rows ) );
+		while ( rows.length > 0 ) {
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			console.log( '@@@', rows.map( cr => cr.map( s => s.selectedMember ) ) );
+			console.log( '===========================================' );
+			console.log( '===========================================' );
+			const row = rows.splice( 0, 1 )[0];
+			const query = {
+				exportPlanningData: false,
+				gridDefinition: {
+					suppressMissingBlocks: true,
+					pov: {
+						dimensions: payload.query.povDims.map( dimid => payload.query.dimensions[dimid].name ),
+						members: payload.query.povs.map( pov => [getPBCSReadDataSelections( pov )] )
+					},
+					columns: payload.query.cols.map( col => {
+						return {
+							dimensions: payload.query.colDims.map( dimid => payload.query.dimensions[dimid].name ),
+							members: col.map( c => [getPBCSReadDataSelections( c )] )
+						};
+					} ),
+					rows: [
+						{
+							dimensions: payload.query.rowDims.map( dimid => payload.query.dimensions[dimid].name ),
+							members: row.map( r => [getPBCSReadDataSelections( r )] )
+						}
+					]
 				}
-			} );
+			};
+			const result = await this.pbcsReadDataAction( payload, query );
+			if ( Array.isArray( result ) ) {
+				result.forEach( r => payload.data.push( r ) );
+			} else {
+				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				// console.log( row );
+				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+				let minIndex = -1;
+				let minNumberofMembers = 999999999;
+				row.forEach( ( selection, dimindex ) => {
+					selection.memberList = findMembers( payload.query.hierarchies[payload.query.rowDims[dimindex]], selection.selectionType, selection.selectedMember );
+					selection.memberCount = selection.memberList.length;
+					if ( selection.memberCount > 1 && selection.memberCount < minNumberofMembers ) {
+						minNumberofMembers = selection.memberCount;
+						minIndex = dimindex;
+					}
+					console.log( payload.query.dimensions[payload.query.rowDims[dimindex]].name, selection.memberCount, minIndex, minNumberofMembers );
+				} );
+				const membersToExpand = JSON.parse( JSON.stringify( row[minIndex].memberList ) );
+				membersToExpand.forEach( ( currentMember, spliceIndex ) => {
+					const toPush = JSON.parse( JSON.stringify( row ) );
+					toPush[minIndex] = { selectedMember: currentMember.RefField, selectionType: 'member' };
+					rows.splice( spliceIndex, 0, toPush );
+				} );
+				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+				// console.log( membersToExpand );
+				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
+
+				/**
+				 * payload.query.rows.forEach( ( row, index ) => {
+				 * let rowCount = 1;
+					row.forEach( ( selection, dimindex ) => {
+							selection.memberList = findMembers( payload.query.hierarchies[payload.query.rowDims[dimindex]], selection.selectionType, selection.selectedMember );
+							selection.memberCount = selection.memberList.length;
+							rowCount *= selection.memberCount;
+						} );
+						payload.query.memberCounts.rows.push( rowCount );
+					} );
+				*/
+			}
+		}
+
+		console.log( 'Final======================================' );
+		console.log( 'Final======================================' );
+		console.log( payload.data );
+		console.log( 'Final======================================' );
+		console.log( 'Final======================================' );
+		const endTime = new Date();
+		const duration = ( endTime.getTime() - startTime.getTime() ) / 1000;
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+		console.log( 'Total time spent:', duration, 'seconds' );
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+
+		const colCartesian = payload.query.cols.map( col => {
+			return arrayCartesian( col.map( ( selection, sindex ) => {
+				return findMembers( payload.query.hierarchies[payload.query.colDims[sindex]], selection.selectionType, selection.selectedMember );
+			} ) );
+		} );
+		payload.query.colMembers = [];
+		colCartesian.forEach( cm => {
+			payload.query.colMembers = payload.query.colMembers.concat( cm );
+		} );
+
+		payload.query.povMembers = payload.query.povs.map( ( pov, pindex ) => findMembers( payload.query.hierarchies[payload.query.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
+	}
+	private pbcsReadDataAction = async ( payload: DimeEnvironmentPBCS, pbcsQuery: any ): Promise<any> => {
+		console.log( 'Running pbcsInitiateRest' );
+		await this.pbcsInitiateRest( payload );
+		const dataURL = payload.resturl + '/applications/' + payload.database + '/plantypes/' + payload.table + '/exportdataslice';
+		console.log( 'Sending pbcsSendRequest' );
+		const result = await this.pbcsSendRequest( { method: 'POST', url: dataURL, domain: payload.identitydomain, user: payload.username, pass: payload.password, body: pbcsQuery } );
+		console.log( 'Received pbcsSendRequest' );
+		if ( result.body && result.body.detail === 'Unable to load the data entry form as the number of data entry cells exceeded the threshold.' ) {
+			return false;
+		}
+		return result.body.rows;
+	}
+	private pbcsInitiateRest = async ( payload: DimeEnvironmentPBCS ) => {
+		if ( !payload.restInitiated ) {
+			// payload = await this.pbcsStaticVerify( payload );
+			await this.pbcsStaticVerify( payload );
+			payload.resturl = await this.pbcsGetVersion( payload );
+			payload.restInitiated = true;
+		}
+		return payload;
+	}
+	private pbcsGetVersion = async ( payload: DimeEnvironmentPBCS ) => {
+		const result = await this.pbcsSendRequest( { method: 'GET', url: payload.resturl, domain: payload.identitydomain, user: payload.username, pass: payload.password } );
+		const linkObject = result.body.links.find( e => e.rel === 'current' );
+		if ( linkObject && linkObject.href ) {
+			return linkObject.href;
+		} else {
+			throw new Error( 'Rest API link is not accessible@pbcsGetVersion' );
+		}
+	}
+	private pbcsSendRequest = async ( payload: { method: 'GET' | 'POST', url: string, domain: string, user: string, pass: string, body?: string } ) => {
+		const options: any = {};
+		options.method = payload.method;
+		options.url = payload.url;
+		options.json = true;
+		if ( payload.body ) options.json = payload.body;
+
+		options.auth = {
+			user: payload.domain + '.' + payload.user,
+			pass: payload.pass,
+			sendImmediately: true
 		};
-
-
-
-
+		const result = await Promisers.sendRequest( options );
+		return result;
+	}
+	private pbcsStaticVerify = async ( payload: DimeEnvironmentPBCS ) => {
+		if ( !payload ) {
+			throw new Error( 'No data provided' );
+		} else if ( !payload.username ) {
+			throw new Error( 'No username provided' );
+		} else if ( !payload.password ) {
+			throw new Error( 'No password provided' );
+		} else if ( !payload.server ) {
+			throw new Error( 'No server is provided' );
+		} else if ( !payload.port ) {
+			throw new Error( 'No port is provided' );
+		} else if ( !payload.identitydomain ) {
+			throw new Error( 'No domain is provided' );
+		} else if ( payload.server.substr( 0, 4 ) !== 'http' ) {
+			throw new Error( 'Server address is not valid. Make sure it starts with http:// or https://' );
+		} else {
+			payload.address = payload.server + ':' + payload.port;
+			payload.resturl = payload.address + '/HyperionPlanning/rest/';
+			payload.smartviewurl = payload.address + '/workspace/SmartViewProviders';
+			return payload;
+		}
+	}
+	/*
 
 		public verify = ( refObj: DimeEnvironmentPBCS ) => {
 			return this.initiateRest( refObj );

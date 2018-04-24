@@ -18,5 +18,6 @@ export interface DimeEnvironmentPBCS extends DimeEnvironmentDetail {
 		hasRTP: number,
 		type: string
 	},
-	jar: any
+	jar: any,
+	restInitiated: boolean
 }

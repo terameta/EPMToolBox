@@ -1,6 +1,5 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"workbench.colorTheme": "Default Light+",
 	"git.confirmSync": false,
 	"window.zoomLevel": 0,
 	"typescript.tsdk": "node_modules\\typescript\\lib",
@@ -36,7 +35,7 @@
 	"editor.formatOnSave": true,
 	"terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
 	"terminal.integrated.fontSize": 12,
-	"workbench.iconTheme": null,
+	"workbench.iconTheme": "vs-seti",
 	"html.format.wrapLineLength": 240,
 	"html.format.indentInnerHtml": true,
 	"html.format.endWithNewline": true,

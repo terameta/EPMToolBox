@@ -584,6 +584,7 @@ export class StreamTools {
 		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: numRowDims * 2, ySplit: 2, activeCell: 'A1' }] } );
 
 		console.log( '===========================================' );
+		console.log( payload );
 		console.log( '===========================================' );
 		console.log( 'Column Members' );
 		payload.result.query.colMembers.forEach( cm => console.log( cm ) );

@@ -29,8 +29,20 @@ export class SmartViewTools {
 		return this.smartviewReadData( payload );
 	}
 	public smartviewReadData = async ( payload ) => {
-		await this.smartviewReadDataPrepare( payload );
+		// await this.smartviewReadDataPrepare( payload );
+		await this.smartviewReadDataMDX( payload );
 		return payload;
+	}
+	private smartviewReadDataMDX = async ( payload ) => {
+		await this.smartviewOpenCube( payload );
+		const params: any = {};
+		params.SID = payload.SID;
+		const bodyXML = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_ExecuteQuery.xml' ) );
+		const bodyTemplate = Handlebars.compile( bodyXML );
+		const body = bodyTemplate( params );
+		const response = await this.smartviewPoster( { url: payload.planningurl, body, cookie: payload.cookies, timeout: 120000000 } );
+		console.log( response.body );
+		return Promise.reject( new Error( 'Not Yet' ) );
 	}
 	public smartviewReadDataPrepare = async ( payload ) => {
 		await this.smartviewOpenCube( payload );
@@ -79,8 +91,8 @@ export class SmartViewTools {
 		payload.query.memberCounts.totalRowIntersections = payload.query.memberCounts.rows.reduce( ( accumulator, currentValue ) => accumulator + currentValue );
 		payload.query.memberCounts.totalColIntersections = payload.query.memberCounts.cols.reduce( ( accumulator, currentValue ) => accumulator + currentValue );
 
-		payload.pullLimit = 3000000;
-		payload.pullThreadNumber = 12;
+		payload.pullLimit = 100000;
+		payload.pullThreadNumber = 8;
 		payload.pullThreadPool = []; for ( let x = 0; x < payload.pullThreadNumber; x++ ) payload.pullThreadPool[x] = 0;
 
 		if ( payload.query.memberCounts.totalColIntersections > payload.pullLimit ) {
@@ -161,8 +173,8 @@ export class SmartViewTools {
 	private smartviewReadDataPullChunckAction = async ( payload, chunck: any[], whichChunck: number ) => {
 		const startTime = new Date();
 
-		const valueArray = [];
-		const typeArray = [];
+		let valueArray = [];
+		let typeArray = [];
 
 		payload.query.colDims.forEach( ( colDim, colDimIndex ) => {
 			payload.query.rowDims.forEach( ( rowDim, rowDimIndex ) => {
@@ -196,6 +208,11 @@ export class SmartViewTools {
 		params.colDims = payload.query.colDims.map( ( cd, index ) => ( { refreshid: index + payload.query.povDims.length + payload.query.rowDims.length, name: payload.query.dimensions[cd].name, colorder: index } ) );
 		params.vals = valueArray.join( '|' );
 		params.types = typeArray.join( '|' );
+
+		// Clean up some unused variables
+		chunck = [];
+		valueArray = [];
+		typeArray = [];
 
 		const bodyXML = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_Refresh.xml' ) );
 		const bodyTemplate = Handlebars.compile( bodyXML );
@@ -698,7 +715,7 @@ export class SmartViewTools {
 			.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
 			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsWithHierarchyAction( refObj, refField ); } );
 	}
-	private smartviewGetAllDescriptionsWithHierarchy = async ( refObj: DimeEnvironmentSmartView, refFields: DimeStreamFieldDetail[] ) => {
+	public smartviewGetAllDescriptionsWithHierarchy = async ( refObj: DimeEnvironmentSmartView, refFields: DimeStreamFieldDetail[] ) => {
 		const toReturn: any = {};
 		await Promise.all( refFields.map( async ( field ) => this.smartviewGetAllDescriptionsWithHierarchyAction( refObj, field, toReturn ) ) );
 		return toReturn;
