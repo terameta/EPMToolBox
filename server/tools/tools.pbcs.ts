@@ -138,12 +138,6 @@ export class PBCSTools {
 				*/
 			}
 		}
-
-		console.log( 'Final======================================' );
-		console.log( 'Final======================================' );
-		console.log( payload.data );
-		console.log( 'Final======================================' );
-		console.log( 'Final======================================' );
 		const endTime = new Date();
 		const duration = ( endTime.getTime() - startTime.getTime() ) / 1000;
 		console.log( '===========================================' );
@@ -163,6 +157,7 @@ export class PBCSTools {
 		} );
 
 		payload.query.povMembers = payload.query.povs.map( ( pov, pindex ) => findMembers( payload.query.hierarchies[payload.query.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
+		return payload;
 	}
 	private pbcsReadDataAction = async ( payload: DimeEnvironmentPBCS, pbcsQuery: any ): Promise<any> => {
 		console.log( 'Running pbcsInitiateRest' );
