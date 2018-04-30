@@ -10,6 +10,9 @@ import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { ToastrService } from 'ngx-toastr';
 import { DimeStreamBackend } from '../../dimestream.backend';
 import { countMembers } from '../../../../../../shared/utilities/hpUtilities';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../ngstore/models';
+import { ActivatedRoute } from '@angular/router';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -17,7 +20,7 @@ import { countMembers } from '../../../../../../shared/utilities/hpUtilities';
 	styleUrls: ['./dime-stream-detail-export-hpdb.component.scss']
 } )
 export class DimeStreamDetailExportHPDBComponent implements OnInit {
-	@Input() export: DimeStreamExportHPDB = <DimeStreamExportHPDB>{};
+	public export: DimeStreamExportHPDB = <DimeStreamExportHPDB>{};
 
 	public dimensions: any[] = [];
 
@@ -31,7 +34,9 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 		public mainService: DimeStreamService,
 		private modalService: BsModalService,
 		private toastr: ToastrService,
-		private backend: DimeStreamBackend
+		private backend: DimeStreamBackend,
+		private store: Store<AppState>,
+		private route: ActivatedRoute
 	) { }
 
 	ngOnInit() {
@@ -42,6 +47,13 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			.then( this.prepareMembers )
 			.catch( issue => {
 				console.error( 'Failure somewhere:', issue );
+			} );
+		this.store.select( 'dimeStream' )
+			.withLatestFrom( this.route.paramMap )
+			.map( ( [streamState, paramMap] ) => streamState.curItem.exports.find( e => e.id === parseInt( paramMap.get( 'exportid' ), 10 ) ) )
+			.subscribe( currentExport => {
+				this.export = currentExport || <DimeStreamExportHPDB>{};
+				console.log( 'Export is updated from the state', this.export.id );
 			} );
 	}
 

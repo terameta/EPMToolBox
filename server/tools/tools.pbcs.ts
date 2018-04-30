@@ -67,7 +67,7 @@ export class PBCSTools {
 		while ( rows.length > 0 ) {
 			console.log( '===========================================' );
 			console.log( '===========================================' );
-			console.log( '@@@', rows.map( cr => cr.map( s => s.selectedMember ) ) );
+			console.log( '@@@', rows.map( cr => cr.map( s => s.selectionType.substr( 0, 3 ) + ' ' + s.selectedMember ).join( '|' ) ) );
 			console.log( '===========================================' );
 			console.log( '===========================================' );
 			const row = rows.splice( 0, 1 )[0];

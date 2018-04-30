@@ -1,7 +1,9 @@
 import { DimeStreamField, DimeStreamFieldDetail } from '../../shared/model/dime/streamfield';
 import { Pool } from 'mysql';
 import * as excel from 'exceljs';
-const streamBuffers = require( 'stream-buffers' );
+// const streamBuffers = require( 'stream-buffers' );
+import * as streamBuffers from 'stream-buffers';
+import { Duplex, PassThrough } from 'stream';
 
 import { MainTools } from './tools.main';
 import { DimeStream, DimeStreamDetail } from '../../shared/model/dime/stream';
@@ -464,9 +466,11 @@ export class StreamTools {
 		} );
 	}
 	public getAllFieldDescriptionsWithHierarchy = async ( streamid: number ) => {
+		console.log( '!!!>>>getAllFieldDescriptionsWithHierarchy' );
 		const toReturn: any = {};
 		const stream = await this.getOne( streamid );
 		await Promise.all( stream.fieldList.map( async ( field ) => {
+			console.log( '!!!>>>', field.id, field.name, field.descriptiveTable );
 			toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
 		} ) );
 		return toReturn;
@@ -570,21 +574,13 @@ export class StreamTools {
 		const stream = await this.getOne( payload.streamid );
 		const query = stream.exports.find( e => e.id === payload.exportid );
 		query.streamid = payload.streamid;
-		query.dimensions = _.keyBy( stream.fieldList.map( f => ( <DimeStreamFieldDetail>{ id: f.id, stream: f.stream, name: f.name, type: f.type, position: f.position } ) ), 'id' );
+		query.dimensions = _.keyBy( stream.fieldList.map( f => ( <DimeStreamFieldDetail>{ id: f.id, stream: f.stream, name: f.name, type: f.type, position: f.position, descriptiveTable: f.descriptiveTable } ) ), 'id' );
 		return this.environmentTool.readData( { id: stream.environment, db: stream.dbName, table: stream.tableName, query } );
 	}
 
 	private executeExportPrepareFile = async ( payload ) => {
-		// const workbook = new excel.Workbook();
-		await this.executeExportPrepareTempFile( payload );
-		payload.workbookStream = fs.createWriteStream( payload.workbookPath );
-		payload.workbookStream.on( 'done', () => { console.log( '!!!Payload.workbookStream.on.done emitted' ); } );
-		payload.workbookStream.on( 'end', () => { console.log( '!!!Payload.workbookStream.on.end emitted' ); } );
-		payload.workbookStream.on( 'data', () => { console.log( '!!!Payload.workbookStream.on.data emitted' ); } );
-		payload.workbookStream.on( 'finish', () => { console.log( '!!!Payload.workbookStream.on.finish emitted' ); } );
-		const workbook = new excel.stream.xlsx.WorkbookWriter( { stream: payload.workbookStream, useStyles: false, useSharedStrings: true } );
-		// const workbook = new excel.stream.xlsx.WorkbookWriter( { filename: payload.workbookPath } );
-
+		payload.workbookBuffer = new PassThrough();
+		const workbook = new excel.stream.xlsx.WorkbookWriter( { stream: payload.workbookBuffer } );
 		workbook.creator = 'EPM Toolbox';
 		workbook.lastModifiedBy = 'EPM Toolbox';
 		workbook.created = new Date();
@@ -593,22 +589,6 @@ export class StreamTools {
 		const data = payload.result.data;
 		const numRowDims = payload.result.query.rowDims.length;
 		const povsheet = workbook.addWorksheet( 'POVs', { views: [{ state: 'frozen', activeCell: 'A1' }] } );
-		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: numRowDims * 2, ySplit: 1, activeCell: 'A1' }] } );
-
-		// console.log( '===========================================' );
-		// console.log( payload );
-		// console.log( '===========================================' );
-		// console.log( 'Column Members' );
-		// payload.result.query.colMembers.forEach( cm => console.log( cm ) );
-		// console.log( '===========================================' );
-		// console.log( 'POV Members' );
-		// payload.result.query.povMembers.forEach( cm => console.log( cm ) );
-		// console.log( '===========================================' );
-		// console.log( 'Data' );
-		// console.log( data.length, 'rows of data' );
-		// console.log( '===========================================' );
-		// // Object.values( payload.hierarchies ).forEach( dim => console.log( dim ) );
-		// console.log( '===========================================' );
 
 		let currentRow = 0;
 		let currentCol = 0;
@@ -620,33 +600,11 @@ export class StreamTools {
 			povsheet.getCell( currentRow, ++currentCol ).value = pov[0].RefField;
 		} );
 		povsheet.commit();
-		// currentRow++;
-		// currentCol = 1;
-		// if ( data.length < 1 ) {
-		// 	sheet.getCell( ++currentRow, currentCol ).value = 'There is no data generated for this export';
-		// } else {
 
-		// 	currentCol += numRowDims * 2;
-		// 	payload.result.query.colMembers.forEach( cm => {
-		// 		sheet.getCell( currentRow, currentCol++ ).value = cm.map( f => f.RefField ).join( '-' );
-		// 	} );
-		// 	while ( data.length > 0 ) {
-		// 		const datum = data.splice( 0, 1 )[0];
-		// 		currentRow++;
-		// 		currentCol = 1;
-		// 		datum.headers.forEach( ( cell, dataIndex ) => {
-		// 			sheet.getCell( currentRow, currentCol++ ).value = cell;
-		// 			sheet.getCell( currentRow, currentCol++ ).value = payload.hierarchies[payload.result.query.rowDims[dataIndex]].find( e => e.RefField === cell ).Description || '';
-		// 		} );
-		// 		datum.data.forEach( cell => {
-		// 			sheet.getCell( currentRow, currentCol++ ).value = cell;
-		// 		} );
-		// 	}
-
-		// }
+		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: numRowDims * 2, ySplit: 1, activeCell: 'A1' }] } );
 
 		if ( data.length < 1 ) {
-			sheet.addRow( ['There is no data produced with the data export. If in doubt, please contact system admin.'] ).commit();
+			sheet.addRow( ['There is no data produced with the data export. If in doubt, please contact system admin.'] );
 		} else {
 			const rowDims = payload.result.query.rowDims;
 			const dimensions = payload.result.query.dimensions;
@@ -670,20 +628,16 @@ export class StreamTools {
 					rowToPush.push( cell );
 					rowToPush.push( payload.hierarchies[payload.result.query.rowDims[dataIndex]].find( e => e.RefField === cell ).Description || '' );
 				} );
+				let doWeHaveData = false;
 				datum.data.forEach( cell => {
+					if ( cell ) doWeHaveData = true;
 					rowToPush.push( cell );
 				} );
-				await sheet.addRow( rowToPush ).commit();
+				if ( doWeHaveData ) await sheet.addRow( rowToPush ).commit();
 			}
 		}
 
-		await sheet.commit();
-
-		console.log( 'We will now commit workbook' );
-		await workbook.commit();
-		console.log( 'Workbook is committed now sending stream end()' );
-		payload.workbookStream.end();
-		console.log( 'Stream end() is sent' );
+		workbook.commit();
 
 		const finish = new Date();
 		console.log( 'Data Write Duration:', finish.getTime() - start.getTime() );
@@ -697,6 +651,7 @@ export class StreamTools {
 					reject( err );
 				} else {
 					console.log( 'We will be writing the data to', path );
+					console.log( 'File Descriptior is', fd );
 					payload.workbookPath = path;
 					payload.workbookCleanUpCallBack = cleanupCallback;
 					resolve();
@@ -722,13 +677,11 @@ export class StreamTools {
 				{
 					filename: payload.result.query.name + '-' + this.tools.getFormattedDateTime() + '.xlsx',
 					// content: workbookStream.getContents()
-					content: fs.createReadStream( payload.workbookPath )
+					// content: payload.workbookBuffer.getContents()
+					content: payload.workbookBuffer
 				}
 			]
 		} );
-		console.log( 'We will now clean up' );
-		payload.workbookCleanUpCallBack();
-		console.log( 'We will now clean up - complete' );
 		return mailResult;
 	}
 	private workbookToStreamBuffer = ( workbook: excel.Workbook ) => {
