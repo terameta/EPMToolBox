@@ -91,6 +91,7 @@ export class AcmUserService {
 			} );
 		this.fetchUserRights( id ).
 			subscribe( ( data ) => {
+				console.log( 'Current Item Access Rights:', data );
 				this.curItemAccessRights = data;
 			}, ( error ) => {
 				this.toastr.error( 'Failed to get user access rights' );

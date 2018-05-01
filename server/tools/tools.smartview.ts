@@ -116,7 +116,6 @@ export class SmartViewTools {
 			let keepWorking = true;
 
 			while ( keepWorking ) {
-				// console.log( 'Working on', ( ++whichRow ).toString().padStart( 7, '0' ), payload.currentRowIntersection, payload.currentRowIntersectionLimits );
 				chunck.push( payload.currentRowIntersection.map( ( index, dimindex ) => row[dimindex].memberList[index].RefField ) );
 				if ( chunck.length === payload.rowsPerChunck ) {
 					const threadToAssign = await this.waitForEmptyThread( payload.pullThreadPool );
@@ -711,7 +710,6 @@ export class SmartViewTools {
 		return this.smartviewGetDescriptionsWithHierarchy( refObj, refField ).then( result => result.memberList );
 	}
 	private smartviewGetDescriptionsWithHierarchy = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
-		console.log( '!>!', refField );
 		return this.smartviewListAliasTables( refObj )
 			.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
 			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsWithHierarchyAction( refObj, refField ); } );
@@ -724,7 +722,6 @@ export class SmartViewTools {
 	private smartviewGetAllDescriptionsWithHierarchyAction = ( refObj, field, toReturn ) => {
 		const sourceEnvironment = JSON.parse( JSON.stringify( refObj ) );
 		return new Promise( ( resolve, reject ) => {
-			console.log( '!!!', field );
 			this.smartviewGetDescriptionsWithHierarchy( sourceEnvironment, field ).then( result => {
 				toReturn[field.id] = result.memberList;
 				resolve();

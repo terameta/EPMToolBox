@@ -4,8 +4,15 @@
 	</div>
 	<div class="box-header">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="#usertabmaindefinitions" data-toggle="tab">Details</a></li>
-			<li><a href="#usertabaccessdefinitions" data-toggle="tab">Access Definitions</a></li>
+			<li class="active">
+				<a href="#usertabmaindefinitions" data-toggle="tab">Details</a>
+			</li>
+			<li>
+				<a href="#usertabaccessdefinitions" data-toggle="tab">Access Definitions</a>
+			</li>
+			<li>
+				<a href="#usertabaccessforexports" data-toggle="tab">Access for Exports</a>
+			</li>
 		</ul>
 	</div>
 	<div class="box-body">
@@ -28,17 +35,13 @@
 						<div class="form-group">
 							<label for="itemUserName" class="col-xs-2 control-label">Username:</label>
 							<div class="col-xs-10">
-								<input type="text" class="form-control" id="itemUserName" name="itemUserName" [(ngModel)]="mainService.curItem.username"
-									[disabled]="mainService.curItem.type=='directory'"
-								>
+								<input type="text" class="form-control" id="itemUserName" name="itemUserName" [(ngModel)]="mainService.curItem.username" [disabled]="mainService.curItem.type=='directory'">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="itemPassword" class="col-xs-2 control-label">Password:</label>
 							<div class="col-xs-10">
-								<input type="text" class="form-control" id="itemPassword" name="itemPassword" [(ngModel)]="mainService.curItem.password"
-									[disabled]="mainService.curItem.type=='directory'"
-								>
+								<input type="text" class="form-control" id="itemPassword" name="itemPassword" [(ngModel)]="mainService.curItem.password" [disabled]="mainService.curItem.type=='directory'">
 							</div>
 						</div>
 						<div class="form-group">
@@ -64,9 +67,7 @@
 							<label for="itemServer" class="col-xs-2 control-label">Directory Server:</label>
 							<div class="col-xs-10">
 								<select name="itemServer" id="itemServer" [disabled]="mainService.curItem.type !='directory'" class="form-control" [(ngModel)]="mainService.curItem.ldapserver">
-									<option
-										*ngFor="let server of serverService.items | async"
-										[value]="server.id">{{server.name}} ({{server.hostname}})</option>
+									<option *ngFor="let server of serverService.items | async" [value]="server.id">{{server.name}} ({{server.hostname}})</option>
 								</select>
 							</div>
 						</div>
@@ -78,9 +79,12 @@
 						</div>
 						<div class="form-group">
 							<div class="col-xs-10 col-xs-offset-2">
-								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-								<button class="btn btn-warning btn-xs" type="button" routerLink="/accessmanagement/users/user-list"><i class="fa fa-ban fa-fw"></i> Cancel</button>
-								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)"><i class="fa fa-trash fa-fw"></i> Delete User</button>
+								<button class="btn btn-primary btn-xs" type="submit">
+									<i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+								<button class="btn btn-warning btn-xs" type="button" routerLink="/accessmanagement/users/user-list">
+									<i class="fa fa-ban fa-fw"></i> Cancel</button>
+								<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.curItem.id, mainService.curItem.name)">
+									<i class="fa fa-trash fa-fw"></i> Delete User</button>
 							</div>
 						</div>
 					</fieldset>
@@ -93,19 +97,14 @@
 							<label for="isassigned{{process.id}}" class="col-xs-6 col-md-2 control-label">{{process.name}}</label>
 							<div class="col-xs-6 col-md-10 checkbox">
 								<label>
-									<input
-										type="checkbox"
-										id="isassigned{{process.id}}"
-										name="isassigned{{process.id}}"
-										[(ngModel)]="process.isAssigned"
-										(change)='processAccessRightChange()'
-									>
+									<input type="checkbox" id="isassigned{{process.id}}" name="isassigned{{process.id}}" [(ngModel)]="process.isAssigned" (change)='processAccessRightChange()'>
 								</label>
 							</div>
 						</div>
 						<div class="form-group">
 							<div class="col-xs-6 col-md-10 col-xs-offset-6 col-md-offset-2">
-								<button class="btn btn-primary btn-xs" type="submit"><i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
+								<button class="btn btn-primary btn-xs" type="submit">
+									<i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
 							</div>
 						</div>
 					</fieldset>
@@ -114,6 +113,37 @@
 				<pre>{{dimeProcessService.items | async | json}}</pre>
 				<pre>{{mainService.curItemAccessRights | json}}</pre>-->
 
+			</div>
+			<div class="tab-pane fade in" id="usertabaccessforexports">
+				<form (ngSubmit)="mainService.updateAccessRights()" #fExportAccess="ngForm" class="form-horizontal">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th>Stream</th>
+								<th>Export</th>
+								<th>Assigned?</th>
+							</tr>
+						</thead>
+						<tbody>
+							<ng-container *ngFor="let stream of availableStreams;">
+								<tr *ngFor="let export of stream.exports;">
+									<td>{{stream.name}}</td>
+									<td>{{export.name}}</td>
+									<td>
+										<input type="checkbox" id="isassignedExport{{export.id}}" name="isassignedExport{{export.id}}" [(ngModel)]="export.isAssigned" (change)="streamExportAccessRightChange()">
+									</td>
+								</tr>
+							</ng-container>
+							<tr>
+								<td colspan="3">
+									<button class="btn btn-primary btn-xs pull-right" type="submit">
+										<i class="fa fa-floppy-o fa-fw"></i> Save Changes
+									</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</form>
 			</div>
 		</div>
 	</div>

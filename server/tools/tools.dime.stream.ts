@@ -17,6 +17,9 @@ import { SettingsTool } from './tools.settings';
 import * as _ from 'lodash';
 import * as tmp from 'tmp';
 import * as fs from 'fs';
+import * as path from 'path';
+import * as Promisers from '../../shared/utilities/promisers';
+import * as Handlebars from 'handlebars';
 
 export class StreamTools {
 	environmentTool: EnvironmentTools;
@@ -409,11 +412,6 @@ export class StreamTools {
 			} else {
 				this.retrieveField( tableStatus.field ).
 					then( ( field: DimeStreamFieldDetail ) => {
-						console.log( '===========================================' );
-						console.log( '===========================================' );
-						console.log( tableStatus );
-						console.log( '===========================================' );
-						console.log( '===========================================' );
 						let curQuery: string; curQuery = '';
 						curQuery += 'CREATE TABLE ' + tableStatus.tableName + ' (id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT';
 						if ( tableStatus.streamType !== 'HPDB' ) { curQuery += ', RefField '; }
@@ -466,11 +464,9 @@ export class StreamTools {
 		} );
 	}
 	public getAllFieldDescriptionsWithHierarchy = async ( streamid: number ) => {
-		console.log( '!!!>>>getAllFieldDescriptionsWithHierarchy' );
 		const toReturn: any = {};
 		const stream = await this.getOne( streamid );
 		await Promise.all( stream.fieldList.map( async ( field ) => {
-			console.log( '!!!>>>', field.id, field.name, field.descriptiveTable );
 			toReturn[field.id] = await this.environmentTool.getDescriptionsWithHierarchy( stream, field );
 		} ) );
 		return toReturn;
@@ -546,28 +542,34 @@ export class StreamTools {
 	}
 
 	public executeExport = ( payload: { streamid: number, exportid: number, user: any, hierarchies?: any } ) => {
-		const startTime = new Date();
 		this.executeExportAction( payload )
 			.then( ( result: any ) => this.executeExportPrepareFile( { result, user: payload.user, hierarchies: result.query.hierarchies } ) )
 			.then( this.executeExportSendFile )
-			.then( ( result ) => {
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				console.log( 'ExecuteExportAction is now complete' );
-				console.log( 'ExecuteExportAction is now complete:', result );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				const totalTime = ( ( new Date() ).getTime() - startTime.getTime() ) / 1000;
-				console.log( 'Total Time is', totalTime, 'seconds' );
-				console.log( 'or', totalTime / 60, 'minutes' );
-				console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-			} ).catch( ( error ) => {
-				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-				console.log( 'ExecuteExportAction failed:' );
-				console.log( error );
-				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-				console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-			} );
+			.catch( async ( issue ) => {
+				const systemAdmin: any = await this.settingsTool.getOne( 'systemadmin' );
+				const stream = await this.getOne( payload.streamid );
+				const query = stream.exports.find( e => e.id === payload.exportid );
+				const params = { fromname: systemAdmin.fromname, exportname: query.name, issue };
+				let bodyXML = await Promisers.readFile( path.join( __dirname, './tools.email.templates/stream.export.failed.html' ) );
+				let bodyTemplate = Handlebars.compile( bodyXML );
+				let body = bodyTemplate( params );
+				this.mailTool.sendMail( {
+					from: systemAdmin.emailaddress,
+					to: payload.user.email,
+					cc: systemAdmin.emailaddress,
+					subject: 'Export failed',
+					html: body
+				} ).catch( console.log );
+				bodyXML = await Promisers.readFile( path.join( __dirname, './tools.email.templates/stream.export.failed.toAdmin.html' ) );
+				bodyTemplate = Handlebars.compile( bodyXML );
+				body = bodyTemplate( params );
+				this.mailTool.sendMail( {
+					from: systemAdmin.emailaddress,
+					to: systemAdmin.emailaddress,
+					subject: 'Export failed (Administrator Notification)',
+					html: body
+				} ).catch( console.log );
+			} ).catch( console.log );
 		return Promise.resolve( { status: 'Initiated' } );
 	}
 	private executeExportAction = async ( payload: { streamid: number, exportid: number, user: any } ) => {
@@ -588,20 +590,28 @@ export class StreamTools {
 
 		const data = payload.result.data;
 		const numRowDims = payload.result.query.rowDims.length;
-		const povsheet = workbook.addWorksheet( 'POVs', { views: [{ state: 'frozen', activeCell: 'A1' }] } );
+		// const povsheet = workbook.addWorksheet( 'POVs', { views: [{ state: 'frozen', activeCell: 'A1' }] } );
 
-		let currentRow = 0;
-		let currentCol = 0;
+		// let currentRow = 0;
+		// let currentCol = 0;
 
-		const start = new Date();
+		// povsheet.getCell( ++currentRow, ++currentCol ).value = 'POVs:';
+		// payload.result.query.povMembers.forEach( pov => {
+		// 	povsheet.getCell( currentRow, ++currentCol ).value = pov[0].RefField;
+		// } );
+		const povHeaders = payload.result.query.povDims.map( d => payload.result.query.dimensions[d].name ).map( h => ( { header: h, key: h } ) );
+		povHeaders.splice( 0, 0, { header: 'POV Dimensions', key: 'POV Dimensions' } );
+		const povValues = payload.result.query.povMembers.map( p => p[0].RefField );
+		povValues.splice( 0, 0, 'POV Selections' );
 
-		povsheet.getCell( ++currentRow, ++currentCol ).value = 'POVs:';
-		payload.result.query.povMembers.forEach( pov => {
-			povsheet.getCell( currentRow, ++currentCol ).value = pov[0].RefField;
-		} );
-		povsheet.commit();
 
-		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: numRowDims * 2, ySplit: 1, activeCell: 'A1' }] } );
+		const sheet = workbook.addWorksheet( 'Data', { views: [{ state: 'frozen', xSplit: numRowDims * 2, ySplit: 4, activeCell: 'A1' }] } );
+
+		// sheet.columns = povHeaders;
+		await sheet.addRow( povHeaders.map( h => h.header ) ).commit();
+		await sheet.addRow( povValues ).commit();
+		await sheet.addRow( [] ).commit();
+		// await sheet.commit();
 
 		if ( data.length < 1 ) {
 			sheet.addRow( ['There is no data produced with the data export. If in doubt, please contact system admin.'] );
@@ -618,10 +628,10 @@ export class StreamTools {
 			dataColumnHeaders.forEach( dch => {
 				sheetColumns.push( { header: dch, key: dch } );
 			} );
-			sheet.columns = sheetColumns;
+			// sheet.columns = sheetColumns;
+			await sheet.addRow( sheetColumns.map( c => c.header ) ).commit();
 
 			while ( data.length > 0 ) {
-				if ( data.length % 10000 === 0 ) console.log( 'Remaining data rows:', data.length );
 				const rowToPush = [];
 				const datum = data.splice( 0, 1 )[0];
 				datum.headers.forEach( ( cell, dataIndex ) => {
@@ -639,40 +649,21 @@ export class StreamTools {
 
 		workbook.commit();
 
-		const finish = new Date();
-		console.log( 'Data Write Duration:', finish.getTime() - start.getTime() );
-
 		return { ...payload, workbook };
-	}
-	private executeExportPrepareTempFile = ( payload ) => {
-		return new Promise( ( resolve, reject ) => {
-			tmp.file( ( err, path, fd, cleanupCallback ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					console.log( 'We will be writing the data to', path );
-					console.log( 'File Descriptior is', fd );
-					payload.workbookPath = path;
-					payload.workbookCleanUpCallBack = cleanupCallback;
-					resolve();
-				}
-			} );
-		} );
 	}
 	private executeExportSendFile = async ( payload ) => {
 		const systemAdmin: any = await this.settingsTool.getOne( 'systemadmin' );
-		console.log( 'We received system admin details:', systemAdmin );
-		// console.log( 'We are now getting workbookstream' );
-		// const workbookStream: any = await this.workbookToStreamBuffer( payload.workbook );
-		// console.log( 'We received workbookstream' );
-		// Maybe we should do below now
-		// payload.workbook = null;
+		const params = { fromname: systemAdmin.fromname, exportname: payload.result.query.name };
+		const bodyXML = await Promisers.readFile( path.join( __dirname, './tools.email.templates/stream.export.complete.html' ) );
+		const bodyTemplate = Handlebars.compile( bodyXML );
+		const body = bodyTemplate( params );
 		const mailResult = await this.mailTool.sendMail( {
 			from: systemAdmin.emailaddress,
 			to: payload.user.email,
 			cc: systemAdmin.emailaddress,
 			subject: 'Requested Data File Attached',
-			text: 'Data file is attached.',
+			// text: 'Data file is attached.',
+			html: body,
 			attachments: [
 				{
 					filename: payload.result.query.name + '-' + this.tools.getFormattedDateTime() + '.xlsx',

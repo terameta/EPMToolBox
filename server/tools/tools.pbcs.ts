@@ -56,20 +56,11 @@ export class PBCSTools {
 	public writeData = ( refObj ) => this.smartview.writeData( refObj );
 	public readData = ( refObj ) => this.pbcsReadData( refObj );
 	private pbcsReadData = async ( payload ) => {
-		const startTime = new Date();
-		console.log( 'pbcsReadData is initiated' );
-		console.log( 'Reading hierarchies' );
 		payload.query.hierarchies = await this.smartview.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
-		console.log( 'Hierarchies received' );
 		await this.pbcsInitiateRest( payload );
 		payload.data = [];
 		const rows = JSON.parse( JSON.stringify( payload.query.rows ) );
 		while ( rows.length > 0 ) {
-			console.log( '===========================================' );
-			console.log( '===========================================' );
-			console.log( '@@@', rows.map( cr => cr.map( s => s.selectionType.substr( 0, 3 ) + ' ' + s.selectedMember ).join( '|' ) ) );
-			console.log( '===========================================' );
-			console.log( '===========================================' );
 			const row = rows.splice( 0, 1 )[0];
 			const query = {
 				exportPlanningData: false,
@@ -97,11 +88,6 @@ export class PBCSTools {
 			if ( Array.isArray( result ) ) {
 				result.forEach( r => payload.data.push( r ) );
 			} else {
-				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				// console.log( row );
-				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-				// console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 				let minIndex = -1;
 				let minNumberofMembers = 999999999;
 				row.forEach( ( selection, dimindex ) => {
@@ -111,7 +97,6 @@ export class PBCSTools {
 						minNumberofMembers = selection.memberCount;
 						minIndex = dimindex;
 					}
-					console.log( payload.query.dimensions[payload.query.rowDims[dimindex]].name, selection.memberCount, minIndex, minNumberofMembers );
 				} );
 				const membersToExpand = JSON.parse( JSON.stringify( row[minIndex].memberList ) );
 				membersToExpand.forEach( ( currentMember, spliceIndex ) => {
@@ -119,32 +104,8 @@ export class PBCSTools {
 					toPush[minIndex] = { selectedMember: currentMember.RefField, selectionType: 'member' };
 					rows.splice( spliceIndex, 0, toPush );
 				} );
-				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-				// console.log( membersToExpand );
-				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-				// console.log( '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<' );
-
-				/**
-				 * payload.query.rows.forEach( ( row, index ) => {
-				 * let rowCount = 1;
-					row.forEach( ( selection, dimindex ) => {
-							selection.memberList = findMembers( payload.query.hierarchies[payload.query.rowDims[dimindex]], selection.selectionType, selection.selectedMember );
-							selection.memberCount = selection.memberList.length;
-							rowCount *= selection.memberCount;
-						} );
-						payload.query.memberCounts.rows.push( rowCount );
-					} );
-				*/
 			}
 		}
-		const endTime = new Date();
-		const duration = ( endTime.getTime() - startTime.getTime() ) / 1000;
-		console.log( '===========================================' );
-		console.log( '===========================================' );
-		console.log( 'Total time spent:', duration, 'seconds' );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
 
 		const colCartesian = payload.query.cols.map( col => {
 			return arrayCartesian( col.map( ( selection, sindex ) => {
@@ -160,12 +121,9 @@ export class PBCSTools {
 		return payload;
 	}
 	private pbcsReadDataAction = async ( payload: DimeEnvironmentPBCS, pbcsQuery: any ): Promise<any> => {
-		console.log( 'Running pbcsInitiateRest' );
 		await this.pbcsInitiateRest( payload );
 		const dataURL = payload.resturl + '/applications/' + payload.database + '/plantypes/' + payload.table + '/exportdataslice';
-		console.log( 'Sending pbcsSendRequest' );
 		const result = await this.pbcsSendRequest( { method: 'POST', url: dataURL, domain: payload.identitydomain, user: payload.username, pass: payload.password, body: pbcsQuery } );
-		console.log( 'Received pbcsSendRequest' );
 		if ( result.body && result.body.detail === 'Unable to load the data entry form as the number of data entry cells exceeded the threshold.' ) {
 			return false;
 		}
@@ -263,7 +221,6 @@ export class PBCSTools {
 										}
 									} );
 									if ( refObj.version ) {
-										// console.log(refObj);
 										resolve( refObj );
 									} else {
 										reject( 'No active version found' );
@@ -311,7 +268,6 @@ export class PBCSTools {
 											result.items.forEach( ( curItem: any ) => {
 												if ( innerObj.apps ) { innerObj.apps.push( { name: curItem.name } ); }
 											} );
-											console.log( result );
 											resolve( innerObj );
 										}
 									} ).
@@ -349,10 +305,8 @@ export class PBCSTools {
 							if ( err ) {
 								reject( err );
 							} else {
-								console.log( response );
 								this.tools.parseJsonString( body ).
 									then( ( result: any ) => {
-										console.log( result );
 										reject( 'Hdere' );
 									} ).
 									catch( reject );
@@ -648,8 +602,6 @@ export class PBCSTools {
 			} );
 		};
 		private writeDataAction = ( refObj: any, toSend: any, rows: any[], howMany: number, toLog: { numAcceptedCells: number, numRejectedCells: number, rejectedCells: any[], detail: any[] } ) => {
-			// console.log( rows );
-			// console.log( 'Running writeDataAction:', howMany, ' - Remaining:', rows.length );
 			return new Promise( ( resolve, reject ) => {
 				toSend.dataGrid.rows = rows.splice( 0, howMany );
 				this.initiateRest( refObj ).
@@ -670,7 +622,6 @@ export class PBCSTools {
 							} else {
 								this.tools.parseJsonString( body ).
 									then( ( result: any ) => {
-										// console.log( '>>>', body );
 										if ( rows.length > 0 ) {
 											if ( result.numAcceptedCells ) { toLog.numAcceptedCells += result.numAcceptedCells; }
 											if ( result.numRejectedCells ) { toLog.numRejectedCells += result.numRejectedCells; }
@@ -686,7 +637,6 @@ export class PBCSTools {
 										}
 									} ).
 									catch( ( issue ) => {
-										console.log( '???', issue );
 										toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );
 										toLog.detail.push( JSON.stringify( issue ) );
 										toLog.detail.push( '>>>>>>>>>>>>>>>>>>>' );

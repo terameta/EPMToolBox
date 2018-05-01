@@ -13,6 +13,7 @@ import { countMembers } from '../../../../../../shared/utilities/hpUtilities';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
 import { ActivatedRoute } from '@angular/router';
+import { merge } from 'rxjs/operators';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -49,11 +50,15 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 				console.error( 'Failure somewhere:', issue );
 			} );
 		this.store.select( 'dimeStream' )
-			.withLatestFrom( this.route.paramMap )
-			.map( ( [streamState, paramMap] ) => streamState.curItem.exports.find( e => e.id === parseInt( paramMap.get( 'exportid' ), 10 ) ) )
+			.map( s => s.curItem.exports )
+			.mergeMap( exportList => this.route.paramMap.map( p => ( [parseInt( p.get( 'exportid' ), 10 ), exportList] ) ) )
+			.map( ( [exportid, exportList] ) => ( exportList ? ( <any[]>exportList ).find( e => e.id === exportid ) : <DimeStreamExportHPDB>{} ) )
 			.subscribe( currentExport => {
 				this.export = currentExport || <DimeStreamExportHPDB>{};
-				console.log( 'Export is updated from the state', this.export.id );
+				try {
+					this.recalculateCellCounts();
+				} catch ( e ) { }
+				// console.log( 'Export is updated from the state and params', currentExport.id );
 			} );
 	}
 

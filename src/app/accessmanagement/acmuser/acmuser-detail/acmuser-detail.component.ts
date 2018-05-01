@@ -12,6 +12,9 @@ import { AcmServerService } from '../../acmserver/acmserver.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../ngstore/models';
 import { DimeProcessActions } from '../../../dime/dimeprocess/dimeprocess.actions';
+import { DimeStreamActions } from '../../../dime/dimestream/dimestream.actions';
+import * as _ from 'lodash';
+import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
 
 @Component( {
 	selector: 'app-acmuser-detail',
@@ -20,7 +23,8 @@ import { DimeProcessActions } from '../../../dime/dimeprocess/dimeprocess.action
 } )
 export class AcmUserDetailComponent implements OnInit, OnDestroy {
 	paramsSubscription: Subscription;
-	assignedProcesses: any[] = [];
+	public assignedProcesses: any[] = [];
+	public availableStreams: any[] = [];
 
 	constructor(
 		private route: ActivatedRoute,
@@ -39,6 +43,7 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 			}
 		);
 		this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+		this.store.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() );
 		this.store.select( 'dimeProcess' ).subscribe( processState => {
 			processState.ids.forEach( processid => {
 				let toPush: any; toPush = {};
@@ -50,6 +55,11 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 			this.populateAccessRights();
 		}, error => {
 			this.toastr.error( 'Failed to receive processes' );
+		} );
+		this.store.select( 'dimeStream' ).subscribe( streamState => {
+			console.log( streamState );
+			this.availableStreams = _.values( streamState.items ).sort( SortByName );
+			console.log( this.availableStreams );
 		} );
 	}
 
@@ -80,12 +90,23 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 			} );
 		}
 	}
-	private processAccessRightChange = () => {
+	public processAccessRightChange = () => {
 		this.mainService.curItemAccessRights.processes = [];
 		this.assignedProcesses.forEach( ( curAssignedProcess ) => {
 			if ( curAssignedProcess.isAssigned ) {
 				this.mainService.curItemAccessRights.processes.push( { user: curAssignedProcess.user, process: curAssignedProcess.id } );
 			}
+		} );
+
+	}
+	public streamExportAccessRightChange = () => {
+		this.mainService.curItemAccessRights.streamExports = [];
+		this.availableStreams.forEach( stream => {
+			stream.exports.forEach( ex => {
+				if ( ex.isAssigned ) {
+					this.mainService.curItemAccessRights.streamExports.push( { user: this.mainService.curItem.id, stream: stream.id, export: ex.id } );
+				}
+			} );
 		} );
 	}
 }
