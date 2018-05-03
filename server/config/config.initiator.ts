@@ -11,6 +11,8 @@ import { DimeCredential } from '../../shared/model/dime/credential';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
 import { DimeSetting } from '../../shared/model/dime/settings';
 import { DimeProcessStepType } from '../../shared/model/dime/process';
+import * as util from 'util';
+import { AcmUser } from '../../shared/model/accessmanagement/user';
 
 interface TableDefiner {
 	name: string;
@@ -42,7 +44,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		then( to0043 ).then( to0044 ).then( to0045 ).then( to0046 ).then( to0047 ).then( to0048 ).then( to0049 ).then( to0050 ).then( to0051 ).then( to0052 ).then( to0053 ).then( to0054 ).then( to0055 ).then( to0056 ).
 		then( to0057 ).then( to0058 ).then( to0059 ).then( to0060 ).then( to0061 ).then( to0062 ).then( to0063 ).then( to0064 ).then( to0065 ).then( to0066 ).then( to0067 ).then( to0068 ).then( to0069 ).then( to0070 ).
 		then( to0071 ).then( to0072 ).then( to0073 ).then( to0074 ).then( to0075 ).then( to0076 ).then( to0077 ).then( to0078 ).then( to0079 ).then( to0080 ).then( to0081 ).then( to0082 ).then( to0083 ).then( to0084 ).
-		then( to0085 ).then( to0086 ).then( to0087 ).
+		then( to0085 ).then( to0086 ).then( to0087 ).then( to0088 ).then( to0089 ).
 		then( ( finalVersion: number ) => {
 			const versionToLog = ( '0000' + finalVersion ).substr( -4 );
 			console.log( '===============================================' );
@@ -51,6 +53,77 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+const to0089 = async ( currentVersion: number ) => {
+	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+	console.log( 'Remember to drop table userdimeprocesses' );
+	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+	console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+	const nextVersion = 89;
+	const expectedCurrentVersion = nextVersion - 1;
+	if ( currentVersion > expectedCurrentVersion ) {
+		return currentVersion;
+	} else {
+		const promises = [];
+		const users = await to0089ListUsers();
+		const assignments = await to0089ListAccessRights();
+		users.forEach( user => {
+			// assignments.filter( a => a.user === user.id ).forEach( a => console.log( 'User:', user.id, user.username, '--- Process:', a.process ) );
+			if ( !user.clearance ) user.clearance = {};
+			user.clearance.processes = assignments.filter( a => a.user === user.id ).map( a => ( { id: a.process } ) );
+			promises.push( to0089UpdateUsers( user ) );
+		} );
+		await Promise.all( promises );
+		return await utils.updateToVersion( nextVersion );
+	}
+};
+const to0089UpdateUsers = ( user: AcmUser ): Promise<any> => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'UPDATE users SET clearance = ? WHERE id = ?', [JSON.stringify( user.clearance ), user.id], ( err, result ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve();
+			}
+		} );
+	} );
+};
+const to0089ListUsers = (): Promise<AcmUser[]> => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'SELECT * FROM users', ( err, users: AcmUser[] ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve( users );
+			}
+		} );
+	} );
+};
+const to0089ListAccessRights = (): Promise<any[]> => {
+	return new Promise( ( resolve, reject ) => {
+		db.query( 'SELECT * FROM userdimeprocesses', ( err, users ) => {
+			if ( err ) {
+				reject( err );
+			} else {
+				resolve( users );
+			}
+		} );
+	} );
+};
+const to0088 = ( currentVersion: number ) => {
+	return new Promise( ( resolve, reject ) => {
+		const nextVersion = 88;
+		const expectedCurrentVersion = nextVersion - 1;
+		if ( currentVersion > expectedCurrentVersion ) {
+			resolve( currentVersion );
+		} else {
+			utils.tableAddColumn( 'users', 'clearance TEXT NULL AFTER surname' )
+				.then( () => {
+					resolve( utils.updateToVersion( nextVersion ) );
+				} ).catch( reject );
+		}
+	} );
+};
 const to0087 = ( currentVersion: number ) => {
 	return new Promise( ( resolve, reject ) => {
 		const nextVersion = 87;

@@ -129,6 +129,12 @@ export class AcmUserService {
 			} );
 	}
 	public updateAccessRights = () => {
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+		console.log( 'We will now save the access rights' );
+		console.log( this.curItemAccessRights );
+		console.log( '===========================================' );
+		console.log( '===========================================' );
 		this.http.put( this.baseUrl + '/userrights/' + this.curItem.id, this.curItemAccessRights ).
 			subscribe( ( data ) => {
 				console.log( data );

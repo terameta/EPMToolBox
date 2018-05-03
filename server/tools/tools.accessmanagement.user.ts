@@ -12,23 +12,29 @@ export class AcmUserTool {
 	}
 
 	public getAll = () => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM users', ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving access management user list has failed' } );
 				} else {
-					rows.forEach(( curRow: AcmUser ) => {
-						delete curRow.password;
-					} );
-					resolve( rows );
+					// rows.forEach( ( curRow: AcmUser ) => {
+					// 	delete curRow.password;
+					// } );
+					const toResolve = rows.map( this.prepareToGet );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					console.log( toResolve );
+					console.log( '===========================================' );
+					console.log( '===========================================' );
+					resolve( toResolve );
 				}
 			} );
 		} );
-	};
+	}
 	public create = ( sentItem?: AcmUser ) => {
 		if ( sentItem ) { if ( sentItem.id ) { delete sentItem.id; } }
 		const newItem = this.tools.isEmptyObject( sentItem ) ? { name: 'New User (Please change name)', username: '-', password: '-' } : <any>sentItem;
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO users SET ?', newItem, function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to create a new item.' } );
@@ -37,12 +43,21 @@ export class AcmUserTool {
 				}
 			} );
 		} );
-	};
+	}
 	public getOne = ( id: number ) => {
 		return this.getUserDetails( <AcmUser>{ id: id } );
-	};
+	}
+	private prepareToGet = ( payload: AcmUser ) => {
+		delete payload.password;
+		console.log( '>>>:', payload.clearance );
+		payload.clearance = JSON.parse( payload.clearance ? payload.clearance : '{}' );
+		return payload;
+	}
+	private prepareToSet = ( payload: AcmUser ) => {
+		payload.clearance = JSON.stringify( payload.clearance );
+	}
 	public getUserDetails = ( refObj: AcmUser ): Promise<AcmUser> => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM users WHERE id = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving item with id ' + refObj.id + ' has failed' } );
@@ -56,7 +71,7 @@ export class AcmUserTool {
 		} );
 	}
 	public getAccessRights = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM userdimeprocesses WHERE user = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( 'Failed to receive user access rights' );
@@ -67,18 +82,18 @@ export class AcmUserTool {
 				}
 			} );
 		} );
-	};
+	}
 	public setAccessRights = ( refObj: { user: number, rights: any } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.clearAccessRights( refObj.user ).
-				then(() => {
+				then( () => {
 					return this.populateAccessRights( refObj.rights );
 				} ).then( resolve ).catch( reject );
 		} );
-	};
+	}
 	private clearAccessRights = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
-			const deleteQuery = 'DELETE FROM userdimeprocesses WHERE user = ?'
+		return new Promise( ( resolve, reject ) => {
+			const deleteQuery = 'DELETE FROM userdimeprocesses WHERE user = ?';
 			this.db.query( deleteQuery, id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err );
@@ -87,9 +102,9 @@ export class AcmUserTool {
 				}
 			} );
 		} );
-	};
+	}
 	private populateAccessRights = ( rights: { processes: any[] } ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			async.eachOfSeries(
 				rights.processes,
 				( item, key, callback ) => {
@@ -105,9 +120,9 @@ export class AcmUserTool {
 				}
 			);
 		} );
-	};
+	}
 	public update = ( item: AcmUser ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( item.password === '|||---protected---|||' ) {
 				delete item.password;
 			} else if ( item.password ) {
@@ -122,9 +137,9 @@ export class AcmUserTool {
 				}
 			} );
 		} );
-	};
+	}
 	public delete = ( id: number ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'DELETE FROM users WHERE id = ?', id, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to delete the item' } );

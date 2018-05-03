@@ -7,5 +7,6 @@ export interface AcmUser {
 	ldapserver: number,
 	email: string,
 	name: string,
-	surname: string
+	surname: string,
+	clearance: any
 }
