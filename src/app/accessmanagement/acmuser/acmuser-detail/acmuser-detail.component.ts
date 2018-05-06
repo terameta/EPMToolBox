@@ -57,9 +57,8 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 			this.toastr.error( 'Failed to receive processes' );
 		} );
 		this.store.select( 'dimeStream' ).subscribe( streamState => {
-			console.log( streamState );
 			this.availableStreams = _.values( streamState.items ).sort( SortByName );
-			console.log( this.availableStreams );
+			this.populateAccessRights();
 		} );
 	}
 
@@ -73,38 +72,42 @@ export class AcmUserDetailComponent implements OnInit, OnDestroy {
 		}
 	}
 	private populateAccessRights = () => {
-		if ( Object.keys( this.mainService.curItemAccessRights ).length === 0 ) {
+		if ( !this.mainService.curItem.clearance ) {
 			setTimeout( this.populateAccessRights, 1000 );
 		} else {
-			this.mainService.curItemAccessRights.processes.forEach( ( curProcess ) => {
-				this.assignedProcesses.forEach( ( curAssignedProcess ) => {
-					curAssignedProcess.user = this.mainService.curItem.id;
-					console.log( curProcess.id, curProcess );
-					if ( curAssignedProcess.id === curProcess.process ) {
-						curAssignedProcess.isAssigned = true;
-					}
+			if ( !this.mainService.curItem.clearance.processes ) this.mainService.curItem.clearance.processes = [];
+			this.assignedProcesses.forEach( availableProcess => {
+				this.mainService.curItem.clearance.processes.forEach( ( assignedProcess ) => {
+					if ( availableProcess.id === assignedProcess.id ) availableProcess.isAssigned = true;
 				} );
 			} );
-			this.assignedProcesses.forEach( ( curAssignedProcess ) => {
-				curAssignedProcess.user = this.mainService.curItem.id;
+			if ( !this.mainService.curItem.clearance.streamExports ) this.mainService.curItem.clearance.streamExports = [];
+			this.availableStreams.forEach( stream => {
+				stream.exports.forEach( ex => {
+					this.mainService.curItem.clearance.streamExports.forEach( assignedStreamExports => {
+						if ( assignedStreamExports.id === ex.id && assignedStreamExports.stream === stream.id ) {
+							ex.isAssigned = true;
+						}
+					} );
+				} );
 			} );
 		}
 	}
 	public processAccessRightChange = () => {
-		this.mainService.curItemAccessRights.processes = [];
+		this.mainService.curItem.clearance.processes = [];
 		this.assignedProcesses.forEach( ( curAssignedProcess ) => {
-			if ( curAssignedProcess.isAssigned ) {
-				this.mainService.curItemAccessRights.processes.push( { user: curAssignedProcess.user, process: curAssignedProcess.id } );
+			if ( curAssignedProcess.isAssigned && !this.mainService.curItem.clearance.processes.find( e => e.id === curAssignedProcess.id ) ) {
+				this.mainService.curItem.clearance.processes.push( { id: curAssignedProcess.id } );
 			}
 		} );
 
 	}
 	public streamExportAccessRightChange = () => {
-		this.mainService.curItemAccessRights.streamExports = [];
+		this.mainService.curItem.clearance.streamExports = [];
 		this.availableStreams.forEach( stream => {
 			stream.exports.forEach( ex => {
-				if ( ex.isAssigned ) {
-					this.mainService.curItemAccessRights.streamExports.push( { user: this.mainService.curItem.id, stream: stream.id, export: ex.id } );
+				if ( ex.isAssigned && !this.mainService.curItem.clearance.streamExports.find( e => ( e.id === ex.id && e.stream === stream.id ) ) ) {
+					this.mainService.curItem.clearance.streamExports.push( { id: ex.id, stream: stream.id } );
 				}
 			} );
 		} );

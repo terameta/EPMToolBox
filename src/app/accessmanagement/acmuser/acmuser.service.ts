@@ -40,7 +40,7 @@ export class AcmUserService {
 	}
 
 	public getAll = ( isSilent?: boolean ) => {
-		this.fetchAll().subscribe( ( data ) => {
+		this.fetchAll().subscribe( ( data: AcmUser[] ) => {
 			this.dataStore.items = data;
 			this._items.next( Object.assign( {}, this.dataStore ).items );
 			if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
@@ -68,7 +68,7 @@ export class AcmUserService {
 	}
 	public getOne = ( id: number ) => {
 		this.fetchOne( id ).
-			subscribe( ( data ) => {
+			subscribe( ( data: AcmUser ) => {
 				let notFound = true;
 
 				this.dataStore.items.forEach( ( item, index ) => {
@@ -91,7 +91,6 @@ export class AcmUserService {
 			} );
 		this.fetchUserRights( id ).
 			subscribe( ( data ) => {
-				console.log( 'Current Item Access Rights:', data );
 				this.curItemAccessRights = data;
 			}, ( error ) => {
 				this.toastr.error( 'Failed to get user access rights' );

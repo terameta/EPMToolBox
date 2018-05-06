@@ -10,11 +10,14 @@
 						<li>
 							<a href="#tabDataFile" data-toggle="tab">Data File</a>
 						</li>
+						<li>
+							<a href="#tabStreamExports" data-toggle="tab">Exports</a>
+						</li>
 					</ul>
 				</div>
 				<div class="box-body">
 					<div class="tab-content">
-						<div class="tab-pane fade in active" id="tabNightRun">
+						<div class="tab-pane fade in" id="tabNightRun">
 							<div class="box box-success" *ngFor="let process of userProcessDetails">
 								<div class="box-header with-border">
 									<h3 class="box-title">{{ process.name }}</h3>
@@ -64,6 +67,40 @@
 									<button type="button" class="btn btn-success btn-xs" (click)="processService.sendDataFile(process.id)" title="Initiate Process">
 										<i class="fa fa-table fa-fw" aria-hidden="true"></i> Send Data File
 									</button>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane fade in active" id="tabStreamExports">
+							<div class="box box-success">
+								<div class="box-header with-border">
+									<h3 class="box-title">Data Stream Exports</h3>
+									<div class="box-body">
+										<br>
+										<table class="table table-condensed">
+											<thead>
+												<tr>
+													<th>Stream Name</th>
+													<th>Export Name</th>
+													<th>Action</th>
+												</tr>
+											</thead>
+											<tbody>
+												<ng-container *ngFor="let stream of streamService.itemList">
+													<ng-container *ngFor="let currentExport of stream.exports">
+														<tr *ngIf="isStreamExportAssigned(stream.id, currentExport.id)">
+															<td>{{stream.name}}</td>
+															<td>{{currentExport.name}}</td>
+															<td>
+																<button class="btn btn-success btn-xs" type="button" (click)="initiateExport(stream.id, currentExport.id)" title="Initiate Data Export">
+																	<i class="fa fa-download fa-fw" aria-hidden="true"></i> Initiate Data Export
+																</button>
+															</td>
+														</tr>
+													</ng-container>
+												</ng-container>
+											</tbody>
+										</table>
+									</div>
 								</div>
 							</div>
 						</div>

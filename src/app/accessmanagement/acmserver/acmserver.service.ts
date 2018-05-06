@@ -38,7 +38,7 @@ export class AcmServerService {
 	}
 
 	public getAll = ( isSilent?: boolean ) => {
-		this.fetchAll().subscribe( ( data ) => {
+		this.fetchAll().subscribe( ( data: AcmServer[] ) => {
 			this.dataStore.items = data;
 			this._items.next( Object.assign( {}, this.dataStore ).items );
 			if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
@@ -48,7 +48,7 @@ export class AcmServerService {
 		} );
 	}
 	public fetchAll = () => {
-		return this.http.get( this.baseUrl ).
+		return this.http.get<AcmServer[]>( this.baseUrl ).
 			catch( error => Observable.throw( error ) );
 	}
 	public create = () => {
@@ -66,7 +66,7 @@ export class AcmServerService {
 	}
 	public getOne = ( id: number ) => {
 		this.fetchOne( id ).
-			subscribe( ( data ) => {
+			subscribe( ( data: any ) => {
 				let notFound = true;
 
 				this.dataStore.items.forEach( ( item, index ) => {

@@ -10,6 +10,11 @@ import { AppState } from '../../ngstore/models';
 import { DimeProcessActions } from '../../dime/dimeprocess/dimeprocess.actions';
 import { DimeProcessBackend } from '../../dime/dimeprocess/dimeprocess.backend';
 import { DimeProcessStatus, DimeProcess } from '../../../../shared/model/dime/process';
+import { DimeStreamActions } from '../../dime/dimestream/dimestream.actions';
+import * as _ from 'lodash';
+import { SortByName } from '../../../../shared/utilities/utilityFunctions';
+import { DimeStreamService } from '../../dime/dimestream/dimestream.service';
+import { DimeStreamBackend } from '../../dime/dimestream/dimestream.backend';
 
 @Component( {
 	selector: 'app-enduser-dime',
@@ -26,29 +31,43 @@ export class EnduserDimeComponent implements OnInit {
 		private userService: AcmUserService,
 		// private authHttp: AuthHttp,
 		private toastr: ToastrService,
-		private processService: DimeProcessService,
+		public processService: DimeProcessService,
 		private processBackend: DimeProcessBackend,
+		public streamService: DimeStreamService,
+		private streamBackend: DimeStreamBackend,
 		private store: Store<AppState>
 	) { }
 
 	ngOnInit() {
 		setTimeout( () => {
 			this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+			this.store.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() );
 		}, 1000 );
 		this.currentUser = this.authService.getCurrentUser();
-		this.userService.fetchUserRights( this.currentUser.id ).
-			subscribe( ( data ) => {
-				this.userProcesses = data.processes;
-				this.prepareProcesses();
-			}, ( error ) => {
-				console.error( error );
-			} );
+		if ( !this.currentUser.clearance ) this.currentUser.clearance = {};
+		if ( typeof this.currentUser.clearance === 'string' ) this.currentUser.clearance = JSON.parse( this.currentUser.clearance );
+		if ( !this.currentUser.clearance.processes ) this.currentUser.clearance.processes = [];
+		if ( !this.currentUser.clearance.streamExports ) this.currentUser.clearance.streamExports = [];
+
+		this.prepareProcesses();
+	}
+	public isStreamExportAssigned = ( streamid: number, exportid: number ) => {
+		return this.currentUser.clearance.streamExports.findIndex( e => e.stream === streamid && e.id === exportid ) >= 0;
+	}
+	public initiateExport = ( streamid: number, exportid: number ) => {
+		this.toastr.info( 'Initiating the stream data export' );
+		this.streamBackend.executeExport( { streamid, exportid } ).subscribe( result => {
+			this.toastr.success( 'Stream data export is initiated. Please check your inbox after a couple of minutes.' );
+		}, error => {
+			this.toastr.error( 'Failed to initiate the stream data export' );
+			console.error( error );
+		} );
 	}
 	private prepareProcesses = () => {
 		this.userProcessDetails = [];
 		this.store.select( 'dimeProcess' ).subscribe( processState => {
 			this.userProcessDetails = [];
-			processState.ids.filter( id => this.userProcesses.findIndex( e => e.process === id ) >= 0 ).forEach( id => {
+			processState.ids.filter( id => this.currentUser.clearance.processes.findIndex( e => e.id === id ) >= 0 ).forEach( id => {
 				const toPush: DimeProcess = JSON.parse( JSON.stringify( processState.items[id] ) );
 				this.userProcessDetails.push( toPush );
 				this.processBackend.filtersLoad( id ).subscribe( filters => {

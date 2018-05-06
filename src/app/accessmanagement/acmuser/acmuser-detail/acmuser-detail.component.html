@@ -8,7 +8,7 @@
 				<a href="#usertabmaindefinitions" data-toggle="tab">Details</a>
 			</li>
 			<li>
-				<a href="#usertabaccessdefinitions" data-toggle="tab">Access Definitions</a>
+				<a href="#usertabaccessdefinitions" data-toggle="tab">Access for Processes</a>
 			</li>
 			<li>
 				<a href="#usertabaccessforexports" data-toggle="tab">Access for Exports</a>
@@ -91,13 +91,13 @@
 				</form>
 			</div>
 			<div class="tab-pane fade in" id="usertabaccessdefinitions">
-				<form (ngSubmit)="mainService.updateAccessRights()" #f="ngForm" class="form-horizontal">
+				<form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
 					<fieldset>
 						<div class="form-group" *ngFor="let process of assignedProcesses;">
 							<label for="isassigned{{process.id}}" class="col-xs-6 col-md-2 control-label">{{process.name}}</label>
 							<div class="col-xs-6 col-md-10 checkbox">
 								<label>
-									<input type="checkbox" id="isassigned{{process.id}}" name="isassigned{{process.id}}" [(ngModel)]="process.isAssigned" (change)='processAccessRightChange()'>
+									<input type="checkbox" id="IAP{{process.id}}" name="IAP{{process.id}}" [(ngModel)]="process.isAssigned" (change)="processAccessRightChange()">
 								</label>
 							</div>
 						</div>
@@ -115,7 +115,7 @@
 
 			</div>
 			<div class="tab-pane fade in" id="usertabaccessforexports">
-				<form (ngSubmit)="mainService.updateAccessRights()" #fExportAccess="ngForm" class="form-horizontal">
+				<form (ngSubmit)="mainService.update()" #fExportAccess="ngForm" class="form-horizontal">
 					<table class="table table-condensed">
 						<thead>
 							<tr>
@@ -126,11 +126,11 @@
 						</thead>
 						<tbody>
 							<ng-container *ngFor="let stream of availableStreams;">
-								<tr *ngFor="let export of stream.exports;">
+								<tr *ngFor="let cExport of stream.exports;">
 									<td>{{stream.name}}</td>
-									<td>{{export.name}}</td>
+									<td>{{cExport.name}}</td>
 									<td>
-										<input type="checkbox" id="isassignedExport{{export.id}}" name="isassignedExport{{export.id}}" [(ngModel)]="export.isAssigned" (change)="streamExportAccessRightChange()">
+										<input type="checkbox" id="IAE{{cExport.id}}-{{stream.id}}" name="IAE{{cExport.id}}-{{stream.id}}" [(ngModel)]="cExport.isAssigned" (change)="streamExportAccessRightChange()">
 									</td>
 								</tr>
 							</ng-container>
@@ -148,5 +148,3 @@
 		</div>
 	</div>
 </div>
-<pre>{{mainService.curItem | json}}</pre>
-<pre>{{mainService.curItemAccessRights | json}}</pre>

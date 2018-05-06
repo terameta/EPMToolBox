@@ -47,7 +47,7 @@ export class SmartViewTools {
 	public smartviewReadDataPrepare = async ( payload ) => {
 		await this.smartviewOpenCube( payload );
 
-		payload.query.hierarchies = await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
+		payload.query.hierarchies = await this.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( <DimeStreamFieldDetail[]>payload.query.dimensions ).sort( SortByPosition ) );
 		payload.query.povMembers = payload.query.povs.map( ( pov, pindex ) => findMembers( payload.query.hierarchies[payload.query.povDims[pindex]], pov.selectionType, pov.selectedMember ) );
 
 		const colCartesian = payload.query.cols.map( col => {

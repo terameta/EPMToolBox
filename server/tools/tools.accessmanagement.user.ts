@@ -17,15 +17,7 @@ export class AcmUserTool {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving access management user list has failed' } );
 				} else {
-					// rows.forEach( ( curRow: AcmUser ) => {
-					// 	delete curRow.password;
-					// } );
 					const toResolve = rows.map( this.prepareToGet );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
-					console.log( toResolve );
-					console.log( '===========================================' );
-					console.log( '===========================================' );
 					resolve( toResolve );
 				}
 			} );
@@ -49,11 +41,25 @@ export class AcmUserTool {
 	}
 	private prepareToGet = ( payload: AcmUser ) => {
 		delete payload.password;
-		console.log( '>>>:', payload.clearance );
+		console.log( '===========================================' );
+		console.log( '===========================================' );
+		console.log( payload );
+		console.log( '===========================================' );
+		console.log( '===========================================' );
 		payload.clearance = JSON.parse( payload.clearance ? payload.clearance : '{}' );
 		return payload;
 	}
 	private prepareToSet = ( payload: AcmUser ) => {
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		console.log( payload );
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
+		if ( payload.password === '|||---protected---|||' ) {
+			delete payload.password;
+		} else if ( payload.password ) {
+			payload.password = bcrypt.hashSync( payload.password, 10 );
+		}
 		payload.clearance = JSON.stringify( payload.clearance );
 	}
 	public getUserDetails = ( refObj: AcmUser ): Promise<AcmUser> => {
@@ -64,8 +70,7 @@ export class AcmUserTool {
 				} else if ( rows.length !== 1 ) {
 					reject( { error: 'Wrong number of records', message: 'Wrong number of records for item received from the server, 1 expected' } );
 				} else {
-					delete rows[0].password;
-					resolve( rows[0] );
+					resolve( rows.map( this.prepareToGet )[0] );
 				}
 			} );
 		} );
@@ -123,11 +128,7 @@ export class AcmUserTool {
 	}
 	public update = ( item: AcmUser ) => {
 		return new Promise( ( resolve, reject ) => {
-			if ( item.password === '|||---protected---|||' ) {
-				delete item.password;
-			} else if ( item.password ) {
-				item.password = bcrypt.hashSync( item.password, 10 );
-			}
+			this.prepareToSet( item );
 			this.db.query( 'UPDATE users SET ? WHERE id = ' + item.id, item, function ( err, result, fields ) {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the item' } );

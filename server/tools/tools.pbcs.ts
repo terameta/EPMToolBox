@@ -56,7 +56,7 @@ export class PBCSTools {
 	public writeData = ( refObj ) => this.smartview.writeData( refObj );
 	public readData = ( refObj ) => this.pbcsReadData( refObj );
 	private pbcsReadData = async ( payload ) => {
-		payload.query.hierarchies = await this.smartview.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( payload.query.dimensions ).sort( SortByPosition ) );
+		payload.query.hierarchies = await this.smartview.smartviewGetAllDescriptionsWithHierarchy( payload, Object.values( <DimeStreamFieldDetail[]>payload.query.dimensions ).sort( SortByPosition ) );
 		await this.pbcsInitiateRest( payload );
 		payload.data = [];
 		const rows = JSON.parse( JSON.stringify( payload.query.rows ) );
