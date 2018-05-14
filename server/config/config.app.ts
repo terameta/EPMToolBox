@@ -47,7 +47,7 @@ export function initiateApplicationWorker( refDB: Pool, refConfig: SystemConfig 
 	} );
 
 	const server: http.Server = app.listen( app.get( 'port' ), () => {
-		console.log( 'Server is now running on port ' + server.address().port );
+		console.log( 'Server is now running on port ' + app.get( 'port' ) );
 	} );
 
 }

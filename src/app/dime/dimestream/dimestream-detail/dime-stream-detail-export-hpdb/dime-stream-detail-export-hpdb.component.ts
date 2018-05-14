@@ -13,7 +13,7 @@ import { countMembers } from '../../../../../../shared/utilities/hpUtilities';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
 import { ActivatedRoute } from '@angular/router';
-import { merge } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -51,7 +51,9 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			} );
 		this.store.select( 'dimeStream' )
 			.map( s => s.curItem.exports )
-			.mergeMap( exportList => this.route.paramMap.map( p => ( [parseInt( p.get( 'exportid' ), 10 ), exportList] ) ) )
+			.pipe(
+				mergeMap( exportList => this.route.paramMap.map( p => ( [parseInt( p.get( 'exportid' ), 10 ), exportList] ) ) )
+			)
 			.map( ( [exportid, exportList] ) => ( exportList ? ( <any[]>exportList ).find( e => e.id === exportid ) : <DimeStreamExportHPDB>{} ) )
 			.subscribe( currentExport => {
 				this.export = currentExport || <DimeStreamExportHPDB>{};

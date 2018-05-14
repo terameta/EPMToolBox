@@ -9,6 +9,7 @@ import { DimeStatusActions } from '../../ngstore/applicationstatus';
 import { of } from 'rxjs/observable/of';
 import { Action } from '../../ngstore/ngrx.generators';
 import { DimeSetting } from '../../../../shared/model/dime/settings';
+import { catchError, mergeMap } from 'rxjs/operators';
 
 @Injectable()
 export class DimeSettingsEffects {
@@ -19,11 +20,13 @@ export class DimeSettingsEffects {
 		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading all processes...', this.serviceName ) ); return action; } )
 		.switchMap( ( action ) => {
 			return this.backend.allLoad()
-				.mergeMap( resp => [
-					DimeSettingsActions.ALL.LOAD.COMPLETE.action( resp ),
-					DimeStatusActions.success( 'All settings are now loaded.', this.serviceName )
-				] )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+				.pipe(
+					mergeMap( resp => [
+						DimeSettingsActions.ALL.LOAD.COMPLETE.action( resp ),
+						DimeStatusActions.success( 'All settings are now loaded.', this.serviceName )
+					] ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				);
 		} );
 
 	@Effect() ALL_LOAD_INITIATEIFEMPTY$ = this.actions$
@@ -38,11 +41,13 @@ export class DimeSettingsEffects {
 		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving the setting...', this.serviceName ) ); return action; } )
 		.switchMap( ( action: Action<DimeSetting> ) => {
 			return this.backend.update( action.payload )
-				.mergeMap( resp => [
-					DimeStatusActions.success( 'Setting is saved.', this.serviceName ),
-					DimeSettingsActions.ALL.LOAD.INITIATE.action()
-				] )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+				.pipe(
+					mergeMap( resp => [
+						DimeStatusActions.success( 'Setting is saved.', this.serviceName ),
+						DimeSettingsActions.ALL.LOAD.INITIATE.action()
+					] ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				);
 		} );
 
 	constructor(

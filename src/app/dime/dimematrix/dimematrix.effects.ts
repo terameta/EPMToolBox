@@ -12,6 +12,7 @@ import { DimeMatrix, DimeMatrixRefreshPayload } from '../../../../shared/model/d
 import { Action } from '../../ngstore/ngrx.generators';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
+import { catchError, mergeMap } from 'rxjs/operators';
 
 @Injectable()
 export class DimeMatrixEffects {
@@ -21,11 +22,13 @@ export class DimeMatrixEffects {
 		.ofType( DimeMatrixActions.ALL.LOAD.INITIATE.type )
 		.switchMap( ( action ) => {
 			return this.backend.allLoad()
-				.mergeMap( resp => [
-					DimeMatrixActions.ALL.LOAD.COMPLETE.action( resp ),
-					DimeStreamActions.ALL.LOAD.initiateifempty()
-				] )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+				.pipe(
+					mergeMap( resp => [
+						DimeMatrixActions.ALL.LOAD.COMPLETE.action( resp ),
+						DimeStreamActions.ALL.LOAD.initiateifempty()
+					] ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				);
 		} );
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
@@ -56,15 +59,17 @@ export class DimeMatrixEffects {
 		.ofType( DimeMatrixActions.ONE.LOAD.INITIATE.type )
 		.switchMap( ( action: Action<number> ) => {
 			return this.backend.oneLoad( action.payload )
-				.mergeMap( resp => {
-					return [
-						DimeMatrixActions.ONE.LOAD.COMPLETE.action( resp ),
-						DimeMatrixActions.ONE.ISREADY.INITIATE.action( action.payload ),
-						DimeStreamActions.ALL.LOAD.initiateifempty(),
-						DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
-					];
-				} )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+				.pipe(
+					mergeMap( resp => {
+						return [
+							DimeMatrixActions.ONE.LOAD.COMPLETE.action( resp ),
+							DimeMatrixActions.ONE.ISREADY.INITIATE.action( action.payload ),
+							DimeStreamActions.ALL.LOAD.initiateifempty(),
+							DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
+						];
+					} ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				);
 		} );
 
 	@Effect() ONE_LOAD_INITIATEIFEMPTY$ = this.actions$
@@ -105,13 +110,16 @@ export class DimeMatrixEffects {
 	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
 		.ofType( DimeMatrixActions.ONE.UPDATE.INITIATE.type )
 		.switchMap( ( action: Action<DimeMatrix> ) => {
-			return this.backend.oneUpdate( action.payload ).mergeMap( ( resp: DimeMatrix ) => {
-				return [
-					DimeMatrixActions.ONE.UPDATE.COMPLETE.action( resp ),
-					DimeMatrixActions.ALL.LOAD.INITIATE.action(),
-					DimeMatrixActions.ONE.LOAD.INITIATE.action( action.payload.id )
-				];
-			} );
+			return this.backend.oneUpdate( action.payload )
+				.pipe(
+					mergeMap( ( resp: DimeMatrix ) => {
+						return [
+							DimeMatrixActions.ONE.UPDATE.COMPLETE.action( resp ),
+							DimeMatrixActions.ALL.LOAD.INITIATE.action(),
+							DimeMatrixActions.ONE.LOAD.INITIATE.action( action.payload.id )
+						];
+					} )
+				);
 		} );
 
 	@Effect() ONE_REFRESH_INITIATE$ = this.actions$

@@ -12,6 +12,7 @@ import { DimeStatusActions } from '../../ngstore/applicationstatus';
 import { DimeEnvironmentActions } from './dimeenvironment.actions';
 import { DimeEnvironmentBackend } from './dimeenvironment.backend';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
+import { catchError, mergeMap } from 'rxjs/operators';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -95,12 +96,14 @@ export class DimeEnvironmentEffects {
 		.ofType( DimeEnvironmentActions.ONE.VERIFY.INITIATE )
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneVerify( action.payload )
-				.mergeMap( resp => [
-					DimeEnvironmentActions.ONE.VERIFY.complete(),
-					DimeEnvironmentActions.ONE.LOAD.initiate( action.payload ),
-					DimeEnvironmentActions.ALL.LOAD.initiate()
-				] )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+				.pipe(
+					mergeMap( resp => [
+						DimeEnvironmentActions.ONE.VERIFY.complete(),
+						DimeEnvironmentActions.ONE.LOAD.initiate( action.payload ),
+						DimeEnvironmentActions.ALL.LOAD.initiate()
+					] ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				);
 		} );
 
 	constructor(

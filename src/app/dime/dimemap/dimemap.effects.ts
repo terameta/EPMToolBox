@@ -15,6 +15,8 @@ import { DimeStreamActions } from '../dimestream/dimestream.actions';
 import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actions';
 import { ATReadyStatus } from '../../../../shared/enums/generic/readiness';
 import { DimeMatrixActions } from '../dimematrix/dimematrix.actions';
+import { catchError, finalize } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/internal/operators/mergeMap';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -28,12 +30,14 @@ export class DimeMapEffects {
 		.ofType( DimeMapActions.ALL.LOAD.INITIATE )
 		.switchMap( ( action ) => {
 			return this.backend.allLoad()
-				.mergeMap( resp => [
-					DimeMapActions.ALL.LOAD.complete( resp ),
-					DimeStreamActions.ALL.LOAD.initiateifempty(),
-					DimeEnvironmentActions.ALL.LOAD.initiateifempty()
-				] )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) );
+				.pipe(
+					mergeMap( resp => [
+						DimeMapActions.ALL.LOAD.complete( resp ),
+						DimeStreamActions.ALL.LOAD.initiateifempty(),
+						DimeEnvironmentActions.ALL.LOAD.initiateifempty()
+					] ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
+				);
 		} );
 
 	@Effect() ALL_LOAD_INITIATE_IF_EMPTY$ = this.actions$
@@ -66,14 +70,16 @@ export class DimeMapEffects {
 		.ofType( DimeMapActions.ONE.LOAD.INITIATE )
 		.switchMap( ( action: Action ) => {
 			return this.backend.oneLoad( action.payload )
-				.mergeMap( resp => [
-					DimeMapActions.ONE.LOAD.complete( resp ),
-					DimeStreamActions.ALL.LOAD.initiateifempty(),
-					DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
-					DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
-				] )
-				.catch( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
-				.finally( () => { this.store$.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() ); } );
+				.pipe(
+					mergeMap( resp => [
+						DimeMapActions.ONE.LOAD.complete( resp ),
+						DimeStreamActions.ALL.LOAD.initiateifempty(),
+						DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
+						DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action()
+					] ),
+					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) ),
+					finalize( () => { this.store$.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() ); } )
+				);
 		} );
 
 	@Effect() ONE_LOAD_COMPLETE$ = this.actions$
@@ -99,11 +105,13 @@ export class DimeMapEffects {
 
 	@Effect() ONE_UPDATE_COMPLETE$ = this.actions$
 		.ofType( DimeMapActions.ONE.UPDATE.COMPLETE )
-		.mergeMap( ( action: Action ) => [
-			DimeMapActions.ALL.LOAD.initiate(),
-			DimeMapActions.ONE.MARK.clean(),
-			DimeMapActions.ONE.LOAD.initiate( action.payload.id )
-		] );
+		.pipe(
+			mergeMap( ( action: Action ) => [
+				DimeMapActions.ALL.LOAD.initiate(),
+				DimeMapActions.ONE.MARK.clean(),
+				DimeMapActions.ONE.LOAD.initiate( action.payload.id )
+			] )
+		);
 
 	@Effect() ONE_DELETE_INITIATE$ = this.actions$
 		.ofType( DimeMapActions.ONE.DELETE.INITIATE )
