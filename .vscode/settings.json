@@ -48,5 +48,7 @@
 	"zenMode.centerLayout": false,
 	"zenMode.hideTabs": false,
 	"zenMode.hideStatusBar": false,
-	"zenMode.hideActivityBar": false
+	"zenMode.hideActivityBar": false,
+	"javascript.showUnused": true,
+	"typescript.showUnused": true
 }
