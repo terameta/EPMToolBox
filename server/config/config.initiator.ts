@@ -53,6 +53,7 @@ export function initiateInitiator( refDB: Pool, refConf: any ) {
 		} ).
 		then( clearResidue );
 }
+
 const to0090 = async ( currentVersion: number ) => {
 	const nextVersion = 90;
 	const expectedCurrentVersion = nextVersion - 1;

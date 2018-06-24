@@ -256,6 +256,12 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 
 
 						const toCheck = this.matrixObject.targets.map( field => changedDataTuple['TAR_' + field] ).join( '|||' );
+						console.log( '===========================================' );
+						console.log( '===========================================' );
+						console.log( toCheck );
+						console.log( '===========================================' );
+						console.log( this.matrixObject.targets );
+						console.log( '===========================================' );
 						const foundIndex = this.matrixObject.matrixData.findIndex( element => element === toCheck );
 						let isValidAgainstMatrix = ( foundIndex >= 0 );
 						if ( !this.mainService.currentItem.matrix ) {
@@ -336,6 +342,9 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 					this.matrixObject.targets = [];
 					this.streamService.itemObject[this.mainService.currentItem.target].fieldList
 						.filter( currentStreamField => ( this.mainService.currentItem.targetfields.findIndex( currentMapField => currentMapField.name === currentStreamField.name ) >= 0 ) )
+						// Below ensures that there are no fields listed as target for matrix even if it is the target of the map where the matrix is using a subset of target fields of map
+						// Before this fix, matrix would never validate
+						.filter( currentStreamField => ( Object.keys( result[0] ).findIndex( key => key === currentStreamField.name ) >= 0 ) )
 						.forEach( currentField => {
 							this.matrixObject.targets.push( currentField.name );
 						} );
