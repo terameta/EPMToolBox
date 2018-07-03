@@ -33,6 +33,9 @@ import { DimeTagsComponent } from './dimetag/dimetags/dimetags.component';
 import { DimeTagModule } from './dimetag/dimetag.module';
 import { DimesettingsComponent } from './dimesettings/dimesettings/dimesettings.component';
 
+import { DimesecretsComponent } from './dimesecret/dimesecrets/dimesecrets.component';
+import { DimeSecretModule } from './dimesecret/dimesecret.module';
+
 
 
 const dimeRoutes: Routes = [
@@ -48,7 +51,8 @@ const dimeRoutes: Routes = [
 			{ path: 'maps', component: DimemapsComponent, loadChildren: 'app/dime/dimemap/dimemap.module#DimemapModule' },
 			{ path: 'matrices', component: DimeMatricesComponent, loadChildren: 'app/dime/dimematrix/dimematrix.module#DimematrixModule' },
 			{ path: 'asyncprocesses', component: DimeAsyncProcessesComponent, loadChildren: 'app/dime/dimeasyncprocess/dimeasyncprocess.module#DimeAsyncProcessModule' },
-			{ path: 'settings', component: DimesettingsComponent, loadChildren: 'app/dime/dimesettings/dimesettings.module#DimeSettingsModule' }
+			{ path: 'settings', component: DimesettingsComponent, loadChildren: 'app/dime/dimesettings/dimesettings.module#DimeSettingsModule' },
+			{ path: 'secrets', component: DimesecretsComponent, loadChildren: 'app/dime/dimesecret/dimesecret.module#DimeSecretModule' }
 		]
 	}
 ];
