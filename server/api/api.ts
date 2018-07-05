@@ -16,6 +16,7 @@ import { ApiDimeMatrix } from './api.dime.matrix';
 import { ApiDimeProcess } from './api.dime.process';
 import { ApiDimeAsyncProcess } from './api.dime.asyncprocess';
 import { ApiDimeSchedule } from './api.dime.schedule';
+import { ApiDimeSecret } from './api.dime.secret';
 
 // Access Management Route APIs
 import { ApiAcmUsers } from './api.accessmanagement.user';
@@ -41,6 +42,7 @@ export function initializeRestApi( app: Application, refDB: Pool, refTools: Main
 	const apiDimeProcess = new ApiDimeProcess( app, refDB, refTools );
 	const apiDimeAsyncProcess = new ApiDimeAsyncProcess( app, refDB, refTools );
 	const apiDimeSchedule = new ApiDimeSchedule( app, refDB, refTools );
+	const apiDimeSecret = new ApiDimeSecret( app, refDB, refTools );
 
 	const apiAcmServer = new ApiAcmServers( app, refDB, refTools );
 	const apiAcmUser = new ApiAcmUsers( app, refDB, refTools );

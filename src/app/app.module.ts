@@ -57,6 +57,10 @@ import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
 import { DimeScheduleEffects } from './dime/dimeschedule/dimeschedule.effects';
 import { DimeScheduleBackend } from './dime/dimeschedule/dimeschedule.backend';
 
+import { DimeSecretService } from './dime/dimesecret/dimesecret.service';
+import { DimeSecretBackend } from './dime/dimesecret/dimesecret.backend';
+import { DimeSecretEffects } from './dime/dimesecret/dimesecret.effects';
+
 import { DimeAsyncProcessService } from './dime/dimeasyncprocess/dimeasyncprocess.service';
 
 // Access Management Services
@@ -79,7 +83,6 @@ import { HotTableRegisterer, HotTableModule } from '@handsontable/angular';
 import { ModalModule } from 'ngx-bootstrap/modal/modal.module';
 
 const appRoutes: Routes = [
-	// { path: '', component: AppComponent },
 	{ path: '', pathMatch: 'full', redirectTo: 'welcome' }
 ];
 
@@ -133,7 +136,8 @@ export function tokenGetter() {
 			DimeMatrixEffects,
 			DimeProcessEffects,
 			DimeSettingsEffects,
-			DimeScheduleEffects
+			DimeScheduleEffects,
+			DimeSecretEffects
 		] ),
 		StoreRouterConnectingModule,
 		HotTableModule.forRoot(),
@@ -167,6 +171,8 @@ export function tokenGetter() {
 		DimeSettingsService,
 		DimeAsyncProcessService,
 		DimeAsyncProcessBackend,
+		DimeSecretService,
+		DimeSecretBackend,
 		AcmServerService,
 		AcmUserService,
 		EndUserService

@@ -34,9 +34,9 @@ export function initiateApplicationWorker( refDB: Pool, refConfig: SystemConfig 
 
 	app.use( logger( 'short' ) );
 
-	// app.use("/api", jwt({ secret: refConfig.hash }).unless({ path: ["/api/auth/signin"] }));
-	app.use( '/api/dime', jwt( { secret: refConfig.hash } ) );
-	app.use( '/api/log', jwt( { secret: refConfig.hash } ) );
+	app.use( '/api', jwt( { secret: refConfig.hash } ).unless( { path: ['/api/auth/signin', /\/api\/dime\/secret\/givemysecret/i] } ) );
+	// app.use( '/api/dime', jwt( { secret: refConfig.hash } ) );
+	// app.use( '/api/log', jwt( { secret: refConfig.hash } ) );
 
 	initializeRestApi( app, refDB, mainTools );
 

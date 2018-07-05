@@ -15,7 +15,7 @@ const dimeEnvironmentRoutes: Routes = [
 	{ path: 'dime/environments', pathMatch: 'prefix', redirectTo: 'dime/environments/environment-list' },
 	{ path: 'environment-list', component: DimeenvironmentListComponent },
 	{ path: 'environment-detail/:id', component: DimeenvironmentDetailComponent }
-]
+];
 
 @NgModule( {
 	imports: [

@@ -6,7 +6,7 @@ import { DimeProcessBackend } from './dimeprocess.backend';
 import { Router } from '@angular/router';
 import { DimeProcessActions } from './dimeprocess.actions';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
-import { of } from 'rxjs/observable/of';
+import { of } from 'rxjs';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { Action } from '../../ngstore/ngrx.generators';
 import { DimeStreamActions } from '../dimestream/dimestream.actions';

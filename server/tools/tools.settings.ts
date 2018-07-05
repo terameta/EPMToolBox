@@ -20,7 +20,7 @@ export class SettingsTool {
 		} );
 	}
 
-	public getOne = ( name: string ) => {
+	public getOne = ( name: string ): Promise<DimeSetting> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM settings WHERE name = ?', name, ( err, rows: DimeSettingOnDB[], fields ) => {
 				if ( err ) {

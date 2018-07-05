@@ -54,6 +54,10 @@ import { DimeScheduleState, dimeScheduleInitialState } from '../dime/dimeschedul
 import { dimeScheduleReducer } from '../dime/dimeschedule/dimeschedule.reducer';
 import { DimeScheduleActions } from '../dime/dimeschedule/dimeschedule.actions';
 
+import { DimeSecretState, dimeSecretInitialState } from '../dime/dimesecret/dimesecret.state';
+import { dimeSecretReducer } from '../dime/dimesecret/dimesecret.reducer';
+import { DimeSecretActions } from '../dime/dimesecret/dimesecret.actions';
+
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
 	router: RouteState,
@@ -68,7 +72,8 @@ export interface AppState {
 	dimeMatrix: DimeMatrixState,
 	dimeProcess: DimeProcessState,
 	dimeSettings: DimeSettingsState,
-	dimeSchedule: DimeScheduleState
+	dimeSchedule: DimeScheduleState,
+	dimeSecret: DimeSecretState
 }
 
 export const appInitialState: AppState = {
@@ -84,7 +89,8 @@ export const appInitialState: AppState = {
 	dimeMatrix: dimeMatrixInitialState,
 	dimeProcess: dimeProcessInitialState,
 	dimeSettings: dimeSettingsInitialState,
-	dimeSchedule: dimeScheduleInitialState
+	dimeSchedule: dimeScheduleInitialState,
+	dimeSecret: dimeSecretInitialState
 };
 
 export class DoNothingAction implements Action {
@@ -131,7 +137,8 @@ export const reducers = {
 	dimeMatrix: dimeMatrixReducer,
 	dimeProcess: dimeProcessReducer,
 	dimeSettings: dimeSettingsReducer,
-	dimeSchedule: dimeScheduleReducer
+	dimeSchedule: dimeScheduleReducer,
+	dimeSecret: dimeSecretReducer
 };
 
 @Injectable()
@@ -170,6 +177,20 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 						}
 						default: {
 							console.log( 'We are at tags default' );
+							return new DoNothingAction();
+						}
+					}
+				}
+				case 'secrets': {
+					switch ( segments[2] ) {
+						case 'secret-list': {
+							return DimeSecretActions.ALL.LOAD.INITIATEIFEMPTY.action();
+						}
+						case 'secret-detail/:id': {
+							return DimeSecretActions.ONE.LOAD.INITIATE.action( paramset.params.id );
+						}
+						default: {
+							console.log( 'We are at secrets default' );
 							return new DoNothingAction();
 						}
 					}

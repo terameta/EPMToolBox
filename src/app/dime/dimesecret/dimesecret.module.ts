@@ -11,7 +11,8 @@ import { DimeSecretsComponent } from './dimesecrets/dimesecrets.component';
 
 const dimeSecretRoutes: Routes = [
 	{ path: 'dime/secrets', pathMatch: 'prefix', redirectTo: 'dime/secrets/secret-list' },
-	{ path: 'secret-list', }
+	{ path: 'secret-list', component: DimeSecretListComponent },
+	{ path: 'secret-detail/:id', component: DimeSecretDetailComponent }
 ];
 
 @NgModule( {
