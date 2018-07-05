@@ -1,5 +1,7 @@
-export const configuration = {
-	'environment': 'development|production',															// This defines the number of cores utilized
+import { SystemConfig } from '../shared/model/systemconfig';
+
+export const configuration: SystemConfig = {
+	'numberofCPUs': 1,															// This defines the number of cores utilized
 	'hash': 'enter a really long string. 128 caharacters is recommended',
 	'mysql': {
 		'host': 'fullyqualified.server.address',
