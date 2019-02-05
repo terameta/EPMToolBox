@@ -802,12 +802,31 @@ export class SmartViewTools {
 			} );
 	}
 	public getDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ) => {
-		return this.smartviewGetDescriptions( refObj, refField ).then( result => result.memberList );
+		return this.smartviewGetDescriptions( refObj, refField ).
+			catch( e => { console.log( 'Get Descriptions Catch 0' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 1' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 2' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 3' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 4' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 5' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 6' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 7' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 8' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			catch( e => { console.log( 'Get Descriptions Catch 9' ); return this.smartviewGetDescriptions( refObj, refField ); } ).
+			then( result => result.memberList );
 	}
-	private smartviewGetDescriptions = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
-		return this.smartviewListAliasTables( refObj )
-			.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
-			.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsAction( refObj, refField ); } );
+	private smartviewGetDescriptions = async ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
+		console.log( 'Getting descriptions for', refField.name );
+		await this.smartviewListAliasTables( refObj );
+		console.log( 'Getting descriptions for', refField.name, 'Listed alias tables' );
+		await this.smartviewOpenDimension( refObj, refField );
+		console.log( 'Getting descriptions for', refField.name, 'Opened dimension' );
+		await this.smartviewGetDescriptionsAction( refObj, refField );
+		console.log( 'Getting descriptions for', refField.name, 'Got Descriptions' );
+		return refObj;
+		// return this.smartviewListAliasTables( refObj )
+		// 	.then( resEnv => { refObj = resEnv; return this.smartviewOpenDimension( refObj, refField ); } )
+		// 	.then( resEnv => { refObj = resEnv; return this.smartviewGetDescriptionsAction( refObj, refField ); } );
 	}
 	private smartviewOpenDimension = ( refObj: DimeEnvironmentSmartView, refField: DimeStreamFieldDetail ): Promise<DimeEnvironmentSmartView> => {
 		return this.smartviewOpenApplication( refObj )

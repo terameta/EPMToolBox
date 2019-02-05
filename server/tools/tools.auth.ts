@@ -30,7 +30,7 @@ export class AuthTools {
 	}
 
 	public signin = ( refObj: any ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			if ( !refObj ) {
 				reject( 'No credentials presented' );
 			} else if ( !refObj.username || !refObj.password ) {
@@ -39,9 +39,9 @@ export class AuthTools {
 				resolve( this.authenticate( refObj.username, refObj.password ) );
 			}
 		} );
-	};
+	}
 	private authenticate = ( username: string, password: string ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const fixedUserName = escape( username.toString().toLowerCase() );
 			this.db.query( 'SELECT * FROM users WHERE username = ' + fixedUserName, ( err, result, fields ) => {
 				if ( err ) {
@@ -62,9 +62,9 @@ export class AuthTools {
 				}
 			} );
 		} );
-	};
+	}
 	private authenticateWithLocal = ( username: string, password: string, dbUser: AcmUser ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			bcrypt.compare( password, dbUser.password, ( err, hashResult ) => {
 				if ( err ) {
 					reject( 'There is an issue with the encryption. Please consult with the system admin.' );
@@ -73,27 +73,27 @@ export class AuthTools {
 				} else {
 					resolve( this.authenticateAction( dbUser ) );
 				}
-			} )
+			} );
 		} );
-	};
+	}
 	private authenticateWithDirectory = ( username: string, password: string, dbUser: AcmUser ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			let authObj: AuthObjectDirectory; authObj = <AuthObjectDirectory>{};
 			authObj.username = username;
 			authObj.password = password;
 			authObj.dbUser = dbUser;
 
 			this.acmServerTool.getServerDetails( <AcmServer>{ id: dbUser.ldapserver }, true ).
-				then(( ldapServer: AcmServer ) => { authObj.ldapServer = ldapServer; return this.authenticateWithDirectoryBind( authObj ); } ).
+				then( ( ldapServer: AcmServer ) => { authObj.ldapServer = ldapServer; return this.authenticateWithDirectoryBind( authObj ); } ).
 				then( this.authenticateWithDirectorySearch ).
 				then( this.authenticateWithDirectoryAuthenticate ).
 				then( this.authenticateAction ).
 				then( resolve ).
 				catch( reject );
 		} );
-	};
+	}
 	private authenticateWithDirectoryBind = ( authObj: AuthObjectDirectory ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			const config = {
 				url: 'ldap://' + authObj.ldapServer.hostname + ':' + authObj.ldapServer.port,
 				baseDN: authObj.ldapServer.basedn,
@@ -112,9 +112,9 @@ export class AuthTools {
 				}
 			} );
 		} );
-	};
+	}
 	private authenticateWithDirectorySearch = ( authObj: AuthObjectDirectory ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			authObj.ldapClient.findUsers( 'mail=' + authObj.username, ( err: any, users: any ) => {
 				if ( err ) {
 					reject( err );
@@ -128,9 +128,9 @@ export class AuthTools {
 				}
 			} );
 		} );
-	};
+	}
 	private authenticateWithDirectoryAuthenticate = ( authObj: AuthObjectDirectory ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			authObj.ldapClient.authenticate( authObj.username, authObj.password, ( err: any, auth: any ) => {
 				if ( err ) {
 					console.log( err );
@@ -144,7 +144,7 @@ export class AuthTools {
 		} );
 	}
 	private authenticateAction = ( dbUser: AcmUser ) => {
-		return new Promise(( resolve, reject ) => {
+		return new Promise( ( resolve, reject ) => {
 			delete dbUser.password;
 			const token = this.tools.signToken( dbUser );
 			resolve( { status: 'success', message: 'Welcome to EPM Tool Box', token: token } );

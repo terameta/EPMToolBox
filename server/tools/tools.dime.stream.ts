@@ -471,10 +471,17 @@ export class StreamTools {
 		} ) );
 		return toReturn;
 	}
-	public populateFieldDescriptions = ( id: number ) => {
+	public populateFieldDescriptions = ( id: number, shouldWait = true ) => {
+		console.log( 'We are at the populateFieldDescriptions' );
 		return this.getOne( id )
 			.then( this.populateFieldDescriptionsClear )
 			.then( this.populateFieldDescriptionsPullandSet );
+	}
+	public populateFieldDescriptionsforUI = ( id: number ) => {
+		this.populateFieldDescriptions( id );
+		return new Promise( ( resolve, reject ) => {
+			resolve( { status: 'OK' } );
+		} );
 	}
 	private populateFieldDescriptionsClear = ( stream: DimeStreamDetail ): Promise<DimeStreamDetail> => {
 		return new Promise( ( resolve, reject ) => {
@@ -497,21 +504,28 @@ export class StreamTools {
 			} ).catch( reject );
 		} );
 	}
-	private populateFieldDescriptionsPullandSet = ( stream: DimeStreamDetail ) => {
-		return new Promise( ( resolve, reject ) => {
-			const promises = [];
-			stream.fieldList
-				.filter( currentField => currentField.isDescribed )
-				.forEach( currentField => {
-					promises.push(
-						this.environmentTool.getDescriptions( stream, currentField )
-							.then( ( result: { RefField: string, Description: string }[] ) => this.populateFieldDescriptionsSet( result, stream, currentField ) )
-					);
-				} );
-			Promise.all( promises ).then( () => {
-				resolve( stream );
-			} ).catch( reject );
-		} );
+	private populateFieldDescriptionsPullandSet = async ( stream: DimeStreamDetail ) => {
+		for ( const currentField of stream.fieldList.filter( cf => !!cf.isDescribed ) ) {
+			console.log( 'Getting descriptions for', currentField.name );
+			await this.environmentTool.getDescriptions( stream, currentField ).
+				then( ( result: { RefField: string, Description: string }[] ) => this.populateFieldDescriptionsSet( result, stream, currentField ) );
+		}
+		console.log( 'All descriptions are now received' );
+		return stream;
+		// return new Promise( ( resolve, reject ) => {
+		// 	const promises = [];
+		// 	stream.fieldList
+		// 		.filter( currentField => currentField.isDescribed )
+		// 		.forEach( currentField => {
+		// 			promises.push(
+		// 				this.environmentTool.getDescriptions( stream, currentField )
+		// 					.then( ( result: { RefField: string, Description: string }[] ) => this.populateFieldDescriptionsSet( result, stream, currentField ) )
+		// 			);
+		// 		} );
+		// 	Promise.all( promises ).then( () => {
+		// 		resolve( stream );
+		// 	} ).catch( reject );
+		// } );
 	}
 	private populateFieldDescriptionsSet = ( descriptions: { RefField: string, Description: string }[], stream: DimeStream, field: DimeStreamField ) => {
 		return new Promise( ( resolve, reject ) => {
