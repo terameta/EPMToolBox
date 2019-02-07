@@ -1,11 +1,9 @@
-// import { Http, Headers, Response } from '@angular/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import 'rxjs/add/operator/map';
 import { Router } from '@angular/router';
 import { JwtHelperService as JwtHelper } from '@auth0/angular-jwt';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class AuthService {
@@ -28,15 +26,16 @@ export class AuthService {
 	signinUser( username: string, password: string ) {
 		const headers = new Headers( { 'Content-Type': 'application/json' } );
 
-		return this.http.post( '/api/auth/signin', { username: username, password: password } )
-			.map(
-			( response: Response ) => {
-				this._setSession( response );
-				return response;
-			}, ( error ) => {
-				const errorMessage: string = error.message;
-				return Observable.throw( errorMessage );
-			} );
+		return this.http.post( '/api/auth/signin', { username: username, password: password } ).pipe(
+			map(
+				( response: Response ) => {
+					this._setSession( response );
+					return response;
+				}, ( error ) => {
+					const errorMessage: string = error.message;
+					return Observable.throw( errorMessage );
+				} )
+		);
 	}
 
 	setLoggedIn( value: boolean ) {

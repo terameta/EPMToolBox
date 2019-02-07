@@ -1,5 +1,5 @@
 import { DimeAsyncProcessBackend } from './dimeasyncprocess.backend';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { DimeAsyncProcess } from '../../../../shared/model/dime/asyncprocess';
 import { Action } from '@ngrx/store';
@@ -8,7 +8,7 @@ import { DimeEnvironmentActions } from '../dimeenvironment/dimeenvironment.actio
 import { DimeStreamActions } from '../dimestream/dimestream.actions';
 
 import * as _ from 'lodash';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, switchMap, map } from 'rxjs/operators';
 
 export interface DimeAsyncProcessState {
 	items: { [key: number]: DimeAsyncProcess },
@@ -53,20 +53,25 @@ export function dimeAsyncProcessReducer( state: DimeAsyncProcessState, action: A
 
 @Injectable()
 export class DimeAsyncProcessEffects {
-	@Effect() DIME_ASYNC_PROCESS_ACTIONS_ALL_LOAD_INITIATE$ = this.actions.ofType( DIME_ASYNC_PROCESS_ACTIONS.ALL.LOAD.INITIATE ).switchMap( ( a: DimeAsyncProcessAllLoadInitiateAction ) => {
-		return this.backend.allLoad().pipe(
-			mergeMap( resp => {
-				return [
-					new DimeAsyncProcessAllLoadCompleteAction( resp ),
-					DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
-					DimeStreamActions.ALL.LOAD.initiateifempty()
-				];
-			} )
-		);
-	} );
-	@Effect() DIME_ASYNC_PROCESS_ACTIONS_ONE_CREATE_INITIATE$ = this.actions.ofType( DIME_ASYNC_PROCESS_ACTIONS.ONE.CREATE.INITIATE ).switchMap( ( a: DimeAsyncProcessOneCreateInitiateAction ) => {
-		return this.backend.oneCreate( a.payload ).map( resp => ( new DimeAsyncProcessOneCreateCompleteAction( resp ) ) );
-	} );
+	@Effect() DIME_ASYNC_PROCESS_ACTIONS_ALL_LOAD_INITIATE$ = this.actions.pipe(
+		ofType( DIME_ASYNC_PROCESS_ACTIONS.ALL.LOAD.INITIATE ),
+		switchMap( ( a: DimeAsyncProcessAllLoadInitiateAction ) => {
+			return this.backend.allLoad().pipe(
+				mergeMap( resp => {
+					return [
+						new DimeAsyncProcessAllLoadCompleteAction( resp ),
+						DimeEnvironmentActions.ALL.LOAD.initiateifempty(),
+						DimeStreamActions.ALL.LOAD.initiateifempty()
+					];
+				} )
+			);
+		} ) );
+	@Effect() DIME_ASYNC_PROCESS_ACTIONS_ONE_CREATE_INITIATE$ = this.actions.pipe(
+		ofType( DIME_ASYNC_PROCESS_ACTIONS.ONE.CREATE.INITIATE ),
+		switchMap( ( a: DimeAsyncProcessOneCreateInitiateAction ) => {
+			return this.backend.oneCreate( a.payload ).pipe(
+				map( resp => ( new DimeAsyncProcessOneCreateCompleteAction( resp ) ) ) );
+		} ) );
 	constructor( private actions: Actions, private backend: DimeAsyncProcessBackend ) { }
 }
 

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as request from 'request';
 
-export const readFile = ( path: string, encoding: string = 'utf8' ) => {
+export const readFile = ( path: string, encoding: string = 'utf8' ): Promise<string> => {
 	return new Promise( ( resolve, reject ) => {
 		fs.readFile( path, encoding, ( error, data ) => {
 			if ( error ) {

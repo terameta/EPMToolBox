@@ -1,6 +1,6 @@
 import { Action as NgRXAction, Store } from '@ngrx/store';
-import { of } from 'rxjs/observable/of';
-import { Observable } from 'rxjs/Observable';
+
+import { Observable, of } from 'rxjs';
 
 export interface Action<T = void> extends NgRXAction {
 	payload?: T;

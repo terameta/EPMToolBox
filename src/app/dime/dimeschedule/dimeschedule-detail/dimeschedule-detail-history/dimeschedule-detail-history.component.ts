@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 import { DimeLog } from '../../../../../../shared/model/dime/log';
 import { DimeScheduleService } from '../../dimeschedule.service';
 import { DimeScheduleBackend } from '../../dimeschedule.backend';

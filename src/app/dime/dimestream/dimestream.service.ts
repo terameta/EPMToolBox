@@ -6,8 +6,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { DimeEnvironmentService } from '../dimeenvironment/dimeenvironment.service';

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Effect, Actions } from '@ngrx/effects';
+import { Effect, Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../ngstore/models';
 import { DimeSecretBackend } from './dimesecret.backend';
 import { DimeSecretActions } from './dimesecret.actions';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
-import { mergeMap, catchError } from 'rxjs/operators';
+import { mergeMap, catchError, map, switchMap, withLatestFrom, filter } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { Action } from '../../ngstore/ngrx.generators';
@@ -16,10 +16,10 @@ import { Router } from '@angular/router';
 export class DimeSecretEffects {
 	private serviceName = 'Secrets';
 
-	@Effect() ALL_LOAD_INITIATE$ = this.actions$
-		.ofType( DimeSecretActions.ALL.LOAD.INITIATE.type )
-		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading all secrets', this.serviceName ) ); return action; } )
-		.switchMap( ( action ) => {
+	@Effect() ALL_LOAD_INITIATE$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ALL.LOAD.INITIATE.type )
+		, map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading all secrets', this.serviceName ) ); return action; } )
+		, switchMap( ( action ) => {
 			return this.backend.allLoad()
 				.pipe(
 					mergeMap( resp => [
@@ -28,19 +28,19 @@ export class DimeSecretEffects {
 						DimeStatusActions.success( 'All secrets are now loaded.', this.serviceName )
 					] ),
 					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) ) );
-		} );
+		} ) );
 
-	@Effect() ALL_LOAD_INITIATEIFEMPTY$ = this.actions$
-		.ofType( DimeSecretActions.ALL.LOAD.INITIATEIFEMPTY.type )
-		.withLatestFrom( this.store$ )
-		.filter( ( [action, state] ) => ( !state.dimeSecret.items || Object.keys( state.dimeSecret.items ).length === 0 ) )
-		.map( ( [action, state] ) => action )
-		.switchMap( action => DimeSecretActions.ALL.LOAD.INITIATE.observableaction() );
+	@Effect() ALL_LOAD_INITIATEIFEMPTY$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ALL.LOAD.INITIATEIFEMPTY.type )
+		, withLatestFrom( this.store$ )
+		, filter( ( [action, state] ) => ( !state.dimeSecret.items || Object.keys( state.dimeSecret.items ).length === 0 ) )
+		, map( ( [action, state] ) => action )
+		, switchMap( action => DimeSecretActions.ALL.LOAD.INITIATE.observableaction() ) );
 
-	@Effect() ONE_CREATE_INITIATE$ = this.actions$
-		.ofType( DimeSecretActions.ONE.CREATE.INITIATE.type )
-		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Creating new secret...', this.serviceName ) ); return action; } )
-		.switchMap( ( action: Action<DimeSecret> ) => {
+	@Effect() ONE_CREATE_INITIATE$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ONE.CREATE.INITIATE.type )
+		, map( action => { this.store$.dispatch( DimeStatusActions.info( 'Creating new secret...', this.serviceName ) ); return action; } )
+		, switchMap( ( action: Action<DimeSecret> ) => {
 			return this.backend.oneCreate( action.payload )
 				.pipe(
 					mergeMap( resp => [
@@ -50,19 +50,19 @@ export class DimeSecretEffects {
 					] ),
 					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
 				);
-		} );
+		} ) );
 
-	@Effect() ONE_CREATE_COMPLETE$ = this.actions$
-		.ofType( DimeSecretActions.ONE.CREATE.COMPLETE.type )
-		.switchMap( ( action: Action<DimeSecret> ) => {
+	@Effect() ONE_CREATE_COMPLETE$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ONE.CREATE.COMPLETE.type )
+		, switchMap( ( action: Action<DimeSecret> ) => {
 			this.router.navigateByUrl( 'dime/secrets/secret-detail/' + action.payload.id );
 			return DimeSecretActions.ALL.LOAD.INITIATE.observableaction();
-		} );
+		} ) );
 
-	@Effect() ONE_LOAD_INITIATE$ = this.actions$
-		.ofType( DimeSecretActions.ONE.LOAD.INITIATE.type )
-		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading the secret...', this.serviceName ) ); return action; } )
-		.switchMap( ( action: Action<number> ) => {
+	@Effect() ONE_LOAD_INITIATE$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ONE.LOAD.INITIATE.type )
+		, map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading the secret...', this.serviceName ) ); return action; } )
+		, switchMap( ( action: Action<number> ) => {
 			return this.backend.oneLoad( action.payload )
 				.pipe(
 					mergeMap( resp => [
@@ -72,20 +72,20 @@ export class DimeSecretEffects {
 					] ),
 					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
 				);
-		} );
+		} ) );
 
-	@Effect() ONE_LOAD_INITIATEIFEMPTY$ = this.actions$
-		.ofType( DimeSecretActions.ONE.LOAD.INITIATEIFEMPTY.type )
-		.map( action => <Action<number>>action )
-		.withLatestFrom( this.store$ )
-		.filter( ( [action, state] ) => ( !state.dimeSecret.curItem || state.dimeSecret.curItem.id === 0 || state.dimeSecret.curItem.id !== action.payload ) )
-		.map( ( [action, state] ) => action )
-		.switchMap( ( action ) => DimeSecretActions.ONE.LOAD.INITIATE.observableaction( action.payload ) );
+	@Effect() ONE_LOAD_INITIATEIFEMPTY$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ONE.LOAD.INITIATEIFEMPTY.type )
+		, map( action => <Action<number>>action )
+		, withLatestFrom( this.store$ )
+		, filter( ( [action, state] ) => ( !state.dimeSecret.curItem || state.dimeSecret.curItem.id === 0 || state.dimeSecret.curItem.id !== action.payload ) )
+		, map( ( [action, state] ) => action )
+		, switchMap( ( action ) => DimeSecretActions.ONE.LOAD.INITIATE.observableaction( action.payload ) ) );
 
-	@Effect() ONE_UPDATE_INITIATE$ = this.actions$
-		.ofType( DimeSecretActions.ONE.UPDATE.INITIATE.type )
-		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving the secret...', this.serviceName ) ); return action; } )
-		.switchMap( ( action: Action<DimeSecret> ) => {
+	@Effect() ONE_UPDATE_INITIATE$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ONE.UPDATE.INITIATE.type )
+		, map( action => { this.store$.dispatch( DimeStatusActions.info( 'Saving the secret...', this.serviceName ) ); return action; } )
+		, switchMap( ( action: Action<DimeSecret> ) => {
 			return this.backend.oneUpdate( action.payload )
 				.pipe(
 					mergeMap( ( resp: DimeSecret ) => [
@@ -96,12 +96,12 @@ export class DimeSecretEffects {
 					] ),
 					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
 				);
-		} );
+		} ) );
 
-	@Effect() ONE_DELETE_INITIATE$ = this.actions$
-		.ofType( DimeSecretActions.ONE.DELETE.INITIATE.type )
-		.map( action => { this.store$.dispatch( DimeStatusActions.info( 'Deleting the secret...', this.serviceName ) ); return action; } )
-		.switchMap( ( action: Action<number> ) => {
+	@Effect() ONE_DELETE_INITIATE$ = this.actions$.pipe(
+		ofType( DimeSecretActions.ONE.DELETE.INITIATE.type )
+		, map( action => { this.store$.dispatch( DimeStatusActions.info( 'Deleting the secret...', this.serviceName ) ); return action; } )
+		, switchMap( ( action: Action<number> ) => {
 			return this.backend.oneDelete( action.payload )
 				.pipe(
 					mergeMap( resp => [
@@ -111,7 +111,7 @@ export class DimeSecretEffects {
 					] ),
 					catchError( resp => of( DimeStatusActions.error( resp, this.serviceName ) ) )
 				);
-		} );
+		} ) );
 
 	constructor(
 		private actions$: Actions,

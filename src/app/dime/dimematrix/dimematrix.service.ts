@@ -12,7 +12,7 @@ import { DimeMatrixBackend } from './dimematrix.backend';
 import { DimeMapService } from '../dimemap/dimemap.service';
 import { DimeStreamService } from '../dimestream/dimestream.service';
 
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 import * as _ from 'lodash';
 import { Store } from '@ngrx/store';
@@ -80,7 +80,7 @@ export class DimeMatrixService {
 	}
 	private matrixExportDownload = ( response: any ) => {
 		let blob: any; blob = new Blob( [response], { type: 'application/vnd.ms-excel' } );
-		const url = window.URL.createObjectURL( blob, { oneTimeOnly: true } );
+		const url = ( window as any ).URL.createObjectURL( blob, { oneTimeOnly: true } );
 		const a = document.createElement( 'a' );
 		a.href = url;
 		a.download = this.currentItem.name + ' ' + getFormattedDate() + '.xlsx';

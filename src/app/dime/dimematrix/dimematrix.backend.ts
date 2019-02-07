@@ -1,6 +1,5 @@
-import { of } from 'rxjs/observable/of';
 import { DimeMatrix, DimeMatrixRefreshPayload } from '../../../../shared/model/dime/matrix';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IsReadyPayload } from '../../../../shared/enums/generic/readiness';

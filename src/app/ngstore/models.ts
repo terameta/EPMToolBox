@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import {
 	DIME_ASYNC_PROCESS_ACTIONS,
@@ -8,10 +8,10 @@ import {
 } from '../dime/dimeasyncprocess/dimeasyncprocess.ngrx';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { Action, State, Store } from '@ngrx/store';
-import { of } from 'rxjs/observable/of';
+
 import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from './applicationstatus';
 
 import { dimeUIReducer } from './uistate.reducer';
@@ -57,6 +57,7 @@ import { DimeScheduleActions } from '../dime/dimeschedule/dimeschedule.actions';
 import { DimeSecretState, dimeSecretInitialState } from '../dime/dimesecret/dimesecret.state';
 import { dimeSecretReducer } from '../dime/dimesecret/dimesecret.reducer';
 import { DimeSecretActions } from '../dime/dimesecret/dimesecret.actions';
+import { map } from 'rxjs/operators';
 
 export interface RouteState { currentRoute: ActivatedRouteSnapshot }
 export interface AppState {
@@ -143,7 +144,9 @@ export const reducers = {
 
 @Injectable()
 export class RouteEffects {
-	@Effect() navigationHappened$ = this.actions$.ofType( ROUTER_NAVIGATION ).map( ( r: RouterNavigationAction ) => routeHandleNavigation( r ) );
+	@Effect() navigationHappened$ = this.actions$.pipe(
+		ofType( ROUTER_NAVIGATION ),
+		map( ( r: RouterNavigationAction ) => routeHandleNavigation( r ) ) );
 
 	constructor( private actions$: Actions, private store: Store<State<AppState>> ) { }
 }
@@ -325,7 +328,9 @@ function routeHandleNavigation( r: RouterNavigationAction ) {
 }
 
 function disectNavigation( r: ActivatedRouteSnapshot, segments: string[] ) {
-	let route = r.root;
+	// console.log( r );
+	let route = r;
+	if ( r.root ) route = r.root;
 	let params: any = {};
 	while ( route.firstChild ) {
 		if ( route.firstChild.routeConfig.path && route.firstChild.routeConfig.path !== '' ) {
@@ -335,4 +340,5 @@ function disectNavigation( r: ActivatedRouteSnapshot, segments: string[] ) {
 		route = route.firstChild;
 	}
 	return { params, qparams: route.queryParams };
+	// return { params: r.params, qparams: r.queryParams };
 }

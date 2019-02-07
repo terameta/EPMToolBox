@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DimeStreamFieldDetail } from '../../../../../../shared/model/dime/streamfield';
 import { DimeStreamService } from '../../dimestream.service';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 @Component( {
 	selector: 'app-dime-stream-detail-field-descriptions-hpdb',

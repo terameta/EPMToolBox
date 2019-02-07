@@ -1,9 +1,10 @@
 import { Action as NgRXAction, Store } from '@ngrx/store';
 import { Injectable } from '@angular/core';
-import { Actions, Effect } from '@ngrx/effects';
+import { Actions, Effect, ofType } from '@ngrx/effects';
 import { AppState } from '../ngstore/models';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { map } from 'rxjs/operators';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -33,9 +34,9 @@ export function dimeStatusReducer( state: DimeStatusState, action: Action ): Dim
 
 @Injectable()
 export class DimeStatusEffects {
-	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_ERROR$ = this.actions$
-		.ofType( DimeStatusActions.ERROR )
-		.map( ( action: Action ) => {
+	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_ERROR$ = this.actions$.pipe(
+		ofType( DimeStatusActions.ERROR )
+		, map( ( action: Action ) => {
 			let message = 'No message received';
 			console.log( action );
 			if ( action.payload ) {
@@ -48,18 +49,18 @@ export class DimeStatusEffects {
 				}
 			}
 			this.toastr.error( message, action.payload.caller );
-		} );
-	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_SUCCESS$ = this.actions$
-		.ofType( DimeStatusActions.SUCCESS )
-		.map( ( action: Action ) => {
+		} ) );
+	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_SUCCESS$ = this.actions$.pipe(
+		ofType( DimeStatusActions.SUCCESS )
+		, map( ( action: Action ) => {
 			this.toastr.success( action.payload.message, action.payload.caller );
-		} );
+		} ) );
 
-	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_INFO$ = this.actions$
-		.ofType( DimeStatusActions.INFO )
-		.map( ( action: Action ) => {
+	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_INFO$ = this.actions$.pipe(
+		ofType( DimeStatusActions.INFO )
+		, map( ( action: Action ) => {
 			this.toastr.info( action.payload.message, action.payload.caller );
-		} );
+		} ) );
 
 	constructor( private actions$: Actions, private store$: Store<AppState>, private router$: Router, private toastr: ToastrService ) { }
 }

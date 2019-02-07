@@ -10,14 +10,12 @@ import { DimeSecretState } from '../dimesecret.state';
 	styleUrls: ['./dimesecret-list.component.scss']
 } )
 export class DimeSecretListComponent implements OnInit {
-	public state$: Store<DimeSecretState>;
+	public state$ = this.store.select<DimeSecretState>( state => state.dimeSecret );
 
 	constructor(
 		public store: Store<AppState>,
 		public secretService: DimeSecretService
-	) {
-		this.state$ = store.select<DimeSecretState>( state => state.dimeSecret );
-	}
+	) { }
 
 	ngOnInit() {
 	}

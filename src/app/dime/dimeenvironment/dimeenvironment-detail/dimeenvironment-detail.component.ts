@@ -2,8 +2,7 @@ import { ActivatedRoute, Router, Params } from '@angular/router';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
-import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { DimeEnvironmentService } from '../dimeenvironment.service';
 import { DimeTagService } from '../../dimetag/dimetag.service';

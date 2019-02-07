@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DimeProcessBackend } from '../../dimeprocess.backend';
 import { DimeProcessService } from '../../dimeprocess.service';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 import { DimeLog } from '../../../../../../shared/model/dime/log';
 
 @Component( {

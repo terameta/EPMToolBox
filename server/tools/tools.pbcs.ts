@@ -62,6 +62,7 @@ export class PBCSTools {
 		const rows = JSON.parse( JSON.stringify( payload.query.rows ) );
 		while ( rows.length > 0 ) {
 			const row = rows.splice( 0, 1 )[0];
+			console.log( '>>>', row );
 			const query = {
 				exportPlanningData: false,
 				gridDefinition: {

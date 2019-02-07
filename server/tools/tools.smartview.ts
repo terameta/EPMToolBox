@@ -1284,282 +1284,424 @@ export class SmartViewTools {
 		}
 		return toReturn;
 	}
-	private pbcsObtainSID01 = ( refObj: DimeEnvironmentSmartView ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			const refDetails: any = {};
-			refDetails.originalCookie = 'EPM_Remote_User=; ORA_EPMWS_User=' + encodeURIComponent( refObj.username ) + '; ORA_EPMWS_Locale=en_US; ORA_EPMWS_AccessibilityMode=false; ORA_EPMWS_ThemeSelection=Skyros';
+	private pbcsObtainSID01 = async ( refObj: DimeEnvironmentSmartView ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const refDetails: any = {};
+		refDetails.originalCookie = 'EPM_Remote_User=; ORA_EPMWS_User=' + encodeURIComponent( refObj.username ) + '; ORA_EPMWS_Locale=en_US; ORA_EPMWS_AccessibilityMode=false; ORA_EPMWS_ThemeSelection=Skyros';
+		const body = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_ConnectToProvider.xml' ) );
+		const { response } = await this.smartviewPoster( { url: refObj.smartviewurl, body, cookie: refDetails.originalCookie, followRedirect: false } );
+		refDetails.redirectTarget = response.headers.location;
+		refDetails.requestContext = this.pbcsGetRequestContext( response.headers['set-cookie'] );
 
-			request.post( {
-				url: refObj.smartviewurl,
-				// tslint:disable-next-line:max-line-length
-				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
-				headers: { 'Content-Type': 'application/xml', cookie: refDetails.originalCookie },
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					refDetails.redirectTarget = response.headers.location;
-					refDetails.requestContext = this.pbcsGetRequestContext( response.headers['set-cookie'] );
-					if ( refDetails.requestContext === '' ) {
-						reject( new Error( 'No request context retrieved ' + refObj.name + '@pbcsObtainSID01' ) );
-					} else {
-						resolve( { refObj, refDetails } );
-					}
-				}
-			} );
-		} );
-	}
-	private pbcsObtainSID02 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			refInfo.refDetails.oamPrefsCookie = 'OAM_PREFS=dGVuYW50TmFtZT1rZXJ6bmVyfnJlbWVtYmVyVGVuYW50PXRydWV+cmVtZW1iZXJNZT1mYWxzZQ==';
+		if ( refDetails.requestContext === '' ) {
+			throw ( new Error( 'No request context retrieved ' + refObj.name + '@pbcsObtainSID01' ) );
+		} else {
+			return { refObj, refDetails };
+		}
 
-			request.get( {
-				url: refInfo.refDetails.redirectTarget,
-				headers: { cookie: refInfo.refDetails.oamPrefsCookie },
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					resolve( refInfo );
-				}
-			} );
-		} );
-	}
-	private pbcsObtainSID03 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.get( {
-				url: refInfo.refObj.server + ':' + refInfo.refObj.port + '/workspace/SmartViewProviders',
-				headers: {
-					cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext
-				},
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					refInfo.refDetails.redirectTarget = response.headers.location;
-					if ( this.pbcsGetRequestContext( response.headers['set-cookie'] ) ) {
-						refInfo.refDetails.requestContext += '; ' + this.pbcsGetRequestContext( response.headers['set-cookie'] );
-					}
-					if ( refInfo.refDetails.requestContext === '' ) {
-						reject( new Error( 'No request context retrieved ' + refInfo.refObj.name + '@pbcsObtainSID03' ) );
-					} else {
-						refInfo.refDetails.encquery = url.parse( refInfo.refDetails.redirectTarget ).search;
-						resolve( refInfo );
-					}
-				}
-			} );
-		} );
-	}
-	private pbcsObtainSID04 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.get( {
-				url: refInfo.refDetails.redirectTarget,
-				headers: {
-					cookie: refInfo.refDetails.oamPrefsCookie
-				},
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					const $ = cheerio.load( response.body );
-					refInfo.refDetails.formFields = {};
-					$( 'input' ).each( ( i: any, elem: any ) => {
-						if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
-							refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
-						}
-					} );
 
-					$( 'form' ).each( ( i: any, elem: any ) => {
-						if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
-							refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
-						}
-					} );
+		// return new Promise( ( resolve, reject ) => {
+		// 	const refDetails: any = {};
+		// 	refDetails.originalCookie = 'EPM_Remote_User=; ORA_EPMWS_User=' + encodeURIComponent( refObj.username ) + '; ORA_EPMWS_Locale=en_US; ORA_EPMWS_AccessibilityMode=false; ORA_EPMWS_ThemeSelection=Skyros';
 
-					refInfo.refDetails.formFields.username = refInfo.refObj.username;
-					refInfo.refDetails.formFields.password = refInfo.refObj.password;
-					refInfo.refDetails.formFields.userid = refInfo.refObj.username;
-					refInfo.refDetails.formFields.tenantDisplayName = refInfo.refObj.identitydomain;
-					refInfo.refDetails.formFields.tenantName = refInfo.refObj.identitydomain;
+		// 	request.post( {
+		// 		url: refObj.smartviewurl,
+		// tslint:disable-next-line:max-line-length
+		// 		body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
+		// 		headers: { 'Content-Type': 'application/xml', cookie: refDetails.originalCookie },
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			refDetails.redirectTarget = response.headers.location;
+		// 			refDetails.requestContext = this.pbcsGetRequestContext( response.headers['set-cookie'] );
+		// 			if ( refDetails.requestContext === '' ) {
+		// 				reject( new Error( 'No request context retrieved ' + refObj.name + '@pbcsObtainSID01' ) );
+		// 			} else {
+		// 				resolve( { refObj, refDetails } );
+		// 			}
+		// 		}
+		// 	} );
+		// } );
+	}
+	private pbcsObtainSID02 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		await this.smartviewGetter( { url: refInfo.refDetails.redirectTarget, cookie: refInfo.refDetails.oamPrefsCookie, followRedirect: false } );
+		return refInfo;
+		// return new Promise( ( resolve, reject ) => {
+		// 	refInfo.refDetails.oamPrefsCookie = 'OAM_PREFS=dGVuYW50TmFtZT1rZXJ6bmVyfnJlbWVtYmVyVGVuYW50PXRydWV+cmVtZW1iZXJNZT1mYWxzZQ==';
 
-					refInfo.refDetails.formCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
-					if ( refInfo.refDetails.formAction ) {
-						resolve( refInfo );
-					} else {
-						reject( new Error( 'Form action is not set ' + refInfo.refObj.name + '@pbcsObtainSID04' ) );
-					}
-				}
-			} );
-		} );
+		// 	request.get( {
+		// 		url: refInfo.refDetails.redirectTarget,
+		// 		headers: { cookie: refInfo.refDetails.oamPrefsCookie },
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			resolve( refInfo );
+		// 		}
+		// 	} );
+		// } );
 	}
-	private pbcsObtainSID05 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.post( {
-				url: refInfo.refDetails.formAction,
-				headers: {
-					referer: refInfo.refDetails.redirectTarget,
-					cookie: refInfo.refDetails.oamPrefsCookie + '; ' + refInfo.refDetails.formCookie,
-				},
-				form: refInfo.refDetails.formFields,
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					refInfo.refDetails.formResponseCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
-					refInfo.refDetails.redirectTarget = response.headers.location;
-					refInfo.refDetails.referer = refInfo.refDetails.formAction + refInfo.refDetails.encquery;
-					resolve( refInfo );
-				}
-			} );
-		} );
+	private pbcsObtainSID03 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const urlCurrent = refInfo.refObj.server + ':' + refInfo.refObj.port + '/workspace/SmartViewProviders';
+		const cookie = refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext;
+		const { response } = await this.smartviewGetter( { url: urlCurrent, cookie, followRedirect: false } );
+		refInfo.refDetails.redirectTarget = response.headers.location;
+		if ( this.pbcsGetRequestContext( response.headers['set-cookie'] ) ) {
+			refInfo.refDetails.requestContext += '; ' + this.pbcsGetRequestContext( response.headers['set-cookie'] );
+		}
+		if ( refInfo.refDetails.requestContext === '' ) {
+			throw ( new Error( 'No request context retrieved ' + refInfo.refObj.name + '@pbcsObtainSID03' ) );
+		} else {
+			refInfo.refDetails.encquery = url.parse( refInfo.refDetails.redirectTarget ).search;
+			return refInfo;
+		}
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.get( {
+		// 		url: refInfo.refObj.server + ':' + refInfo.refObj.port + '/workspace/SmartViewProviders',
+		// 		headers: {
+		// 			cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext
+		// 		},
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			refInfo.refDetails.redirectTarget = response.headers.location;
+		// 			if ( this.pbcsGetRequestContext( response.headers['set-cookie'] ) ) {
+		// 				refInfo.refDetails.requestContext += '; ' + this.pbcsGetRequestContext( response.headers['set-cookie'] );
+		// 			}
+		// 			if ( refInfo.refDetails.requestContext === '' ) {
+		// 				reject( new Error( 'No request context retrieved ' + refInfo.refObj.name + '@pbcsObtainSID03' ) );
+		// 			} else {
+		// 				refInfo.refDetails.encquery = url.parse( refInfo.refDetails.redirectTarget ).search;
+		// 				resolve( refInfo );
+		// 			}
+		// 		}
+		// 	} );
+		// } );
 	}
-	private pbcsObtainSID06 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.get( {
-				url: refInfo.refDetails.redirectTarget,
-				headers: {
-					cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext,
-					referer: refInfo.refDetails.referer
-				},
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					refInfo.refDetails.currentCookie = refInfo.refDetails.originalCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
-					refInfo.refDetails.redirectTarget = refInfo.refObj.server + response.headers.location;
-					resolve( refInfo );
-				}
-			} );
+	private pbcsObtainSID04 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const { $, response } = await this.smartviewGetter( { url: refInfo.refDetails.redirectTarget, cookie: refInfo.refDetails.oamPrefsCookie, followRedirect: false } );
+
+
+		refInfo.refDetails.formFields = {};
+		$( 'input' ).each( ( i: any, elem: any ) => {
+			if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
+				refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
+			}
 		} );
+
+		$( 'form' ).each( ( i: any, elem: any ) => {
+			if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
+				refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+			}
+		} );
+
+		refInfo.refDetails.formFields.username = refInfo.refObj.username;
+		refInfo.refDetails.formFields.password = refInfo.refObj.password;
+		refInfo.refDetails.formFields.userid = refInfo.refObj.username;
+		refInfo.refDetails.formFields.tenantDisplayName = refInfo.refObj.identitydomain;
+		refInfo.refDetails.formFields.tenantName = refInfo.refObj.identitydomain;
+
+		refInfo.refDetails.formCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
+		if ( refInfo.refDetails.formAction ) {
+			return ( refInfo );
+		} else {
+			throw ( new Error( 'Form action is not set ' + refInfo.refObj.name + '@pbcsObtainSID04' ) );
+		}
+
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.get( {
+		// 		url: refInfo.refDetails.redirectTarget,
+		// 		headers: {
+		// 			cookie: refInfo.refDetails.oamPrefsCookie
+		// 		},
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			const $ = cheerio.load( response.body );
+		// refInfo.refDetails.formFields = {};
+		// $( 'input' ).each( ( i: any, elem: any ) => {
+		// 	if ( $( elem.parent ).attr( 'name' ) === 'signin_form' ) {
+		// 		refInfo.refDetails.formFields[$( elem ).attr( 'name' )] = $( elem ).val();
+		// 	}
+		// } );
+
+		// $( 'form' ).each( ( i: any, elem: any ) => {
+		// 	if ( $( elem ).attr( 'name' ) === 'signin_form' ) {
+		// 		refInfo.refDetails.formAction = response.request.uri.protocol + '//' + response.request.uri.hostname + $( elem ).attr( 'action' );
+		// 	}
+		// } );
+
+		// refInfo.refDetails.formFields.username = refInfo.refObj.username;
+		// refInfo.refDetails.formFields.password = refInfo.refObj.password;
+		// refInfo.refDetails.formFields.userid = refInfo.refObj.username;
+		// refInfo.refDetails.formFields.tenantDisplayName = refInfo.refObj.identitydomain;
+		// refInfo.refDetails.formFields.tenantName = refInfo.refObj.identitydomain;
+
+		// refInfo.refDetails.formCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
+		// if ( refInfo.refDetails.formAction ) {
+		// 	resolve( refInfo );
+		// } else {
+		// 	reject( new Error( 'Form action is not set ' + refInfo.refObj.name + '@pbcsObtainSID04' ) );
+		// }
+		// 		}
+		// 	} );
+		// } );
 	}
-	private pbcsObtainSID07 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.get( {
-				url: refInfo.refDetails.redirectTarget,
-				headers: {
-					cookie: refInfo.refDetails.currentCookie,
-					referer: refInfo.refDetails.referer
-				},
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
-					resolve( refInfo );
-				}
-			} );
+	private pbcsObtainSID05 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const { response } = await this.smartviewPoster( {
+			url: refInfo.refDetails.formAction,
+			referer: refInfo.refDetails.redirectTarget,
+			cookie: refInfo.refDetails.oamPrefsCookie + '; ' + refInfo.refDetails.formCookie,
+			form: refInfo.refDetails.formFields,
+			followRedirect: false,
 		} );
+
+		refInfo.refDetails.formResponseCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
+		refInfo.refDetails.redirectTarget = response.headers.location;
+		refInfo.refDetails.referer = refInfo.refDetails.formAction + refInfo.refDetails.encquery;
+
+		return refInfo;
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.post( {
+		// 		url: refInfo.refDetails.formAction,
+		// 		headers: {
+		// 			referer: refInfo.refDetails.redirectTarget,
+		// 			cookie: refInfo.refDetails.oamPrefsCookie + '; ' + refInfo.refDetails.formCookie,
+		// 		},
+		// 		form: refInfo.refDetails.formFields,
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			refInfo.refDetails.formResponseCookie = this.pbcsGetCookieString( response.headers['set-cookie'] );
+		// 			refInfo.refDetails.redirectTarget = response.headers.location;
+		// 			refInfo.refDetails.referer = refInfo.refDetails.formAction + refInfo.refDetails.encquery;
+		// 			resolve( refInfo );
+		// 		}
+		// 	} );
+		// } );
 	}
-	private pbcsObtainSID08 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.post( {
-				url: refInfo.refDetails.redirectTarget,
-				headers: {
-					'Content-Type': 'application/xml',
-					cookie: refInfo.refDetails.currentCookie
-				},
-				// tslint:disable-next-line:max-line-length
-				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					resolve( refInfo );
-				}
-			} );
+	private pbcsObtainSID06 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const { response } = await this.smartviewGetter( {
+			url: refInfo.refDetails.redirectTarget,
+			cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext,
+			referer: refInfo.refDetails.referer,
+			followRedirect: false
 		} );
+		refInfo.refDetails.currentCookie = refInfo.refDetails.originalCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
+		refInfo.refDetails.redirectTarget = refInfo.refObj.server + response.headers.location;
+		return refInfo;
+
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.get( {
+		// 		url: refInfo.refDetails.redirectTarget,
+		// 		headers: {
+		// 			cookie: refInfo.refDetails.originalCookie + '; ' + refInfo.refDetails.requestContext,
+		// 			referer: refInfo.refDetails.referer
+		// 		},
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			refInfo.refDetails.currentCookie = refInfo.refDetails.originalCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
+		// 			refInfo.refDetails.redirectTarget = refInfo.refObj.server + response.headers.location;
+		// 			resolve( refInfo );
+		// 		}
+		// 	} );
+		// } );
 	}
-	private pbcsObtainSID09 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
-		return new Promise( ( resolve, reject ) => {
-			request.post( {
-				url: refInfo.refDetails.redirectTarget,
-				headers: {
-					'Content-Type': 'application/xml',
-					cookie: refInfo.refDetails.currentCookie
-				},
-				body: '<req_GetProvisionedDataSources><usr></usr><pwd></pwd><filters></filters></req_GetProvisionedDataSources>',
-				followRedirect: false,
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					const $ = cheerio.load( body );
-					$( 'Product' ).each( ( i: any, elem: any ) => {
-						if ( $( elem ).attr( 'id' ) === 'HP' ) {
-							refInfo.refObj.planningurl = refInfo.refObj.server + ':' + refInfo.refObj.port + $( elem ).children( 'Server' ).attr( 'context' );
-						}
-					} );
-					refInfo.refObj.ssotoken = $( 'sso' ).text();
-					if ( !refInfo.refObj.planningurl ) {
-						reject( new Error( 'No planning url could be identified ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
-					} else if ( !refInfo.refObj.ssotoken ) {
-						reject( new Error( 'No sso token was found ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
-					} else {
-						resolve( refInfo );
-					}
-				}
-			} );
-		} );
+	private pbcsObtainSID07 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const { response } = await this.smartviewGetter( { url: refInfo.refDetails.redirectTarget, cookie: refInfo.refDetails.currentCookie, referer: refInfo.refDetails.referer, followRedirect: false } );
+		refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
+		return refInfo;
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.get( {
+		// 		url: refInfo.refDetails.redirectTarget,
+		// 		headers: {
+		// 			cookie: refInfo.refDetails.currentCookie,
+		// 			referer: refInfo.refDetails.referer
+		// 		},
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			refInfo.refDetails.currentCookie = refInfo.refDetails.currentCookie + '; ' + this.pbcsGetCookieString( response.headers['set-cookie'] );
+		// 			resolve( refInfo );
+		// 		}
+		// 	} );
+		// } );
 	}
-	private pbcsObtainSID10 = ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<DimeEnvironmentSmartView> => {
-		return new Promise( ( resolve, reject ) => {
-			request.post( {
-				url: refInfo.refObj.planningurl,
-				body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><sso>' + refInfo.refObj.ssotoken + '</sso></req_ConnectToProvider>',
-				headers: { 'Content-Type': 'application/xml', cookie: refInfo.refDetails.currentCookie },
-				timeout: 120000
-			}, ( err, response, body ) => {
-				if ( err ) {
-					reject( err );
-				} else {
-					const $ = cheerio.load( body );
-					refInfo.refObj.SID = $( 'sID' ).text();
-					refInfo.refObj.cookies = refInfo.refDetails.currentCookie;
-					if ( refInfo.refObj.SID ) {
-						resolve( refInfo.refObj );
-					} else {
-						reject( new Error( 'No SID found ' + refInfo.refObj.name + '@pbcsObtainSID10' ) );
-					}
-				}
-			} );
+	private pbcsObtainSID08 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const body = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_ConnectToProvider.xml' ) );
+		await this.smartviewPoster( { url: refInfo.refDetails.redirectTarget, cookie: refInfo.refDetails.currentCookie, body, followRedirect: false } );
+		return refInfo;
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.post( {
+		// 		url: refInfo.refDetails.redirectTarget,
+		// 		headers: {
+		// 			'Content-Type': 'application/xml',
+		// 			cookie: refInfo.refDetails.currentCookie
+		// 		},
+		// tslint:disable-next-line:max-line-length
+		// 		body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.7.3</ClientXMLVersion><ClientInfo><ExternalVersion>11.1.2.5.710</ExternalVersion><OfficeVersion>16.0</OfficeVersion><OSVersion>Windows MajorVersion.MinorVersion.BuildNumber 10.0.15063</OSVersion></ClientInfo><lngs enc="0">en_US</lngs><usr></usr><pwd></pwd><sharedServices>1</sharedServices></req_ConnectToProvider >',
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			resolve( refInfo );
+		// 		}
+		// 	} );
+		// } );
+	}
+	private pbcsObtainSID09 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<{ refObj: DimeEnvironmentSmartView, refDetails: any }> => {
+		const body = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_GetProvisionedDataSources.xml' ) );
+		const { $ } = await this.smartviewPoster( { url: refInfo.refDetails.redirectTarget, cookie: refInfo.refDetails.currentCookie, body, followRedirect: false } );
+		$( 'Product' ).each( ( i: any, elem: any ) => {
+			if ( $( elem ).attr( 'id' ) === 'HP' ) {
+				refInfo.refObj.planningurl = refInfo.refObj.server + ':' + refInfo.refObj.port + $( elem ).children( 'Server' ).attr( 'context' );
+			}
 		} );
+		refInfo.refObj.ssotoken = $( 'sso' ).text();
+		if ( !refInfo.refObj.planningurl ) {
+			throw ( new Error( 'No planning url could be identified ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+		} else if ( !refInfo.refObj.ssotoken ) {
+			throw ( new Error( 'No sso token was found ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+		} else {
+			// resolve( refInfo );
+			return refInfo;
+		}
+
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.post( {
+		// 		url: refInfo.refDetails.redirectTarget,
+		// 		headers: {
+		// 			'Content-Type': 'application/xml',
+		// 			cookie: refInfo.refDetails.currentCookie
+		// 		},
+		// 		body: '<req_GetProvisionedDataSources><usr></usr><pwd></pwd><filters></filters></req_GetProvisionedDataSources>',
+		// 		followRedirect: false,
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			const $ = cheerio.load( body );
+		// 			$( 'Product' ).each( ( i: any, elem: any ) => {
+		// 				if ( $( elem ).attr( 'id' ) === 'HP' ) {
+		// 					refInfo.refObj.planningurl = refInfo.refObj.server + ':' + refInfo.refObj.port + $( elem ).children( 'Server' ).attr( 'context' );
+		// 				}
+		// 			} );
+		// 			refInfo.refObj.ssotoken = $( 'sso' ).text();
+		// 			if ( !refInfo.refObj.planningurl ) {
+		// 				reject( new Error( 'No planning url could be identified ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+		// 			} else if ( !refInfo.refObj.ssotoken ) {
+		// 				reject( new Error( 'No sso token was found ' + refInfo.refObj.name + '@pbcsObtainSID09' ) );
+		// 			} else {
+		// 				resolve( refInfo );
+		// 			}
+		// 		}
+		// 	} );
+		// } );
+	}
+	private pbcsObtainSID10 = async ( refInfo: { refObj: DimeEnvironmentSmartView, refDetails: any } ): Promise<DimeEnvironmentSmartView> => {
+		const bodyXML = await Promisers.readFile( path.join( __dirname, './tools.smartview.assets/req_ConnectToProviderWithSSO.xml' ) );
+		const bodyTemplate = Handlebars.compile( bodyXML );
+		const body = bodyTemplate( { sso: refInfo.refObj.ssotoken } );
+		const { $ } = await this.smartviewPoster( { url: refInfo.refObj.planningurl, body, cookie: refInfo.refDetails.currentCookie } );
+
+		refInfo.refObj.SID = $( 'sID' ).text();
+		refInfo.refObj.cookies = refInfo.refDetails.currentCookie;
+		if ( refInfo.refObj.SID ) {
+			return refInfo.refObj;
+		} else {
+			throw ( new Error( 'No SID found ' + refInfo.refObj.name + '@pbcsObtainSID10' ) );
+		}
+		// return new Promise( ( resolve, reject ) => {
+		// 	request.post( {
+		// 		url: refInfo.refObj.planningurl,
+		// 		body: '<req_ConnectToProvider><ClientXMLVersion>4.2.5.6.0</ClientXMLVersion><lngs enc="0">en_US</lngs><sso>' + refInfo.refObj.ssotoken + '</sso></req_ConnectToProvider>',
+		// 		headers: { 'Content-Type': 'application/xml', cookie: refInfo.refDetails.currentCookie },
+		// 		timeout: 120000
+		// 	}, ( err, response, body ) => {
+		// 		if ( err ) {
+		// 			reject( err );
+		// 		} else {
+		// 			const $ = cheerio.load( body );
+		// 			refInfo.refObj.SID = $( 'sID' ).text();
+		// 			refInfo.refObj.cookies = refInfo.refDetails.currentCookie;
+		// 			if ( refInfo.refObj.SID ) {
+		// 				resolve( refInfo.refObj );
+		// 			} else {
+		// 				reject( new Error( 'No SID found ' + refInfo.refObj.name + '@pbcsObtainSID10' ) );
+		// 			}
+		// 		}
+		// 	} );
+		// } );
 	}
 
-	private smartviewRequester = ( options: SmartViewRequestOptions ): Promise<{ body: any, $: CheerioStatic, options: SmartViewRequestOptions }> => {
+	private smartviewRequester = ( options: SmartViewRequestOptions ): Promise<{ body: any, $: CheerioStatic, options: SmartViewRequestOptions, response: any }> => {
 		return new Promise( ( resolve, reject ) => {
 			const requestOptions: any = {};
 			requestOptions.url = options.url;
 			requestOptions.method = options.method;
-			requestOptions.body = options.body;
+			if ( options.form ) { requestOptions.form = options.form; }
+			if ( options.body ) { requestOptions.body = options.body; }
 			requestOptions.headers = { 'Content-Type': 'application/xml' };
 			if ( options.contentType ) { requestOptions.headers['Content-Type'] = options.contentType; }
 			if ( options.cookie ) { requestOptions.headers.cookie = options.cookie; }
 			requestOptions.timeout = 120000;
 			if ( options.timeout ) { requestOptions.timeout = options.timeout; }
+			if ( options.followRedirect === false ) { requestOptions.followRedirect = false; }
+			this.smartviewRequesterAction( requestOptions, options ).then( resolve ).catch( reject );
+			// request( requestOptions, ( err0: Error, res0: any, bod0: any ) => {
+			// 	if ( err0 ) {
+			// 		reject( err0 );
+			// 	} else {
+			// 		try {
+			// 			resolve( { body: bod0, $: cheerio.load( bod0 ), options } );
+			// 		} catch ( error ) {
+			// 			reject( error );
+			// 		}
+			// 	}
+			// } );
+		} );
+	}
+	private smartviewRequesterAction = ( requestOptions: any, options: SmartViewRequestOptions, retryCount = 0 ) => {
+		return new Promise( ( resolve, reject ) => {
 			request( requestOptions, ( err: Error, response: any, body: any ) => {
 				if ( err ) {
-					reject( err );
+					if ( retryCount < 10 ) {
+						resolve( this.smartviewRequesterAction( requestOptions, options, ++retryCount ) );
+					} else {
+						reject( err );
+					}
 				} else {
 					try {
-						resolve( { body, $: cheerio.load( body ), options } );
+						resolve( { body, $: cheerio.load( body ), options, response } );
 					} catch ( error ) {
-						reject( error );
+						if ( retryCount < 10 ) {
+							resolve( this.smartviewRequesterAction( requestOptions, options, ++retryCount ) );
+						} else {
+							reject( error );
+						}
 					}
 				}
 			} );

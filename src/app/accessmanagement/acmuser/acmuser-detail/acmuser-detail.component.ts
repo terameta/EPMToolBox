@@ -1,5 +1,4 @@
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs/Subscription';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
@@ -15,6 +14,7 @@ import { DimeProcessActions } from '../../../dime/dimeprocess/dimeprocess.action
 import { DimeStreamActions } from '../../../dime/dimestream/dimestream.actions';
 import * as _ from 'lodash';
 import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
+import { Subscription } from 'rxjs';
 
 @Component( {
 	selector: 'app-acmuser-detail',

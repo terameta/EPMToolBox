@@ -4,5 +4,8 @@ export interface SmartViewRequestOptions {
 	body?: string,
 	contentType?: string,
 	cookie?: string,
-	timeout?: number
+	timeout?: number,
+	followRedirect?: boolean,
+	referer?: any,
+	form?: any
 }

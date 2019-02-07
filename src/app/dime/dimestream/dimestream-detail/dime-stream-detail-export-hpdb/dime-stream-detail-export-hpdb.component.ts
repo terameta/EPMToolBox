@@ -5,15 +5,13 @@ import { BsModalRef } from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import { ModalOptions } from 'ngx-bootstrap/modal/modal-options.class';
 import { HpdbMemberSelectorComponent } from '../../../../shared/hpdb-member-selector/hpdb-member-selector.component';
 import { DimeStreamExportHPDB } from '../../../../../../shared/model/dime/stream';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { ToastrService } from 'ngx-toastr';
 import { DimeStreamBackend } from '../../dimestream.backend';
 import { countMembers } from '../../../../../../shared/utilities/hpUtilities';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../ngstore/models';
 import { ActivatedRoute } from '@angular/router';
-import { mergeMap } from 'rxjs/operators';
+import { map, combineLatest, tap } from 'rxjs/operators';
 
 @Component( {
 	selector: 'app-dime-stream-detail-export-hpdb',
@@ -49,19 +47,17 @@ export class DimeStreamDetailExportHPDBComponent implements OnInit {
 			.catch( issue => {
 				console.error( 'Failure somewhere:', issue );
 			} );
-		this.store.select( 'dimeStream' )
-			.map( s => s.curItem.exports )
-			.pipe(
-				mergeMap( exportList => this.route.paramMap.map( p => ( [parseInt( p.get( 'exportid' ), 10 ), exportList] ) ) )
-			)
-			.map( ( [exportid, exportList] ) => ( exportList ? ( <any[]>exportList ).find( e => e.id === exportid ) : <DimeStreamExportHPDB>{} ) )
-			.subscribe( currentExport => {
-				this.export = currentExport || <DimeStreamExportHPDB>{};
-				try {
-					this.recalculateCellCounts();
-				} catch ( e ) { }
-				// console.log( 'Export is updated from the state and params', currentExport.id );
-			} );
+		this.store.select( 'dimeStream' ).pipe(
+			map( s => s.curItem.exports ),
+			combineLatest( this.route.params ),
+			map( ( [exportList, params] ) => ( exportList && params.exportid ? exportList.find( e => e.id === parseInt( params.exportid, 10 ) ) : <DimeStreamExportHPDB>{} ) ),
+		).subscribe( currentExport => {
+			this.export = currentExport || <DimeStreamExportHPDB>{};
+			try {
+				this.recalculateCellCounts();
+			} catch ( e ) { }
+			// console.log( 'Export is updated from the state and params', currentExport.id );
+		} );
 	}
 
 	private waitUntilReady = () => {

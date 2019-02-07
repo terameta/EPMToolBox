@@ -82,7 +82,7 @@ export class DimeMapService {
 
 	private mapExportDownload = ( response: any ) => {
 		let blob: any; blob = new Blob( [response], { type: 'application/vnd.ms-excel' } );
-		const url = window.URL.createObjectURL( blob, { oneTimeOnly: true } );
+		const url = ( window as any ).URL.createObjectURL( blob, { oneTimeOnly: true } );
 		const a = document.createElement( 'a' );
 		a.href = url;
 		a.download = this.currentItem.name + ' ' + getFormattedDate() + '.xlsx';

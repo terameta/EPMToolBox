@@ -2,12 +2,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 // import { AuthHttp } from 'angular2-jwt';
 // import { Headers, Http } from '@angular/http';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 
 import { AcmUser } from '../../../../shared/model/accessmanagement/user';
 import { HttpClient } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class AcmUserService {
@@ -50,8 +51,7 @@ export class AcmUserService {
 		} );
 	}
 	public fetchAll = () => {
-		return this.http.get( this.baseUrl ).
-			catch( error => Observable.throw( error ) );
+		return this.http.get( this.baseUrl ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
 	public create = () => {
 		this.http.post<AcmUser>( this.baseUrl, {} )
@@ -98,12 +98,10 @@ export class AcmUserService {
 			} );
 	}
 	public fetchOne = ( id: number ) => {
-		return this.http.get( this.baseUrl + '/' + id ).
-			catch( error => Observable.throw( error ) );
+		return this.http.get( this.baseUrl + '/' + id ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
 	public fetchUserRights = ( id: number ) => {
-		return this.http.get( this.baseUrl + '/userrights/' + id ).
-			catch( error => Observable.throw( error ) );
+		return this.http.get( this.baseUrl + '/userrights/' + id ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
 	public update = ( curItem?: AcmUser ) => {
 		let shouldUpdate = false;

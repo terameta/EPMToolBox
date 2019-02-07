@@ -2,11 +2,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 // import { AuthHttp } from 'angular2-jwt';
 // import { Headers, Http } from '@angular/http';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
 import { AcmServer } from '../../../../shared/model/accessmanagement/server';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class AcmServerService {
@@ -48,8 +48,7 @@ export class AcmServerService {
 		} );
 	}
 	public fetchAll = () => {
-		return this.http.get<AcmServer[]>( this.baseUrl ).
-			catch( error => Observable.throw( error ) );
+		return this.http.get<AcmServer[]>( this.baseUrl ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
 	public create = () => {
 		this.http.post<AcmServer>( this.baseUrl, {} )
@@ -89,9 +88,9 @@ export class AcmServerService {
 			} );
 	}
 	public fetchOne = ( id: number ) => {
-		return this.http.get( this.baseUrl + '/' + id ).
-			catch( error => Observable.throw( error ) );
+		return this.http.get( this.baseUrl + '/' + id ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
+
 	public update = ( curItem?: AcmServer ) => {
 		let shouldUpdate = false;
 		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; }

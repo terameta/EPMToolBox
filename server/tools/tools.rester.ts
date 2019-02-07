@@ -10,7 +10,7 @@ export class Rester {
 			// console.log( result );
 			res.send( result );
 		} ).catch( function ( issue: any ) {
-			console.log( issue );
+			console.log( 'rester.respond caught issue:', issue );
 			res.status( 500 ).json( { status: 'fail', message: issue } );
 		} );
 	}

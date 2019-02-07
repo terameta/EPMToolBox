@@ -1,7 +1,7 @@
 import { ActivatedRoute, Params } from '@angular/router';
 import { DimeScheduleService } from '../dimeschedule.service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 @Component( {
 	selector: 'app-dimeschedule-detail',

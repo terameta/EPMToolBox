@@ -18,6 +18,7 @@ import { DimeEnvironmentActions } from './dimeenvironment.actions';
 import { DimeEnvironmentBackend } from './dimeenvironment.backend';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
 import { DimeStream } from '../../../../shared/model/dime/stream';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class DimeEnvironmentService {
@@ -72,27 +73,27 @@ export class DimeEnvironmentService {
 	}
 
 	public listDatabases = ( id: number ) => {
-		return this.backend.listDatabases( id )
-			.catch( resp => {
+		return this.backend.listDatabases( id ).pipe(
+			catchError( resp => {
 				this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 				return resp;
-			} );
+			} ) );
 	}
 
 	public listTables = ( id: number, db: string ) => {
-		return this.backend.listTables( id, db )
-			.catch( resp => {
+		return this.backend.listTables( id, db ).pipe(
+			catchError( resp => {
 				this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 				return resp;
-			} );
+			} ) );
 	}
 
 	public listDescriptiveTables = ( id: number, db: string, cube: string ) => {
-		return this.backend.listDescriptiveTables( id, db, cube )
-			.catch( resp => {
+		return this.backend.listDescriptiveTables( id, db, cube ).pipe(
+			catchError( resp => {
 				this.store.dispatch( DimeStatusActions.error( resp, this.serviceName ) );
 				return resp;
-			} );
+			} ) );
 	}
 
 	public testAll = () => {

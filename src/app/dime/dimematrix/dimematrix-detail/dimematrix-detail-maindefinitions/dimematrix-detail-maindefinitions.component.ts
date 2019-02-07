@@ -1,7 +1,7 @@
 import { DimeMatrixService } from '../../dimematrix.service';
 import { SortByName } from '../../../../../../shared/utilities/utilityFunctions';
 import { DimeStream } from '../../../../../../shared/model/dime/stream';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 import { AppState } from '../../../../ngstore/models';
 import { Store } from '@ngrx/store';
 import * as _ from 'lodash';

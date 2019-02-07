@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DimeStreamService } from 'app/dime/dimestream/dimestream.service';
-import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-import { Subscription } from 'rxjs/Subscription';
+import { DimeStreamService } from '../../dimestream.service';
 
 @Component( {
 	selector: 'app-dime-stream-detail-field-descriptions',
@@ -10,9 +8,7 @@ import { Subscription } from 'rxjs/Subscription';
 } )
 export class DimeStreamDetailFieldDescriptionsComponent implements OnInit {
 
-	constructor( public mainService: DimeStreamService ) {
-	}
+	constructor( public mainService: DimeStreamService ) { }
 
-	ngOnInit() {
-	}
+	ngOnInit() { }
 }

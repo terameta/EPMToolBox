@@ -4,7 +4,7 @@ import { DimeProcessService } from '../dimeprocess.service';
 import { DimeEnvironmentService } from '../../dimeenvironment/dimeenvironment.service';
 import { DimeStreamService } from '../../dimestream/dimestream.service';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute, Params } from '@angular/router';
 import { SortByName, SortByDescription } from '../../../../../shared/utilities/utilityFunctions';
 import { DimeStream } from '../../../../../shared/model/dime/stream';

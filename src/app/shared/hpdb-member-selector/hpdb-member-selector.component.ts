@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ITreeOptions } from 'angular-tree-component';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 
 @Component( {
 	selector: 'app-hpdb-member-selector',
