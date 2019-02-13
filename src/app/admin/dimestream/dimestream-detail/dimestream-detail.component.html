@@ -1,0 +1,13 @@
+<div class="w-100 p-3">
+	<ul class="nav nav-tabs">
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="definitions" data-toggle="tab"> <i class="fa fa-sliders fa-fw"></i> Main Definitions </a> </li>
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="fields" data-toggle="tab"> <i class="fa fa-columns fa-fw"></i> Fields </a> </li>
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="fielddescriptions" data-toggle="tab"> <i class="fa fa-align-justify fa-fw"></i> Field Descriptions </a> </li>
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="export" data-toggle="tab"> <i class="fa fa-download fa-fw"></i> Export Data </a> </li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active">
+			<router-outlet></router-outlet>
+		</div>
+	</div>
+</div>

@@ -1,4 +1,4 @@
-export interface DimeCredential {
+export interface Credential {
 	id: number,
 	name: string,
 	username: string,
@@ -6,6 +6,6 @@ export interface DimeCredential {
 	tags: any
 }
 
-export interface DimeCredentialDetail extends DimeCredential {
+export interface CredentialDetail extends Credential {
 	clearPassword: string
 }

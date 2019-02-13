@@ -1,4 +1,4 @@
-import { AuthModule } from '../../welcome/auth.module';
+import { AuthModule } from '../../auth/auth.module';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
@@ -15,11 +15,11 @@ const acmServerRoutes: Routes = [
 	{ path: 'server-detail/:id', component: AcmServerDetailComponent }
 ]
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild(acmServerRoutes),
+		RouterModule.forChild( acmServerRoutes ),
 		AuthModule
 	],
 	exports: [
@@ -32,5 +32,5 @@ const acmServerRoutes: Routes = [
 		AcmServerDetailComponent,
 		AcmServerToolbarComponent
 	]
-})
+} )
 export class AcmServerModule { }

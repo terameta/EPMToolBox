@@ -1,20 +1,19 @@
 import { AcmUserService } from '../../accessmanagement/acmuser/acmuser.service';
-import { DimeProcessService } from '../../dime/dimeprocess/dimeprocess.service';
-import { AuthService } from '../../welcome/auth.service';
+import { AuthService } from '../../auth/auth.service';
 
 import { Component, OnInit } from '@angular/core';
 // import { AuthHttp } from 'angular2-jwt';
 import { ToastrService } from 'ngx-toastr';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../ngstore/models';
-import { DimeProcessActions } from '../../dime/dimeprocess/dimeprocess.actions';
-import { DimeProcessBackend } from '../../dime/dimeprocess/dimeprocess.backend';
 import { DimeProcessStatus, DimeProcess } from '../../../../shared/model/dime/process';
-import { DimeStreamActions } from '../../dime/dimestream/dimestream.actions';
 import * as _ from 'lodash';
-import { SortByName } from '../../../../shared/utilities/utilityFunctions';
-import { DimeStreamService } from '../../dime/dimestream/dimestream.service';
-import { DimeStreamBackend } from '../../dime/dimestream/dimestream.backend';
+import { DimeProcessService } from '../../admin/dimeprocess/dimeprocess.service';
+import { DimeProcessBackend } from '../../admin/dimeprocess/dimeprocess.backend';
+import { DimeStreamService } from '../../admin/dimestream/dimestream.service';
+import { DimeStreamBackend } from '../../admin/dimestream/dimestream.backend';
+import { DimeProcessActions } from '../../admin/dimeprocess/dimeprocess.actions';
+import { DimeStreamActions } from '../../admin/dimestream/dimestream.actions';
+import { AppState } from '../../app.state';
 
 @Component( {
 	selector: 'app-enduser-dime',

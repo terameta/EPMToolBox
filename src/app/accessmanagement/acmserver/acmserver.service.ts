@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-@Injectable()
+@Injectable( { providedIn: 'root' } )
 export class AcmServerService {
 	items: Observable<AcmServer[]>;
 	private _items: BehaviorSubject<AcmServer[]>;

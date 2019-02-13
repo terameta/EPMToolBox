@@ -1,5 +1,5 @@
-import { AuthModule } from '../welcome/auth.module';
-import { AuthGuard } from '../welcome/auth-guard.service';
+import { AuthModule } from '../auth/auth.module';
+import { AuthGuard } from '../auth/auth-guard.service';
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -24,12 +24,12 @@ const acmRoutes: Routes = [
 	}
 ];
 
-@NgModule({
+@NgModule( {
 	imports: [
 		CommonModule,
 		AcmServerModule,
 		AcmUserModule,
-		RouterModule.forChild(acmRoutes),
+		RouterModule.forChild( acmRoutes ),
 		AuthModule
 	],
 	declarations: [
@@ -37,5 +37,5 @@ const acmRoutes: Routes = [
 		AccessmanagementmenuComponent,
 		AccessmanagementdashboardComponent
 	]
-})
+} )
 export class AccessManagementModule { }

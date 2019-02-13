@@ -1,0 +1,25 @@
+<form class="form-inline">
+	<div class="form-group form-group-sm">
+		<div class="input-group">
+			<a class="input-group-addon btn" title="Tag List" routerLink="/admin/tags"><i class="fa fa-tags fa-fw"></i> Tags</a>
+			<select class="form-control" style="width:0px;padding-left:0px;padding-right:0px;border:none;">
+				<option value="0">Hidden</option>
+			</select>
+			<a class="input-group-addon btn" title="Current Item: {{mainService.currentItem.name}}" *ngIf="mainService.currentItem.id > 0" [routerLink]="['/admin/tags/tag-detail', mainService.currentItem.id]">
+				<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.currentItem.name}}
+			</a>
+		</div>
+	</div>
+	<div class="form-group form-group-sm">
+		<div class="input-group">
+			<a class="input-group-addon btn" title="Tag List" routerLink="/admin/tags"><i class="fa fa-list fa-fw"></i> List</a>
+			<select class="form-control" name="selectedtag" (change)="mainService.navigateTo($event.target.value)" [ngModel]="mainService.currentItem.id">
+				<option value="0">Go To</option>
+				<option *ngFor="let tag of mainService.itemList" value="{{tag.id}}">{{tag.name}}</option>
+			</select>
+			<div class="input-group-addon btn" title="New Tag" (click)="mainService.create()"><i class="fa fa-plus fa-fw"></i> New Tag</div>
+			<div class="input-group-addon btn" title="New Tag Group" (click)="mainService.groupCreate()"><i class="fa fa-plus fa-fw"></i> New Group</div>
+		</div>
+	</div>
+	<button type="button" class="btn btn-default btn-sm pull-right">Help</button>
+</form>

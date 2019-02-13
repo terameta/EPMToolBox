@@ -1,0 +1,16 @@
+<div class="w-100 p-3">
+	<ul class="nav nav-tabs">
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="definitions" data-toggle="tab"> <i class="fa fa-sliders fa-fw"></i> Main Definitions </a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="run" data-toggle="tab"> <i class="fa fa-space-shuttle fa-fw"></i> Run Process </a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="steps" data-toggle="tab"> <i class="fa fa-steam fa-fw"></i> Steps </a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="defaulttargets" data-toggle="tab"> <i class="fa fa-bullseye fa-fw"></i> Default Targets </a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="filters" data-toggle="tab"> <i class="fa fa-filter fa-fw"></i> Filters </a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="filtersdatafile" data-toggle="tab"> <i class="fa fa-filter fa-fw"></i> Filters (Data File) </a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="history" data-toggle="tab"> <i class="fa fa-history fa-fw"></i> History </a> </li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active">
+			<router-outlet></router-outlet>
+		</div>
+	</div>
+</div>

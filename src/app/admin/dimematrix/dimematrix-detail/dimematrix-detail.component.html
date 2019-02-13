@@ -1,0 +1,14 @@
+<div class="w-100 p-3">
+	<ul class="nav nav-tabs">
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="definitions" data-toggle="tab">Main Definitions</a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="fields" data-toggle="tab">Fields</a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="matrix" data-toggle="tab">Validity Matrix</a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="import" data-toggle="tab">Import</a> </li>
+		<li class="nav-item"> <a class="nav-link" routerLinkActive="active" routerLink="export" data-toggle="tab">Export</a> </li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active">
+			<router-outlet></router-outlet>
+		</div>
+	</div>
+</div>

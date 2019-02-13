@@ -1,0 +1,17 @@
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+		<a routerLink="list" routerLinkActive="active" class="nav-link">
+			<i class="fa fa-list fa-fw"></i> List
+		</a>
+	</li>
+	<li class="nav-item" *ngFor="let export of mainService.currentItem.exports;">
+		<a routerLink="{{export.id}}" routerLinkActive="active" class="nav-link">
+			<i class="fa fa-download fa-fw"></i> {{export.name}}
+		</a>
+	</li>
+</ul>
+<div class="tab-content">
+	<div class="tab-pane active">
+		<router-outlet></router-outlet>
+	</div>
+</div>

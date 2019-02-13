@@ -1,0 +1,71 @@
+<form class="form-inline">
+	<div class="form-group form-group-sm">
+		<div class="input-group">
+			<a class="input-group-addon btn" title="Process List" routerLink="/admin/processes">
+				<i class="fa fa-cogs fa-fw"></i> Processes
+			</a>
+			<select class="form-control" style="width:0px;padding-left:0px;padding-right:0px;border:none;">
+				<option value="0">Hidden</option>
+			</select>
+			<a class="input-group-addon btn" title="Current Item: {{mainService.currentItem.name}}" *ngIf="mainService.currentItem.id > 0" [routerLink]="['/admin/processes/process-detail', mainService.currentItem.id]">
+				<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.currentItem.name}}
+			</a>
+		</div>
+	</div>
+
+	<div class="form-group form-group-sm">
+		<div class="input-group">
+			<a class="input-group-addon btn" title="Process List" routerLink="/admin/processes">
+				<i class="fa fa-list fa-fw"></i> List</a>
+			<select class="form-control" name="selecteddimeprocess" (change)="mainService.navigateTo($event.target.value)" [ngModel]="mainService.currentItem.id">
+				<option value="0">Go To</option>
+				<option *ngFor="let itemid of mainService.itemids" value="{{itemid}}">{{mainService.items[itemid]?.name}}</option>
+			</select>
+			<div class="input-group-addon btn" title="New Process" (click)="mainService.create()">
+				<i class="fa fa-plus fa-fw"></i> New</div>
+		</div>
+	</div>
+
+	<button type="button" class="btn btn-default btn-sm pull-right">Help</button>
+	<div class="form-group form-group-sm pull-right">
+		<div class="input-group" *ngFor="let tagGroup of tagService.groupList">
+			<div class="input-group-addon" title="Please select an {{tagGroup.name}} tag">{{tagGroup.name}}:</div>
+			<select name="TagSelector{{tagGroup.id}}" id="TagSelector{{tagGroup.id}}" class="form-control" (change)="uiService.tagChanged(tagGroup.id, $event.target.value)" [ngModel]="uiService.uiState.selectedTags[tagGroup.id]">
+				<option value="0">All</option>
+				<ng-container *ngFor="let tagItem of tagService.itemList">
+					<option *ngIf="tagItem.taggroup == tagGroup.id" value="{{tagItem.id}}">{{tagItem.name}}</option>
+				</ng-container>
+			</select>
+		</div>
+	</div>
+</form>
+
+<!-- <div class="btn-toolbar" role="toolbar" aria-label="Processes Menu">
+	<div class="btn-group btn-group-xs" role="group">
+		<button type="button" class="btn btn-default btn-xs" title="Process List" routerLink="process-list"><i class="fa fa-cogs fa-fw"></i> Processes</button>
+		<button type="button"
+					class="btn btn-default btn-xs"
+					title="Current Item: {{mainService.curItem.name}}"
+					routerLink="/dime/processes/process-detail/{{mainService.curItem.id}}"
+					*ngIf="mainService.curItem.id > 0">
+			<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.curItem.name}}
+		</button>
+	</div>
+	<div class="btn-group btn-group-xs" role="group">
+		<button type="button" class="btn btn-default btn-xs" title="Process List" routerLink="process-list"><i class="fa fa-list fa-fw"></i> List</button>
+		<div class="btn-group btn-group-xs" role="group">
+			<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<i class="fa fa-exchange fa-fw"></i> Go To
+				<span class="caret"></span>
+    		</button>
+			<ul class="dropdown-menu">
+				<li *ngFor="let process of mainService.items | async"><a [routerLink]="['/dime/processes/process-detail', process.id]">Go to {{process.name}}</a></li>
+				<li *ngIf="(mainService.items | async)?.length == 0"><a style="cursor: pointer;" (click)="mainService.create()">No processes are defined. Click here to create the first one.</a></li>
+			</ul>
+		</div>
+		<button type="button" class="btn btn-default btn-xs" title="New Process" (click)="mainService.create()"><i class="fa fa-plus fa-fw"></i> New</button>
+	</div>
+	<div class="btn-group btn-group-xs pull-right" role="group">
+		<button type="button" class="btn btn-default" title="Help"><i class="fa fa-question fa-fw"></i> Help</button>
+	</div>
+</div> -->

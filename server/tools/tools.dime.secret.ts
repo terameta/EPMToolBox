@@ -2,10 +2,10 @@ import { MainTools } from './tools.main';
 import { Pool } from 'mysql';
 import { DimeSecret } from '../../shared/model/secret';
 import { JSONDeepCopy } from '../../shared/utilities/utilityFunctions';
-import { dimeSecretInitialState } from '../../src/app/dime/dimesecret/dimesecret.state';
 import { MailTool } from './tools.mailer';
 import { SettingsTool } from './tools.settings';
 import { DimeSetting } from '../../shared/model/dime/settings';
+import { dimeSecretInitialState } from '../../src/app/admin/dimesecret/dimesecret.state';
 
 export class SecretTools {
 	settingsTool: SettingsTool;

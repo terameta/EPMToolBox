@@ -1,0 +1,45 @@
+@import './style.colors.scss';
+
+$theme-colors: (
+	"accent": $evaccent,
+	"accentdark": $evaccentdark,
+	"dark": $evdark,
+	"activedark": $evactivedark,
+	"evblue": $evblue,
+	"evdarkblue": $evdarkblue,
+	"evwhite": $evwhite,
+	"warning": $evwarning,
+	"evpink": $evpink,
+	"evrose": $evrose,
+	"evyellow": $evyellow,
+	"dusty": $dusty,
+	"evgreen": $evgreen,
+	"onyx": $onyx,
+	"beachstorm": $beachstorm,
+	"shadowsontheclif": $shadowsontheclif,
+	"maximumred": $maximumred,
+	"lightsteelblue": $lightsteelblue
+);
+
+$grid-breakpoints: (
+	xs: 0,
+	sm: 576px,
+	md: 768px,
+	lg: 992px,
+	xl: 1200px,
+	xxl: 1900px
+);
+
+$container-max-widths: (
+	// sm: 540px,
+	// md: 720px,
+	sm: 940px,
+	md: 950px,
+	lg: 960px,
+	xl: 1140px,
+	xxl: 1200px
+);
+
+$modal-xl: calc(100% - 48px);
+$modal-lg: 80%;
+$modal-md: 70%;

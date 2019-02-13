@@ -1,0 +1,26 @@
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+		<a class="nav-link" routerLinkActive="active" routerLink="list" data-toggle="tab">
+			<i class="fa fa-list fa-fw"></i> List
+		</a>
+	</li>
+	<li class="nav-item" *ngFor="let step of mainService.currentItem.steps;">
+		<a class="nav-link" routerLinkActive="active" routerLink="{{step.id}}">
+			<i class="fa fa-code fa-fw" *ngIf="step.type == 'srcprocedure'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-download fa-fw" *ngIf="step.type == 'pulldata'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-globe fa-fw" *ngIf="step.type == 'mapdata'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-bolt fa-fw" *ngIf="step.type == 'transform'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-th fa-fw" *ngIf="step.type == 'validate'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-upload fa-fw" *ngIf="step.type == 'pushdata'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-cubes fa-fw" *ngIf="step.type == 'tarprocedure'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-table fa-fw" *ngIf="step.type == 'senddata'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-check-circle fa-fw" *ngIf="step.type == 'sendmissing'" title="{{processStepTypeName[step.type]}}"></i>
+			<i class="fa fa-file-text fa-fw" *ngIf="step.type == 'sendlogs'" title="{{processStepTypeName[step.type]}}"></i>
+		</a>
+	</li>
+</ul>
+<div class="tab-content">
+	<div class="tab-pane active">
+		<router-outlet></router-outlet>
+	</div>
+</div>

@@ -1,10 +1,10 @@
 import { Action as NgRXAction, Store } from '@ngrx/store';
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
-import { AppState } from '../ngstore/models';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { map } from 'rxjs/operators';
+import { AppState } from '../app.state';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -32,7 +32,7 @@ export function dimeStatusReducer( state: DimeStatusState, action: Action ): Dim
 	return state;
 }
 
-@Injectable()
+@Injectable( { providedIn: 'root' } )
 export class DimeStatusEffects {
 	@Effect( { dispatch: false } ) DIME_STATUS_ACTIONS_ERROR$ = this.actions$.pipe(
 		ofType( DimeStatusActions.ERROR )

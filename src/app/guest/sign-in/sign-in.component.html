@@ -1,0 +1,19 @@
+<ng-container *ngIf="auth$ | async as auth">
+	<form class="text-right" #f="ngForm" (ngSubmit)="signin(f)">
+		<div class="input-group input-group-sm mb-1 border-0">
+			<div class="input-group-prepend">
+				<span class="input-group-text bg-white border-0"><i class="fa fa-at fa-fw"></i></span>
+			</div>
+			<input type="text" name="useremail" class="form-control border-left rounded-right border-right-0 border-top-0 border-bottom-0 border-dark" placeholder="E-mail Address" [(ngModel)]="creds.username" [autofocus]="true"
+				[disabled]="auth.status == authStatus.Authenticating">
+		</div>
+		<div class="input-group input-group-sm mb-2 border-0">
+			<div class="input-group-prepend">
+				<span class="input-group-text bg-white border-0"><i class="fa fa-key fa-fw"></i></span>
+			</div>
+			<input type="password" name="userpass" class="form-control border-left rounded-right border-right-0 border-top-0 border-bottom-0 border-dark" placeholder="Password" [(ngModel)]="creds.password" minlength="8"
+				[disabled]="auth.status == authStatus.Authenticating">
+		</div>
+		<button type="submit" class="btn btn-sm btn-outline-light" [disabled]="auth.status == authStatus.Authenticating">Sign In</button>
+	</form>
+</ng-container>

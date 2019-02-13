@@ -1,4 +1,4 @@
-export interface DimeTagGroup {
+export interface TagGroup {
 	id: number,
 	name: string,
 	position: number,

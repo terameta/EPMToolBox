@@ -1,12 +1,12 @@
-import { Action as NgRXAction, Store } from '@ngrx/store';
-import { DimeUIState } from 'app/ngstore/uistate.state';
-import { DimeUIActions } from 'app/ngstore/uistate.actions';
+import { Action as NgRXAction } from '@ngrx/store';
+import { DimeUIActions } from './uistate.actions';
+import { State } from '../central/central.state';
 
 export interface Action extends NgRXAction {
 	payload?: any;
 }
 
-export function dimeUIReducer( state: DimeUIState, action: Action ): DimeUIState {
+export function dimeUIReducer( state: State, action: Action ): State {
 	switch ( action.type ) {
 		case DimeUIActions.USER.TAG.SELECT: {
 			return handleUserSelectedTag( state, action );
@@ -17,8 +17,8 @@ export function dimeUIReducer( state: DimeUIState, action: Action ): DimeUIState
 	}
 }
 
-const handleUserSelectedTag = ( state: DimeUIState, action: Action ): DimeUIState => {
-	const newState: DimeUIState = Object.assign( {}, state );
+const handleUserSelectedTag = ( state: State, action: Action ): State => {
+	const newState: State = Object.assign( {}, state );
 	newState.selectedTags[action.payload.group] = action.payload.tag;
 	return newState;
-}
+};

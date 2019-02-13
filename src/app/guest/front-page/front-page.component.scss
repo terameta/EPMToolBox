@@ -1,0 +1,26 @@
+.toppart {
+   height: 240px;
+}
+
+.bottompart {
+   height: calc(100% - 240px);
+   // background-color: #004050;
+}
+
+.toolname {
+   font-size: 24px;
+   font-weight: bold;
+}
+
+.slogan {
+   font-size: 36px;
+   line-height: 36px;
+   font-weight: bold;
+   display: block;
+}
+
+.detail {
+   font-size: 16px;
+   font-weight: bold;
+   display: block;
+}

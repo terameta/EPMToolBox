@@ -1,0 +1,17 @@
+<nav class="navbar navbar-dark fixed-top bg-dark justify-content-start p-0 top-nav-bar">
+	<a routerLink="/admin" routerLinkActive="active-navbar-item" class="navbar-text px-3 text-evwhite font-weight-bold top-nav-item" [routerLinkActiveOptions]="{exact: true}">Start Here</a>
+	<a routerLink="environments" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Environments</a>
+	<a routerLink="streams" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Streams</a>
+	<a routerLink="maps" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Maps</a>
+	<a routerLink="matrices" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Matrices</a>
+	<a routerLink="schedules" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Schedules</a>
+	<a routerLink="processes" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Processes</a>
+	<a routerLink="asyncbr" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">AsyncBR</a>
+	<a routerLink="settings" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Settings</a>
+	<a routerLink="secrets" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Secrets</a>
+	<a routerLink="credentials" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Credentials</a>
+	<a routerLink="users" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Users</a>
+	<a routerLink="tags" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Tags</a>
+
+	<a title="Sign Out" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item ml-auto pointer" (click)="signOut();"><i class="fa fa-sign-out"></i></a>
+</nav>

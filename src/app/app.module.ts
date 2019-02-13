@@ -1,89 +1,24 @@
-import { HttpClientModule } from '@angular/common/http';
-import { DimeAsyncProcessBackend } from './dime/dimeasyncprocess/dimeasyncprocess.backend';
-import { DimeAsyncProcessEffects } from './dime/dimeasyncprocess/dimeasyncprocess.ngrx';
-// import { AuthHttp, AuthConfig, AUTH_PROVIDERS, provideAuth } from 'angular2-jwt';
-import { JwtModule } from '@auth0/angular-jwt';
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-// import { HttpModule } from '@angular/http';
 import { Routes, RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { JwtModule } from '@auth0/angular-jwt';
+import { ToastrModule } from 'ngx-toastr';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-// import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-
-import { ToastrModule } from 'ngx-toastr';
-
-import { AppComponent } from './app.component';
-import { DimeModule } from './dime/dime.module';
-import { WelcomeModule } from './welcome/welcome.module';
-import { AuthService } from './welcome/auth.service';
-import { AuthGuard } from './welcome/auth-guard.service';
-import { AuthModule } from './welcome/auth.module';
-import { AccessManagementModule } from './accessmanagement/accessmanagement.module';
-import { EndUserModule } from './enduser/enduser.module';
-
-// Dime Services & Backends
-import { DimeCredentialService } from './dime/dimecredential/dimecredential.service';
-import { DimeCredentialEffects } from './dime/dimecredential/dimecredential.effects';
-import { DimeCredentialBackend } from './dime/dimecredential/dimecredential.backend';
-
-import { DimeEnvironmentService } from './dime/dimeenvironment/dimeenvironment.service';
-import { DimeEnvironmentEffects } from './dime/dimeenvironment/dimeenvironment.effects';
-import { DimeEnvironmentBackend } from './dime/dimeenvironment/dimeenvironment.backend';
-
-import { DimeStreamService } from './dime/dimestream/dimestream.service';
-import { DimeStreamEffects } from './dime/dimestream/dimestream.effects';
-import { DimeStreamBackend } from './dime/dimestream/dimestream.backend';
-
-import { DimeMapService } from './dime/dimemap/dimemap.service';
-import { DimeMapEffects } from './dime/dimemap/dimemap.effects';
-import { DimeMapBackend } from './dime/dimemap/dimemap.backend';
-
-import { DimeMatrixService } from './dime/dimematrix/dimematrix.service';
-import { DimeMatrixEffects } from './dime/dimematrix/dimematrix.effects';
-import { DimeMatrixBackend } from './dime/dimematrix/dimematrix.backend';
-
-import { DimeProcessService } from './dime/dimeprocess/dimeprocess.service';
-import { DimeProcessEffects } from './dime/dimeprocess/dimeprocess.effects';
-import { DimeProcessBackend } from './dime/dimeprocess/dimeprocess.backend';
-
-import { DimeSettingsService } from './dime/dimesettings/dimesettings.service';
-import { DimeSettingsEffects } from './dime/dimesettings/dimesettings.effects';
-import { DimeSettingsBackend } from './dime/dimesettings/dimesettings.backend';
-
-import { DimeScheduleService } from './dime/dimeschedule/dimeschedule.service';
-import { DimeScheduleEffects } from './dime/dimeschedule/dimeschedule.effects';
-import { DimeScheduleBackend } from './dime/dimeschedule/dimeschedule.backend';
-
-import { DimeSecretService } from './dime/dimesecret/dimesecret.service';
-import { DimeSecretBackend } from './dime/dimesecret/dimesecret.backend';
-import { DimeSecretEffects } from './dime/dimesecret/dimesecret.effects';
-
-import { DimeAsyncProcessService } from './dime/dimeasyncprocess/dimeasyncprocess.service';
-
-// Access Management Services
-import { AcmServerService } from './accessmanagement/acmserver/acmserver.service';
-import { AcmUserService } from './accessmanagement/acmuser/acmuser.service';
-
-// End User Services
-import { EndUserService } from './enduser/enduser.service';
-import { reducers, appInitialState, RouteEffects } from './ngstore/models';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
-import { DimeUIEffects } from './ngstore/uistate.effects';
-import { DimeUIBackend } from './ngstore/uistate.backend';
-import { DimeUIService } from './ngstore/uistate.service';
-import { DimeTagBackend } from './dime/dimetag/dimetag.backend';
-import { DimeTagGroupBackend } from './dime/dimetag/dimetaggroup.backend';
-import { DimeTagService } from './dime/dimetag/dimetag.service';
-import { DimeTagEffects } from './dime/dimetag/dimetag.effects';
-import { DimeStatusEffects } from './ngstore/applicationstatus';
-import { HotTableRegisterer, HotTableModule } from '@handsontable/angular';
-import { ModalModule } from 'ngx-bootstrap/modal/modal.module';
+import { AppEffects } from './app.effects';
+import { AppReducer } from './app.reducer';
+import { ModalModule } from 'ngx-bootstrap/modal';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { HotTableModule } from '@handsontable/angular';
 
-const appRoutes: Routes = [
-	{ path: '', pathMatch: 'full', redirectTo: 'welcome' }
+const routes: Routes = [
+	{ path: '', loadChildren: './guest/guest.module#GuestModule' },
+	{ path: 'admin', loadChildren: './admin/admin.module#AdminModule' }
 ];
 
 const toastrOptions = {
@@ -96,87 +31,27 @@ const toastrOptions = {
 	timeOut: 2500
 };
 
-export function tokenGetter() {
-	return localStorage.getItem( 'token' );
-}
+export function tokenGetter() { return localStorage.getItem( 'token' ); }
 
 @NgModule( {
-	declarations: [
-		AppComponent
-	],
+	declarations: [AppComponent],
 	imports: [
 		BrowserModule,
 		FormsModule,
-		// HttpModule,
 		HttpClientModule,
-		JwtModule.forRoot( {
-			config: {
-				tokenGetter: tokenGetter
-			}
-		} ),
-		WelcomeModule,
-		DimeModule,
-		AccessManagementModule,
-		EndUserModule,
-		RouterModule.forRoot( appRoutes ),
 		BrowserAnimationsModule,
+		JwtModule.forRoot( { config: { tokenGetter } } ),
+		MonacoEditorModule.forRoot(),
+		RouterModule.forRoot( routes ),
 		ToastrModule.forRoot( toastrOptions ),
-		AuthModule,
-		StoreModule.forRoot( reducers, { initialState: appInitialState } ),
-		EffectsModule.forRoot( [
-			RouteEffects,
-			DimeUIEffects,
-			DimeStatusEffects,
-			DimeTagEffects,
-			DimeCredentialEffects,
-			DimeAsyncProcessEffects,
-			DimeEnvironmentEffects,
-			DimeStreamEffects,
-			DimeMapEffects,
-			DimeMatrixEffects,
-			DimeProcessEffects,
-			DimeSettingsEffects,
-			DimeScheduleEffects,
-			DimeSecretEffects
-		] ),
-		StoreRouterConnectingModule,
+		// StoreModule.forRoot( reducers, { initialState: initialAppState } ),
+		StoreModule.forRoot( AppReducer ),
+		EffectsModule.forRoot( AppEffects ),
+		StoreRouterConnectingModule.forRoot( { stateKey: 'router' } ),
 		HotTableModule.forRoot(),
 		ModalModule.forRoot()
 	],
-	providers: [
-		// HotTableRegisterer,
-		AuthGuard,
-		AuthService,
-		DimeUIBackend,
-		DimeUIService,
-		DimeTagBackend,
-		DimeTagGroupBackend,
-		DimeTagService,
-		DimeCredentialBackend,
-		DimeCredentialService,
-		DimeEnvironmentBackend,
-		DimeEnvironmentService,
-		DimeStreamBackend,
-		DimeStreamService,
-		DimeMapService,
-		DimeMapBackend,
-		DimeMatrixService,
-		DimeMatrixBackend,
-		DimeProcessService,
-		DimeProcessBackend,
-		DimeSettingsService,
-		DimeSettingsBackend,
-		DimeScheduleService,
-		DimeScheduleBackend,
-		DimeSettingsService,
-		DimeAsyncProcessService,
-		DimeAsyncProcessBackend,
-		DimeSecretService,
-		DimeSecretBackend,
-		AcmServerService,
-		AcmUserService,
-		EndUserService
-	],
+	providers: [],
 	bootstrap: [AppComponent]
 } )
 export class AppModule { }

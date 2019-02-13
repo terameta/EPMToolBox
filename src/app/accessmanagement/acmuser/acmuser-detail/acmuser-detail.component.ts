@@ -2,19 +2,16 @@ import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import { AuthService } from '../../../welcome/auth.service';
-
-import { DimeProcessService } from '../../../dime/dimeprocess/dimeprocess.service';
-
 import { AcmUserService } from '../acmuser.service';
 import { AcmServerService } from '../../acmserver/acmserver.service';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../ngstore/models';
-import { DimeProcessActions } from '../../../dime/dimeprocess/dimeprocess.actions';
-import { DimeStreamActions } from '../../../dime/dimestream/dimestream.actions';
 import * as _ from 'lodash';
 import { SortByName } from '../../../../../shared/utilities/utilityFunctions';
 import { Subscription } from 'rxjs';
+import { DimeProcessService } from '../../../admin/dimeprocess/dimeprocess.service';
+import { DimeProcessActions } from '../../../admin/dimeprocess/dimeprocess.actions';
+import { DimeStreamActions } from '../../../admin/dimestream/dimestream.actions';
+import { AppState } from '../../../app.state';
 
 @Component( {
 	selector: 'app-acmuser-detail',

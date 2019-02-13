@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 
@@ -34,7 +34,7 @@ export class SigninComponent implements OnInit {
 		const username = form.value.username;
 		const password = form.value.password;
 		// console.log("We are signing in");
-		this.authService.signinUser( username, password ).subscribe(( result ) => {
+		this.authService.signinUser( username, password ).subscribe( ( result ) => {
 			// console.log("Resulted", result);
 			this.router.navigate( ['/'] );
 			this.toastrService.success( 'You have successfully signed in' );

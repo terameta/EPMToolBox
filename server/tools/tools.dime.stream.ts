@@ -61,6 +61,7 @@ export class StreamTools {
 	}
 	public getOne = ( id: number ): Promise<DimeStreamDetail> => {
 		return new Promise( ( resolve, reject ) => {
+			if ( !id ) id = 0;
 			this.db.query( 'SELECT * FROM streams WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving stream with id ' + id + ' has failed' } );

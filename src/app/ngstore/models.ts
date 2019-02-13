@@ -1,98 +1,26 @@
 import { Observable } from 'rxjs';
 
-import {
-	DIME_ASYNC_PROCESS_ACTIONS,
-	DimeAsyncProcessAllLoadInitiateAction,
-	dimeAsyncProcessReducer,
-	DimeAsyncProcessState,
-} from '../dime/dimeasyncprocess/dimeasyncprocess.ngrx';
+import { DimeAsyncProcessAllLoadInitiateAction } from '../admin/dimeasyncprocess/dimeasyncprocess.ngrx';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { Action, State, Store } from '@ngrx/store';
 
-import { DimeStatusState, dimeStatusInitialState, dimeStatusReducer } from './applicationstatus';
+import { DimeTagActions } from '../admin/dimetag/dimetag.actions';
+import { DimeTagGroupActions } from '../admin/dimetag/dimetaggroup.actions';
+import { DimeCredentialActions } from '../admin/dimecredential/dimecredential.actions';
+import { DimeEnvironmentActions } from '../admin/dimeenvironment/dimeenvironment.actions';
+import { DimeStreamActions } from '../admin/dimestream/dimestream.actions';
+import { DimeMapActions } from '../admin/dimemap/dimemap.actions';
+import { DimeMatrixActions } from '../admin/dimematrix/dimematrix.actions';
+import { DimeProcessActions } from '../admin/dimeprocess/dimeprocess.actions';
+import { DimeSettingsActions } from '../admin/dimesettings/dimesettings.actions';
+import { DimeScheduleActions } from '../admin/dimeschedule/dimeschedule.actions';
 
-import { dimeUIReducer } from './uistate.reducer';
-import { DimeUIState, dimeUIInitialState } from './uistate.state';
-
-import { DimeTagState, dimeTagInitialState } from '../dime/dimetag/dimetag.state';
-import { dimeTagReducer } from '../dime/dimetag/dimetag.reducer';
-import { DimeTagActions } from '../dime/dimetag/dimetag.actions';
-import { DimeTagGroupActions } from '../dime/dimetag/dimetaggroup.actions';
-
-import { DimeCredentialState, dimeCredentialInitialState } from '../dime/dimecredential/dimecredential.state';
-import { dimeCredentialReducer } from '../dime/dimecredential/dimecredential.reducer';
-import { DimeCredentialActions } from '../dime/dimecredential/dimecredential.actions';
-
-import { DimeEnvironmentState, dimeEnvironmentInitialState } from '../dime/dimeenvironment/dimeenvironment.state';
-import { dimeEnvironmentReducer } from '../dime/dimeenvironment/dimeenvironment.reducer';
-import { DimeEnvironmentActions } from '../dime/dimeenvironment/dimeenvironment.actions';
-
-import { DimeStreamState, dimeStreamInitialState } from '../dime/dimestream/dimestream.state';
-import { dimeStreamReducer } from '../dime/dimestream/dimestream.reducer';
-import { DimeStreamActions } from '../dime/dimestream/dimestream.actions';
-
-import { DimeMapState, dimeMapInitialState } from '../dime/dimemap/dimemap.state';
-import { dimeMapReducer } from '../dime/dimemap/dimemap.reducer';
-import { DimeMapActions } from '../dime/dimemap/dimemap.actions';
-
-import { DimeMatrixState, dimeMatrixInitialState } from '../dime/dimematrix/dimematrix.state';
-import { dimeMatrixReducer } from '../dime/dimematrix/dimematrix.reducer';
-import { DimeMatrixActions } from '../dime/dimematrix/dimematrix.actions';
-
-import { DimeProcessState, dimeProcessInitialState } from '../dime/dimeprocess/dimeprocess.state';
-import { dimeProcessReducer } from '../dime/dimeprocess/dimeprocess.reducer';
-import { DimeProcessActions } from '../dime/dimeprocess/dimeprocess.actions';
-
-import { DimeSettingsState, dimeSettingsInitialState } from '../dime/dimesettings/dimesettings.state';
-import { dimeSettingsReducer } from '../dime/dimesettings/dimesettings.reducer';
-import { DimeSettingsActions } from '../dime/dimesettings/dimesettings.actions';
-
-import { DimeScheduleState, dimeScheduleInitialState } from '../dime/dimeschedule/dimeschedule.state';
-import { dimeScheduleReducer } from '../dime/dimeschedule/dimeschedule.reducer';
-import { DimeScheduleActions } from '../dime/dimeschedule/dimeschedule.actions';
-
-import { DimeSecretState, dimeSecretInitialState } from '../dime/dimesecret/dimesecret.state';
-import { dimeSecretReducer } from '../dime/dimesecret/dimesecret.reducer';
-import { DimeSecretActions } from '../dime/dimesecret/dimesecret.actions';
+import { DimeSecretActions } from '../admin/dimesecret/dimesecret.actions';
+import { AppState } from '../app.state';
 import { map } from 'rxjs/operators';
-
-export interface RouteState { currentRoute: ActivatedRouteSnapshot }
-export interface AppState {
-	router: RouteState,
-	dimeUI: DimeUIState,
-	dimeStatus: DimeStatusState,
-	dimeTag: DimeTagState,
-	dimeCredential: DimeCredentialState,
-	dimeAsyncProcess: DimeAsyncProcessState,
-	dimeEnvironment: DimeEnvironmentState,
-	dimeStream: DimeStreamState,
-	dimeMap: DimeMapState,
-	dimeMatrix: DimeMatrixState,
-	dimeProcess: DimeProcessState,
-	dimeSettings: DimeSettingsState,
-	dimeSchedule: DimeScheduleState,
-	dimeSecret: DimeSecretState
-}
-
-export const appInitialState: AppState = {
-	router: <RouteState>{},
-	dimeUI: dimeUIInitialState,
-	dimeStatus: dimeStatusInitialState,
-	dimeTag: dimeTagInitialState,
-	dimeCredential: dimeCredentialInitialState,
-	dimeAsyncProcess: <DimeAsyncProcessState>{},
-	dimeEnvironment: dimeEnvironmentInitialState,
-	dimeStream: dimeStreamInitialState,
-	dimeMap: dimeMapInitialState,
-	dimeMatrix: dimeMatrixInitialState,
-	dimeProcess: dimeProcessInitialState,
-	dimeSettings: dimeSettingsInitialState,
-	dimeSchedule: dimeScheduleInitialState,
-	dimeSecret: dimeSecretInitialState
-};
 
 export class DoNothingAction implements Action {
 	readonly type = 'DONOTHINGATALL';
@@ -110,7 +38,8 @@ export function dimeHandleApiError( error: Response | any ) {
 	return Observable.throw( body );
 }
 
-export function routeReducer( state: RouteState, action: RouterNavigationAction ): RouteState {
+export function routeReducer( state: any, action: RouterNavigationAction ): any {
+	console.log( 'Router state can not be any' );
 	switch ( action.type ) {
 		case ROUTER_NAVIGATION: {
 			if ( action.payload ) {
@@ -125,31 +54,14 @@ export function routeReducer( state: RouteState, action: RouterNavigationAction 
 	}
 }
 
-export const reducers = {
-	router: routeReducer,
-	dimeUI: dimeUIReducer,
-	dimeStatus: dimeStatusReducer,
-	dimeTag: dimeTagReducer,
-	dimeCredential: dimeCredentialReducer,
-	dimeAsyncProcess: dimeAsyncProcessReducer,
-	dimeEnvironment: dimeEnvironmentReducer,
-	dimeStream: dimeStreamReducer,
-	dimeMap: dimeMapReducer,
-	dimeMatrix: dimeMatrixReducer,
-	dimeProcess: dimeProcessReducer,
-	dimeSettings: dimeSettingsReducer,
-	dimeSchedule: dimeScheduleReducer,
-	dimeSecret: dimeSecretReducer
-};
+// @Injectable( { providedIn: 'root' } )
+// export class RouteEffects {
+// 	@Effect() navigationHappened$ = this.actions$.pipe(
+// 		ofType( ROUTER_NAVIGATION ),
+// 		map( ( r: RouterNavigationAction ) => routeHandleNavigation( r ) ) );
 
-@Injectable()
-export class RouteEffects {
-	@Effect() navigationHappened$ = this.actions$.pipe(
-		ofType( ROUTER_NAVIGATION ),
-		map( ( r: RouterNavigationAction ) => routeHandleNavigation( r ) ) );
-
-	constructor( private actions$: Actions, private store: Store<State<AppState>> ) { }
-}
+// 	constructor( private actions$: Actions, private store: Store<State<AppState>> ) { }
+// }
 
 function routeHandleNavigation( r: RouterNavigationAction ) {
 	const segments: string[] = [];

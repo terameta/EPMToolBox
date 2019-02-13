@@ -1,5 +1,5 @@
-import { AuthModule } from '../welcome/auth.module';
-import { AuthGuard } from '../welcome/auth-guard.service';
+import { AuthModule } from '../auth/auth.module';
+import { AuthGuard } from '../auth/auth-guard.service';
 
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';

@@ -6,19 +6,19 @@ import { BehaviorSubject } from 'rxjs';
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 
-import { AcmUser } from '../../../../shared/model/accessmanagement/user';
 import { HttpClient } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
+import { User } from '../../../../shared/models/user';
 
-@Injectable()
+@Injectable( { providedIn: 'root' } )
 export class AcmUserService {
-	items: Observable<AcmUser[]>;
-	private _items: BehaviorSubject<AcmUser[]>;
+	items: Observable<User[]>;
+	private _items: BehaviorSubject<User[]>;
 	private baseUrl: string;
-	private dataStore: { items: AcmUser[] };
+	private dataStore: { items: User[] };
 	private serviceName: string;
 
-	curItem: AcmUser;
+	curItem: User;
 	curItemClean = true;
 	curItemAccessRights: any;
 
@@ -32,7 +32,7 @@ export class AcmUserService {
 		this.baseUrl = '/api/accessmanagement/user';
 		this.serviceName = 'Users';
 		this.dataStore = { items: [] };
-		this._items = <BehaviorSubject<AcmUser[]>>new BehaviorSubject( [] );
+		this._items = <BehaviorSubject<User[]>>new BehaviorSubject( [] );
 		this.items = this._items.asObservable();
 
 		this.resetCurItem();
@@ -41,7 +41,7 @@ export class AcmUserService {
 	}
 
 	public getAll = ( isSilent?: boolean ) => {
-		this.fetchAll().subscribe( ( data: AcmUser[] ) => {
+		this.fetchAll().subscribe( ( data: User[] ) => {
 			this.dataStore.items = data;
 			this._items.next( Object.assign( {}, this.dataStore ).items );
 			if ( !isSilent ) { this.toastr.info( 'Items are loaded.', this.serviceName ); }
@@ -54,7 +54,7 @@ export class AcmUserService {
 		return this.http.get( this.baseUrl ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
 	public create = () => {
-		this.http.post<AcmUser>( this.baseUrl, {} )
+		this.http.post<User>( this.baseUrl, {} )
 			.subscribe( ( data ) => {
 				this.dataStore.items.push( data );
 				this._items.next( Object.assign( {}, this.dataStore ).items );
@@ -68,7 +68,7 @@ export class AcmUserService {
 	}
 	public getOne = ( id: number ) => {
 		this.fetchOne( id ).
-			subscribe( ( data: AcmUser ) => {
+			subscribe( ( data: User ) => {
 				let notFound = true;
 
 				this.dataStore.items.forEach( ( item, index ) => {
@@ -103,13 +103,13 @@ export class AcmUserService {
 	public fetchUserRights = ( id: number ) => {
 		return this.http.get( this.baseUrl + '/userrights/' + id ).pipe( catchError( error => Observable.throw( error ) ) );
 	}
-	public update = ( curItem?: AcmUser ) => {
+	public update = ( curItem?: User ) => {
 		let shouldUpdate = false;
 		if ( !curItem ) { curItem = this.curItem; shouldUpdate = true; }
 		if ( curItem.type === 'directory' ) {
 			curItem.username = curItem.email;
 		}
-		this.http.put<AcmUser>( this.baseUrl, curItem ).
+		this.http.put<User>( this.baseUrl, curItem ).
 			subscribe( data => {
 				this.dataStore.items.forEach( ( item, index ) => {
 					if ( item.id === data.id ) { this.dataStore.items[index] = data; }
@@ -161,7 +161,7 @@ export class AcmUserService {
 	}
 
 	private resetCurItem = () => {
-		this.curItem = <AcmUser>{};
+		this.curItem = <User>{};
 		this.curItemClean = true;
 		this.curItemAccessRights = {};
 	}

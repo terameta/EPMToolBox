@@ -3,11 +3,10 @@ import { Router } from '@angular/router';
 
 import { Actions } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { AppState } from 'app/ngstore/models';
+import { DimeUIBackend } from './uistate.backend';
+import { AppState } from '../app.state';
 
-import { DimeUIBackend } from 'app/ngstore/uistate.backend';
-
-@Injectable()
+@Injectable( { providedIn: 'root' } )
 export class DimeUIEffects {
 	private serviceName = 'User Interface';
 

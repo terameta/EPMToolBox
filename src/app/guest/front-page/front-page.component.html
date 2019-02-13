@@ -1,0 +1,5 @@
+<ng-container *ngIf="auth$ | async as auth">
+	<button class="btn btn-outline-light" *ngIf="auth.user.role === userRole.Admin" routerLink="/admin"><b>Start Here</b></button>
+	<button class="btn btn-outline-light" *ngIf="auth.user.role === userRole.User" routerLink="/end-user"><b>Start Here</b></button>
+	<button class="btn btn-outline-light" *ngIf="auth.user.role === userRole.Guest" routerLink="/sign-in"><b>Start Here</b></button>
+</ng-container>

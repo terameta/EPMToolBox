@@ -1,0 +1,136 @@
+<form (ngSubmit)="mainService.update()" class="form-horizontal">
+	<div class="form-group">
+		<label for="streamName" class="col-2 control-label">Name:</label>
+		<div class="col-10">
+			<input type="text" class="form-control" id="streamName" name="streamName" [(ngModel)]="mainService.currentItem.name">
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="streamEnvironment" class="col-2 control-label">Environment:</label>
+		<div class="col-10">
+			<select name="streamEnvironment" id="streamEnvironment" class="form-control" [(ngModel)]="mainService.currentItem.environment" (change)="markDirty()">
+				<option *ngFor="let environment of environmentService.itemList" [value]="environment.id">{{environment.name}}</option>
+			</select>
+			<span class="help-block" *ngIf="mainService.currentItem.environment < 1">
+				<div class="well well-warning well-sm">
+					Please assign an environment to be able to change more details.
+				</div>
+			</span>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="streamType" class="col-2 control-label">Stream Type:</label>
+		<div class="col-10">
+			<select name="streamType" id="streamType" class="form-control" [(ngModel)]="mainService.currentItem.type" disabled>
+				<option *ngFor="let streamType of mainService.typeList" [value]="streamType.value">
+					{{ mainService.getStreamTypeDescription(streamType.value) }}
+				</option>
+			</select>
+		</div>
+	</div>
+	<div class="form-group" *ngIf="(isClean() && (mainService.currentItem.environment > 0)) || mainService.currentItem.dbName">
+		<label for="streamDB" class="col-2 control-label">
+			<span *ngIf="isEnvironmentNoType()">Database Name:</span>
+			<span *ngIf="isEnvironmentThisType('MSSQL')">Database Name:</span>
+			<span *ngIf="isEnvironmentThisType('ORADB')">Database Name:</span>
+			<span *ngIf="isEnvironmentThisType('HP')">Application Name:</span>
+			<span *ngIf="isEnvironmentThisType('PBCS')">Application Name:</span>
+		</label>
+		<div class="col-10">
+			<div class="input-group">
+				<!-- <select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="mainService.curItem.dbName" (change)="mainService.curItemClean=false;"> -->
+				<select name="streamDB" id="streamDB" class="form-control" [(ngModel)]="mainService.currentItem.dbName" (change)="markDirty()">
+					<option *ngFor="let selectableDB of mainService.currentItem.databaseList" [value]="selectableDB.name">{{selectableDB.name}}</option>
+				</select>
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" [disabled]="isDirty()" (click)="mainService.refreshDatabases()">Refresh</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="form-group" *ngIf="(isClean() && (mainService.currentItem.environment > 0)) || mainService.currentItem.tableName">
+		<label for=" streamTable " class="col-2 control-label ">
+			<span *ngIf="isEnvironmentNoType() ">TableName:</span>
+			<span *ngIf="isEnvironmentThisType( 'MSSQL') ">Table Name:</span>
+			<span *ngIf="isEnvironmentThisType( 'ORADB') ">Table Name:</span>
+			<span *ngIf="isEnvironmentThisType( 'HP') ">Cube Name:</span>
+			<span *ngIf="isEnvironmentThisType( 'PBCS') ">Cube Name:</span>
+		</label>
+		<!-- <div class="col-10 " *ngIf="isEnvironmentThisType('PBCS')">
+			<input type="text " class="form-control " id="streamTable " name="streamTable " [(ngModel)]="mainService.currentItem.tableName " (change)="markDirty() ">
+			<span class="help-block " *ngIf="!mainService.currentItem.dbName ">
+				<div class="well well-warning well-sm ">
+					Please assign an application to be able to change the cube name.
+				</div>
+			</span>
+		</div> -->
+		<!-- <div class="col-10 " *ngIf="!isEnvironmentThisType('PBCS')"> -->
+		<div class="col-10">
+			<div class="input-group ">
+				<select name="streamTable " id="streamTable " class="form-control " [(ngModel)]="mainService.currentItem.tableName " (change)="markDirty() ">
+					<option *ngFor="let selectableTable of mainService.currentItem.tableList " [value]="selectableTable.name ">{{selectableTable.name}}</option>
+				</select>
+				<span class="input-group-btn">
+					<button class="btn btn-default " type="button" [disabled]="!mainService.currentItem.dbName || mainService.curStreamClean==false " (click)="mainService.refreshTables() ">Refresh</button>
+				</span>
+			</div>
+			<span class="help-block " *ngIf="!mainService.currentItem.dbName ">
+				<div class="well well-warning well-sm ">
+					Please assign a database to be able to change the table name.
+				</div>
+			</span>
+		</div>
+	</div>
+	<div class="form-group " *ngIf="!isEnvironmentThisType('PBCS') && !isEnvironmentThisType('HP')">
+		<label for="streamQuery " class="col-2 control-label ">Custom Query:</label>
+		<div class="col-10">
+			<textarea name="streamQuery " id="streamQuery " rows="10 " class="form-control " [(ngModel)]="mainService.currentItem.customQuery" *ngIf="mainService.currentItem.tableName=='Custom Query'"></textarea>
+			<div class="input-group" *ngIf="mainService.currentItem.tableName !='Custom Query'">
+				<input type="text " class="form-control " id="streamQuery " name="streamQuery " [(ngModel)]="mainService.currentItem.customQuery" disabled>
+				<span class="input-group-btn">
+					<button class="btn btn-default " type="button" [disabled]="!mainService.currentItem.dbName || isDirty()" (click)="mainService.assignCustomQuery() ">Assign Custom Query</button>
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="col-2 control-label">Tags:</label>
+		<div class="col-10">
+			<div class="col-{{decideColWidth(tagService.groupList.length)}}" *ngFor="let tagGroup of tagService.groupList">
+				{{tagGroup.name}}
+				<hr />
+				<ng-container *ngFor="let tagItem of tagService.itemList">
+					<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
+						<label>
+							<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="mainService.currentItem?.tags[tagItem.id]"> {{tagItem.name}}
+						</label>
+					</div>
+				</ng-container>
+			</div>
+		</div>
+	</div>
+	<div class="form-group ">
+		<div class="col-10 col-offset-2 ">
+			<span class="help-block " *ngIf="isDirty() ">
+				<div class="well well-warning well-sm ">
+					Changes must be saved before assignment.
+				</div>
+			</span>
+			<button class="btn btn-primary btn-xs" type="submit ">
+				<i class="fa fa-floppy-o fa-fw "></i> Save Changes
+			</button>
+			<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/streams/stream-list ">
+				<i class="fa fa-ban fa-fw "></i> Cancel
+			</button>
+			<button class="btn btn-success btn-xs" type="button" (click)="mainService.prepareTables()">
+				<i class="fa fa-check-circle"></i> Prepare Tables
+			</button>
+			<button class="btn btn-success btn-xs" type="button" (click)="mainService.populateFieldDescriptions()">
+				<i class="fa fa-arrow-circle-o-down"></i> Populate Field Descriptions
+			</button>
+			<button class="btn btn-danger btn-xs pull-right " type="button" (click)="mainService.delete(mainService.currentItem.id, mainService.currentItem.name) ">
+				<i class="fa fa-trash fa-fw "></i> Delete Stream
+			</button>
+		</div>
+	</div>
+</form>

@@ -1,4 +1,4 @@
-import { AuthModule } from '../../welcome/auth.module';
+import { AuthModule } from '../../auth/auth.module';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { NgModule } from '@angular/core';

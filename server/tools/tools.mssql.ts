@@ -23,7 +23,7 @@ export class MSSQLTools {
 				connectionTimeout: 300000,
 				requestTimeout: 6000000,
 			};
-			if ( refObj.port ) { dbConfig.port = refObj.port; }
+			if ( refObj.port ) { dbConfig.port = parseInt( refObj.port, 10 ); }
 			if ( refObj.database ) { dbConfig.database = refObj.database; }
 			if ( refObj.server ) {
 				if ( refObj.server.split( '\\' ).length === 2 ) {
