@@ -1,0 +1,7 @@
+<div class="modal-body text-center">
+	<p class="font-weight-bold">{{question}}</p>
+</div>
+<div class="modal-footer">
+	<button type="button" class="btn btn-outline-dark btn-sm" (click)="no()" *ngIf="!okonly">No</button>
+	<button type="button" class="btn btn-outline-success btn-sm" (click)="yes()">Yes</button>
+</div>

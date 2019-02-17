@@ -51,7 +51,7 @@ export class Effects {
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeEnvironmentActions.ONE.CREATE.COMPLETE )
 		, switchMap( ( action: Action ) => {
-			this.router.navigateByUrl( 'admin/environments/environment-detail/' + action.payload.id );
+			this.router.navigateByUrl( 'admin/environments/' + action.payload.id );
 			return of( DimeEnvironmentActions.ALL.LOAD.initiate() );
 		} ) );
 

@@ -1,7 +1,4 @@
 import { RouterReducerState } from '@ngrx/router-store';
-import { AsyncProcessState } from './admin/dimeasyncprocess/dimeasyncprocess.ngrx';
-import { SettingsState } from './admin/dimesettings/dimesettings.state';
-import { SecretState } from './admin/dimesecret/dimesecret.state';
 import * as fromCentral from './central';
 import * as fromAuth from './auth';
 import * as fromTags from './admin/dimetag';
@@ -12,6 +9,9 @@ import * as fromMaps from './admin/dimemap';
 import * as fromMatrices from './admin/dimematrix';
 import * as fromProcesses from './admin/dimeprocess';
 import * as fromSchedules from './admin/dimeschedule';
+import * as fromAsyncProcesses from './admin/dimeasyncprocess';
+import * as fromSettings from './admin/dimesettings';
+import * as fromSecrets from './admin/dimesecret';
 
 export interface AppState {
 	auth: fromAuth.State
@@ -25,10 +25,7 @@ export interface AppState {
 	matrix: fromMatrices.State,
 	process: fromProcesses.State,
 	schedule: fromSchedules.State,
-
-
-
-	asyncProcess: AsyncProcessState,
-	settings: SettingsState,
-	secret: SecretState
+	asyncprocess: fromAsyncProcesses.State,
+	settings: fromSettings.State,
+	secret: fromSecrets.State
 }

@@ -12,8 +12,8 @@ import { catchError, mergeMap, map, switchMap, withLatestFrom, filter } from 'rx
 import { of } from 'rxjs';
 import { AppState } from '../../app.state';
 
-@Injectable( { providedIn: 'root' } )
-export class DimeSettingsEffects {
+@Injectable()
+export class Effects {
 	private serviceName = 'Settings';
 
 	@Effect() ALL_LOAD_INITIATE$ = this.actions$.pipe(

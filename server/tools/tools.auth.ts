@@ -7,13 +7,13 @@ const ActiveDirectory = require( 'activedirectory' );
 import { MainTools } from './tools.main';
 import { AcmServerTool } from './tools.accessmanagement.server';
 
-import { AcmUser } from '../../shared/model/accessmanagement/user';
 import { AcmServer } from '../../shared/model/accessmanagement/server';
+import { User } from '../../shared/models/user';
 
 interface AuthObjectDirectory {
 	username: string,
 	password: string,
-	dbUser: AcmUser,
+	dbUser: User,
 	// ldapClient: ldap.Client,
 	ldapClient: any,
 	ldapServer: AcmServer
@@ -51,7 +51,7 @@ export class AuthTools {
 				} else if ( result.length > 1 ) {
 					reject( 'Multiple users are defined with the same username. Please consult with system admin.' );
 				} else {
-					const dbUser = <AcmUser>result[0];
+					const dbUser = <User>result[0];
 					if ( dbUser.type === 'local' ) {
 						resolve( this.authenticateWithLocal( username, password, dbUser ) );
 					} else if ( dbUser.type === 'directory' ) {
@@ -63,7 +63,7 @@ export class AuthTools {
 			} );
 		} );
 	}
-	private authenticateWithLocal = ( username: string, password: string, dbUser: AcmUser ) => {
+	private authenticateWithLocal = ( username: string, password: string, dbUser: User ) => {
 		return new Promise( ( resolve, reject ) => {
 			bcrypt.compare( password, dbUser.password, ( err, hashResult ) => {
 				if ( err ) {
@@ -76,7 +76,7 @@ export class AuthTools {
 			} );
 		} );
 	}
-	private authenticateWithDirectory = ( username: string, password: string, dbUser: AcmUser ) => {
+	private authenticateWithDirectory = ( username: string, password: string, dbUser: User ) => {
 		return new Promise( ( resolve, reject ) => {
 			let authObj: AuthObjectDirectory; authObj = <AuthObjectDirectory>{};
 			authObj.username = username;
@@ -143,7 +143,7 @@ export class AuthTools {
 			} );
 		} );
 	}
-	private authenticateAction = ( dbUser: AcmUser ) => {
+	private authenticateAction = ( dbUser: User ) => {
 		return new Promise( ( resolve, reject ) => {
 			delete dbUser.password;
 			const token = this.tools.signToken( dbUser );

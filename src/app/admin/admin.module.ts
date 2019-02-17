@@ -8,6 +8,8 @@ import { AuthGuard } from '../auth/auth-guard.service';
 import { DimeComponent } from './dime/dime.component';
 import { DimemenuComponent } from './dimemenu/dimemenu.component';
 import { DimedashboardComponent } from './dimedashboard/dimedashboard.component';
+import { ModalModule } from 'ngx-bootstrap/modal';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 const routes: Routes = [
 	{
@@ -21,9 +23,9 @@ const routes: Routes = [
 			{ path: 'matrices', loadChildren: 'app/admin/dimematrix/dimematrix.module#DimematrixModule' },
 			{ path: 'processes', loadChildren: 'app/admin/dimeprocess/dimeprocess.module#DimeprocessModule' },
 			{ path: 'schedules', loadChildren: 'app/admin/dimeschedule/dimeschedule.module#DimescheduleModule' },
-			// { path: 'asyncprocesses', component: DimeAsyncProcessesComponent, loadChildren: 'app/admin/dimeasyncprocess/dimeasyncprocess.module#DimeAsyncProcessModule' },
-			// { path: 'settings', component: DimesettingsComponent, loadChildren: 'app/admin/dimesettings/dimesettings.module#DimeSettingsModule' },
-			// { path: 'secrets', component: DimeSecretsComponent, loadChildren: 'app/admin/dimesecret/dimesecret.module#DimeSecretModule' }
+			{ path: 'asyncprocesses', loadChildren: 'app/admin/dimeasyncprocess/dimeasyncprocess.module#DimeAsyncProcessModule' },
+			{ path: 'settings', loadChildren: 'app/admin/dimesettings/dimesettings.module#DimeSettingsModule' },
+			{ path: 'secrets', loadChildren: 'app/admin/dimesecret/dimesecret.module#DimeSecretModule' }
 		]
 	}
 ];
@@ -33,12 +35,13 @@ const routes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( routes ),
+		ModalModule,
+		BsDropdownModule
 	],
-	exports: [],
 	declarations: [
 		DimeComponent,
 		DimemenuComponent,
-		DimedashboardComponent
+		DimedashboardComponent,
 	]
 } )
 export class AdminModule { }

@@ -1,9 +1,6 @@
 import { ActionReducerMap, MetaReducer } from '@ngrx/store';
 import { AppState } from './app.state';
 import { routerReducer } from '@ngrx/router-store';
-import { asyncProcessReducer } from './admin/dimeasyncprocess/dimeasyncprocess.ngrx';
-import { settingsReducer } from './admin/dimesettings/dimesettings.reducer';
-import { secretReducer } from './admin/dimesecret/dimesecret.reducer';
 import * as fromCentral from './central';
 import * as fromAuth from './auth';
 import * as fromTags from './admin/dimetag';
@@ -14,6 +11,9 @@ import * as fromMaps from './admin/dimemap';
 import * as fromMatrices from './admin/dimematrix';
 import * as fromProcesses from './admin/dimeprocess';
 import * as fromSchedules from './admin/dimeschedule';
+import * as fromAsyncProcesses from './admin/dimeasyncprocess';
+import * as fromSettings from './admin/dimesettings';
+import * as fromSecrets from './admin/dimesecret';
 
 export const AppReducer: ActionReducerMap<AppState> = {
 	auth: fromAuth.reducer,
@@ -27,11 +27,7 @@ export const AppReducer: ActionReducerMap<AppState> = {
 	matrix: fromMatrices.reducer,
 	process: fromProcesses.reducer,
 	schedule: fromSchedules.reducer,
-
-
-
-
-	asyncProcess: asyncProcessReducer,
-	settings: settingsReducer,
-	secret: secretReducer
+	asyncprocess: fromAsyncProcesses.reducer,
+	settings: fromSettings.reducer,
+	secret: fromSecrets.reducer
 };

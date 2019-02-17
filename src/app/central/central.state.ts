@@ -1,11 +1,22 @@
 import { JSONDeepCopy } from '../../../shared/utilities/utilityFunctions';
 
+export const FEATURE = '[CENTRAL]';
+
 export interface State {
-	selectedTags: { [key: number]: string }
+	currentAudience: string,
+	currentFeature: string,
+	currentID: number,
+	selectedTags: { [key: number]: number }
 }
 
-const baseState: State = {
-	selectedTags: {}
+const baseState = (): State => {
+	return {
+		currentAudience: 'guest',
+		currentFeature: '',
+		currentID: 0,
+		selectedTags: JSON.parse( localStorage.getItem( 'selectedTags' ) ) || {}
+		// selectedTags: {}
+	};
 };
 
-export const initialState = (): State => JSONDeepCopy( baseState );
+export const initialState = (): State => JSONDeepCopy( baseState() );

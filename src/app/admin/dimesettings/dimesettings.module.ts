@@ -7,33 +7,14 @@ import { DimesettingsMailserverComponent } from './dimesettings-mailserver/dimes
 import { FormsModule } from '@angular/forms';
 import { DimesettingsSystemadminComponent } from './dimesettings-systemadmin/dimesettings-systemadmin.component';
 
-// const dimeProcessRoutes: Routes = [
-//   { path: 'dime/processes', pathMatch: 'prefix', redirectTo: 'dime/processes/process-list' },
-//   { path: 'process-list', component: DimeprocessListComponent },
-//   {
-//     path: 'process-detail/:id', component: DimeprocessDetailComponent, children: [
-//       { path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
-//       { path: 'definitions', component: DimeprocessDetailTabMaindefinitionsComponent },
-//       { path: 'run', component: DimeprocessDetailTabRunComponent },
-//       {
-//         path: 'steps', component: DimeprocessDetailTabStepsComponent, children: [
-//           { path: '', pathMatch: 'prefix', redirectTo: 'list' },
-//           { path: 'list', component: DimeprocessStepListComponent },
-//           { path: ':stepid', component: DimeprocessStepDetailComponent }
-//         ]
-//       },
-//       { path: 'defaulttargets', component: DimeprocessDetailTabDefaulttargetsComponent },
-//       { path: 'filters', component: DimeprocessDetailTabFiltersComponent },
-//       { path: 'filtersdatafile', component: DimeprocessDetailTabFiltersdatafileComponent }
-//     ]
-//   },
-//   { path: 'process-step-detail/:id', component: DimeprocessStepDetailComponent }
-// ];
-
 const dimeSettingsRoutes: Routes = [
-	{ path: '', pathMatch: 'prefix', redirectTo: 'systemadmin' },
-	{ path: 'systemadmin', component: DimesettingsSystemadminComponent },
-	{ path: 'mailserver', component: DimesettingsMailserverComponent }
+	{
+		path: '', component: DimesettingsComponent, children: [
+			{ path: '', pathMatch: 'full', redirectTo: 'systemadmin' },
+			{ path: 'systemadmin', component: DimesettingsSystemadminComponent },
+			{ path: 'mailserver', component: DimesettingsMailserverComponent }
+		]
+	}
 ];
 
 

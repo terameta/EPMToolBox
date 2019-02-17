@@ -13,8 +13,10 @@ import { StoreRouterConnectingModule } from '@ngrx/router-store';
 import { AppEffects } from './app.effects';
 import { AppReducer } from './app.reducer';
 import { ModalModule } from 'ngx-bootstrap/modal';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 import { HotTableModule } from '@handsontable/angular';
+import { CentralModule } from './central/central.module';
 
 const routes: Routes = [
 	{ path: '', loadChildren: './guest/guest.module#GuestModule' },
@@ -49,7 +51,9 @@ export function tokenGetter() { return localStorage.getItem( 'token' ); }
 		EffectsModule.forRoot( AppEffects ),
 		StoreRouterConnectingModule.forRoot( { stateKey: 'router' } ),
 		HotTableModule.forRoot(),
-		ModalModule.forRoot()
+		ModalModule.forRoot(),
+		BsDropdownModule.forRoot(),
+		CentralModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]

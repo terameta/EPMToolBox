@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Effect, Actions, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { DimeSecretBackend } from './dimesecret.backend';
 import { DimeSecretActions } from './dimesecret.actions';
 import { DimeStatusActions } from '../../ngstore/applicationstatus';
-import { mergeMap, catchError, map, switchMap, withLatestFrom, filter } from 'rxjs/operators';
+import { mergeMap, catchError, map, switchMap, withLatestFrom, filter, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { Action } from '../../ngstore/ngrx.generators';
@@ -12,13 +12,13 @@ import { DimeSecret } from '../../../../shared/model/secret';
 import { Router } from '@angular/router';
 import { AppState } from '../../app.state';
 
-@Injectable( { providedIn: 'root' } )
-export class DimeSecretEffects {
+@Injectable()
+export class Effects {
 	private serviceName = 'Secrets';
 
 	@Effect() ALL_LOAD_INITIATE$ = this.actions$.pipe(
 		ofType( DimeSecretActions.ALL.LOAD.INITIATE.type )
-		, map( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading all secrets', this.serviceName ) ); return action; } )
+		, tap( action => { this.store$.dispatch( DimeStatusActions.info( 'Loading all secrets', this.serviceName ) ); } )
 		, switchMap( ( action ) => {
 			return this.backend.allLoad()
 				.pipe(
@@ -32,8 +32,8 @@ export class DimeSecretEffects {
 
 	@Effect() ALL_LOAD_INITIATEIFEMPTY$ = this.actions$.pipe(
 		ofType( DimeSecretActions.ALL.LOAD.INITIATEIFEMPTY.type )
-		, withLatestFrom( this.store$ )
-		, filter( ( [action, state] ) => ( !state.secret.items || Object.keys( state.secret.items ).length === 0 ) )
+		, withLatestFrom( this.store$.pipe( select( 'secret' ) ) )
+		, filter( ( [action, state] ) => ( !state.items || Object.keys( state.items ).length === 0 ) )
 		, map( ( [action, state] ) => action )
 		, switchMap( action => DimeSecretActions.ALL.LOAD.INITIATE.observableaction() ) );
 

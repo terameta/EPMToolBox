@@ -17,12 +17,10 @@ export class DimeAsyncProcessListComponent implements OnInit, OnDestroy {
 	private environmentSubscription: Subscription;
 
 	constructor( private store: Store<AppState> ) {
-		this.subscription = this.store.select( 'dimeAsyncProcess' ).subscribe( storeState => {
-			console.log( 'asyncSubs' );
+		this.subscription = this.store.select( 'asyncprocess' ).subscribe( storeState => {
 			this.items = _.values( storeState.items ).sort( SortByName );
 		} );
-		this.environmentSubscription = this.store.select( 'dimeEnvironment' ).subscribe( envState => {
-			console.log( 'envSubs' );
+		this.environmentSubscription = this.store.select( 'environment' ).subscribe( envState => {
 			this.environments = _.values( envState.items ).sort( SortByName );
 		} );
 	}

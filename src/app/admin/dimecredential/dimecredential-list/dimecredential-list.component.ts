@@ -18,7 +18,7 @@ export class DimeCredentialListComponent implements OnInit {
 	public shouldListItem = ( itemid: number ) => {
 		let shouldShow = true;
 		this.tagService.groupList.forEach( ( curGroup ) => {
-			if ( parseInt( this.uiService.uiState.selectedTags[curGroup.id], 10 ) > 0 ) {
+			if ( this.uiService.uiState.selectedTags[curGroup.id] > 0 ) {
 				if ( !this.mainService.itemObject[itemid].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
 					shouldShow = false;
 				}

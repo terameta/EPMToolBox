@@ -1,10 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DimeSecretService } from '../dimesecret.service';
 import { DimeTagService } from '../../dimetag/dimetag.service';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { DimeUIService } from '../../../ngstore/uistate.service';
 import { AppState } from '../../../app.state';
-import { SecretState } from '../dimesecret.state';
 
 @Component( {
 	selector: 'app-dimesecret-toolbar',
@@ -12,16 +11,14 @@ import { SecretState } from '../dimesecret.state';
 	styleUrls: ['./dimesecret-toolbar.component.scss']
 } )
 export class DimeSecretToolbarComponent implements OnInit, OnDestroy {
-	public state$;
+	public state$ = this.store.pipe( select( 'secret' ) );
 
 	constructor(
 		public secretService: DimeSecretService,
 		public tagService: DimeTagService,
 		public uiService: DimeUIService,
 		public store: Store<AppState>
-	) {
-		this.state$ = store.select<SecretState>( state => state.secret );
-	}
+	) { }
 
 	ngOnInit() { }
 

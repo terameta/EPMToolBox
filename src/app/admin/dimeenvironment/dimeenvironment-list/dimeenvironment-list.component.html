@@ -15,7 +15,7 @@
 				<ng-container *ngFor="let item of mainService.itemList">
 					<tr *ngIf="shouldListItem(item.id)">
 						<td>
-							<a [routerLink]="['../environment-detail', item.id]" class="at-table-link">{{item.name}}</a>
+							<a [routerLink]="['../', item.id]" class="at-table-link">{{item.name}}</a>
 						</td>
 						<td> {{mainService.typeObject[item.type]?.label}} </td>
 						<td>{{ item.server }}</td>
@@ -27,7 +27,7 @@
 						<td>
 							<div class="btn-toolbar" role="toolbar" aria-label="Environment Actions">
 								<div class="btn-group btn-group-xs" role="group">
-									<button class="btn btn-xs btn-default" [routerLink]="['../environment-detail', item.id]" title="Details/Edit">
+									<button class="btn btn-xs btn-default" [routerLink]="['../', item.id]" title="Details/Edit">
 										<i class="fa fa-pencil fa-fw"></i>
 									</button>
 								</div>
@@ -44,3 +44,4 @@
 		</table>
 	</div>
 </div>
+<pre>{{ tagState$ | async | json }}</pre>

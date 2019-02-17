@@ -1,31 +1,12 @@
-<div class="box box-primary">
-	<div class="box-header with-border">
-		<h3 class="box-title">Edit Schedule</h3>
-	</div>
-	<div class="box-header">
-		<ul class="nav nav-tabs">
-			<li routerLinkActive="active">
-				<a routerLink="definitions" data-toggle="tab">
-					<i class="fa fa-sliders fa-fw"></i> Main Definitions
-				</a>
-			</li>
-			<li routerLinkActive="active">
-				<a routerLink="steps" data-toggle="tab">
-					<i class="fa fa-steam fa-fw"></i> Steps
-				</a>
-			</li>
-			<li routerLinkActive="active">
-				<a routerLink="history" data-toggle="tab">
-					<i class="fa fa-history fa-fw"></i> History
-				</a>
-			</li>
-		</ul>
-	</div>
-	<div class="box-body">
-		<div class="tab-content">
-			<div class="tab-pane active" id="scheduletabmaindefinitions">
-				<router-outlet></router-outlet>
-			</div>
+<div class="w-100 p-3">
+	<ul class="nav nav-tabs">
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="definitions" data-toggle="tab"> <i class="fa fa-sliders fa-fw"></i> Main Definitions </a> </li>
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="steps" data-toggle="tab"> <i class="fa fa-steam fa-fw"></i> Steps </a> </li>
+		<li class="nav-item"> <a routerLinkActive="active" class="nav-link" routerLink="history" data-toggle="tab"> <i class="fa fa-history fa-fw"></i> History </a> </li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active" id="scheduletabmaindefinitions">
+			<router-outlet></router-outlet>
 		</div>
 	</div>
 </div>

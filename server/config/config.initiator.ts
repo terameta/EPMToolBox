@@ -7,12 +7,12 @@ import { InitiatorUtils } from './config.initiator.utils';
 import { EnumToArray, SortByName } from '../../shared/utilities/utilityFunctions';
 import { DimeEnvironment } from '../../shared/model/dime/environment';
 import { MainTools } from '../tools/tools.main';
-import { DimeCredential } from '../../shared/model/dime/credential';
+import { Credential } from '../../shared/model/dime/credential';
 import { DimeStreamType } from '../../shared/enums/dime/streamtypes';
 import { DimeSetting } from '../../shared/model/dime/settings';
 import { DimeProcessStepType } from '../../shared/model/dime/process';
 import * as util from 'util';
-import { AcmUser } from '../../shared/model/accessmanagement/user';
+import { User } from '../../shared/models/user';
 
 interface TableDefiner {
 	name: string;
@@ -123,7 +123,7 @@ const to0089 = async ( currentVersion: number ) => {
 		return await utils.updateToVersion( nextVersion );
 	}
 };
-const to0089UpdateUsers = ( user: AcmUser ): Promise<any> => {
+const to0089UpdateUsers = ( user: User ): Promise<any> => {
 	return new Promise( ( resolve, reject ) => {
 		db.query( 'UPDATE users SET clearance = ? WHERE id = ?', [JSON.stringify( user.clearance ), user.id], ( err, result ) => {
 			if ( err ) {
@@ -134,9 +134,9 @@ const to0089UpdateUsers = ( user: AcmUser ): Promise<any> => {
 		} );
 	} );
 };
-const to0089ListUsers = (): Promise<AcmUser[]> => {
+const to0089ListUsers = (): Promise<User[]> => {
 	return new Promise( ( resolve, reject ) => {
-		db.query( 'SELECT * FROM users', ( err, users: AcmUser[] ) => {
+		db.query( 'SELECT * FROM users', ( err, users: User[] ) => {
 			if ( err ) {
 				reject( err );
 			} else {
@@ -1008,7 +1008,7 @@ const to0048 = ( currentVersion: number ) => {
 			db.query( 'SELECT * FROM environments', ( err, rows ) => {
 				rows.forEach( ( curTuple: any ) => {
 					if ( curTuple.password ) {
-						const credentialToCreate = <DimeCredential>{};
+						const credentialToCreate = <Credential>{};
 						credentialToCreate.name = ( 'FromEnv-' + curTuple.id + '-' + curTuple.name ).substr( 0, 1000 );
 						credentialToCreate.username = curTuple.username;
 						credentialToCreate.password = tools.encryptText( tools.decryptTextOLDDONOTUSE( curTuple.password ) );

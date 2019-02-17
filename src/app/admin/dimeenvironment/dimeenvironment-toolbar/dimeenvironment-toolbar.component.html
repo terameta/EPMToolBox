@@ -6,7 +6,7 @@
 			<select class="form-control" style="width:0px;padding-left:0px;padding-right:0px;border:none;">
 				<option value="0">Hidden</option>
 			</select>
-			<a class="input-group-addon btn" title="Current Item: {{mainService.currentItem.name}}" *ngIf="mainService.currentItem.id > 0" [routerLink]="['/admin/environments/environment-detail', mainService.currentItem.id]">
+			<a class="input-group-addon btn" title="Current Item: {{mainService.currentItem.name}}" *ngIf="mainService.currentItem.id > 0" [routerLink]="['/admin/environments/', mainService.currentItem.id]">
 				<i class="fa fa-angle-double-right fa-fw"></i> {{mainService.currentItem.name}}
 			</a>
 		</div>
@@ -26,7 +26,7 @@
 	</div>
 
 	<button type="button" class="btn btn-default btn-sm pull-right">Help</button>
-	<div class="form-group form-group-sm pull-right">
+	<!-- <div class="form-group form-group-sm pull-right">
 		<div class="input-group" *ngFor="let tagGroup of tagService.groupList">
 			<div class="input-group-addon" title="Please select an {{tagGroup.name}} tag">{{tagGroup.name}}:</div>
 			<select name="TagSelector{{tagGroup.id}}" id="TagSelector{{tagGroup.id}}" class="form-control" (change)="uiService.tagChanged(tagGroup.id, $event.target.value)" [ngModel]="uiService.uiState.selectedTags[tagGroup.id]">
@@ -36,5 +36,5 @@
 				</ng-container>
 			</select>
 		</div>
-	</div>
+	</div> -->
 </form>

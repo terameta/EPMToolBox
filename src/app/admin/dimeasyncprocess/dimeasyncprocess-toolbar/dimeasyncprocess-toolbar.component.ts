@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Component, OnInit } from '@angular/core';
 import { AppState } from '../../../app.state';
-import { DimeAsyncProcessOneCreateInitiateAction } from '../dimeasyncprocess.ngrx';
+import { DimeAsyncProcessOneCreateInitiateAction } from '../asyncprocess.actions';
 
 @Component( {
 	selector: 'app-dimeasyncprocess-toolbar',

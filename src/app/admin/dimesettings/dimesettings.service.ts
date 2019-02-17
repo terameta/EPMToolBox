@@ -15,7 +15,7 @@ export class DimeSettingsService {
 		private store: Store<AppState>,
 		private toastr: ToastrService,
 	) {
-		this.store.select( 'dimeSettings' ).subscribe( settingsState => {
+		this.store.select( 'settings' ).subscribe( settingsState => {
 			this.items = settingsState.items;
 		}, error => {
 			console.error( error );

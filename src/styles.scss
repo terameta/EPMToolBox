@@ -24,6 +24,16 @@ body {
 	border-radius: .2rem;
 }
 
+a { text-decoration: none; color: inherit; }
+a:hover { text-decoration: none; color: inherit; }
+
+.tab-pane {
+	border: 1px solid rgb(221, 221, 221);
+	border-top: 0;
+	padding: 1rem;
+	// padding-top: 1rem;
+	/*padding-right: 20px;*/
+}
 
 // .center-text {	text-align: center; }
 // .default-color { color: #515151; }

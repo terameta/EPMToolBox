@@ -19,7 +19,7 @@
 						</td>
 						<td> {{ mainService.getStreamTypeDescription(item.type) }} </td>
 						<td>
-							<a routerLink="../../environments/environment-detail/{{ item.environment }}" class="at-table-link">{{ environmentService.itemObject[item.environment]?.name }}</a>
+							<a routerLink="../../environments/{{ item.environment }}" class="at-table-link">{{ environmentService.itemObject[item.environment]?.name }}</a>
 						</td>
 						<td>{{ item.dbName }}</td>
 						<td>{{ item.tableName }}</td>

@@ -124,11 +124,26 @@
 	"defaultProject": "asli-tool",
 	"schematics": {
 		"@schematics/angular:component": {
-			"prefix": "app",
-			"styleext": "scss"
+			"styleext": "scss",
+			"spec": false
+		},
+		"@schematics/angular:class": {
+			"spec": false
 		},
 		"@schematics/angular:directive": {
-			"prefix": "app"
+			"spec": false
+		},
+		"@schematics/angular:guard": {
+			"spec": false
+		},
+		"@schematics/angular:module": {
+			"spec": false
+		},
+		"@schematics/angular:pipe": {
+			"spec": false
+		},
+		"@schematics/angular:service": {
+			"spec": false
 		}
 	}
 }

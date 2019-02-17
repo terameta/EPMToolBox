@@ -19,7 +19,7 @@ export class DimeScheduleService {
 		private router: Router,
 		private toastr: ToastrService
 	) {
-		this.store.select( 'dimeSchedule' ).subscribe( state => {
+		this.store.select( 'schedule' ).subscribe( state => {
 			this.itemids = state.ids;
 			this.items = state.items;
 			this.currentItem = state.curItem;

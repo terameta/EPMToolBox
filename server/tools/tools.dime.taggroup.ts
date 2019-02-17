@@ -1,14 +1,14 @@
 import { Pool } from 'mysql';
 import { MainTools } from './tools.main';
 
-import { DimeTagGroup } from '../../shared/model/dime/taggroup';
+import { TagGroup } from '../../shared/model/dime/taggroup';
 
 export class TagGroupTools {
 	constructor( public db: Pool, public tools: MainTools ) { }
 
-	public getAll = (): Promise<DimeTagGroup[]> => {
+	public getAll = (): Promise<TagGroup[]> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM taggroups ORDER BY position', {}, ( err, rows: DimeTagGroup[], fields ) => {
+			this.db.query( 'SELECT * FROM taggroups ORDER BY position', {}, ( err, rows: TagGroup[], fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else {
@@ -24,7 +24,7 @@ export class TagGroupTools {
 		} );
 	}
 
-	public getOne = ( id: number ): Promise<DimeTagGroup> => {
+	public getOne = ( id: number ): Promise<TagGroup> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM taggroups WHERE id = ?', id, ( err, rows, fields ) => {
 				if ( err ) {
@@ -38,8 +38,8 @@ export class TagGroupTools {
 		} );
 	}
 
-	public create = ( refItem: DimeTagGroup ): Promise<DimeTagGroup> => {
-		const newTagGroup: DimeTagGroup = <DimeTagGroup>{ name: 'New Tag Group' };
+	public create = ( refItem: TagGroup ): Promise<TagGroup> => {
+		const newTagGroup: TagGroup = <TagGroup>{ name: 'New Tag Group' };
 		if ( refItem.name ) { newTagGroup.name = refItem.name; }
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT MAX(position) AS maxpos FROM taggroups', {}, ( err, rows, fields ) => {
@@ -60,7 +60,7 @@ export class TagGroupTools {
 		} );
 	}
 
-	public update = ( refItem: DimeTagGroup ): Promise<DimeTagGroup> => {
+	public update = ( refItem: TagGroup ): Promise<TagGroup> => {
 		delete refItem.isReordered;
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE taggroups SET ? WHERE id = ' + refItem.id, refItem, ( err, rows, fields ) => {

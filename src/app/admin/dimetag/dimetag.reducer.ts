@@ -35,6 +35,7 @@ export function reducer( state: State = initialState(), action: Action ): State 
 const handleAllLoadComplete = ( state: State, action: Action ): State => {
 	const newState: State = Object.assign( {}, state );
 	newState.items = _.keyBy( action.payload, 'id' );
+	newState.loaded = true;
 	return newState;
 };
 

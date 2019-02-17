@@ -60,7 +60,7 @@ export class DimeEnvironmentService {
 	}
 
 	public navigateTo = ( id: number ) => {
-		this.router.navigateByUrl( '/dime/environments/environment-detail/' + id );
+		this.router.navigateByUrl( '/admin/environments/' + id );
 	}
 
 	public isPBCS = () => {

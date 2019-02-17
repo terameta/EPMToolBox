@@ -36,7 +36,7 @@
 					<span *ngIf="step.type == dimeProcessStepType.SourceProcedure || step.type == dimeProcessStepType.TargetProcedure">
 						<span *ngIf="!step.referedid">Please select an environment for the process.</span>
 						<span *ngIf="step.referedid">
-							<a routerLink="/dime/environments/environment-detail/{{ step.referedid }}">
+							<a routerLink="/dime/environments/{{ step.referedid }}">
 								{{ environmentService.itemObject[step.referedid]?.name }}
 							</a>
 						</span>

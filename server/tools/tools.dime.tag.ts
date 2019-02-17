@@ -1,6 +1,6 @@
 import { Pool } from 'mysql';
 
-import { DimeTag } from '../../shared/model/dime/tag';
+import { Tag } from '../../shared/model/dime/tag';
 
 import { MainTools } from './tools.main';
 
@@ -34,23 +34,22 @@ export class TagTools {
 		} );
 	}
 
-	public create = ( refItem: DimeTag ) => {
-		const newTag: DimeTag = <DimeTag>{ name: 'New Tag' };
-		if ( refItem.name ) { newTag.name = refItem.name; }
-		if ( refItem.description ) { newTag.description = refItem.description; }
+	public create = ( payload: Tag ) => {
+		delete payload.id;
+		if ( !payload.name ) payload.name = 'New Tag';
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'INSERT INTO tags SET ?', newTag, ( err, result, fields ) => {
+			this.db.query( 'INSERT INTO tags SET ?', payload, ( err, result, fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else {
-					newTag.id = result.insertId;
-					resolve( newTag );
+					payload.id = result.insertId;
+					resolve( payload );
 				}
 			} );
 		} );
 	}
 
-	public update = ( refItem: DimeTag ) => {
+	public update = ( refItem: Tag ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'UPDATE tags SET ? WHERE id = ' + refItem.id, refItem, ( err, rows, fields ) => {
 				if ( err ) {

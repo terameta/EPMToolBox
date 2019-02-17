@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Store, select } from '@ngrx/store';
-import * as _ from 'lodash';
+import { values } from 'lodash';
 import { SortByName, SortByPosition } from '../../../../shared/utilities/utilityFunctions';
 import { Router } from '@angular/router';
 import { DimeTagActions } from './dimetag.actions';
@@ -27,9 +27,9 @@ export class DimeTagService {
 		this.store.dispatch( DimeTagActions.ALL.LOAD.initiate() );
 		this.store.dispatch( DimeTagGroupActions.ALL.LOAD.initiate() );
 		this.store.pipe( select( 'tag' ) ).subscribe( tagState => {
-			this.itemList = _.values( tagState.items ).sort( SortByName );
+			this.itemList = values( tagState.items ).sort( SortByName );
 			this.currentItem = tagState.curItem;
-			this.groupList = _.values( tagState.groups ).sort( SortByPosition );
+			this.groupList = values( tagState.groups ).sort( SortByPosition );
 			this.groupObject = tagState.groups;
 			this.currentGroup = tagState.curGroup;
 			this.currentGroupID = tagState.curGroupID;
@@ -55,7 +55,7 @@ export class DimeTagService {
 				}
 			} );
 			this.groupList.forEach( ( curGroup ) => {
-				if ( !this.uiService.uiState.selectedTags[curGroup.id] ) { this.uiService.uiState.selectedTags[curGroup.id] = '0'; }
+				if ( !this.uiService.uiState.selectedTags[curGroup.id] ) { this.uiService.uiState.selectedTags[curGroup.id] = 0; }
 			} );
 		} );
 	}

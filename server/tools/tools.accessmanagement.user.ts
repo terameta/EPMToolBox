@@ -2,8 +2,8 @@ import { MainTools } from './tools.main';
 import { Pool } from 'mysql';
 import * as async from 'async';
 import * as bcrypt from 'bcrypt';
+import { User } from '../../shared/models/user';
 
-import { AcmUser } from '../../shared/model/accessmanagement/user';
 
 export class AcmUserTool {
 
@@ -23,7 +23,7 @@ export class AcmUserTool {
 			} );
 		} );
 	}
-	public create = ( sentItem?: AcmUser ) => {
+	public create = ( sentItem?: User ) => {
 		if ( sentItem ) { if ( sentItem.id ) { delete sentItem.id; } }
 		const newItem = this.tools.isEmptyObject( sentItem ) ? { name: 'New User (Please change name)', username: '-', password: '-' } : <any>sentItem;
 		return new Promise( ( resolve, reject ) => {
@@ -37,9 +37,9 @@ export class AcmUserTool {
 		} );
 	}
 	public getOne = ( id: number ) => {
-		return this.getUserDetails( <AcmUser>{ id: id } );
+		return this.getUserDetails( <User>{ id: id } );
 	}
-	private prepareToGet = ( payload: AcmUser ) => {
+	private prepareToGet = ( payload: User ) => {
 		delete payload.password;
 		console.log( '===========================================' );
 		console.log( '===========================================' );
@@ -49,7 +49,7 @@ export class AcmUserTool {
 		payload.clearance = JSON.parse( payload.clearance ? payload.clearance : '{}' );
 		return payload;
 	}
-	private prepareToSet = ( payload: AcmUser ) => {
+	private prepareToSet = ( payload: User ) => {
 		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 		console.log( payload );
@@ -62,7 +62,7 @@ export class AcmUserTool {
 		}
 		payload.clearance = JSON.stringify( payload.clearance );
 	}
-	public getUserDetails = ( refObj: AcmUser ): Promise<AcmUser> => {
+	public getUserDetails = ( refObj: User ): Promise<User> => {
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'SELECT * FROM users WHERE id = ?', refObj.id, ( err, rows, fields ) => {
 				if ( err ) {
@@ -126,7 +126,7 @@ export class AcmUserTool {
 			);
 		} );
 	}
-	public update = ( item: AcmUser ) => {
+	public update = ( item: User ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.prepareToSet( item );
 			this.db.query( 'UPDATE users SET ? WHERE id = ' + item.id, item, function ( err, result, fields ) {

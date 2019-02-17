@@ -17,8 +17,6 @@ export class DimeprocessToolbarComponent implements OnInit {
 		public uiService: DimeUIService
 	) { }
 
-	ngOnInit() {
-		// this.mainService.getAll();
-	}
+	ngOnInit() { }
 
 }

@@ -2,6 +2,7 @@ import { Tag } from '../../../../shared/model/dime/tag';
 import { TagGroup } from '../../../../shared/model/dime/taggroup';
 import { JSONDeepCopy } from '../../../../shared/utilities/utilityFunctions';
 
+export const FEATURE = '[TAGS]';
 
 
 export interface State {
@@ -9,7 +10,8 @@ export interface State {
 	curItem: Tag,
 	groups: { [key: number]: TagGroup },
 	curGroup: TagGroup,
-	curGroupID: number
+	curGroupID: number,
+	loaded: boolean
 }
 
 const baseState: State = {
@@ -17,7 +19,8 @@ const baseState: State = {
 	curItem: <Tag>{ id: 0 },
 	groups: [],
 	curGroup: <TagGroup>{ id: 0 },
-	curGroupID: 0
+	curGroupID: 0,
+	loaded: false
 };
 
 export const initialState = (): State => JSONDeepCopy( baseState );

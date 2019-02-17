@@ -1,12 +1,13 @@
 import { DimeSecretObject, DimeSecret } from '../../../../shared/model/secret';
+import { JSONDeepCopy } from '../../../../shared/utilities/utilityFunctions';
 
-export interface SecretState {
+export interface State {
 	ids: number[],
 	items: DimeSecretObject,
 	curItem: DimeSecret
 }
 
-export const initialSecretState: SecretState = {
+const baseState: State = {
 	ids: [],
 	items: {},
 	curItem: {
@@ -18,3 +19,5 @@ export const initialSecretState: SecretState = {
 		}
 	}
 };
+
+export const initialState = (): State => JSONDeepCopy( baseState );

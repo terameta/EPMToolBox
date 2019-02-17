@@ -15,9 +15,11 @@ import { DimeStreamActions } from '../admin/dimestream/dimestream.actions';
 import { DimeMapActions } from '../admin/dimemap/dimemap.actions';
 import { DimeProcessActions } from '../admin/dimeprocess/dimeprocess.actions';
 import { DimeScheduleActions } from '../admin/dimeschedule/dimeschedule.actions';
-import { DimeAsyncProcessAllLoadInitiateAction } from '../admin/dimeasyncprocess/dimeasyncprocess.ngrx';
 import { DimeMatrixActions } from '../admin/dimematrix/dimematrix.actions';
 import { DimeSettingsActions } from '../admin/dimesettings/dimesettings.actions';
+import { DimeAsyncProcessAllLoadInitiateAction } from '../admin/dimeasyncprocess/asyncprocess.actions';
+import { Store } from '@ngrx/store';
+import { AppState } from '../app.state';
 
 @Injectable()
 export class Effects {
@@ -46,10 +48,15 @@ export class Effects {
 		map( ( a: RouterNavigatedAction ) => a.payload.routerState.url ),
 		map( ( url ) => {
 			const segments = url.split( '/' ).splice( 1 );
-			console.log( segments );
 			switch ( segments[0] ) {
 				case 'admin': {
 					switch ( segments[1] ) {
+						case 'environments': {
+							this.store.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() );
+							if ( segments[2] ) this.store.dispatch( DimeEnvironmentActions.ONE.LOAD.initiate( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
+						// below are not new style
 						case 'tags': {
 							switch ( segments[2] ) {
 								case 'tag-list': { return DimeTagGroupActions.ONE.selected( parseInt( segments[3], 10 ) ); }
@@ -69,13 +76,6 @@ export class Effects {
 								case 'credential-list': { return DimeCredentialActions.ALL.LOAD.initiateifempty(); }
 								case 'credential-detail': { return DimeCredentialActions.ONE.LOAD.initiate( parseInt( segments[3], 10 ) ); }
 								default: { console.log( 'We are at credentials default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'environments': {
-							switch ( segments[2] ) {
-								case 'environment-list': { return DimeEnvironmentActions.ALL.LOAD.initiateifempty(); }
-								case 'environment-detail': { return DimeEnvironmentActions.ONE.LOAD.initiate( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at environments default' ); return new DoNothingAction(); }
 							}
 						}
 						case 'streams': {
@@ -138,6 +138,7 @@ export class Effects {
 	constructor(
 		private actions$: Actions,
 		private router: Router,
-		private location: Location
+		private location: Location,
+		private store: Store<AppState>
 	) { }
 }

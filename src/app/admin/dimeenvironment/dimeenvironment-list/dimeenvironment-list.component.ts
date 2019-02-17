@@ -7,6 +7,8 @@ import { ToastrService } from 'ngx-toastr';
 import { DimeEnvironmentService } from '../dimeenvironment.service';
 import { DimeTagService } from '../../dimetag/dimetag.service';
 import { DimeUIService } from '../../../ngstore/uistate.service';
+import { Store, select } from '@ngrx/store';
+import { AppState } from '../../../app.state';
 
 @Component( {
 	selector: 'app-dimeenvironment-list',
@@ -14,8 +16,14 @@ import { DimeUIService } from '../../../ngstore/uistate.service';
 	styleUrls: ['./dimeenvironment-list.component.css']
 } )
 export class DimeenvironmentListComponent implements OnInit {
+	public tagState$ = this.store.pipe( select( 'central' ) );
 
-	constructor( public mainService: DimeEnvironmentService, public tagService: DimeTagService, public uiService: DimeUIService ) { }
+	constructor(
+		public mainService: DimeEnvironmentService,
+		public tagService: DimeTagService,
+		public uiService: DimeUIService,
+		private store: Store<AppState>
+	) { }
 
 	ngOnInit() {
 	}
@@ -23,7 +31,7 @@ export class DimeenvironmentListComponent implements OnInit {
 	public shouldListItem = ( itemID: number ) => {
 		let shouldShow = true;
 		this.tagService.groupList.forEach( ( curGroup ) => {
-			if ( parseInt( this.uiService.uiState.selectedTags[curGroup.id], 10 ) > 0 ) {
+			if ( this.uiService.uiState.selectedTags[curGroup.id] > 0 ) {
 				if ( !this.mainService.itemObject[itemID].tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
 					shouldShow = false;
 				}

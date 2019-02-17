@@ -1,4 +1,54 @@
-<table class="table table-hover table-condensed">
+<ng-container *ngIf="tags$ | async as tags; else loading">
+	<ng-container *ngIf="groupID$ | async as groupID; else loading">
+		<div class="table-responsive">
+			<table class="table table-sm table-hover table-borderless m-0">
+				<thead>
+					<tr>
+						<th class="border-bottom border-warning m-0 p-0" width="10">Actions</th>
+						<th width="24"></th>
+						<th class="border-bottom border-warning m-0 p-0">Name</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="px-0 text-nowrap text-right">
+							<i class="fa fa-plus-square fa-fw ml-auto text-success pointer" (click)="create(groupID)" title="New Tag"></i>
+						</td>
+						<td>&nbsp;</td>
+						<td class="px-0">
+							<span class="p-0 pointer" (click)="create(groupID)" title="New Tag">
+								<i class="fa fa-chevron-right text-warning"></i>
+								<i class="fa fa-chevron-right text-warning"></i>
+								New Tag
+							</span>
+						</td>
+					</tr>
+					<ng-container *ngFor="let tag of tags; let i = index;">
+						<tr>
+							<td class="px-0 text-nowrap">
+								<i class="fa fa-edit fa-fw pointer" title="Change Name" (click)="rename(tag)"></i>
+								<i class="fa fa-trash fa-fw ml-3 pointer text-danger" title="Delete" (click)="delete(tag)"></i>
+							</td>
+							<td>&nbsp;</td>
+							<td class="px-0">
+								<a class="pointer" (click)="rename(tag)">
+									<i class="fa fa-chevron-right text-warning"></i>
+									{{tag.name}}
+								</a>
+							</td>
+						</tr>
+					</ng-container>
+				</tbody>
+			</table>
+		</div>
+	</ng-container>
+</ng-container>
+<ng-template #loading>
+	<div class="alert alert-info mx-3" role="alert">
+		<i class="fa fa-circle-notch fa-spin"></i> Please wait loading...
+	</div>
+</ng-template>
+<!-- <table class="table table-hover table-condensed">
 	<thead>
 		<tr>
 			<th>Name</th>
@@ -28,4 +78,4 @@
 			</tr>
 		</ng-container>
 	</tbody>
-</table>
+</table> -->

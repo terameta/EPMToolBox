@@ -1,17 +1,89 @@
-<nav class="navbar navbar-dark fixed-top bg-dark justify-content-start p-0 top-nav-bar">
-	<a routerLink="/admin" routerLinkActive="active-navbar-item" class="navbar-text px-3 text-evwhite font-weight-bold top-nav-item" [routerLinkActiveOptions]="{exact: true}">Start Here</a>
-	<a routerLink="environments" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Environments</a>
-	<a routerLink="streams" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Streams</a>
-	<a routerLink="maps" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Maps</a>
-	<a routerLink="matrices" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Matrices</a>
-	<a routerLink="schedules" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Schedules</a>
-	<a routerLink="processes" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Processes</a>
-	<a routerLink="asyncbr" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">AsyncBR</a>
-	<a routerLink="settings" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Settings</a>
-	<a routerLink="secrets" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Secrets</a>
-	<a routerLink="credentials" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Credentials</a>
-	<a routerLink="users" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Users</a>
-	<a routerLink="tags" routerLinkActive="active-navbar-item" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item">Tags</a>
+<nav class="navbar navbar-expand navbar-dark bg-dark fixed-top justify-content-start p-0 pl-2" *ngIf="state$ | async as state">
+	<ng-container *ngIf="tagGroups$ | async as tagGroups">
+		<ul class="navbar-nav">
+			<li class="nav-item">
+				<a class="nav-link text-evwhite font-weight-bold" routerLink="/admin">
+					<i class="fa fa-bars mr-2"></i> Admin
+				</a>
+			</li>
+		</ul>
+		<span class="navbar-text text-evwhite font-weight-bold">
+			<i class="fa fa-angle-double-right mx-2"></i>
+		</span>
+		<ul class="navbar-nav">
+			<li class="nav-item dropdown pointer" dropdown>
+				<a class="nav-link dropdown-toggle text-evwhite font-weight-bold" dropdownToggle *ngIf="state.currentFeature">
+					{{ state.currentFeature | titlecase }}
+				</a>
+				<a class="nav-link dropdown-toggle text-evwhite font-weight-bold" dropdownToggle *ngIf="!state.currentFeature">
+					Start Here
+				</a>
+				<div class="dropdown-menu" *dropdownMenu>
+					<a class="dropdown-item px-2" routerLink="environments"><i class="fa fa-building fa-fw mr-1"></i> Environments</a>
+					<a class="dropdown-item px-2" routerLink="streams"><i class="fa fa-arrows fa-fw mr-1"></i> Streams</a>
+					<a class="dropdown-item px-2" routerLink="maps"><i class="fa fa-globe fa-fw mr-1"></i>Maps</a>
+					<a class="dropdown-item px-2" routerLink="matrices"><i class="fa fa-th fa-fw mr-1"></i>Matrices</a>
+					<a class="dropdown-item px-2" routerLink="schedules"><i class="fa fa-calendar fa-fw mr-1"></i>Schedules</a>
+					<a class="dropdown-item px-2" routerLink="processes"><i class="fa fa-cogs fa-fw mr-1"></i>Processes</a>
+					<a class="dropdown-item px-2" routerLink="asyncprocesses"><i class="fa fa-link fa-fw mr-1"></i>Async Processes</a>
+					<a class="dropdown-item px-2" routerLink="settings"><i class="fa fa-cog fa-fw mr-1"></i>Settings</a>
+					<a class="dropdown-item px-2" routerLink="secrets"><i class="fa fa-lock fa-fw mr-1"></i>Secrets</a>
+					<a class="dropdown-item px-2" routerLink="credentials"><i class="fa fa-key fa-fw mr-1"></i>Credentials</a>
+					<a class="dropdown-item px-2" routerLink="users"><i class="fa fa-user fa-fw mr-1"></i>Users</a>
+					<a class="dropdown-item px-2" routerLink="tags"><i class="fa fa-tags fa-fw mr-1"></i>Tags</a>
+				</div>
+			</li>
+		</ul>
+		<span class="navbar-text text-evwhite font-weight-bold" *ngIf="state.currentFeature">
+			<i class="fa fa-angle-double-right mx-2"></i>
+		</span>
+		<ul class="navbar-nav" *ngIf="state.currentFeature">
+			<li class="nav-item dropdown pointer" dropdown *ngIf="items$ | async as items">
+				<a class="nav-link dropdown-toggle text-evwhite font-weight-bold" dropdownToggle *ngIf="state.currentID">
+					<ng-container *ngIf="state.currentFeature == 'tags'">
+						{{ (tagState$ | async)?.groups[state.currentID]?.name }}
+					</ng-container>
+					<ng-container *ngIf="state.currentFeature != 'tags'">
+						{{ items.current.name }}
+					</ng-container>
+				</a>
+				<a class="nav-link dropdown-toggle text-evwhite font-weight-bold" dropdownToggle *ngIf="!state.currentID">
+					List
+				</a>
+				<div class="dropdown-menu" *dropdownMenu>
+					<a class="dropdown-item px-2" routerLink="{{state.currentFeature}}">List</a>
+					<ng-container *ngIf="state.currentFeature == 'tags'">
+						<a class="dropdown-item px-2" routerLink="./{{state.currentFeature}}/{{item.group.id}}" *ngFor="let item of tagGroups">
+							{{item.group.name}}
+						</a>
+					</ng-container>
+					<ng-container *ngIf="state.currentFeature != 'tags'">
+						<a class="dropdown-item px-2" routerLink="./{{state.currentFeature}}/{{item.id}}" *ngFor="let item of items.list">
+							{{item.name}}
+						</a>
+					</ng-container>
+				</div>
+			</li>
+		</ul>
+		<span class="navbar-text text-evwhite font-weight-bold ml-auto">&nbsp;</span>
 
-	<a title="Sign Out" class="navbar-text py-2 px-3 text-evwhite font-weight-bold top-nav-item ml-auto pointer" (click)="signOut();"><i class="fa fa-sign-out"></i></a>
+		<ng-container *ngFor="let tagGroup of tagGroups">
+			<span class="navbar-text text-evwhite font-weight-bold ml-1">{{tagGroup.group.name}}:</span>
+			<ul class="navbar-nav">
+				<li class="nav-item dropdown pointer" dropdown>
+					<a class="nav-link dropdown-toggle text-evwhite font-weight-bold" dropdownToggle>
+						{{tagGroup.selection.name}}
+					</a>
+					<div class="dropdown-menu" *dropdownMenu>
+						<a class="dropdown-item px-2 pointer" (click)="setTag(tagGroup.group.id, item.id)" *ngFor="let item of tagGroup.list">{{item.name}}</a>
+					</div>
+				</li>
+			</ul>
+		</ng-container>
+	</ng-container>
+	<ul class="navbar-nav pl-1 pr-3 ml-5">
+		<li class="nav-item">
+			<a title="Sign Out" class="navbar-text text-evwhite font-weight-bold pointer" (click)="signOut();"><i class="fa fa-sign-out fa-fw"></i></a>
+		</li>
+	</ul>
 </nav>

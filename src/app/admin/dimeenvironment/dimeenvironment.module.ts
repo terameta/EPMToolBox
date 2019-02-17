@@ -14,9 +14,11 @@ import { DimeenvironmentToolbarComponent } from './dimeenvironment-toolbar/dimee
 const dimeEnvironmentRoutes: Routes = [
 	{
 		path: '', component: DimeenvironmentsComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'environment-list' },
-			{ path: 'environment-list', component: DimeenvironmentListComponent },
-			{ path: 'environment-detail/:id', component: DimeenvironmentDetailComponent }
+			// { path: '', pathMatch: 'full', redirectTo: 'environment-list' },
+			// { path: 'environment-list', component: DimeenvironmentListComponent },
+			// { path: 'environment-detail/:id', component: DimeenvironmentDetailComponent }
+			{ path: '', component: DimeenvironmentListComponent },
+			{ path: ':id', component: DimeenvironmentDetailComponent }
 		]
 	}
 

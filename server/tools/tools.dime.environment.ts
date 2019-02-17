@@ -12,7 +12,7 @@ import { PBCSTools } from './tools.pbcs';
 import { DimeEnvironmentHP } from '../../shared/model/dime/environmentHP';
 import { DimeEnvironmentPBCS } from '../../shared/model/dime/environmentPBCS';
 import { CredentialTools } from './tools.dime.credential';
-import { DimeCredential } from '../../shared/model/dime/credential';
+import { Credential } from '../../shared/model/dime/credential';
 import { EnumToArray } from '../../shared/utilities/utilityFunctions';
 import { DimeEnvironmentType, dimeGetEnvironmentTypeDescription } from '../../shared/enums/dime/environmenttypes';
 
@@ -208,7 +208,7 @@ export class EnvironmentTools {
 						rows[0].tags = {};
 					}
 					if ( shouldShowPassword ) {
-						this.credentialTool.getCredentialDetails( <DimeCredential>{ id: rows[0].credential }, true )
+						this.credentialTool.getCredentialDetails( <Credential>{ id: rows[0].credential }, true )
 							.then( ( curCredential ) => {
 								const environmentToReturn: DimeEnvironmentDetailWithCredentials = Object.assign( <DimeEnvironmentDetailWithCredentials>{}, rows[0] );
 								environmentToReturn.username = curCredential.username;

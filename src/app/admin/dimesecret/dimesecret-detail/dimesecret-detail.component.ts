@@ -1,10 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { DimeSecretService } from '../dimesecret.service';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
 import { DimeSecret } from '../../../../../shared/model/secret';
 import { Subscription } from 'rxjs';
 import { AppState } from '../../../app.state';
-import { SecretState } from '../dimesecret.state';
 
 @Component( {
 	selector: 'app-dimesecret-detail',
@@ -21,7 +20,9 @@ export class DimeSecretDetailComponent implements OnInit, OnDestroy {
 		public secretService: DimeSecretService
 	) {
 		// this.state$ = store.select<DimeSecretState>( state => state.dimeSecret );
-		this.sub = store.select<SecretState>( state => state.secret ).subscribe( s => this.currentItem = s.curItem );
+		this.sub = store.
+			pipe( select( 'secret' ) ).
+			subscribe( s => this.currentItem = s.curItem );
 	}
 
 	ngOnInit() {

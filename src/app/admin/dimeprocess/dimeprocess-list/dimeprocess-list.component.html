@@ -17,12 +17,12 @@
 							<a [routerLink]="['../process-detail', itemid]" class="at-table-link">{{mainService.items[itemid].name}}</a>
 						</td>
 						<td>
-							<a routerLink="../../environments/environment-detail/{{mainService.items[itemid].source}}" class="at-table-link">
+							<a routerLink="../../environments/{{mainService.items[itemid].source}}" class="at-table-link">
 								{{environmentService.itemObject[mainService.items[itemid].source]?.name}}
 							</a>
 						</td>
 						<td>
-							<a routerLink="../../environments/environment-detail/{{mainService.items[itemid].target}}" class="at-table-link">
+							<a routerLink="../../environments/{{mainService.items[itemid].target}}" class="at-table-link">
 								{{environmentService.itemObject[mainService.items[itemid].target]?.name}}
 							</a>
 						</td>

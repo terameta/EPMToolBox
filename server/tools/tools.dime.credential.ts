@@ -1,4 +1,4 @@
-import { DimeCredential, DimeCredentialDetail } from '../../shared/model/dime/credential';
+import { Credential, CredentialDetail } from '../../shared/model/dime/credential';
 import { Pool } from 'mysql';
 
 import { MainTools } from './tools.main';
@@ -12,7 +12,7 @@ export class CredentialTools {
 				if ( err ) {
 					reject( err.code );
 				} else {
-					rows.forEach( ( curRow: DimeCredential ) => {
+					rows.forEach( ( curRow: Credential ) => {
 						curRow.password = '|||---protected---|||';
 						if ( curRow.tags ) {
 							curRow.tags = JSON.parse( curRow.tags );
@@ -27,20 +27,20 @@ export class CredentialTools {
 	}
 
 	public getOne = ( id: number ) => {
-		return this.getCredentialDetails( <DimeCredential>{ id: id } );
+		return this.getCredentialDetails( <Credential>{ id: id } );
 	}
 
 	public reveal = ( id: number ) => {
 		return new Promise( ( resolve, reject ) => {
-			this.getCredentialDetails( <DimeCredential>{ id: id }, true ).then( ( currentItem ) => {
+			this.getCredentialDetails( <Credential>{ id: id }, true ).then( ( currentItem ) => {
 				resolve( { password: currentItem.password } );
 			} ).catch( reject );
 		} );
 	}
 
-	public getCredentialDetails = ( refObj: DimeCredential, shouldShowPassword?: boolean ): Promise<DimeCredential> => {
+	public getCredentialDetails = ( refObj: Credential, shouldShowPassword?: boolean ): Promise<Credential> => {
 		return new Promise( ( resolve, reject ) => {
-			this.db.query( 'SELECT * FROM credentials WHERE id = ?', refObj.id, ( err, rows: DimeCredentialDetail[], fields ) => {
+			this.db.query( 'SELECT * FROM credentials WHERE id = ?', refObj.id, ( err, rows: CredentialDetail[], fields ) => {
 				if ( err ) {
 					reject( err.code );
 				} else if ( rows.length !== 1 ) {
@@ -63,8 +63,8 @@ export class CredentialTools {
 		} );
 	}
 
-	public create = ( refItem: DimeCredential ) => {
-		const newCredential: DimeCredential = <DimeCredential>{ name: 'New Credential' };
+	public create = ( refItem: Credential ) => {
+		const newCredential: Credential = <Credential>{ name: 'New Credential' };
 		if ( refItem.name ) { newCredential.name = refItem.name; }
 		return new Promise( ( resolve, reject ) => {
 			this.db.query( 'INSERT INTO credentials SET ?', newCredential, ( err, result, fields ) => {
@@ -72,13 +72,13 @@ export class CredentialTools {
 					reject( err.code );
 				} else {
 					refItem.id = result.insertId;
-					resolve( this.update( <DimeCredentialDetail>refItem ) );
+					resolve( this.update( <CredentialDetail>refItem ) );
 				}
 			} );
 		} );
 	}
 
-	public update = ( refItem: DimeCredentialDetail ) => {
+	public update = ( refItem: CredentialDetail ) => {
 		return new Promise( ( resolve, reject ) => {
 			if ( refItem.password === '|||---protected---|||' ) {
 				delete refItem.password;

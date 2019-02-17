@@ -10,9 +10,13 @@ import { FormsModule } from '@angular/forms';
 import { AuthModule } from '../../auth/auth.module';
 
 const dimeAsyncProcessRoutes: Routes = [
-	{ path: 'dime/asyncprocesses', pathMatch: 'prefix', redirectTo: 'admin/asyncprocesses/asyncprocess-list' },
-	{ path: 'asyncprocess-list', component: DimeAsyncProcessListComponent },
-	{ path: 'asyncprocess-detail/:id', component: DimeAsyncProcessDetailComponent }
+	{
+		path: '', component: DimeAsyncProcessesComponent, children: [
+			{ path: '', pathMatch: 'full', redirectTo: 'asyncprocess-list' },
+			{ path: 'asyncprocess-list', component: DimeAsyncProcessListComponent },
+			{ path: 'asyncprocess-detail/:id', component: DimeAsyncProcessDetailComponent }
+		]
+	}
 ];
 
 @NgModule( {

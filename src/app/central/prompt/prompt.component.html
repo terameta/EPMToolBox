@@ -1,0 +1,10 @@
+<form (ngSubmit)="ok()">
+	<div class="modal-body text-center">
+		<p class="font-weight-bold">{{question}}</p>
+		<input type="text" name="resultPrompt" class="form-control form-control-sm" [(ngModel)]="result" autofocus>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-outline-dark btn-sm" (click)="cancel()">Cancel</button>
+		<button type="submit" class="btn btn-outline-success btn-sm">OK</button>
+	</div>
+</form>

@@ -10,7 +10,7 @@ import { DimeTagActions } from './dimetag.actions';
 import { DimeTagBackend } from './dimetag.backend';
 import { DimeTagGroupActions } from './dimetaggroup.actions';
 import { DimeTagGroupBackend } from './dimetaggroup.backend';
-import { switchMap, withLatestFrom, filter, map, catchError, finalize } from 'rxjs/operators';
+import { switchMap, withLatestFrom, filter, map, catchError, finalize, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AppState } from '../../app.state';
 
@@ -56,8 +56,9 @@ export class Effects {
 
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeTagActions.ONE.CREATE.COMPLETE ),
+		tap( console.log ),
 		switchMap( ( action: Action ) => {
-			this.router.navigateByUrl( 'admin/tags/tag-detail/' + action.payload.id );
+			this.router.navigateByUrl( 'admin/tags/' + action.payload.taggroup );
 			return of( DimeTagActions.ALL.LOAD.initiate() );
 		} )
 	);

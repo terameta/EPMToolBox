@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DimeTagService } from '../dimetag.service';
 
 @Component( {
 	selector: 'app-dimetags',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 } )
 export class DimeTagsComponent implements OnInit {
 
-	constructor() { }
+	constructor( public mainService: DimeTagService ) { }
 
 	ngOnInit() {
 	}

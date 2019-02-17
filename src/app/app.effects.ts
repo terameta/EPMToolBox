@@ -9,6 +9,9 @@ import * as fromMaps from './admin/dimemap';
 import * as fromMatrices from './admin/dimematrix';
 import * as fromProcesses from './admin/dimeprocess';
 import * as fromSchedules from './admin/dimeschedule';
+import * as fromAsyncProcesses from './admin/dimeasyncprocess';
+import * as fromSettings from './admin/dimesettings';
+import * as fromSecrets from './admin/dimesecret';
 
 export const AppEffects = [
 	fromAuth.Effects,
@@ -22,9 +25,7 @@ export const AppEffects = [
 	fromMatrices.Effects,
 	fromProcesses.Effects,
 	fromSchedules.Effects,
-	// DimeUIEffects,
-	// DimeStatusEffects,
-	// DimeAsyncProcessEffects,
-	// DimeSettingsEffects,
-	// DimeSecretEffects
+	fromAsyncProcesses.Effects,
+	fromSettings.Effects,
+	fromSecrets.Effects
 ];

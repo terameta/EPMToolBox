@@ -1,11 +1,10 @@
 import { MainTools } from './tools.main';
 import { Pool } from 'mysql';
 import { DimeSecret } from '../../shared/model/secret';
-import { JSONDeepCopy } from '../../shared/utilities/utilityFunctions';
 import { MailTool } from './tools.mailer';
 import { SettingsTool } from './tools.settings';
 import { DimeSetting } from '../../shared/model/dime/settings';
-import { dimeSecretInitialState } from '../../src/app/admin/dimesecret/dimesecret.state';
+import { initialState } from '../../src/app/admin/dimesecret/dimesecret.state';
 
 export class SecretTools {
 	settingsTool: SettingsTool;
@@ -75,7 +74,7 @@ export class SecretTools {
 	}
 	public create = () => {
 		return new Promise( ( resolve, reject ) => {
-			const newSecret = <DimeSecret>JSONDeepCopy( dimeSecretInitialState.curItem );
+			const newSecret = <DimeSecret>( initialState().curItem );
 			newSecret.details.name = 'New Secret';
 			delete newSecret.id;
 			this.db.query( 'INSERT INTO secrets SET ?', this.preparePut( newSecret ), ( err, rows, fields ) => {
