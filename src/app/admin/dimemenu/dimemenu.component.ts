@@ -18,7 +18,7 @@ export class DimemenuComponent {
 		map( s => Object.values( s.groups ).sort( SortByPosition ).map( ( g: any ) => ( { group: g, list: Object.values( s.items ).filter( ( t: any ) => t.taggroup === g.id ) } ) ) ),
 		combineLatest( this.state$ ),
 		map( ( [gl, s] ) => gl.map( ( g: any ) => ( { ...g, selection: g.list.find( ( t: any ) => ( t.id === s.selectedTags[g.group.id] ) ) || { id: 0, name: 'All' } } ) ) ),
-		map( gl => gl.map( ( g: any ) => ( { ...g, list: [{ id: 0, name: 'All' }, ...g.list] } ) ) )
+		map( gl => gl.map( ( g: any ) => ( { ...g, list: [{ id: 0, name: 'All' }, ...g.list.sort( SortByName )] } ) ) )
 	);
 
 	public items$ = this.state$.pipe(

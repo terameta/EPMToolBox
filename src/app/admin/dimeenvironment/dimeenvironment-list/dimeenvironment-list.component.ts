@@ -16,7 +16,8 @@ import { AppState } from '../../../app.state';
 	styleUrls: ['./dimeenvironment-list.component.css']
 } )
 export class DimeenvironmentListComponent implements OnInit {
-	public tagState$ = this.store.pipe( select( 'central' ) );
+	// public tagState$ = this.store.pipe( select( 'central' ) );
+	public credentialState$ = this.store.pipe( select( 'credential' ) );
 
 	constructor(
 		public mainService: DimeEnvironmentService,

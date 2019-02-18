@@ -35,6 +35,48 @@ a:hover { text-decoration: none; color: inherit; }
 	/*padding-right: 20px;*/
 }
 
+.form-group {
+	padding: 0;
+	border: 1px solid #ced4da;
+	border-radius: .25rem;
+	margin: .5rem 0 1rem 0;
+	// margin-bottom: 1rem;
+	line-height: 1;
+}
+
+.form-group>label{
+	position: relative;
+	top:-.5rem;
+	background-color:white;
+	left: .375rem;
+	padding-left: .375rem;
+	padding-right: .375rem;
+	font-size: .8rem !important;
+	margin: 0;
+}
+
+.form-group>.form-control{
+	margin-top: -.75rem;
+	border: none;
+}
+.form-group>select{
+	padding-left: .5rem !important;
+}
+.form-group>input[type="checkbox"] {
+	margin-left: .75rem !important;
+	margin-bottom: .5rem !important;
+}
+.form-group>.input-group{
+	border: none;
+	margin-top: -.6rem;
+}
+.form-group>.input-group>select{
+	border: none;
+}
+.form-group>.input-group>input{
+	border: none;
+}
+
 // .center-text {	text-align: center; }
 // .default-color { color: #515151; }
 // .navbar-toolbar { margin-top: 51px; }

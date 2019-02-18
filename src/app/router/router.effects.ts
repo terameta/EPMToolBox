@@ -51,6 +51,11 @@ export class Effects {
 			switch ( segments[0] ) {
 				case 'admin': {
 					switch ( segments[1] ) {
+						case 'streams': {
+							this.store.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() );
+							if ( segments[2] ) this.store.dispatch( DimeStreamActions.ONE.LOAD.initiateifempty( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
 						case 'environments': {
 							this.store.dispatch( DimeEnvironmentActions.ALL.LOAD.initiateifempty() );
 							if ( segments[2] ) this.store.dispatch( DimeEnvironmentActions.ONE.LOAD.initiate( parseInt( segments[2], 10 ) ) );
@@ -76,13 +81,6 @@ export class Effects {
 								case 'credential-list': { return DimeCredentialActions.ALL.LOAD.initiateifempty(); }
 								case 'credential-detail': { return DimeCredentialActions.ONE.LOAD.initiate( parseInt( segments[3], 10 ) ); }
 								default: { console.log( 'We are at credentials default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'streams': {
-							switch ( segments[2] ) {
-								case 'stream-list': { return DimeStreamActions.ALL.LOAD.initiateifempty(); }
-								case 'stream-detail': { return DimeStreamActions.ONE.LOAD.initiateifempty( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at streams default' ); return new DoNothingAction(); }
 							}
 						}
 						case 'maps': {

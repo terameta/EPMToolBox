@@ -35,8 +35,7 @@ export class DimeStreamDetailFieldDescriptionsRouterComponent implements OnInit,
 	}
 
 	public redirectIfNecessary = () => {
-		const params: any = { fieldid: 0 };
-		this.router.url.split( '/' ).filter( ( curPart, curIndex ) => curIndex === 6 ).map( curPart => { params.fieldid = curPart; } );
+		const params: any = { fieldid: this.router.url.split( '/' )[5] };
 		this.waitCurrentItemFieldList().then( () => {
 			let doWeHaveThisField = false;
 			this.mainService.currentItem.fieldList.forEach( curField => { if ( curField.id === parseInt( params.fieldid, 10 ) ) { doWeHaveThisField = true; } } );
@@ -44,7 +43,7 @@ export class DimeStreamDetailFieldDescriptionsRouterComponent implements OnInit,
 			if ( !doWeHaveThisField ) {
 				this.mainService.currentItem.fieldList.slice( 0 ).reverse().map( curField => { if ( curField.isDescribed ) { fieldtoNavigate = curField.id; } } );
 				if ( fieldtoNavigate > 0 ) {
-					this.router.navigateByUrl( '/admin/streams/stream-detail/' + this.mainService.currentItem.id + '/fielddescriptions/' + fieldtoNavigate );
+					this.router.navigateByUrl( '/admin/streams/' + this.mainService.currentItem.id + '/fielddescriptions/' + fieldtoNavigate );
 				}
 			}
 

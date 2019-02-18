@@ -24,16 +24,15 @@ import { DimeStreamDetailExportHPDBComponent } from './dimestream-detail/dime-st
 import { SharedModule } from '../../shared/shared.module';
 import { DimeStreamDetailExportListComponent } from './dimestream-detail/dime-stream-detail-export-list/dime-stream-detail-export-list.component';
 import { DimeStreamDetailExportDetailComponent } from './dimestream-detail/dime-stream-detail-export-detail/dime-stream-detail-export-detail.component';
+import { CentralModule } from '../../central/central.module';
 
 const dimeStreamRoutes: Routes = [
 	{
 		path: '', component: DimeStreamsComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'stream-list' },
-			{ path: 'stream-list', component: DimeStreamListComponent },
+			{ path: '', component: DimeStreamListComponent },
 			{
-				path: 'stream-detail/:id', component: DimeStreamDetailComponent, children: [
-					{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
-					{ path: 'definitions', component: DimeStreamDetailMainDefinitionsComponent },
+				path: ':id', component: DimeStreamDetailComponent, children: [
+					{ path: '', component: DimeStreamDetailMainDefinitionsComponent },
 					{ path: 'fields', component: DimeStreamDetailFieldsComponent },
 					{
 						path: 'fielddescriptions', component: DimeStreamDetailFieldDescriptionsRouterComponent, children: [
@@ -62,7 +61,7 @@ const dimeStreamRoutes: Routes = [
 		RouterModule.forChild( dimeStreamRoutes ),
 		AuthModule,
 		SharedModule,
-		// ModalModule
+		CentralModule
 	],
 	exports: [
 		RouterModule

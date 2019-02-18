@@ -10,13 +10,11 @@ import { DimeenvironmentDetailComponent } from './dimeenvironment-detail/dimeenv
 import { DimeenvironmentComponent } from './dimeenvironment/dimeenvironment.component';
 import { DimeenvironmentsComponent } from './dimeenvironments/dimeenvironments.component';
 import { DimeenvironmentToolbarComponent } from './dimeenvironment-toolbar/dimeenvironment-toolbar.component';
+import { CentralModule } from '../../central/central.module';
 
 const dimeEnvironmentRoutes: Routes = [
 	{
 		path: '', component: DimeenvironmentsComponent, children: [
-			// { path: '', pathMatch: 'full', redirectTo: 'environment-list' },
-			// { path: 'environment-list', component: DimeenvironmentListComponent },
-			// { path: 'environment-detail/:id', component: DimeenvironmentDetailComponent }
 			{ path: '', component: DimeenvironmentListComponent },
 			{ path: ':id', component: DimeenvironmentDetailComponent }
 		]
@@ -29,7 +27,8 @@ const dimeEnvironmentRoutes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( dimeEnvironmentRoutes ),
-		AuthModule
+		AuthModule,
+		CentralModule
 	],
 	exports: [
 		RouterModule

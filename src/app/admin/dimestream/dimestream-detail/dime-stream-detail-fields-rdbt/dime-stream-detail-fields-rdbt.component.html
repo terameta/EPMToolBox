@@ -42,7 +42,7 @@
 			<input type="checkbox" [(ngModel)]="curField.isData" ng-true-value="1" ng-false-value="0">
 		</td>
 		<td>
-			<select *ngIf="curField.isData == 1" [(ngModel)]="curField.aggregateFunction">
+			<select *ngIf="curField.isData == 1" [(ngModel)]="curField.aggregateFunction" class="form-control form-control-sm">
 				<option value="">NONE</option>
 				<option value="SUM">SUM</option>
 				<option value="AVG">AVG</option>
@@ -52,21 +52,25 @@
 			</select>
 		</td>
 		<td>
-			<div class="input-group" *ngIf="curField.type=='number'">
-				<span class="input-group-addon">
-					<b># of Digits:</b>
+			<div class="input-group input-group-sm" *ngIf="curField.type=='number'">
+				<span class="input-group-prepend">
+					<span class="input-group-text"><b># of Digits:</b></span>
 				</span>
 				<input type="number" class="form-control" placeholder="Whole Number Digits" [(ngModel)]="curField.fPrecision" min="1" max="65">
-				<span class="input-group-addon">(Min: 1, Max: 65)</span>
+				<span class="input-group-prepend">
+					<span class="input-group-text">(Min: 1, Max: 65)</span>
+				</span>
 				<input type="number" class="form-control" placeholder="Decimal Number Digits" [(ngModel)]="curField.fDecimals" min="0" max="{{curField.fPrecision -1 || 0}}">
-				<span class="input-group-addon">(Min: 0, Max: {{curField.fPrecision -1 || 0}})</span>
+				<span class="input-group-append">
+					<span class="input-group-text">(Min: 0, Max: {{curField.fPrecision -1 || 0}})</span>
+				</span>
 			</div>
-			<div class="input-group" *ngIf="curField.type=='string'">
-				<span class="input-group-addon">
-					<b># of Chars:</b>
+			<div class="input-group input-group-sm" *ngIf="curField.type=='string'">
+				<span class="input-group-prepend">
+					<span class="input-group-text"><b># of Chars:</b></span>
 				</span>
 				<input type="number" class="form-control" min="1" max="1024" [(ngModel)]="curField.fCharacters">
-				<span class="input-group-addon">(Max: 1024)</span>
+				<span class="input-group-prepend"><span class="input-group-text">(Max: 1024)</span></span>
 			</div>
 			<div class="input-group" *ngIf="curField.type=='date'">
 				<span class="input-group-addon">
@@ -93,13 +97,15 @@
 	</tr>
 	<tr>
 		<td colspan="100">
-			<div class="btn-toolbar">
-				<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.fieldsStartOver()">
-					<i class="fa fa-trash fa-fw "></i> Start Over
-				</button>
-				<button class="btn btn-primary btn-xs pull-right" type="button" (click)="mainService.update()">
-					<i class="fa fa-refresh fa-fw "></i> Save Changes
-				</button>
+			<div class="btn-toolbar w-100">
+				<div class="btn-group btn-group-xs ml-auto">
+					<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.fieldsStartOver()">
+						<i class="fa fa-trash fa-fw "></i> Start Over
+					</button>
+					<button class="btn btn-success btn-xs pull-right" type="button" (click)="mainService.update()">
+						<i class="fa fa-floppy-o fa-fw "></i> Save Changes
+					</button>
+				</div>
 			</div>
 		</td>
 	</tr>

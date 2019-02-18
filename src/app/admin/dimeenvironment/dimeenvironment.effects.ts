@@ -12,6 +12,7 @@ import { DimeTagActions } from '../dimetag/dimetag.actions';
 import { catchError, mergeMap, switchMap, map, withLatestFrom, filter, finalize, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AppState } from '../../app.state';
+import { DimeCredentialActions } from '../dimecredential/dimecredential.actions';
 
 export interface Action extends NgRXAction {
 	payload?: any;
@@ -38,7 +39,10 @@ export class Effects {
 
 	@Effect() ALL_LOAD_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeEnvironmentActions.ALL.LOAD.COMPLETE )
-		, map( () => DimeTagActions.ALL.LOAD.initiateifempty() ) );
+		, mergeMap( () => [
+			DimeTagActions.ALL.LOAD.initiateifempty(),
+			DimeCredentialActions.ALL.LOAD.initiateifempty()
+		] ) );
 
 	@Effect() ONE_CREATE_INITIATE$ = this.actions$.pipe(
 		ofType( DimeEnvironmentActions.ONE.CREATE.INITIATE )

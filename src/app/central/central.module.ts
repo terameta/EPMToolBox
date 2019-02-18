@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ConfirmComponent } from './confirm/confirm.component';
 import { PromptComponent } from './prompt/prompt.component';
 import { FormsModule } from '@angular/forms';
+import { TagSelectorComponent } from './tag-selector/tag-selector.component';
 
 @NgModule( {
 	declarations: [
 		ConfirmComponent,
-		PromptComponent
+		PromptComponent,
+		TagSelectorComponent
 	],
 	imports: [
 		CommonModule,
@@ -16,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 	entryComponents: [
 		ConfirmComponent,
 		PromptComponent
-	]
+	],
+	exports: [TagSelectorComponent]
 } )
 export class CentralModule { }

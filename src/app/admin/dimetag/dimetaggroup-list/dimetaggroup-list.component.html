@@ -30,7 +30,7 @@
 									<a [routerLink]="group.id" title="Edit">
 										<i class="fa fa-edit fa-fw"></i>
 									</a>
-									<i class="fa fa-i-cursor fa-fw" title="Rename"></i>
+									<i class="fa fa-i-cursor fa-fw pointer" title="Rename" (click)="rename(group)"></i>
 									<i class="fa fa-caret-square-o-up fa-fw pointer" title="Move Up" (click)="positionMove(groups, group, -1)"></i>
 									<i class="fa fa-caret-square-o-down fa-fw pointer" title="Move Down" (click)="positionMove(groups, group, 1)"></i>
 									<i class="fa fa-trash fa-fw ml-3 pointer text-danger" title="Delete" (click)="delete(group)"></i>
