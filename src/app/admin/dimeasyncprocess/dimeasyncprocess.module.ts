@@ -12,9 +12,8 @@ import { AuthModule } from '../../auth/auth.module';
 const dimeAsyncProcessRoutes: Routes = [
 	{
 		path: '', component: DimeAsyncProcessesComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'asyncprocess-list' },
-			{ path: 'asyncprocess-list', component: DimeAsyncProcessListComponent },
-			{ path: 'asyncprocess-detail/:id', component: DimeAsyncProcessDetailComponent }
+			{ path: '', component: DimeAsyncProcessListComponent },
+			{ path: ':id', component: DimeAsyncProcessDetailComponent }
 		]
 	}
 ];

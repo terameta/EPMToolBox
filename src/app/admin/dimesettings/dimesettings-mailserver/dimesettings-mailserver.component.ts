@@ -8,11 +8,8 @@ import { DimeSettingsService } from '../dimesettings.service';
 } )
 export class DimesettingsMailserverComponent implements OnInit {
 
-	constructor(
-		public mainService: DimeSettingsService
-	) { }
+	constructor( public mainService: DimeSettingsService ) { }
 
-	ngOnInit() {
-	}
+	ngOnInit() { }
 
 }

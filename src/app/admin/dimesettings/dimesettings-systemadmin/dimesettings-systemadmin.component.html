@@ -1,6 +1,6 @@
 <form (ngSubmit)="mainService.update('systemadmin')" #f="ngForm" action="form-horizontal">
 	<div class="table-responsive">
-		<table class="table table-hover table-condensed">
+		<table class="table table-hover table-sm table-borderless">
 			<thead>
 				<tr>
 					<th width="230">Setting</th>
@@ -11,13 +11,13 @@
 				<tr>
 					<td>From Name</td>
 					<td>
-						<input type="text" class="form-control" id="fromname" name="fromname" [(ngModel)]="mainService.items.systemadmin.fromname">
+						<input type="text" class="form-control form-control-sm" id="fromname" name="fromname" [(ngModel)]="mainService.items.systemadmin.fromname">
 					</td>
 				</tr>
 				<tr>
 					<td>E-Mail Address</td>
 					<td>
-						<input type="email" class="form-control" id="emailaddress" name="emailaddress" [(ngModel)]="mainService.items.systemadmin.emailaddress">
+						<input type="email" class="form-control form-control-sm" id="emailaddress" name="emailaddress" [(ngModel)]="mainService.items.systemadmin.emailaddress">
 					</td>
 				</tr>
 				<tr>

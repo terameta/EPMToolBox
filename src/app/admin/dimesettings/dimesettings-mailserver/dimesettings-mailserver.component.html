@@ -1,6 +1,6 @@
 <form (ngSubmit)="mainService.update('emailserver')" #f="ngForm" action="form-horizontal">
 	<div class="table-responsive">
-		<table class="table table-hover table-condensed">
+		<table class="table table-hover table-sm table-borderless m-0">
 			<thead>
 				<tr>
 					<th width="230">Setting</th>
@@ -11,13 +11,13 @@
 				<tr>
 					<td>Host</td>
 					<td>
-						<input type="text" class="form-control" id="host" name="host" [(ngModel)]="mainService.items.emailserver.host">
+						<input type="text" class="form-control form-control-sm" id="host" name="host" [(ngModel)]="mainService.items.emailserver.host">
 					</td>
 				</tr>
 				<tr>
 					<td>Port</td>
 					<td>
-						<input type="number" class="form-control" id="port" name="port" [(ngModel)]="mainService.items.emailserver.port">
+						<input type="number" class="form-control form-control-sm" id="port" name="port" [(ngModel)]="mainService.items.emailserver.port">
 					</td>
 				</tr>
 				<tr>
@@ -43,13 +43,13 @@
 				<tr>
 					<td>Username</td>
 					<td>
-						<input type="text" class="form-control" id="user" name="user" [(ngModel)]="mainService.items.emailserver.user">
+						<input type="text" class="form-control form-control-sm" id="user" name="user" [(ngModel)]="mainService.items.emailserver.user">
 					</td>
 				</tr>
 				<tr>
 					<td>Password</td>
 					<td>
-						<input type="text" class="form-control" id="pass" name="pass" [(ngModel)]="mainService.items.emailserver.pass">
+						<input type="text" class="form-control form-control-sm" id="pass" name="pass" [(ngModel)]="mainService.items.emailserver.pass">
 					</td>
 				</tr>
 				<tr>

@@ -8,9 +8,7 @@ import { DimeSettingsService } from '../dimesettings.service';
 } )
 export class DimesettingsSystemadminComponent implements OnInit {
 
-	constructor(
-		public mainService: DimeSettingsService
-	) { }
+	constructor( public mainService: DimeSettingsService ) { }
 
 	ngOnInit() {
 	}
