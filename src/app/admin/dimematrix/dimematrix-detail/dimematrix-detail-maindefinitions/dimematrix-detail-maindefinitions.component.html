@@ -1,61 +1,42 @@
 <form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
-	<fieldset>
-		<div class="form-group">
-			<label for="itemName" class="col-6 col-md-1 control-label">Name:</label>
-			<div class="col-6 col-md-11">
-				<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.currentItem.name">
-			</div>
+	<div class="form-group">
+		<label for="itemName" class="control-label">Name:</label>
+		<input type="text" class="form-control" id="itemName" name="itemName" [(ngModel)]="mainService.currentItem.name">
+	</div>
+	<div class="form-group">
+		<label for="itemStream" class="control-label">Bound Stream:</label>
+		<select name="itemStream" id="itemStream" class="form-control" [(ngModel)]="mainService.currentItem.stream">
+			<option *ngFor="let stream of streamService.itemList" [value]="stream.id">{{stream.name}}</option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label class="control-label">Tags:</label>
+		<app-tag-selector [tags]="mainService.currentItem?.tags"></app-tag-selector>
+	</div>
+	<div class="form-group p-3 d-flex">
+		<span class="form-text text-muted" *ngIf="mainService.currentItem.isReady === atReadyStatus.Ready">
+			This matrix definition is ready for data entry.
+		</span>
+		<span class="form-text text-muted" *ngIf="mainService.currentItem.isReady === atReadyStatus.Checking">
+			Please wait, system is checking if the matrix is ready...
+		</span>
+		<span class="form-text text-muted" *ngIf="mainService.currentItem.isReady === atReadyStatus.NotReady">
+			This matrix definition is not ready for data entry.
+			<br> Issue: {{mainService.currentItem.notReadyReason}}
+		</span>
+		<div class="btn-group btn-group-xs ml-auto">
+			<button class="btn btn-primary" type="submit">
+				<i class="fa fa-floppy-o fa-fw"></i> Save Changes
+			</button>
+			<button class="btn btn-danger" type="button" (click)="mainService.prepareMatrixTables()">
+				Prepare Tables
+			</button>
 		</div>
-		<div class="form-group">
-			<label for="itemStream" class="col-6 col-md-1 control-label">Bound Stream:</label>
-			<div class="col-6 col-md-11">
-				<select name="itemStream" id="itemStream" class="form-control" [(ngModel)]="mainService.currentItem.stream">
-					<option *ngFor="let stream of streamService.itemList" [value]="stream.id">{{stream.name}}</option>
-				</select>
-			</div>
+		<div class="btn-group btn-group-xs ml-4">
+			<button class="btn btn-danger pull-right" type="button" (click)="mainService.delete(mainService.currentItem.id, mainService.currentItem.name)">
+				<i class="fa fa-trash fa-fw"></i> Delete Matrix
+			</button>
 		</div>
-		<div class="form-group">
-			<label class="col-1 control-label">Tags:</label>
-			<div class="col-11">
-				<div class="col-{{tagService.decideColWidth(tagService.groupList.length)}}" *ngFor="let tagGroup of tagService.groupList">
-					{{tagGroup.name}}
-					<hr />
-					<ng-container *ngFor="let tagItem of tagService.itemList">
-						<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
-							<label>
-								<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="mainService.currentItem?.tags[tagItem.id]"> {{tagItem.name}}
-							</label>
-						</div>
-					</ng-container>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-11 col-offset-1">
-				<button class="btn btn-primary btn-xs" type="submit">
-					<i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-				<button class="btn btn-danger btn-xs" type="button" (click)="mainService.prepareMatrixTables()">Prepare Tables</button>
-				<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/matrices/matrix-list">
-					<i class="fa fa-ban fa-fw"></i> Cancel</button>
-				<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.currentItem.id, mainService.currentItem.name)">
-					<i class="fa fa-trash fa-fw"></i> Delete Matrix</button>
-			</div>
-		</div>
-	</fieldset>
+
+	</div>
 </form>
-<span class="help-block" *ngIf="mainService.currentItem.isReady === atReadyStatus.Ready">
-	<div class="well well-success well-sm">
-		This matrix definition is ready for data entry.
-	</div>
-</span>
-<span class="help-block" *ngIf="mainService.currentItem.isReady === atReadyStatus.Checking">
-	<div class="well well-warning well-sm">
-		Please wait, system is checking if the matrix is ready...
-	</div>
-</span>
-<span class="help-block" *ngIf="mainService.currentItem.isReady === atReadyStatus.NotReady">
-	<div class="alert alert-danger" role="alert">
-		This matrix definition is not ready for data entry.
-		<br> Issue: {{mainService.currentItem.notReadyReason}}
-	</div>
-</span>

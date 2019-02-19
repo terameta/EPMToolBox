@@ -17,16 +17,15 @@ import { DimematrixDetailFieldsComponent } from './dimematrix-detail/dimematrix-
 import { DimematrixDetailMatrixComponent } from './dimematrix-detail/dimematrix-detail-matrix/dimematrix-detail-matrix.component';
 import { DimematrixDetailImportComponent } from './dimematrix-detail/dimematrix-detail-import/dimematrix-detail-import.component';
 import { DimematrixDetailExportComponent } from './dimematrix-detail/dimematrix-detail-export/dimematrix-detail-export.component';
+import { CentralModule } from '../../central/central.module';
 
 const dimeMatrixRoutes: Routes = [
 	{
 		path: '', component: DimeMatricesComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'matrix-list' },
-			{ path: 'matrix-list', component: DimeMatrixListComponent },
+			{ path: '', component: DimeMatrixListComponent },
 			{
-				path: 'matrix-detail/:id', component: DimeMatrixDetailComponent, children: [
-					{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
-					{ path: 'definitions', component: DimematrixDetailMaindefinitionsComponent },
+				path: ':id', component: DimeMatrixDetailComponent, children: [
+					{ path: '', component: DimematrixDetailMaindefinitionsComponent },
 					{ path: 'fields', component: DimematrixDetailFieldsComponent },
 					{ path: 'matrix', component: DimematrixDetailMatrixComponent },
 					{ path: 'import', component: DimematrixDetailImportComponent },
@@ -43,7 +42,8 @@ const dimeMatrixRoutes: Routes = [
 		FormsModule,
 		RouterModule.forChild( dimeMatrixRoutes ),
 		AuthModule,
-		HotTableModule
+		HotTableModule,
+		CentralModule
 	],
 	exports: [
 		RouterModule

@@ -19,8 +19,8 @@
 	<app-dimeprocess-step-detail-senddata *ngIf="currentStep?.type === stepTypes.SendData" [currentStep]="currentStep"></app-dimeprocess-step-detail-senddata>
 	<app-dimeprocess-step-detail-sendmissing *ngIf="currentStep?.type === stepTypes.SendMissingMaps" [currentStep]="currentStep"></app-dimeprocess-step-detail-sendmissing>
 	<app-dimeprocess-step-detail-sendlogs *ngIf="currentStep?.type === stepTypes.SendLogs" [currentStep]="currentStep"></app-dimeprocess-step-detail-sendlogs>
-	<div class="form-group">
-		<button class="btn btn-primary btn-xs pull-right" type="submit">
+	<div class="form-group d-flex p-3">
+		<button class="btn btn-primary btn-xs ml-auto" type="submit">
 			<i class="fa fa-floppy-o fa-fw"></i> Save Changes
 		</button>
 	</div>

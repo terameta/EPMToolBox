@@ -1,2 +1,9 @@
-<input type="file" id="matriximportfile" name="file" (change)="mainService.matrixImportFileChangeEvent($event)">
-<button type="button" class="btn btn-default btn-xs" (click)="mainService.matrixImport()">Import</button>
+<div class="input-group">
+	<div class="custom-file">
+		<input type="file" class="custom-file-input" id="matriximportfile" name="file" (change)="mainService.matrixImportFileChangeEvent($event)">
+		<label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+	</div>
+	<div class="input-group-append">
+		<button type="button" class="btn btn-outline-dark" (click)="mainService.matrixImport()">Import</button>
+	</div>
+</div>

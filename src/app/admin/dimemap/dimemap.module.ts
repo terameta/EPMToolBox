@@ -17,16 +17,15 @@ import { DimemapDetailTabMaptableComponent } from './dimemap-detail/dimemap-deta
 import { DimemapDetailTabSourcedefinitionsComponent } from './dimemap-detail/dimemap-detail-tab-sourcedefinitions/dimemap-detail-tab-sourcedefinitions.component';
 import { DimemapDetailTabTargetdefinitionsComponent } from './dimemap-detail/dimemap-detail-tab-targetdefinitions/dimemap-detail-tab-targetdefinitions.component';
 import { DimemapDetailTabImportexportComponent } from './dimemap-detail/dimemap-detail-tab-importexport/dimemap-detail-tab-importexport.component';
+import { CentralModule } from '../../central/central.module';
 
 const dimeMapRoutes: Routes = [
 	{
 		path: '', component: DimemapsComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'map-list' },
-			{ path: 'map-list', component: DimemapListComponent },
+			{ path: '', component: DimemapListComponent },
 			{
-				path: 'map-detail/:id', component: DimemapDetailComponent, children: [
-					{ path: '', pathMatch: 'prefix', redirectTo: 'maindefinitions' },
-					{ path: 'maindefinitions', component: DimemapDetailTabMaindefinitionsComponent },
+				path: ':id', component: DimemapDetailComponent, children: [
+					{ path: '', component: DimemapDetailTabMaindefinitionsComponent },
 					{ path: 'maptable', component: DimemapDetailTabMaptableComponent },
 					{ path: 'sourcedefinitions', component: DimemapDetailTabSourcedefinitionsComponent },
 					{ path: 'targetdefinitions', component: DimemapDetailTabTargetdefinitionsComponent },
@@ -43,7 +42,8 @@ const dimeMapRoutes: Routes = [
 		FormsModule,
 		RouterModule.forChild( dimeMapRoutes ),
 		AuthModule,
-		HotTableModule
+		HotTableModule,
+		CentralModule
 	],
 	exports: [RouterModule],
 	providers: [],

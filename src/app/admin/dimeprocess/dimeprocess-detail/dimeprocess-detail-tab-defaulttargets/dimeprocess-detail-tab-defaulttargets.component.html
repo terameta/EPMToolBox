@@ -1,12 +1,12 @@
 <form class="form" (ngSubmit)="updateDefaultTargets()" #f="ngForm" class="form-horizontal">
-	<div class="form-group" *ngFor="let field of streamService.itemObject[targetStreamID]?.fieldList">
-		<div class="input-group">
-			<div class="input-group-addon" style="min-width:150px; text-align:left;">{{field.name}}:</div>
+	<div *ngFor="let field of streamService.itemObject[targetStreamID]?.fieldList">
+		<div class="input-group mb-1">
+			<div class="input-group-prepend" style="min-width:150px; text-align:left;"><span class="input-group-text w-100">{{field.name}}:</span></div>
 			<input type="text" class="form-control" name="{{field.name}}defaultValue" placeholder="Please enter default value" [(ngModel)]="mainService.currentItem.defaultTargets[field.name]">
 		</div>
 	</div>
-	<div class="form-group">
-		<button type="submit" class="btn btn-xs btn-success pull-right">
+	<div class="form-group d-flex p-3">
+		<button type="submit" class="btn btn-xs btn-success ml-auto">
 			<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes</button>
 	</div>
 </form>

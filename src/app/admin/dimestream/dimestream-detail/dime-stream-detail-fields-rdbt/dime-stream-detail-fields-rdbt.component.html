@@ -42,7 +42,7 @@
 			<input type="checkbox" [(ngModel)]="curField.isData" ng-true-value="1" ng-false-value="0">
 		</td>
 		<td>
-			<select *ngIf="curField.isData == 1" [(ngModel)]="curField.aggregateFunction" class="form-control form-control-sm">
+			<select *ngIf="!!curField.isData" [(ngModel)]="curField.aggregateFunction" class="form-control form-control-sm">
 				<option value="">NONE</option>
 				<option value="SUM">SUM</option>
 				<option value="AVG">AVG</option>

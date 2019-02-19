@@ -1,4 +1,4 @@
-<table class="table table-hover table-condensed">
+<table class="table table-hover table-sm table-borderless m-0">
 	<thead>
 		<tr>
 			<th width="100px">Field</th>
@@ -15,13 +15,13 @@
 		<tr>
 			<th>Fields:</th>
 			<td>
-				<table class="table table-condensed">
+				<table class="table table-sm table-borderless m-0">
 					<thead>
 						<tr>
 							<th width="100px">Name</th>
 							<th>
 								Mapped?
-								<span class="label label-info">Data fields are excluded</span>
+								<small class="text-muted">Data fields are excluded</small>
 							</th>
 						</tr>
 					</thead>
@@ -33,9 +33,10 @@
 							</td>
 						</tr>
 						<tr>
-							<td colspan="2">
-								<button class="btn btn-default btn-xs" type="button" (click)="mainService.update()">
-									<i class="fa fa-check-circle"></i> Apply</button>
+							<td colspan="2" class="text-right">
+								<button class="btn btn-outline-success btn-xs" type="button" (click)="mainService.update()">
+									<i class="fa fa-check-circle"></i> Apply
+								</button>
 							</td>
 						</tr>
 					</tbody>

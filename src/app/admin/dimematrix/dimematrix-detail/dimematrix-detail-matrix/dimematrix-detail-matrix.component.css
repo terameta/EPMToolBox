@@ -6,6 +6,9 @@
 	top: 3%;
 	max-height: 94%;
 	overflow-y: auto;
+	background-color: white;
+	padding: 1rem;
+	border: 1px solid silver;
 }
 
 .fix-width {

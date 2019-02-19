@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
-import { DimeProcessService } from './dimeprocess.service';
 import { DimeprocessListComponent } from './dimeprocess-list/dimeprocess-list.component';
 import { DimeprocessDetailComponent } from './dimeprocess-detail/dimeprocess-detail.component';
 import { DimeprocessesComponent } from './dimeprocesses/dimeprocesses.component';
@@ -31,16 +30,16 @@ import { DimeprocessStepDetailSenddataComponent } from './dimeprocess-step-detai
 import { DimeprocessStepDetailSendmissingComponent } from './dimeprocess-step-detail-sendmissing/dimeprocess-step-detail-sendmissing.component';
 import { DimeprocessStepDetailSendlogsComponent } from './dimeprocess-step-detail-sendlogs/dimeprocess-step-detail-sendlogs.component';
 import { DimeprocessDetailTabHistoryComponent } from './dimeprocess-detail/dimeprocess-detail-tab-history/dimeprocess-detail-tab-history.component';
+import { CentralModule } from '../../central/central.module';
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 
 const dimeProcessRoutes: Routes = [
 	{
 		path: '', component: DimeprocessesComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'process-list' },
-			{ path: 'process-list', component: DimeprocessListComponent },
+			{ path: '', component: DimeprocessListComponent },
 			{
-				path: 'process-detail/:id', component: DimeprocessDetailComponent, children: [
-					{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
-					{ path: 'definitions', component: DimeprocessDetailTabMaindefinitionsComponent },
+				path: ':id', component: DimeprocessDetailComponent, children: [
+					{ path: '', component: DimeprocessDetailTabMaindefinitionsComponent },
 					{ path: 'run', component: DimeprocessDetailTabRunComponent },
 					{
 						path: 'steps', component: DimeprocessDetailTabStepsComponent, children: [
@@ -65,7 +64,9 @@ const dimeProcessRoutes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( dimeProcessRoutes ),
-		AuthModule
+		AuthModule,
+		CentralModule,
+		BsDropdownModule
 	],
 	exports: [
 		RouterModule

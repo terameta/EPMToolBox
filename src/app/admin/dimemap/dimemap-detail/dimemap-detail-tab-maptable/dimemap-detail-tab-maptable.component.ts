@@ -302,7 +302,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 		} );
 	}
 	public windowResized = () => {
-		this.hotTableHeight = window.innerHeight - 320;
+		this.hotTableHeight = window.innerHeight - 174;
 		if ( this.hotTableHeight < 100 ) {
 			this.hotTableHeight = 100;
 		}

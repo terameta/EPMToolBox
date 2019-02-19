@@ -32,7 +32,7 @@ export class DimeprocessStepDetailTarprocedureComponent implements OnInit, OnDes
 		private route: ActivatedRoute,
 		public mainService: DimeProcessService,
 		private environmentService: DimeEnvironmentService,
-		private streamService: DimeStreamService,
+		public streamService: DimeStreamService,
 		private toastr: ToastrService
 	) { }
 

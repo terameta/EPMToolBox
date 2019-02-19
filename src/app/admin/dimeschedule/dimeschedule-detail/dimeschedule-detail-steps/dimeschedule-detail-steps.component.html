@@ -1,66 +1,68 @@
 <form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
 	<div class="form-group">
-		<label class="col-6 col-md-1 control-label">Steps:</label>
-		<div class="col-6 col-md-11" *ngIf="mainService.currentItem">
-			<div class="table-responsive">
-				<table class="table table-hover table-condensed">
-					<thead>
-						<tr>
-							<th>Type</th>
-							<th>Item</th>
-							<th width="100">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr *ngFor="let step of mainService.currentItem.steps; let i = index; let last = last; let first = first;">
-							<td>
-								<select name="step{{i}}Type" class="form-control" [(ngModel)]="step.type">
-									<option *ngFor="let option of stepTypeArray" [value]="option.value">{{option.label}}</option>
-								</select>
-							</td>
-							<td *ngIf="findStepType(step.type) === 'Process'">
-								<select name="step{{i}}Referedid" class="form-control" [(ngModel)]="step.referedid">
-									<option *ngFor="let processid of processService.itemids" [value]="processid">{{processService.items[processid]?.name}}</option>
-								</select>
-							</td>
-							<td *ngIf="findStepType(step.type) !== 'Process'"> Not Implemented yet.</td>
-							<td>
-								<div class="btn-toolbar" role="toolbar" aria-label="Schedule Step List Actions">
-									<div class="btn-group btn-group-xs" role="group">
-										<button type="button" *ngIf="!last" class="btn btn-xs btn-default" title="Move Down" (click)="stepMoveOrder(step, 'down')">
-											<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
-										</button>
-										<button type="button" *ngIf="last || first" class="btn btn-xs btn-default" title="Nothing to do!">
-											<i class="fa fa-fw" aria-hidden="true"></i>
-										</button>
-										<button type="button" *ngIf="!first" class="btn btn-xs btn-default" title="Move Up" (click)="stepMoveOrder(step, 'up')">
-											<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
-										</button>
-									</div>
-									<div class="btn-group btn-group-xs pull-right" role="group">
-										<button class="btn btn-danger" type="button" title="Delete" (click)="stepDelete(i);">
-											<i class="fa fa-trash fa-fw"></i>
-										</button>
-									</div>
+		<label class="control-label">Steps:</label>
+		<div class="table-responsive" *ngIf="mainService.currentItem">
+			<table class="table table-hover table-sm table-borderless m-0">
+				<thead>
+					<tr>
+						<th>Type</th>
+						<th>Item</th>
+						<th width="130">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let step of mainService.currentItem.steps; let i = index; let last = last; let first = first;">
+						<td>
+							<select name="step{{i}}Type" class="form-control form-control-sm" [(ngModel)]="step.type">
+								<option *ngFor="let option of stepTypeArray" [value]="option.value">{{option.label}}</option>
+							</select>
+						</td>
+						<td *ngIf="findStepType(step.type) === 'Process'">
+							<select name="step{{i}}Referedid" class="form-control form-control-sm" [(ngModel)]="step.referedid">
+								<option *ngFor="let processid of processService.itemids" [value]="processid">{{processService.items[processid]?.name}}</option>
+							</select>
+						</td>
+						<td *ngIf="findStepType(step.type) !== 'Process'" class="py-auto">
+							<input type="text" value="Not Implemented Yet" disabled class="form-control form-control-sm">
+						</td>
+						<td>
+							<div class="btn-toolbar" role="toolbar" aria-label="Schedule Step List Actions">
+								<div class="btn-group btn-group-sm" role="group">
+									<button type="button" *ngIf="!last" class="btn btn-outline-dark" title="Move Down" (click)="stepMoveOrder(step, 'down')">
+										<i class="fa fa-caret-down fa-fw" aria-hidden="true"></i>
+									</button>
+									<button type="button" *ngIf="(last || first) && (!last || !first)" class="btn btn-outline-dark" title="Nothing to do!">
+										<i class="fa fa-fw" aria-hidden="true"></i>
+									</button>
+									<button type="button" *ngIf="!first" class="btn btn-outline-dark" title="Move Up" (click)="stepMoveOrder(step, 'up')">
+										<i class="fa fa-caret-up fa-fw" aria-hidden="true"></i>
+									</button>
 								</div>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+								<div class="btn-group btn-group-sm ml-auto" role="group">
+									<button class="btn btn-danger" type="button" title="Delete" (click)="stepDelete(i);">
+										<i class="fa fa-trash fa-fw"></i>
+									</button>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
-	<div class="form-group">
-		<div class="col-11 col-offset-1">
+	<div class="form-group p-3 d-flex">
+		<div class="btn-group btn-group-xs ml-auto">
 			<button class="btn btn-success btn-xs" type="submit">
 				<i class="fa fa-floppy-o fa-fw"></i> Save Changes
 			</button>
 			<button class="btn btn-primary btn-xs" type="button" (click)="stepAdd()">
 				<i class="fa fa-plus fa-fw"></i> Add Step
 			</button>
-			<button class="btn btn-warning btn-xs" type="button" routerLink="/dime/schedules/schedule-list">
+			<button class="btn btn-warning btn-xs" type="button" routerLink="/admin/schedules/">
 				<i class="fa fa-ban fa-fw"></i> Cancel
 			</button>
+		</div>
+		<div class="btn-group btn-group-xs ml-3">
 			<button class="btn btn-danger btn-xs pull-right" type="button" (click)="mainService.delete(mainService.currentItem.id, mainService.currentItem.name)">
 				<i class="fa fa-trash fa-fw"></i> Delete Schedule
 			</button>

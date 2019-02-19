@@ -1,76 +1,51 @@
 <form (ngSubmit)="mainService.update()" #f="ngForm" class="form-horizontal">
-	<fieldset>
-		<div class="form-group">
-			<label for="mapName" class="col-2 control-label">Name:</label>
-			<div class="col-10">
-				<input type="text" class="form-control" id="mapName" name="mapName" [(ngModel)]="mainService.currentItem.name">
-			</div>
+	<div class="form-group">
+		<label for="mapName" class="control-label">Name:</label>
+		<input type="text" class="form-control" id="mapName" name="mapName" [(ngModel)]="mainService.currentItem.name">
+	</div>
+	<div class="form-group">
+		<label for="mapSource" class="control-label">Source Stream:</label>
+		<select name="mapSourceStream" id="mapSourceStream" class="form-control" [(ngModel)]="mainService.currentItem.source">
+			<option *ngFor="let srcStream of streamService.itemList" [value]="srcStream.id"> {{ srcStream.name }} </option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="mapTarget" class="control-label">Target Stream:</label>
+		<select name="mapTargetStream" id="mapTargetStream" class="form-control" [(ngModel)]="mainService.currentItem.target">
+			<option *ngFor="let tarStream of streamService.itemList" [value]="tarStream.id"> {{ tarStream.name }} </option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="mapTarget" class="control-label">Validity Matrix:</label>
+		<select name="mapValidityMatrix" id="mapValidityMatrix" class="form-control" [(ngModel)]="mainService.currentItem.matrix">
+			<option value="0">None</option>
+			<option *ngFor="let matrix of matrixService.itemList" [value]="matrix.id"> {{ matrix.name }} </option>
+		</select>
+	</div>
+	<div class="form-group">
+		<label class="control-label">Tags:</label>
+		<app-tag-selector [tags]="mainService.currentItem?.tags"></app-tag-selector>
+	</div>
+	<div class="form-group p-3 d-flex">
+		<span class="form-text text-muted" *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
+			This map definition is ready for mapping.
+		</span>
+		<span class="form-text text-muted" *ngIf="mainService.currentItem.isready === atReadyStatus.Checking">
+			Please wait, system is checking if the map is ready...
+		</span>
+		<span class="form-text text-muted" *ngIf="mainService.currentItem.isready === atReadyStatus.NotReady">
+			This map definition is not ready for mapping.
+		</span>
+		<div class="btn-group btn-group-xs ml-auto">
+			<button class="btn btn-primary btn-xs" type="submit">
+				<i class="fa fa-floppy-o fa-fw"></i> Save Changes
+			</button>
+			<button class="btn btn-success btn-xs" type="button" (click)="mainService.rePrepareTables()" *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
+				<i class="fa fa-check-circle"></i> Re-Prepare Map
+			</button>
+			<button class="btn btn-warning btn-xs" type="button" (click)="mainService.prepareTables()" *ngIf="mainService.currentItem.isready === atReadyStatus.NotReady">
+				<i class="fa fa-check-circle"></i> Prepare Map
+			</button>
 		</div>
-		<div class="form-group">
-			<label for="mapSource" class="col-2 control-label">Source Stream:</label>
-			<div class="col-10">
-				<select name="mapSourceStream" id="mapSourceStream" class="form-control" [(ngModel)]="mainService.currentItem.source">
-					<option *ngFor="let srcStream of streamService.itemList" [value]="srcStream.id"> {{ srcStream.name }} </option>
-				</select>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="mapTarget" class="col-2 control-label">Target Stream:</label>
-			<div class="col-10">
-				<select name="mapTargetStream" id="mapTargetStream" class="form-control" [(ngModel)]="mainService.currentItem.target">
-					<option *ngFor="let tarStream of streamService.itemList" [value]="tarStream.id"> {{ tarStream.name }} </option>
-				</select>
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="mapTarget" class="col-2 control-label">Validity Matrix:</label>
-			<div class="col-10">
-				<select name="mapValidityMatrix" id="mapValidityMatrix" class="form-control" [(ngModel)]="mainService.currentItem.matrix">
-					<option value="0">None</option>
-					<option *ngFor="let matrix of matrixService.itemList" [value]="matrix.id"> {{ matrix.name }} </option>
-				</select>
-			</div>
-		</div>
-		<div class="form-group">
-			<label class="col-2 control-label">Tags:</label>
-			<div class="col-10">
-				<div class="col-{{decideColWidth(tagService.groupList.length)}}" *ngFor="let tagGroup of tagService.groupList">
-					{{tagGroup.name}}
-					<hr />
-					<ng-container *ngFor="let tagItem of tagService.itemList">
-						<div class="checkbox" *ngIf="tagItem.taggroup == tagGroup.id">
-							<label>
-								<input type="checkbox" name="tagName{{tagItem.id}}" [(ngModel)]="mainService.currentItem?.tags[tagItem.id]"> {{tagItem.name}}
-							</label>
-						</div>
-					</ng-container>
-				</div>
-			</div>
-		</div>
-		<div class="form-group">
-			<div class="col-10 col-offset-2">
-				<button class="btn btn-primary btn-xs" type="submit">
-					<i class="fa fa-floppy-o fa-fw"></i> Save Changes</button>
-				<button class="btn btn-success btn-xs" type="button" (click)="mainService.rePrepareTables()" *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
-					<i class="fa fa-check-circle"></i> Re-Prepare Map</button>
-				<button class="btn btn-warning btn-xs" type="button" (click)="mainService.prepareTables()" *ngIf="mainService.currentItem.isready === atReadyStatus.NotReady">
-					<i class="fa fa-check-circle"></i> Prepare Map</button>
-				<span class="help-block" *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
-					<div class="well well-success well-sm">
-						This map definition is ready for mapping.
-					</div>
-				</span>
-				<span class="help-block" *ngIf="mainService.currentItem.isready === atReadyStatus.Checking">
-					<div class="well well-warning well-sm">
-						Please wait, system is checking if the map is ready...
-					</div>
-				</span>
-				<span class="help-block" *ngIf="mainService.currentItem.isready === atReadyStatus.NotReady">
-					<div class="well well-danger well-sm">
-						This map definition is not ready for mapping.
-					</div>
-				</span>
-			</div>
-		</div>
-	</fieldset>
+	</div>
 </form>

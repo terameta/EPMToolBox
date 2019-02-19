@@ -14,7 +14,7 @@ export class DimemapListComponent implements OnInit {
 
 	constructor(
 		public mainService: DimeMapService,
-		private streamService: DimeStreamService,
+		public streamService: DimeStreamService,
 		private uiService: DimeUIService,
 		private tagService: DimeTagService
 	) { }

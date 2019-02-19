@@ -11,16 +11,15 @@ import { DimescheduleToolbarComponent } from './dimeschedule-toolbar/dimeschedul
 import { DimescheduleDetailMaindefinitionsComponent } from './dimeschedule-detail/dimeschedule-detail-maindefinitions/dimeschedule-detail-maindefinitions.component';
 import { DimescheduleDetailStepsComponent } from './dimeschedule-detail/dimeschedule-detail-steps/dimeschedule-detail-steps.component';
 import { DimescheduleDetailHistoryComponent } from './dimeschedule-detail/dimeschedule-detail-history/dimeschedule-detail-history.component';
+import { CentralModule } from '../../central/central.module';
 
 const dimeScheduleRoutes: Routes = [
 	{
 		path: '', component: DimeschedulesComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'schedule-list' },
-			{ path: 'schedule-list', component: DimescheduleListComponent },
+			{ path: '', component: DimescheduleListComponent },
 			{
-				path: 'schedule-detail/:id', component: DimescheduleDetailComponent, children: [
-					{ path: '', pathMatch: 'prefix', redirectTo: 'definitions' },
-					{ path: 'definitions', component: DimescheduleDetailMaindefinitionsComponent },
+				path: ':id', component: DimescheduleDetailComponent, children: [
+					{ path: '', component: DimescheduleDetailMaindefinitionsComponent },
 					{ path: 'steps', component: DimescheduleDetailStepsComponent },
 					{ path: 'history', component: DimescheduleDetailHistoryComponent }
 				]
@@ -32,7 +31,8 @@ const dimeScheduleRoutes: Routes = [
 	imports: [
 		CommonModule,
 		FormsModule,
-		RouterModule.forChild( dimeScheduleRoutes )
+		RouterModule.forChild( dimeScheduleRoutes ),
+		CentralModule
 	],
 	exports: [
 		RouterModule

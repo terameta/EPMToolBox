@@ -1,13 +1,26 @@
-<ul class="nav nav-tabs">
-	<li class="active"><a href="#maptabimport" data-toggle="tab">Import</a></li>
-	<li><a href="#maptabexport" data-toggle="tab">Export</a></li>
-</ul>
-<div class="tab-content">
-	<div class="tab-pane fade in active" id="maptabimport">
-		<input type="file" id="mapimportfile" name="file" (change)="mainService.mapImportFileChangeEvent($event)" >
-		<button type="button" class="btn btn-default btn-xs" (click)="mainService.mapImport()">Import</button>
+<div class="card">
+	<div class="card-header">
+		Import
 	</div>
-	<div class="tab-pane fade in" id="maptabexport">
-		<button type="button" class="btn btn-default btn-xs" title="Export Map" (click)="mainService.mapExport()">Export</button>
+	<div class="card-body">
+		<div class="input-group">
+			<div class="custom-file">
+				<input type="file" class="custom-file-input" id="mapimportfile" name="file" (change)="mainService.mapImportFileChangeEvent($event)" required>
+				<label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+				<div class="invalid-feedback">Not Valid, please choose another file</div>
+			</div>
+			<div class="input-group-append">
+				<button class="btn btn-outline-dark" type="button" (click)="mainService.mapImport()">Import</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="card mt-3">
+	<div class="card-header">
+		Export
+	</div>
+	<div class="card-body">
+		<button type="button" class="btn btn-outline-dark" title="Export Map" (click)="mainService.mapExport()">Export</button>
 	</div>
 </div>

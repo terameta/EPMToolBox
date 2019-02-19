@@ -1,28 +1,28 @@
 <form (ngSubmit)="applyFilters()" #f="ngForm" class="form form-horizontal">
 	<ng-container *ngFor="let field of streamService.itemObject[sourceStreamID]?.fieldList">
-		<div class="form-group" *ngIf="field.isFilter">
+		<div *ngIf="field.isFilter">
 			<div class="input-group" *ngIf="field.type == 'date' && mainService.currentItem.filters[field.id]">
-				<div class="input-group-addon" style="width:150px;text-align:left;">{{field.name}}:</div>
-				<div class="input-group-addon">&gt;=</div>
+				<div class="input-group-prepend" style="width:150px;text-align:left;"><span class="input-group-text w-100">{{field.name}}:</span></div>
+				<div class="input-group-prepend"><span class="input-group-text w-100">&gt;=</span></div>
 				<input type="date" class="form-control" name="{{field.name}}from" placeholder="{{field.fDateFormat}}" [(ngModel)]="mainService.currentItem.filters[field.id].filterfrom">
-				<div class="input-group-addon">&lt;=</div>
+				<div class="input-group-append"><span class="input-group-text w-100">&lt;=</span></div>
 				<input type="date" class="form-control" name="{{field.name}}to" placeholder="{{field.fDateFormat}}" [(ngModel)]="mainService.currentItem.filters[field.id].filterto">
 			</div>
 			<div class="input-group" *ngIf="field.type == 'string' && mainService.currentItem.filters[field.id]">
-				<div class="input-group-addon" style="width:150px;text-align:left;">{{field.name}}:</div>
+				<div class="input-group-prepend" style="width:150px;text-align:left;"><span class="input-group-text w-100">{{field.name}}:</span></div>
 				<input type="text" class="form-control" name="{{field.name}}textfilter" placeholder="ABC%?" [(ngModel)]="mainService.currentItem.filters[field.id].filtertext">
 			</div>
 			<div class="input-group" *ngIf="field.type == 'number' && mainService.currentItem.filters[field.id]">
-				<div class="input-group-addon" style="width:150px;text-align:left;">{{field.name}}:</div>
-				<div class="input-group-addon">&gt;=</div>
+				<div class="input-group-prepend" style="width:150px;text-align:left;"><span class="input-group-text w-100">{{field.name}}:</span></div>
+				<div class="input-group-prepend"><span class="input-group-text w-100">&gt;=</span></div>
 				<input type="number" class="form-control" name="{{field.name}}beq" placeholder="###" [(ngModel)]="mainService.currentItem.filters[field.id].filterbeq">
-				<div class="input-group-addon">&lt;=</div>
+				<div class="input-group-append"><span class="input-group-text w-100">&lt;=</span></div>
 				<input type="number" class="form-control" name="{{field.name}}seq" placeholder="###" [(ngModel)]="mainService.currentItem.filters[field.id].filterseq">
 			</div>
 		</div>
 	</ng-container>
-	<div class="form-group">
-		<button type="submit" class="btn btn-xs btn-success pull-right">
+	<div class="form-group d-flex p-3">
+		<button type="submit" class="btn btn-xs btn-success ml-auto">
 			<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Changes
 		</button>
 	</div>

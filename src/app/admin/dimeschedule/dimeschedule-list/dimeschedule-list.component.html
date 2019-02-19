@@ -1,88 +1,103 @@
-<div class="w-100 p-3">
-	<div class="table-responsive">
-		<table class="table table-bordered table-hover table-sm">
-			<thead>
-				<tr>
-					<th>Name</th>
-					<th>Second</th>
-					<th>Minute</th>
-					<th>Hour</th>
-					<th>Day of Month</th>
-					<th>Month</th>
-					<th>Day of Week</th>
-					<th>Status</th>
-					<th width="135">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				<ng-container *ngFor="let id of mainService.itemids; let i = index;">
-					<ng-container *ngIf="shouldListItem(id)">
-						<ng-container *ngIf="!mainService.items[id].schedule || mainService.items[id].schedule.length == 0">
-							<tr>
-								<td>
-									<a [routerLink]="['../schedule-detail', id]" class="at-table-link">{{mainService.items[id].name}}</a>
-								</td>
-								<td colspan="6">There is no schedule item defined. Please go to details.</td>
-								<td>{{findStatus(mainService.items[id].status)}}</td>
-								<td>
-									<div class="btn-toolbar" role="toolbar" aria-label="Schedule Actions">
-										<div class="btn-group btn-group-xs" role="group">
-											<button class="btn btn-default" [routerLink]="['../schedule-detail', id]" title="Main Definitions">
-												<i class="fa fa-sliders fa-fw"></i>
-											</button>
-											<button class="btn btn-default" [routerLink]="['../schedule-detail', id, 'steps']" title="Steps">
-												<i class="fa fa-steam fa-fw"></i>
-											</button>
-											<button class="btn btn-default" [routerLink]="['../schedule-detail', id, 'history']" title="History">
-												<i class="fa fa-history fa-fw"></i>
-											</button>
-										</div>
-										<div class="btn-group btn-group-xs pull-right" role="group">
-											<button class="btn btn-danger" type="button" title="Details/Edit" (click)="mainService.delete(id, mainService.items[id].name)">
-												<i class="fa fa-trash fa-fw"></i>
-											</button>
-										</div>
-									</div>
-								</td>
-							</tr>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col">
+			<div class="table-responsive">
+				<table class="table table-sm table-hover table-borderless m-0">
+					<thead>
+						<tr>
+							<th class="border-bottom border-warning m-0 p-0" width="10">Actions</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Name</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Second</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Minute</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Hour</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Day of Month</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Month</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Day of Week</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="px-0 text-nowrap text-right">
+								<i class="fa fa-plus-square fa-fw text-success pointer" (click)="mainService.create()"></i>
+							</td>
+							<td>&nbsp;</td>
+							<td class="px-0">
+								<span class="p-0 pointer" (click)="mainService.create()" title="New Item">
+									<i class="fa fa-chevron-right text-warning"></i>
+									<i class="fa fa-chevron-right text-warning"></i>
+									New Item
+								</span>
+							</td>
+						</tr>
+						<ng-container *ngFor="let id of mainService.itemids; let i = index;">
+							<ng-container *ngIf="shouldListItem(id)">
+								<ng-container *ngIf="!mainService.items[id].schedule || mainService.items[id].schedule.length == 0">
+									<tr>
+										<td class="text-nowrap d-flex justify-content-between px-0 py-1">
+											<a [routerLink]="id" title="Main Definitions"><i class="fa fa-edit fa-fw"></i></a>
+											<a [routerLink]="[id, 'steps']" title="Steps"><i class="fa fa-steam fa-fw"></i></a>
+											<a [routerLink]="[id, 'history']" title="History"><i class="fa fa-history fa-fw"></i></a>
+											<i class="fa fa-trash fa-fw ml-3 pointer text-danger" title="Delete" (click)="mainService.delete(id, mainService.items[id].name)"></i>
+										</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">
+											<a [routerLink]="id">
+												<i class="fa fa-chevron-right text-warning"></i>
+												{{mainService.items[id].name}}
+											</a>
+										</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0" colspan="11">There is no schedule item defined. Please go to details.</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{findStatus(mainService.items[id].status)}}</td>
+
+									</tr>
+								</ng-container>
+								<ng-container *ngIf="mainService.items[id].schedule && mainService.items[id].schedule.length > 0">
+									<tr *ngFor="let cron of mainService.items[id].schedule; let c = index;">
+										<td *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1" class="text-nowrap d-flex justify-content-between px-0 py-1">
+											<a [routerLink]="id" title="Main Definitions"><i class="fa fa-edit fa-fw"></i></a>
+											<a [routerLink]="[id, 'steps']" title="Steps"><i class="fa fa-steam fa-fw"></i></a>
+											<a [routerLink]="[id, 'history']" title="History"><i class="fa fa-history fa-fw"></i></a>
+											<i class="fa fa-trash fa-fw ml-3 pointer text-danger" title="Delete" (click)="mainService.delete(id, mainService.items[id].name)"></i>
+										</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0" *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">
+											<a [routerLink]="id">
+												<i class="fa fa-chevron-right text-warning"></i>
+												{{mainService.items[id].name}}
+											</a>
+										</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{cron.second}}</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{cron.minute}}</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{cron.hour}}</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{cron.dayofmonth}}</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{cron.month}}</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0">{{cron.dayofweek}}</td>
+										<td class="p-0">&nbsp;</td>
+										<td class="p-0" *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">{{findStatus(mainService.items[id].status)}}</td>
+									</tr>
+								</ng-container>
+							</ng-container>
 						</ng-container>
-						<ng-container *ngIf="mainService.items[id].schedule && mainService.items[id].schedule.length > 0">
-							<tr *ngFor="let cron of mainService.items[id].schedule; let c = index;">
-								<td *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">
-									<a [routerLink]="['../schedule-detail', id]" class="at-table-link">{{mainService.items[id].name}}</a>
-								</td>
-								<td>{{cron.second}}</td>
-								<td>{{cron.minute}}</td>
-								<td>{{cron.hour}}</td>
-								<td>{{cron.dayofmonth}}</td>
-								<td>{{cron.month}}</td>
-								<td>{{cron.dayofweek}}</td>
-								<td *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">{{findStatus(mainService.items[id].status)}}</td>
-								<td *ngIf="c == 0" [attr.rowspan]="mainService.items[id].schedule.length || 1">
-									<div class="btn-toolbar" role="toolbar" aria-label="Schedule Actions">
-										<div class="btn-group btn-group-xs" role="group">
-											<button class="btn btn-default" [routerLink]="['../schedule-detail', id]" title="Main Definitions">
-												<i class="fa fa-sliders fa-fw"></i>
-											</button>
-											<button class="btn btn-default" [routerLink]="['../schedule-detail', id, 'steps']" title="Steps">
-												<i class="fa fa-steam fa-fw"></i>
-											</button>
-											<button class="btn btn-default" [routerLink]="['../schedule-detail', id, 'history']" title="History">
-												<i class="fa fa-history fa-fw"></i>
-											</button>
-										</div>
-										<div class="btn-group btn-group-xs pull-right" role="group">
-											<button class="btn btn-danger" type="button" title="Details/Edit" (click)="mainService.delete(id, mainService.items[id].name)">
-												<i class="fa fa-trash fa-fw"></i>
-											</button>
-										</div>
-									</div>
-								</td>
-							</tr>
-						</ng-container>
-					</ng-container>
-				</ng-container>
-			</tbody>
-		</table>
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
 </div>

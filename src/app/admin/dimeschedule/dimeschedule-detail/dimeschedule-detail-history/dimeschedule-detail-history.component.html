@@ -1,14 +1,18 @@
-<form class="form-inline">
+<form>
 	<div class="form-group">
+		<label>History:</label>
 		<div class="input-group">
-			<div class="input-group-addon">
-				Select Log:
+			<div class="input-group-prepend">
+				<div class="input-group-text bg-transparent border-0">
+					Select Log:
+				</div>
 			</div>
 			<select name="selectedLog" id="selectedLog" class="form-control" [(ngModel)]="currentLog">
+				<option value="0">Please Select</option>
 				<option *ngFor="let log of allLogs; let i = index;" value="{{i}}">{{log.start}}</option>
 			</select>
-			<div class="input-group-btn">
-				<button class="btn btn-default" type="button" (click)="refreshLogs()">
+			<div class="input-group-append">
+				<button class="btn btn-outline-transparent" type="button" (click)="refreshLogs()">
 					<i class="fa fa-refresh fa-fw"></i> Refresh
 				</button>
 			</div>

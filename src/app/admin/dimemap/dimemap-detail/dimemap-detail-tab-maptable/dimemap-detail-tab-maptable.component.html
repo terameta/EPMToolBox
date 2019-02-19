@@ -1,23 +1,22 @@
 <ng-container *ngIf="mainService.currentItem.isready === atReadyStatus.Ready">
-	<div class="btn-toolbar" role="toolbar" style="margin-bottom: 2px;">
+	<div class="btn-toolbar mb-3">
 		<div class="btn-group btn-group-xs" role="group">
-			<button class="btn btn-default" type="button">{{numberofRowsinMap}}</button>
+			<button class="btn btn-outline-dark" type="button">{{numberofRowsinMap}}</button>
 		</div>
-		<div class="btn-group btn-group-xs pull-right" role="group">
-			<button class="btn btn-default" type="button" title="Show/Hide Sorters" (click)="sortersShown= !sortersShown">
+		<div class="btn-group btn-group-xs ml-auto" role="group">
+			<button class="btn btn-outline-dark" type="button" title="Show/Hide Sorters" (click)="sortersShown= !sortersShown">
 				<i class="fa fa-sort fa-fw"></i> Sort Orders
 			</button>
-			<button class="btn btn-default" type="button" title="Refresh Map" (click)="refreshMapTable()">
+			<button class="btn btn-outline-dark" type="button" title="Refresh Map" (click)="refreshMapTable()">
 				<i class="fa fa-refresh fa-fw"></i> Refresh
 			</button>
-			<!--<button class="btn btn-default" type="button" title="Zen Mode" (click)="refreshMapTable()"><i class="fa fa-expand fa-fw"></i> Zen Mode</button>-->
 		</div>
 	</div>
 	<hot-table [height]="hotTableHeight" fixedColumnsLeft="1" startRows="0" [settings]="mapSettings" [maxRows]="mapData.length" [rowHeaders]="false" [colHeaders]="true" [columns]="mapColumns" [data]="mapData"
 		(window:resize)="windowResized()" hotId="hotInstance"></hot-table>
-	<div class="overlay" *ngIf="sortersShown">
+	<div class="overlay bg-evwhite border-accent" *ngIf="sortersShown">
 		<form class="form-horizontal" (ngSubmit)="refreshMapTable()">
-			<div class="box box-primary box-solid">
+			<div class="box box-primary box-solid p-3">
 				<div class="box-header with-border">
 					<h3 class="box-title">
 						<i class="fa fa-sort"></i> Map Table Sort Orders
@@ -30,7 +29,7 @@
 							<hr>
 							<ng-container *ngFor="let field of availableSorters; let i = index">
 								<div class="btn-group btn-group-xs" style="margin:4px 0;">
-									<button type="button" class="btn btn-default" (click)="addToActiveSorters(i)" style="width:200px;">Add {{field.label}}</button>
+									<button type="button" class="btn btn-outline-dark" (click)="addToActiveSorters(i)" style="width:200px;">Add {{field.label}}</button>
 								</div>
 								<br>
 							</ng-container>
@@ -40,23 +39,23 @@
 							<hr>
 							<ng-container *ngFor="let field of activeSorters; let i = index; let first = first; let last = last;">
 								<div class="btn-group btn-group-xs" style="margin:4px 0;">
-									<button type="button" class="btn btn-default" style="width:200px;">{{field.label}}</button>
-									<button type="button" class="btn btn-default" (click)="field.isAsc = !field.isAsc" *ngIf="field.isAsc">
+									<button type="button" class="btn btn-outline-dark" style="width:200px;">{{field.label}}</button>
+									<button type="button" class="btn btn-outline-dark" (click)="field.isAsc = !field.isAsc" *ngIf="field.isAsc">
 										<i class="fa fa-sort-amount-asc fa-fw"></i>
 									</button>
-									<button type="button" class="btn btn-default" (click)="field.isAsc = !field.isAsc" *ngIf="!field.isAsc">
+									<button type="button" class="btn btn-outline-dark" (click)="field.isAsc = !field.isAsc" *ngIf="!field.isAsc">
 										<i class="fa fa-sort-amount-desc fa-fw"></i>
 									</button>
-									<button type="button" class="btn btn-default" *ngIf="!first" (click)="swapActiveSorters(i, i-1)">
+									<button type="button" class="btn btn-outline-dark" *ngIf="!first" (click)="swapActiveSorters(i, i-1)">
 										<i class="fa fa-caret-up fa-fw"></i>
 									</button>
-									<button type="button" class="btn btn-default" *ngIf="first||last">
+									<button type="button" class="btn btn-outline-dark" *ngIf="first||last">
 										<i class="fa fa-fw"></i>
 									</button>
-									<button type="button" class="btn btn-default" *ngIf="!last" (click)="swapActiveSorters(i, i+1)">
+									<button type="button" class="btn btn-outline-dark" *ngIf="!last" (click)="swapActiveSorters(i, i+1)">
 										<i class="fa fa-caret-down fa-fw"></i>
 									</button>
-									<button type="button" class="btn btn-default" (click)="removeFromActiveSorters(i)">
+									<button type="button" class="btn btn-outline-dark" (click)="removeFromActiveSorters(i)">
 										<i class="fa fa-times fa-fw"></i>
 									</button>
 								</div>
@@ -65,16 +64,20 @@
 						</div>
 					</div>
 				</div>
-				<div class="box-footer">
-					<button class="btn btn-success btn-xs" type="submit">
-						<i class="fa fa-save fa-fw"></i> Apply
-					</button>
-					<button class="btn btn-danger btn-xs" type="button">
-						<i class="fa fa-eraser fa-fw"></i> Clear Sort Orders
-					</button>
-					<button class="btn btn-info btn-xs" type="button" (click)="sortersShown=false;">
-						<i class="fa fa-times fa-fw"></i> Cancel
-					</button>
+				<div class="box-footer d-flex">
+					<div class="btn-toolbar ml-auto">
+						<div class="btn-group btn-group-xs">
+							<button class="btn btn-success" type="submit">
+								<i class="fa fa-save fa-fw"></i> Apply
+							</button>
+							<button class="btn btn-danger" type="button">
+								<i class="fa fa-eraser fa-fw"></i> Clear Sort Orders
+							</button>
+							<button class="btn btn-info" type="button" (click)="sortersShown=false;">
+								<i class="fa fa-times fa-fw"></i> Cancel
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</form>

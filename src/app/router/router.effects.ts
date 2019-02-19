@@ -51,6 +51,26 @@ export class Effects {
 			switch ( segments[0] ) {
 				case 'admin': {
 					switch ( segments[1] ) {
+						case 'processes': {
+							this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+							if ( segments[2] ) this.store.dispatch( DimeProcessActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
+						case 'schedules': {
+							this.store.dispatch( DimeScheduleActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+							if ( segments[2] ) this.store.dispatch( DimeScheduleActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
+						case 'matrices': {
+							this.store.dispatch( DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+							if ( segments[2] ) this.store.dispatch( DimeMatrixActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
+						case 'maps': {
+							this.store.dispatch( DimeMapActions.ALL.LOAD.initiateifempty() );
+							if ( segments[2] ) this.store.dispatch( DimeMapActions.ONE.LOAD.initiateifempty( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
 						case 'streams': {
 							this.store.dispatch( DimeStreamActions.ALL.LOAD.initiateifempty() );
 							if ( segments[2] ) this.store.dispatch( DimeStreamActions.ONE.LOAD.initiateifempty( parseInt( segments[2], 10 ) ) );
@@ -83,38 +103,10 @@ export class Effects {
 								default: { console.log( 'We are at credentials default' ); return new DoNothingAction(); }
 							}
 						}
-						case 'maps': {
-							switch ( segments[2] ) {
-								case 'map-list': { return DimeMapActions.ALL.LOAD.initiateifempty(); }
-								case 'map-detail': { return DimeMapActions.ONE.LOAD.initiateifempty( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at maps default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'processes': {
-							switch ( segments[2] ) {
-								case 'process-list': { return DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action(); }
-								case 'process-detail': { return DimeProcessActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at processes default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'schedules': {
-							switch ( segments[2] ) {
-								case 'schedule-list': { return DimeScheduleActions.ALL.LOAD.INITIATEIFEMPTY.action(); }
-								case 'schedule-detail': { return DimeScheduleActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at schedules default' ); return new DoNothingAction(); }
-							}
-						}
 						case 'asyncprocesses': {
 							switch ( segments[2] ) {
 								case 'asyncprocess-list': { return new DimeAsyncProcessAllLoadInitiateAction(); }
 								default: { console.log( 'We are at async processes default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'matrices': {
-							switch ( segments[2] ) {
-								case 'matrix-list': { return DimeMatrixActions.ALL.LOAD.INITIATEIFEMPTY.action(); }
-								case 'matrix-detail': { return DimeMatrixActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at matrices default' ); return new DoNothingAction(); }
 							}
 						}
 						case 'settings': {

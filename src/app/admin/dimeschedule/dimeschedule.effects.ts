@@ -58,7 +58,7 @@ export class Effects {
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeScheduleActions.ONE.CREATE.COMPLETE.type )
 		, switchMap( ( action: Action<DimeSchedule> ) => {
-			this.router.navigateByUrl( 'admin/schedules/schedule-detail/' + action.payload.id );
+			this.router.navigateByUrl( 'admin/schedules/' + action.payload.id );
 			return DimeScheduleActions.ALL.LOAD.INITIATE.observableaction();
 		} ) );
 
