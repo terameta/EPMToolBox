@@ -9,13 +9,13 @@ import { DimeCredentialListComponent } from './dimecredential-list/dimecredentia
 import { DimeCredentialDetailComponent } from './dimecredential-detail/dimecredential-detail.component';
 import { DimeCredentialComponent } from './dimecredential/dimecredential.component';
 import { AuthModule } from '../../auth/auth.module';
+import { CentralModule } from '../../central/central.module';
 
 const dimeCredentialRoutes: Routes = [
 	{
 		path: '', component: DimeCredentialsComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'credential-list' },
-			{ path: 'credential-list', component: DimeCredentialListComponent },
-			{ path: 'credential-detail/:id', component: DimeCredentialDetailComponent }
+			{ path: '', component: DimeCredentialListComponent },
+			{ path: ':id', component: DimeCredentialDetailComponent }
 		]
 	}
 ];
@@ -25,7 +25,8 @@ const dimeCredentialRoutes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( dimeCredentialRoutes ),
-		AuthModule
+		AuthModule,
+		CentralModule
 	],
 	exports: [
 		RouterModule

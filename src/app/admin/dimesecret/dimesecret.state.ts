@@ -12,11 +12,9 @@ const baseState: State = {
 	items: {},
 	curItem: {
 		id: 0,
-		details: {
-			name: '',
-			whiteList: [],
-			secret: ''
-		}
+		name: '',
+		whiteList: [],
+		secret: ''
 	}
 };
 

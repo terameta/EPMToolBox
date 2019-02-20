@@ -57,7 +57,7 @@ export class Effects {
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeCredentialActions.ONE.CREATE.COMPLETE )
 		, switchMap( ( action: Action ) => {
-			this.router.navigateByUrl( 'admin/credentials/credential-detail/' + action.payload.id );
+			this.router.navigateByUrl( 'admin/credentials/' + action.payload.id );
 			return of( DimeCredentialActions.ALL.LOAD.initiate() );
 		} ) );
 
@@ -93,7 +93,7 @@ export class Effects {
 	@Effect() ONE_DELETE_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeCredentialActions.ONE.DELETE.COMPLETE )
 		, switchMap( ( action: Action ) => {
-			this.router.navigateByUrl( 'admin/credentials/credential-list' );
+			this.router.navigateByUrl( 'admin/credentials' );
 			return of( DimeCredentialActions.ALL.LOAD.initiate() );
 		} ) );
 

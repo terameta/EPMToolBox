@@ -25,7 +25,8 @@ const routes: Routes = [
 			{ path: 'schedules', loadChildren: 'app/admin/dimeschedule/dimeschedule.module#DimescheduleModule' },
 			{ path: 'asyncprocesses', loadChildren: 'app/admin/dimeasyncprocess/dimeasyncprocess.module#DimeAsyncProcessModule' },
 			{ path: 'settings', loadChildren: 'app/admin/dimesettings/dimesettings.module#DimeSettingsModule' },
-			{ path: 'secrets', loadChildren: 'app/admin/dimesecret/dimesecret.module#DimeSecretModule' }
+			{ path: 'secrets', loadChildren: 'app/admin/dimesecret/dimesecret.module#DimeSecretModule' },
+			{ path: 'users', loadChildren: 'app/admin/users/users.module#UsersModule' },
 		]
 	}
 ];

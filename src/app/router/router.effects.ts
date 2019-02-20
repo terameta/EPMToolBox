@@ -51,6 +51,16 @@ export class Effects {
 			switch ( segments[0] ) {
 				case 'admin': {
 					switch ( segments[1] ) {
+						case 'credentials': {
+							this.store.dispatch( DimeCredentialActions.ALL.LOAD.initiateifempty() );
+							if ( segments[2] ) this.store.dispatch( DimeCredentialActions.ONE.LOAD.initiate( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
+						case 'secrets': {
+							this.store.dispatch( DimeSecretActions.ALL.LOAD.INITIATEIFEMPTY.action() );
+							if ( segments[2] ) this.store.dispatch( DimeSecretActions.ONE.LOAD.INITIATE.action( parseInt( segments[2], 10 ) ) );
+							return new DoNothingAction();
+						}
 						case 'processes': {
 							this.store.dispatch( DimeProcessActions.ALL.LOAD.INITIATEIFEMPTY.action() );
 							if ( segments[2] ) this.store.dispatch( DimeProcessActions.ONE.LOAD.INITIATEIFEMPTY.action( parseInt( segments[2], 10 ) ) );
@@ -87,20 +97,6 @@ export class Effects {
 								case 'tag-list': { return DimeTagGroupActions.ONE.selected( parseInt( segments[3], 10 ) ); }
 								case 'tag-detail': { return DimeTagActions.ONE.LOAD.initiate( parseInt( segments[3], 10 ) ); }
 								default: { console.log( 'We are at tags default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'secrets': {
-							switch ( segments[2] ) {
-								case 'secret-list': { return DimeSecretActions.ALL.LOAD.INITIATEIFEMPTY.action(); }
-								case 'secret-detail': { return DimeSecretActions.ONE.LOAD.INITIATE.action( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at secrets default' ); return new DoNothingAction(); }
-							}
-						}
-						case 'credentials': {
-							switch ( segments[2] ) {
-								case 'credential-list': { return DimeCredentialActions.ALL.LOAD.initiateifempty(); }
-								case 'credential-detail': { return DimeCredentialActions.ONE.LOAD.initiate( parseInt( segments[3], 10 ) ); }
-								default: { console.log( 'We are at credentials default' ); return new DoNothingAction(); }
 							}
 						}
 						case 'asyncprocesses': {

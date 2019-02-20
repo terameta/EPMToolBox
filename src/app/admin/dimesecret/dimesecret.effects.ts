@@ -55,7 +55,7 @@ export class Effects {
 	@Effect() ONE_CREATE_COMPLETE$ = this.actions$.pipe(
 		ofType( DimeSecretActions.ONE.CREATE.COMPLETE.type )
 		, switchMap( ( action: Action<DimeSecret> ) => {
-			this.router.navigateByUrl( 'admin/secrets/secret-detail/' + action.payload.id );
+			this.router.navigateByUrl( 'admin/secrets/' + action.payload.id );
 			return DimeSecretActions.ALL.LOAD.INITIATE.observableaction();
 		} ) );
 

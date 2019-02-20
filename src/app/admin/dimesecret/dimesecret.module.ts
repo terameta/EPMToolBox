@@ -8,13 +8,13 @@ import { DimeSecretToolbarComponent } from './dimesecret-toolbar/dimesecret-tool
 import { DimeSecretDetailComponent } from './dimesecret-detail/dimesecret-detail.component';
 import { AuthModule } from '../../auth/auth.module';
 import { DimeSecretsComponent } from './dimesecrets/dimesecrets.component';
+import { CentralModule } from '../../central/central.module';
 
 const dimeSecretRoutes: Routes = [
 	{
 		path: '', component: DimeSecretsComponent, children: [
-			{ path: '', pathMatch: 'full', redirectTo: 'secret-list' },
-			{ path: 'secret-list', component: DimeSecretListComponent },
-			{ path: 'secret-detail/:id', component: DimeSecretDetailComponent }]
+			{ path: '', component: DimeSecretListComponent },
+			{ path: ':id', component: DimeSecretDetailComponent }]
 	}
 ];
 
@@ -23,7 +23,8 @@ const dimeSecretRoutes: Routes = [
 		CommonModule,
 		FormsModule,
 		RouterModule.forChild( dimeSecretRoutes ),
-		AuthModule
+		AuthModule,
+		CentralModule
 	],
 	exports: [
 		RouterModule

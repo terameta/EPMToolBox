@@ -61,15 +61,15 @@
 		"zone.js": "^0.8.29"
 	},
 	"devDependencies": {
-		"@angular-devkit/build-angular": "^0.13.1",
-		"@angular/cli": "^7.3.1",
+		"@angular-devkit/build-angular": "^0.13.2",
+		"@angular/cli": "^7.3.2",
 		"@angular/compiler-cli": "^7.2.5",
 		"@angular/language-service": "^7.2.5",
 		"@types/exceljs": "^0.5.3",
 		"@types/handlebars": "^4.0.40",
 		"@types/lodash": "^4.14.121",
 		"@types/mssql": "^4.0.12",
-		"@types/node": "^10.12.24",
+		"@types/node": "^10.12.26",
 		"@types/request": "^2.48.1",
 		"@types/stream-buffers": "^3.0.2",
 		"@types/tmp": "0.0.33",

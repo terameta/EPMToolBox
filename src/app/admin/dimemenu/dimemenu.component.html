@@ -59,7 +59,7 @@
 					</ng-container>
 					<ng-container *ngIf="state.currentFeature != 'tags'">
 						<a class="dropdown-item px-2" routerLink="./{{state.currentFeature}}/{{item.id}}" *ngFor="let item of items.list">
-							{{item.name}}
+							{{item.name || item.detail?.name}}
 						</a>
 					</ng-container>
 				</div>

@@ -11,7 +11,6 @@ import { AppState } from '../../../app.state';
 	styleUrls: ['./dimesecret-detail.component.scss']
 } )
 export class DimeSecretDetailComponent implements OnInit, OnDestroy {
-	// public state$: Store<DimeSecretState>;
 	public currentItem: DimeSecret;
 	private sub: Subscription;
 
@@ -32,8 +31,8 @@ export class DimeSecretDetailComponent implements OnInit, OnDestroy {
 		this.sub.unsubscribe();
 	}
 
-	public whiteListItemAdd = () => this.currentItem.details.whiteList.push( '' );
-	public whiteListItemDelete = ( index: number ) => this.currentItem.details.whiteList.splice( index, 1 );
+	public whiteListItemAdd = () => this.currentItem.whiteList.push( '' );
+	public whiteListItemDelete = ( index: number ) => this.currentItem.whiteList.splice( index, 1 );
 
 	public customTrackBy( index: number, obj: any ): any {
 		return index;

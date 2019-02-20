@@ -19,12 +19,14 @@ export class SecretTools {
 	}
 
 	private prepareGet = ( payload: any ): DimeSecret => {
-		payload.details = JSON.parse( payload.details );
-		return payload;
+		return { id: payload.id, ...JSON.parse( payload.details ) };
+		// payload.details = JSON.parse( payload.details );
+		// return payload;
 	}
 	private preparePut = ( payload: any ): any => {
-		payload.details = JSON.stringify( payload.details );
-		return payload;
+		return { id: payload.id, details: JSON.stringify( payload ) };
+		// payload.details = JSON.stringify( payload.details );
+		// return payload;
 	}
 	public getAll = () => {
 		return new Promise( ( resolve, reject ) => {
@@ -75,7 +77,7 @@ export class SecretTools {
 	public create = () => {
 		return new Promise( ( resolve, reject ) => {
 			const newSecret = <DimeSecret>( initialState().curItem );
-			newSecret.details.name = 'New Secret';
+			newSecret.name = 'New Secret';
 			delete newSecret.id;
 			this.db.query( 'INSERT INTO secrets SET ?', this.preparePut( newSecret ), ( err, rows, fields ) => {
 				if ( err ) {
@@ -91,21 +93,21 @@ export class SecretTools {
 		const currentSecret = await this.getOne( payload.id );
 		const remoteIP: string = payload.req.headers['x-forwarded-for'] || payload.req.connection.remoteAddress;
 		let shouldRespond = false;
-		currentSecret.details.whiteList.forEach( allowedAddress => {
+		currentSecret.whiteList.forEach( allowedAddress => {
 			if ( remoteIP.indexOf( allowedAddress ) >= 0 ) shouldRespond = true;
 		} );
 		if ( !shouldRespond ) {
 			const systemAdminInfo: DimeSetting = await this.settingsTool.getOne( 'systemadmin' );
-			delete currentSecret.details.secret;
+			delete currentSecret.secret;
 			this.mailTool.sendMail( {
 				from: systemAdminInfo.emailaddress,
 				to: systemAdminInfo.emailaddress,
-				subject: 'Someone requested secret out of white listed ips: ' + currentSecret.details.name,
+				subject: 'Someone requested secret out of white listed ips: ' + currentSecret.name,
 				text: 'Hi,\n\nYou can kindly find the details as below.\n\nBest Regards\n\n\n\nSecret Details:\n' + JSON.stringify( currentSecret ) + '\n\n\n\nRequester Details:\n' + JSON.stringify( remoteIP ),
 			} );
 			throw new Error( 'Not allowed' );
 		}
-		return currentSecret.details.secret;
+		return currentSecret.secret;
 	}
 	private warnAboutSecret = ( payload ) => {
 
