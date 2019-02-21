@@ -2,7 +2,6 @@
 {
 	"git.confirmSync": false,
 	"window.zoomLevel": 0,
-	"typescript.tsdk": "node_modules\\typescript\\lib",
 	"editor.tabSize": 3,
 	"editor.insertSpaces": false,
 	"editor.fontFamily": "Consolas, 'Courier New', monospace",
@@ -26,10 +25,9 @@
 	"javascript.format.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces": true,
 	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": true,
 	"tslint.exclude": "**/node_modules/**/*.ts",
-	"tslint.autoFixOnSave": false,
 	"workbench.editor.enablePreview": false,
 	"explorer.openEditors.visible": 0,
-	"editor.tabCompletion": true,
+	"editor.tabCompletion": "on",
 	"editor.formatOnType": true,
 	"editor.formatOnPaste": true,
 	"editor.formatOnSave": true,
@@ -39,7 +37,6 @@
 	"html.format.wrapLineLength": 240,
 	"html.format.indentInnerHtml": true,
 	"html.format.endWithNewline": true,
-	"html.suggest.angular1": false,
 	"editor.minimap.enabled": false,
 	"emmet.triggerExpansionOnTab": true,
 	"editor.smoothScrolling": true,
@@ -49,6 +46,6 @@
 	"zenMode.hideTabs": false,
 	"zenMode.hideStatusBar": false,
 	"zenMode.hideActivityBar": false,
-	"javascript.showUnused": true,
-	"typescript.showUnused": true
+	"editor.showUnused": true,
+	"typescript.tsdk": "node_modules\\typescript\\lib",
 }

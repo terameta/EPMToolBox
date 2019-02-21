@@ -41,20 +41,10 @@ export class AcmUserTool {
 	}
 	private prepareToGet = ( payload: User ) => {
 		delete payload.password;
-		console.log( '===========================================' );
-		console.log( '===========================================' );
-		console.log( payload );
-		console.log( '===========================================' );
-		console.log( '===========================================' );
 		payload.clearance = JSON.parse( payload.clearance ? payload.clearance : '{}' );
 		return payload;
 	}
 	private prepareToSet = ( payload: User ) => {
-		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		console.log( payload );
-		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
-		console.log( '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>' );
 		if ( payload.password === '|||---protected---|||' ) {
 			delete payload.password;
 		} else if ( payload.password ) {

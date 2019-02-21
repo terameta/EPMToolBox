@@ -12,6 +12,7 @@ import * as fromSchedules from './admin/dimeschedule';
 import * as fromAsyncProcesses from './admin/dimeasyncprocess';
 import * as fromSettings from './admin/dimesettings';
 import * as fromSecrets from './admin/dimesecret';
+import * as fromUsers from './admin/users';
 
 export const AppEffects = [
 	fromAuth.Effects,
@@ -27,5 +28,6 @@ export const AppEffects = [
 	fromSchedules.Effects,
 	fromAsyncProcesses.Effects,
 	fromSettings.Effects,
-	fromSecrets.Effects
+	fromSecrets.Effects,
+	fromUsers.Effects
 ];

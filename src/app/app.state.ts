@@ -12,6 +12,7 @@ import * as fromSchedules from './admin/dimeschedule';
 import * as fromAsyncProcesses from './admin/dimeasyncprocess';
 import * as fromSettings from './admin/dimesettings';
 import * as fromSecrets from './admin/dimesecret';
+import * as fromUsers from './admin/users';
 
 export interface AppState {
 	auth: fromAuth.State
@@ -27,5 +28,6 @@ export interface AppState {
 	schedule: fromSchedules.State,
 	asyncprocess: fromAsyncProcesses.State,
 	settings: fromSettings.State,
-	secret: fromSecrets.State
+	secret: fromSecrets.State,
+	users: fromUsers.State
 }

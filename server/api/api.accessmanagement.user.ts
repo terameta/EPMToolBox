@@ -16,7 +16,7 @@ export class ApiAcmUsers {
 		this.rester = new Rester( this.tools );
 		this.setRoutes();
 		this.rester.restify( this.apiRoutes, this.userTool );
-		this.app.use( '/api/accessmanagement/user', this.apiRoutes );
+		this.app.use( '/api/users', this.apiRoutes );
 	}
 
 	private setRoutes = () => {

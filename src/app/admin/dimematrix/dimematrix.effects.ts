@@ -15,7 +15,7 @@ import { catchError, mergeMap, switchMap, withLatestFrom, filter, map } from 'rx
 import { of } from 'rxjs';
 import { AppState } from '../../app.state';
 
-@Injectable( { providedIn: 'root' } )
+@Injectable()
 export class Effects {
 	private serviceName = 'Matrices';
 
