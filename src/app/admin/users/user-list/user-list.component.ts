@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import { select } from '@ngrx/store';
 import { filter } from 'rxjs/operators';
-import { AppState } from '../../../app.state';
+import { Service } from '../users.service';
+import { DimeTagService } from '../../dimetag/dimetag.service';
+import { DimeUIService } from '../../../ngstore/uistate.service';
+import { User } from '../../../../../shared/models/user';
 
 @Component( {
 	selector: 'app-user-list',
@@ -9,16 +12,26 @@ import { AppState } from '../../../app.state';
 	styleUrls: ['./user-list.component.scss']
 } )
 export class UserListComponent implements OnInit {
-	public state$ = this.store.pipe(
+	public state$ = this.srvc.store.pipe(
 		select( 'users' ),
 		filter( state => state.loaded )
 	);
 
-	constructor(
-		private store: Store<AppState>
-	) { }
+	constructor( public srvc: Service, private tagService: DimeTagService, private uiService: DimeUIService ) { }
 
-	ngOnInit() {
+	ngOnInit() { }
+
+	public shouldListItem = ( item: User ) => {
+		let shouldShow = true;
+		this.tagService.groupList.forEach( ( curGroup ) => {
+			if ( this.uiService.uiState.selectedTags[curGroup.id] > 0 ) {
+				if ( item.tags[this.uiService.uiState.selectedTags[curGroup.id]] ) {
+					shouldShow = false;
+				}
+			}
+		} );
+		return shouldShow;
 	}
+
 
 }

@@ -8,7 +8,8 @@ export interface User {
 	email: string,
 	name: string,
 	surname: string,
-	clearance: any
+	clearance: any,
+	tags: any
 }
 
 export enum UserType {

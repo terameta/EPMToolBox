@@ -27,6 +27,7 @@ export class InitiateCronWorker {
 			() => {
 				// console.log( 'Every 10 secs', new Date() );
 				// console.log( 'Every 10 secs', this.registeredCrons.length );
+				console.log( 'We have come to the second function here, and seen the this is the end on the console' );
 				this.registerSchedules();
 			}, function () {
 				console.log( 'This is the end!' );

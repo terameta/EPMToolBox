@@ -52,10 +52,6 @@ export class Effects {
 			switch ( segments[0] ) {
 				case 'admin': {
 					switch ( segments[1] ) {
-						case 'users': {
-							this.store.dispatch( new fromUsers.Load() );
-							return new DoNothingAction();
-						}
 						case 'credentials': {
 							this.store.dispatch( DimeCredentialActions.ALL.LOAD.initiateifempty() );
 							if ( segments[2] ) this.store.dispatch( DimeCredentialActions.ONE.LOAD.initiate( parseInt( segments[2], 10 ) ) );

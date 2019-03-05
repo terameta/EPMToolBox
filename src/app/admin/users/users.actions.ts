@@ -45,12 +45,16 @@ export class Update implements ReducingAction<State> {
 	readonly feature = FEATURE;
 	readonly type = ActionTypes.UPDATE;
 
+	constructor( public payload: User ) { }
+
 	public reducer = ( state: State ): State => state;
 }
 
 export class Delete implements ReducingAction<State> {
 	readonly feature = FEATURE;
 	readonly type = ActionTypes.DELETE;
+
+	constructor( public payload: number ) { }
 
 	public reducer = ( state: State ): State => state;
 }
