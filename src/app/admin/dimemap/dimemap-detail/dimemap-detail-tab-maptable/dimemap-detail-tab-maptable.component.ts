@@ -41,7 +41,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	private matrixObject: { targets: string[], matrixData: string[] } = { targets: [], matrixData: [] };
 
 	private instance = 'hotInstance';
-	private hotInstance: Handsontable;
+	private hotInstance: any;
 	private invalidRows: number[] = [];
 
 	constructor(
@@ -85,6 +85,7 @@ export class DimemapDetailTabMaptableComponent implements OnInit {
 	ngOnInit() {
 		this.windowResized();
 		this.mapSettings = {
+			licenseKey: 'non-commercial-and-evaluation',
 			colHeaders: true,
 			rowHeaders: false,
 			stretchH: 'all',

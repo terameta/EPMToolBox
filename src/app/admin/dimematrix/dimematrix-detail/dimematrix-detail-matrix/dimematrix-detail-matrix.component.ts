@@ -39,7 +39,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	public matrixData: any[] = [];
 
 	private instance = 'hotMatrixInstance';
-	private hotInstance: Handsontable;
+	private hotInstance: any;
 	private invalidRows: number[] = [];
 
 	constructor(
@@ -241,6 +241,7 @@ export class DimematrixDetailMatrixComponent implements OnInit {
 	private prepareSettings = () => {
 		return new Promise( ( resolve, reject ) => {
 			this.matrixSettings = {
+				licenseKey: 'non-commercial-and-evaluation',
 				colHeaders: true,
 				rowHeaders: false,
 				stretchH: 'all',

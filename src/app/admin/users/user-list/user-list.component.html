@@ -35,13 +35,6 @@
 								<tr *ngIf="shouldListItem(item)">
 									<td class="text-nowrap d-flex justify-content-between px-0 py-1">
 										<a [routerLink]="id" title="Main Definitions"><i class="fa fa-edit fa-fw"></i></a>
-										<!-- <a [routerLink]="[item.id, 'run']" title="Run Process"><i class="fa fa-space-shuttle fa-fw"></i></a>
-										<a [routerLink]="[item.id, 'steps']" title="Steps"><i class="fa fa-steam fa-fw"></i></a>
-										<a [routerLink]="[item.id, 'defaulttargets']" title="Default Targets"><i class="fa fa-bullseye fa-fw"></i></a>
-										<a [routerLink]="[item.id, 'filters']" title="Filters"><i class="fa fa-filter fa-fw"></i></a>
-										<a [routerLink]="[item.id, 'filtersdatafile']" title="Filters for Data File"><i class="fa fa-filter fa-fw"></i><i class="fa fa-file-excel-o fa-fw ml-n3"></i></a>
-										<a [routerLink]="[item.id, 'history']" title="History"><i class="fa fa-history fa-fw"></i></a>
-										<i class="fa fa-file-excel-o fa-fw pointer" title="Send Data File" (click)="mainService.sendDataFile(item.id)"></i> -->
 										<i class="fa fa-trash fa-fw ml-3 pointer text-danger" title="Delete" (click)="srvc.delete(item)"></i>
 									</td>
 									<td class="p-0">&nbsp;</td>
@@ -69,25 +62,6 @@
 											{{item.email}}
 										</a>
 									</td>
-									<!--
-
-									<td class="p-0">
-										<a routerLink="../../environments/{{item.source}}">
-											<i class="fa fa-chevron-right text-warning"></i>
-											{{environmentService.itemObject[item.source]?.name}}
-										</a>
-									</td>
-									<td class="p-0">&nbsp;</td>
-									<td class="p-0">
-										<a routerLink="../../environments/{{item.target}}">
-											<i class="fa fa-chevron-right text-warning"></i>
-											{{environmentService.itemObject[item.target]?.name}}
-										</a>
-									</td>
-									<td class="p-0">&nbsp;</td>
-									<td class="p-0">
-										{{dimeProcessStatus[item.status]}}
-									</td> -->
 								</tr>
 							</ng-container>
 						</ng-container>
