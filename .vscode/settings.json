@@ -2,7 +2,7 @@
 {
 	"git.confirmSync": false,
 	"window.zoomLevel": 0,
-	"editor.tabSize": 3,
+	"editor.tabSize": 2,
 	"editor.insertSpaces": false,
 	"editor.fontFamily": "Consolas, 'Courier New', monospace",
 	"editor.fontSize": 12,

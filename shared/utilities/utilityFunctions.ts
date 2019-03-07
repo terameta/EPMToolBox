@@ -35,6 +35,13 @@ export const waiter = ( duration: number ) => {
 export const EnumToArray = ( curEnum: any, shouldSort?: boolean ) => {
 	return Object.keys( curEnum ).filter( isNumeric ).map( ( item, index ) => ( { value: parseInt( item, 10 ), label: curEnum[item] } ) ).sort( shouldSort ? SortByName : SortByNothing );
 };
+
+export const enum2array = ( payload: any ) => {
+	// console.log( payload );
+	// Object.entries( payload ).forEach( e => console.log( e ) );
+	return Object.entries( payload ).filter( p => !isNumeric( p[0] ) ).map( p => ( { label: p[0], value: p[1] } ) );
+};
+
 export const getFormattedDate = () => {
 	const myDate = new Date();
 	let toReturn: string; toReturn = '';

@@ -44,7 +44,7 @@
 						{{ (tagState$ | async)?.groups[state.currentID]?.name }}
 					</ng-container>
 					<ng-container *ngIf="state.currentFeature != 'tags'">
-						{{ items.current.name }}
+						{{ items.current?.name }}
 					</ng-container>
 				</a>
 				<a class="nav-link dropdown-toggle text-evwhite font-weight-bold" dropdownToggle *ngIf="!state.currentID">

@@ -1,3 +1,59 @@
-<p>
-  user-detail works!
-</p>
+<ng-container *ngIf="item$ | async as item; else loading">
+	<form (ngSubmit)="srvc.update(item)" #f="ngForm">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col">
+					<div class="card mt-3">
+						<div class="card-header bg-accent border accent d-flex">
+							User Details: {{item.username}}
+							<div class="btn-toolbar ml-auto">
+								<div class="btn-group btn-group-xs">
+									<button type="submit" class="btn btn-outline-dark" title="Save Changes"><i class="fa fa-floppy-o fa-fw"></i></button>
+								</div>
+								<div class="btn-group btn-group-xs ml-4">
+									<button type="button" class="btn btn-outline-danger" title="Delete Item" (click)="srvc.delete(item)"><i class="fa fa-trash fa-fw"></i></button>
+								</div>
+							</div>
+						</div>
+						<div class="card-body border-accent">
+							<div class="form-group">
+								<label for="name" class="control-label">Name:</label>
+								<input type="text" class="form-control" name="name" [(ngModel)]="item.name" required>
+							</div>
+							<div class="form-group">
+								<label for="surname" class="control-label">Surname:</label>
+								<input type="text" class="form-control" name="surname" [(ngModel)]="item.surname" required>
+							</div>
+							<div class="form-group">
+								<label for="username" class="control-label">Username:</label>
+								<input type="text" class="form-control" name="username" [(ngModel)]="item.username" required>
+							</div>
+							<div class="form-group">
+								<label for="iPass" class="control-label">Password:</label>
+								<input type="password" class="form-control" name="iPass" [(ngModel)]="item.password" [disabled]="item.type==userType.Directory">
+							</div>
+							<div class="form-group">
+								<label for="iRole" class="control-label">Role:</label>
+								<select name="iRole" class="form-control" [(ngModel)]="item.role">
+									<option [value]="option.value" *ngFor="let option of roles">{{ option.label }}</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="iType" class="control-label">Type:</label>
+								<select name="iType" class="form-control" [(ngModel)]="item.type">
+									<option [value]="option.value" *ngFor="let option of types">{{ option.label }}</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<pre>{{ item | json }}</pre>
+</ng-container>
+<ng-template #loading>
+	<div class="alert alert-info mx-3" role="alert">
+		<i class="fa fa-circle-notch fa-spin"></i> Please wait loading...
+	</div>
+</ng-template>

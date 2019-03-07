@@ -13,7 +13,7 @@ export class RouterGo implements Action {
 		path: any[],
 		query?: object,
 		extras?: NavigationExtras
-	} ) { }
+	} ) { console.log( payload ); }
 }
 
 export class RouterBack implements Action { readonly type = RouterActions.BACK; }
