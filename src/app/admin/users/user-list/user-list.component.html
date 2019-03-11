@@ -14,6 +14,10 @@
 							<th class="border-bottom border-warning m-0 p-0">Surname</th>
 							<th width="24">&nbsp;</th>
 							<th class="border-bottom border-warning m-0 p-0">E-Mail Address</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Role</th>
+							<th width="24">&nbsp;</th>
+							<th class="border-bottom border-warning m-0 p-0">Type</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -62,6 +66,18 @@
 											{{item.email}}
 										</a>
 									</td>
+									<td class="p-0">&nbsp;</td>
+									<td class="p-0">
+										<a [routerLink]="id" *ngFor="let t of roles">
+											<ng-container *ngIf="t.value == item.role">{{ t.label }}</ng-container>
+										</a>
+									</td>
+									<td class="p-0">&nbsp;</td>
+									<td class="p-0">
+										<a [routerLink]="id" *ngFor="let t of types">
+											<ng-container *ngIf="t.value == item.type">{{ t.label }}</ng-container>
+										</a>
+									</td>
 								</tr>
 							</ng-container>
 						</ng-container>
@@ -76,4 +92,3 @@
 		<i class="fa fa-circle-notch fa-spin"></i> Please wait loading...
 	</div>
 </ng-template>
-<pre>{{state$ | async | json}}</pre>

@@ -4,7 +4,8 @@ import { filter } from 'rxjs/operators';
 import { Service } from '../users.service';
 import { DimeTagService } from '../../dimetag/dimetag.service';
 import { DimeUIService } from '../../../ngstore/uistate.service';
-import { User } from '../../../../../shared/models/user';
+import { User, UserType, UserRole } from '../../../../../shared/models/user';
+import { enum2array } from '../../../../../shared/utilities/utilityFunctions';
 
 @Component( {
 	selector: 'app-user-list',
@@ -12,6 +13,8 @@ import { User } from '../../../../../shared/models/user';
 	styleUrls: ['./user-list.component.scss']
 } )
 export class UserListComponent implements OnInit {
+	public types = enum2array( UserType );
+	public roles = enum2array( UserRole );
 	public state$ = this.srvc.store.pipe(
 		select( 'users' ),
 		filter( state => state.loaded )
@@ -19,7 +22,9 @@ export class UserListComponent implements OnInit {
 
 	constructor( public srvc: Service, private tagService: DimeTagService, private uiService: DimeUIService ) { }
 
-	ngOnInit() { }
+	ngOnInit() {
+		console.log( this.types );
+	}
 
 	public shouldListItem = ( item: User ) => {
 		let shouldShow = true;

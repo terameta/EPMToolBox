@@ -5,7 +5,7 @@ import { Store } from "@ngrx/store";
 import { of } from "rxjs";
 import { catchError, filter, map, switchMap, mergeMap, tap } from "rxjs/operators";
 import { AppState } from "../../app.state";
-import { ActionTypes, Load, Create } from "./users.actions";
+import { ActionTypes, Load, Create, Update, Delete } from "./users.actions";
 import { BackEnd } from "./users.backend";
 import { RouterGo } from "../../router";
 
@@ -27,6 +27,27 @@ export class Effects {
 			mergeMap( resp => [
 				new Load(),
 				new RouterGo( { path: ['admin', 'users', resp.id] } )
+			] ),
+			catchError( ( e: HttpErrorResponse ) => { console.log( e ); return of(); } )
+		) )
+	);
+
+	@Effect() UPDATE = this.actions$.pipe(
+		ofType( ActionTypes.UPDATE )
+		, switchMap( ( action: Update ) => this.backend.update( action.payload ).pipe(
+			mergeMap( resp => [
+				new Load()
+			] ),
+			catchError( ( e: HttpErrorResponse ) => { console.log( e ); return of(); } )
+		) )
+	);
+
+	@Effect() DELETE = this.actions$.pipe(
+		ofType( ActionTypes.DELETE )
+		, switchMap( ( action: Delete ) => this.backend.delete( action.payload ).pipe(
+			mergeMap( resp => [
+				new Load(),
+				new RouterGo( { path: ['admin', 'users'] } )
 			] ),
 			catchError( ( e: HttpErrorResponse ) => { console.log( e ); return of(); } )
 		) )

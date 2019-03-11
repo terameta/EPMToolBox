@@ -10,6 +10,6 @@ export class BackEnd {
 
 	public create = ( payload: User ) => this.http.post<User>( `${ this.baseUrl }`, payload );
 	public load = () => this.http.get<User[]>( `${ this.baseUrl }` );
-	public update = ( payload: User ) => this.http.patch<User>( `${ this.baseUrl }`, payload );
+	public update = ( payload: User ) => this.http.put<User>( `${ this.baseUrl }`, payload );
 	public delete = ( payload: number ) => this.http.delete( `${ this.baseUrl }/${ payload }` );
 }

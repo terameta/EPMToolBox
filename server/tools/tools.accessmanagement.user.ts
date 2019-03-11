@@ -17,8 +17,7 @@ export class AcmUserTool {
 				if ( err ) {
 					reject( { error: err, message: 'Retrieving access management user list has failed' } );
 				} else {
-					const toResolve = rows.map( this.prepareToGet );
-					resolve( toResolve );
+					resolve( rows.map( this.prepareToGet ) );
 				}
 			} );
 		} );
@@ -119,7 +118,7 @@ export class AcmUserTool {
 	public update = ( item: User ) => {
 		return new Promise( ( resolve, reject ) => {
 			this.prepareToSet( item );
-			this.db.query( 'UPDATE users SET ? WHERE id = ' + item.id, item, function ( err, result, fields ) {
+			this.db.query( 'UPDATE users SET ? WHERE id = ' + item.id, item, ( err, result, fields ) => {
 				if ( err ) {
 					reject( { error: err, message: 'Failed to update the item' } );
 				} else {
