@@ -52,7 +52,22 @@
 									</div>
 								</div>
 								<div class="col">
-									Clearances
+									Process Run Clearance:
+									<hr>
+									<div *ngFor="let process of processes$ | async">
+										<input type="checkbox" class="mr-2" name="processCheckBox{{process.id}}" [(ngModel)]="item.clearance.processes[process.id]">
+										<label for="processCheckBox{{process.id}}" class="control-label">{{process.name}}</label>
+									</div>
+								</div>
+								<div class="col">
+									Stream Export Clearance:
+									<hr>
+									<div *ngFor="let stream of streams$ | async">
+										<ng-container *ngFor="let streamExport of stream.exports">
+											<input type="checkbox" class="mr-2" name="streamCheckBox{{stream.id}}" [(ngModel)]="item.clearance.streamExports[stream.id + '-' + streamExport.id]">
+											<label for="streamCheckBox{{stream.id}}" class="control-label">{{stream.name}} - {{streamExport.name}}</label>
+										</ng-container>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -67,4 +82,3 @@
 		<i class="fa fa-circle-notch fa-spin"></i> Please wait loading...
 	</div>
 </ng-template>
-<pre>{{processes$ | async | json}}</pre>

@@ -22,9 +22,7 @@ export class UserListComponent implements OnInit {
 
 	constructor( public srvc: Service, private tagService: DimeTagService, private uiService: DimeUIService ) { }
 
-	ngOnInit() {
-		console.log( this.types );
-	}
+	ngOnInit() { }
 
 	public shouldListItem = ( item: User ) => {
 		let shouldShow = true;
