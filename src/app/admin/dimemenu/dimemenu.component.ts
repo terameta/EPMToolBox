@@ -23,12 +23,11 @@ export class DimemenuComponent {
 
 	public items$ = this.state$.pipe(
 		filter( s => !!s.currentFeature ),
-		map( s => this.toFeature( s.currentFeature ) ),
+		map( s => ( { ...s, f: this.toFeature( s.currentFeature ) } ) ),
 		combineLatest( this.store ),
-		filter( ( [f, s] ) => !!s ),
-		map( ( [f, s] ) => s[f] ),
-		filter( s => !!s ),
-		map( s => ( { list: Object.values( s.items ).sort( SortByName ), current: s.curItem } ) )
+		filter( ( [s, i] ) => !!i ),
+		filter( ( [s, i] ) => !!i[s.f] ),
+		map( ( [s, i] ) => ( { list: Object.values( i[s.f].items ).sort( SortByName ), current: i[s.f].curItem || i[s.f].items[s.currentID] } ) ),
 	);
 
 	constructor( private store: Store<AppState> ) { }

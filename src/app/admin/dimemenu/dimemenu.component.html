@@ -43,7 +43,10 @@
 					<ng-container *ngIf="state.currentFeature == 'tags'">
 						{{ (tagState$ | async)?.groups[state.currentID]?.name }}
 					</ng-container>
-					<ng-container *ngIf="state.currentFeature != 'tags'">
+					<ng-container *ngIf="state.currentFeature == 'users'">
+						{{ items.current?.username }}
+					</ng-container>
+					<ng-container *ngIf="state.currentFeature != 'tags' && state.currentFeature != 'users'">
 						{{ items.current?.name }}
 					</ng-container>
 				</a>
@@ -57,7 +60,12 @@
 							{{item.group.name}}
 						</a>
 					</ng-container>
-					<ng-container *ngIf="state.currentFeature != 'tags'">
+					<ng-container *ngIf="state.currentFeature == 'users'">
+						<a class="dropdown-item px-2" routerLink="./{{state.currentFeature}}/{{item.id}}" *ngFor="let item of items.list">
+							{{ (item.name || '') + ' ' + (item.surname || '') + '('+ item.username +')' }}
+						</a>
+					</ng-container>
+					<ng-container *ngIf="state.currentFeature != 'tags' && state.currentFeature != 'users'">
 						<a class="dropdown-item px-2" routerLink="./{{state.currentFeature}}/{{item.id}}" *ngFor="let item of items.list">
 							{{item.name || item.detail?.name}}
 						</a>
