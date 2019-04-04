@@ -13,6 +13,7 @@ import * as fromAsyncProcesses from './admin/dimeasyncprocess';
 import * as fromSettings from './admin/dimesettings';
 import * as fromSecrets from './admin/dimesecret';
 import * as fromUsers from './admin/users';
+import * as fromDirectories from './admin/directories';
 
 export const AppEffects = [
 	fromAuth.Effects,
@@ -29,5 +30,6 @@ export const AppEffects = [
 	fromAsyncProcesses.Effects,
 	fromSettings.Effects,
 	fromSecrets.Effects,
-	fromUsers.Effects
+	fromUsers.Effects,
+	fromDirectories.Effects
 ];

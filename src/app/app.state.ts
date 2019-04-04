@@ -13,6 +13,7 @@ import * as fromAsyncProcesses from './admin/dimeasyncprocess';
 import * as fromSettings from './admin/dimesettings';
 import * as fromSecrets from './admin/dimesecret';
 import * as fromUsers from './admin/users';
+import * as fromDirectories from './admin/directories';
 
 export interface AppState {
 	auth: fromAuth.State
@@ -29,5 +30,6 @@ export interface AppState {
 	asyncprocess: fromAsyncProcesses.State,
 	settings: fromSettings.State,
 	secret: fromSecrets.State,
-	users: fromUsers.State
+	users: fromUsers.State,
+	directories: fromDirectories.State
 }

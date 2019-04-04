@@ -1,0 +1,11 @@
+<div class="w-100 p-3">
+	<ul class="nav nav-tabs">
+		<li class="nav-item"><a routerLinkActive="active" class="nav-link" routerLink="." [routerLinkActiveOptions]="{exact:true}">List</a></li>
+		<li class="nav-item"><a routerLinkActive="active" class="nav-link" routerLink="mailserver"> Mail Server </a> </li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active">
+			<router-outlet></router-outlet>
+		</div>
+	</div>
+</div>

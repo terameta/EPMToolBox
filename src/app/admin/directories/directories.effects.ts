@@ -1,11 +1,11 @@
-import { HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Actions, Effect, ofType } from "@ngrx/effects";
+import { BackEnd } from "./directories.backend";
+import { ActionTypes, Load, Create, Delete, Update } from "./directories.actions";
+import { HttpErrorResponse } from "@angular/common/http";
 import { of } from "rxjs";
-import { catchError, filter, map, mergeMap, switchMap, tap } from "rxjs/operators";
+import { filter, switchMap, map, catchError, tap, mergeMap } from "rxjs/operators";
 import { RouterGo } from "../../router";
-import { ActionTypes, Create, Delete, Load, Update } from "./users.actions";
-import { BackEnd } from "./users.backend";
 
 @Injectable()
 export class Effects {

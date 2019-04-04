@@ -27,6 +27,7 @@ const routes: Routes = [
 			{ path: 'settings', loadChildren: 'app/admin/dimesettings/dimesettings.module#DimeSettingsModule' },
 			{ path: 'secrets', loadChildren: 'app/admin/dimesecret/dimesecret.module#DimeSecretModule' },
 			{ path: 'users', loadChildren: 'app/admin/users/users.module#UsersModule' },
+			{ path: 'directories', loadChildren: 'app/admin/directories/directories.module#DirectoriesModule' },
 		]
 	}
 ];

@@ -15,6 +15,7 @@ import * as fromAsyncProcesses from './admin/dimeasyncprocess';
 import * as fromSettings from './admin/dimesettings';
 import * as fromSecrets from './admin/dimesecret';
 import * as fromUsers from './admin/users';
+import * as fromDirectories from './admin/directories';
 
 export const AppReducer: ActionReducerMap<AppState> = {
 	auth: fromAuth.reducer,
@@ -31,5 +32,6 @@ export const AppReducer: ActionReducerMap<AppState> = {
 	asyncprocess: fromAsyncProcesses.reducer,
 	settings: fromSettings.reducer,
 	secret: fromSecrets.reducer,
-	users: fromUsers.reducer
+	users: fromUsers.reducer,
+	directories: fromDirectories.reducer
 };
