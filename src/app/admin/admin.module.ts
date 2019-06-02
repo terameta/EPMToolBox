@@ -15,19 +15,19 @@ const routes: Routes = [
 	{
 		path: '', component: DimeComponent, children: [
 			{ path: '', component: DimedashboardComponent, canActivate: [AuthGuard] },
-			{ path: 'tags', loadChildren: 'app/admin/dimetag/dimetag.module#DimeTagModule' },
-			{ path: 'environments', loadChildren: 'app/admin/dimeenvironment/dimeenvironment.module#DimeEnvironmentModule' },
-			{ path: 'credentials', loadChildren: 'app/admin/dimecredential/dimecredential.module#DimeCredentialModule' },
-			{ path: 'streams', loadChildren: 'app/admin/dimestream/dimestream.module#DimestreamModule' },
-			{ path: 'maps', loadChildren: 'app/admin/dimemap/dimemap.module#DimemapModule' },
-			{ path: 'matrices', loadChildren: 'app/admin/dimematrix/dimematrix.module#DimematrixModule' },
-			{ path: 'processes', loadChildren: 'app/admin/dimeprocess/dimeprocess.module#DimeprocessModule' },
-			{ path: 'schedules', loadChildren: 'app/admin/dimeschedule/dimeschedule.module#DimescheduleModule' },
-			{ path: 'asyncprocesses', loadChildren: 'app/admin/dimeasyncprocess/dimeasyncprocess.module#DimeAsyncProcessModule' },
-			{ path: 'settings', loadChildren: 'app/admin/dimesettings/dimesettings.module#DimeSettingsModule' },
-			{ path: 'secrets', loadChildren: 'app/admin/dimesecret/dimesecret.module#DimeSecretModule' },
-			{ path: 'users', loadChildren: 'app/admin/users/users.module#UsersModule' },
-			{ path: 'directories', loadChildren: 'app/admin/directories/directories.module#DirectoriesModule' },
+			{ path: 'tags', loadChildren: () => import('app/admin/dimetag/dimetag.module').then(m => m.DimeTagModule) },
+			{ path: 'environments', loadChildren: () => import('app/admin/dimeenvironment/dimeenvironment.module').then(m => m.DimeEnvironmentModule) },
+			{ path: 'credentials', loadChildren: () => import('app/admin/dimecredential/dimecredential.module').then(m => m.DimeCredentialModule) },
+			{ path: 'streams', loadChildren: () => import('app/admin/dimestream/dimestream.module').then(m => m.DimestreamModule) },
+			{ path: 'maps', loadChildren: () => import('app/admin/dimemap/dimemap.module').then(m => m.DimemapModule) },
+			{ path: 'matrices', loadChildren: () => import('app/admin/dimematrix/dimematrix.module').then(m => m.DimematrixModule) },
+			{ path: 'processes', loadChildren: () => import('app/admin/dimeprocess/dimeprocess.module').then(m => m.DimeprocessModule) },
+			{ path: 'schedules', loadChildren: () => import('app/admin/dimeschedule/dimeschedule.module').then(m => m.DimescheduleModule) },
+			{ path: 'asyncprocesses', loadChildren: () => import('app/admin/dimeasyncprocess/dimeasyncprocess.module').then(m => m.DimeAsyncProcessModule) },
+			{ path: 'settings', loadChildren: () => import('app/admin/dimesettings/dimesettings.module').then(m => m.DimeSettingsModule) },
+			{ path: 'secrets', loadChildren: () => import('app/admin/dimesecret/dimesecret.module').then(m => m.DimeSecretModule) },
+			{ path: 'users', loadChildren: () => import('app/admin/users/users.module').then(m => m.UsersModule) },
+			{ path: 'directories', loadChildren: () => import('app/admin/directories/directories.module').then(m => m.DirectoriesModule) },
 		]
 	}
 ];

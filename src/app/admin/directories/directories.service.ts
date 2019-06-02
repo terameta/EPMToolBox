@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { AppState } from "../../app.state";
-import * as fromDirectories from './';
+import * as fromDirectories from './directories.actions';
 import { Directory } from "../../../../shared/models/directory";
 
 @Injectable( { providedIn: 'root' } )

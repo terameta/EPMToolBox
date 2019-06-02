@@ -48,4 +48,8 @@
 	"zenMode.hideActivityBar": false,
 	"editor.showUnused": true,
 	"typescript.tsdk": "node_modules\\typescript\\lib",
+	"editor.codeActionsOnSave": {
+		"source.fixAll": true,
+		"source.fixAll.tslint": true
+	}
 }

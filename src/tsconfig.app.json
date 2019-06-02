@@ -1,6 +1,7 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"module": "esnext",
 		"outDir": "../out-tsc/app",
 		"baseUrl": "./",
 		"paths": {
@@ -8,7 +9,6 @@
 				"../../shared/*"
 			]
 		},
-		"module": "es2015",
 		"types": []
 	},
 	"exclude": [
@@ -16,6 +16,7 @@
 		"**/*.spec.ts"
 	],
 	"angularCompilerOptions": {
-		"preserveWhitespaces": false
+		"preserveWhitespaces": false,
+		// "enableIvy": true
 	}
 }

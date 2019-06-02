@@ -17,9 +17,9 @@ const acmRoutes: Routes = [
 	{
 		path: 'accessmanagement', component: AccessmanagementComponent, children: [
 			{ path: '', component: AccessmanagementdashboardComponent, canActivate: [AuthGuard] },
-			{ path: 'users', component: AcmUsersComponent, loadChildren: 'app/accessmanagement/acmuser/acmuser.module#AcmUserModule' },
+			{ path: 'users', component: AcmUsersComponent, loadChildren: () => import('app/accessmanagement/acmuser/acmuser.module').then(m => m.AcmUserModule) },
 			// { path: 'groups', component: AcmGroupsComponent, loadChildren: 'app/accessmanagement/group/group.module#GroupModule' },
-			{ path: 'servers', component: AcmServersComponent, loadChildren: 'app/accessmanagement/acmserver/acmserver.module#AcmServerModule' }
+			{ path: 'servers', component: AcmServersComponent, loadChildren: () => import('app/accessmanagement/acmserver/acmserver.module').then(m => m.AcmServerModule) }
 		]
 	}
 ];

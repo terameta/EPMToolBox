@@ -19,8 +19,8 @@ import { HotTableModule } from '@handsontable/angular';
 import { CentralModule } from './central/central.module';
 
 const routes: Routes = [
-	{ path: '', loadChildren: './guest/guest.module#GuestModule' },
-	{ path: 'admin', loadChildren: './admin/admin.module#AdminModule' }
+	{ path: '', loadChildren: () => import('./guest/guest.module').then(m => m.GuestModule) },
+	{ path: 'admin', loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule) }
 ];
 
 const toastrOptions = {
