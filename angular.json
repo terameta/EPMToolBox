@@ -3,7 +3,7 @@
 	"version": 1,
 	"newProjectRoot": "projects",
 	"projects": {
-		"asli-tool": {
+		"epm-tool": {
 			"root": "",
 			"sourceRoot": "src",
 			"projectType": "application",
