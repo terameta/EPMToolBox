@@ -1,6 +1,6 @@
 import { AppPage } from './app.po';
 
-describe('asli-tool App', () => {
+describe('epm-tool App', () => {
   let page: AppPage;
 
   beforeEach(() => {
